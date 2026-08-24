@@ -1,7 +1,32 @@
+import os
+import requests
 from market_data import get_market_data
 
+def send_telegram_message(message):
+    token = os.environ.get('TELEGRAM_TOKEN')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID')
+    
+    if not token or not chat_id:
+        print("⚠️ بيانات تليجرام غير متوفرة.")
+        return
+    
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML"
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            print("✅ تم إرسال التنبيه إلى تليجرام بنجاح!")
+        else:
+            print(f"❌ فشل إرسال تليجرام: {response.text}")
+    except Exception as e:
+        print(f"❌ خطأ في الاتصال بتليجرام: {e}")
+
 def evaluate_coin(symbol, price, volume):
-    score = 50  # النقطة الأساسية
+    score = 50
     try:
         vol_val = float(volume) if volume else 0
         if vol_val > 1000000:
@@ -26,7 +51,7 @@ def evaluate_coin(symbol, price, volume):
 
 def main():
     print("=" * 65)
-    print("🚀 بدء تشغيل محرك تقييم العملات الرقمية (نظام الـ 100 نقطة)...")
+    print("🚀 بدء تشغيل محرك تقييم العملات الرقمية وتليجرام...")
     print("=" * 65)
     
     raw_data = get_market_data()
@@ -42,7 +67,6 @@ def main():
         elif 'ticker' in raw_data and isinstance(raw_data['ticker'], list):
             markets = raw_data['ticker']
         else:
-            # تحويل مفاتيح القاموس إلى رموز
             for k, v in raw_data.items():
                 if isinstance(v, dict):
                     v['symbol'] = k
@@ -52,17 +76,15 @@ def main():
     elif isinstance(raw_data, list):
         markets = raw_data
 
-    print(f"📊 إجمالي الأزواج المتاحة في السوق: {len(markets)}")
-    print("🔍 جاري تصفية وتقييم أزواج الليرة التركية (TL/TRY)...")
-    print("-" * 65)
-
+    report_lines = ["<b>🤖 تقرير فحص سوق Paribu (الليرة التركية)</b>\n"]
     count = 0
+    strong_count = 0
+
     for item in markets:
         if isinstance(item, dict):
             symbol = item.get('symbol', item.get('code', item.get('name', 'UNKNOWN')))
             sym_upper = str(symbol).upper()
             
-            # البحث عن أزواج الليرة التركية
             if 'TL' in sym_upper or 'TRY' in sym_upper:
                 count += 1
                 price = item.get('last', item.get('price', item.get('bid', 0)))
@@ -70,12 +92,19 @@ def main():
                 
                 score, rating = evaluate_coin(symbol, price, volume)
                 
-                print(f"🌟 العملة: {symbol} | السعر: {price}")
-                print(f"   التقييم: {score}/100 ➔ {rating}")
-                print("-" * 45)
+                if score >= 60:  # التركيز على الفرص القوية والاستثنائية للإرسال
+                    strong_count += 1
+                    line = f"🌟 <b>{symbol}</b>\n💰 السعر: <code>{price}</code>\n📊 التقييم: <b>{score}/100</b>\n➔ {rating}\n-------------------\n"
+                    report_lines.append(line)
 
-    print("-" * 65)
-    print(f"✅ انتهى الفحص. إجمالي أزواج الليرة التركية المكتشفة: {count}")
+    report_text = "\n".join(report_lines)
+    if len(report_text) > 4000:
+        report_text = report_text[:4000] + "\n... (تم اختصار التقرير لطوله)"
+
+    print(f"📊 إجمالي الأزواج المفحوصة: {count} | الفرص القوية المرسلة: {strong_count}")
+    
+    # إرسال التقرير إلى تليجرام
+    send_telegram_message(report_text)
     print("=" * 65)
 
 if __name__ == "__main__":
