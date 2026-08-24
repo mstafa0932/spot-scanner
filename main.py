@@ -1,23 +1,45 @@
 from market_data import get_market_data
+# استدعاء دالة الفحص من ملف scanner (تأكد من توافق الأسماء لاحقاً حسب محتوى ملفك)
 
 def main():
-    print("=" * 50)
-    print("جاري الاتصال بسوق Paribu وجلب بيانات العملات...")
-    print("=" * 50)
+    print("=" * 60)
+    print("🚀 بدء تشغيل ماسح سوق Paribu للعملات الرقمية (Spot)...")
+    print("=" * 60)
     
-    data = get_market_data()
+    raw_data = get_market_data()
     
-    if data:
-        print("✅ تم بنجاح استلام البيانات من السوق!")
-        # طباعة عدد الأزواج المتاحة كبداية للتأكد
-        if isinstance(data, list):
-            print(f"📊 عدد أزواج العملات المتاحة: {len(data)}")
-        else:
-            print("📦 نوع البيانات المستلمة:", type(data))
-    else:
-        print("❌ لم يتم استلام أي بيانات، تحقق من الاتصال.")
+    if not raw_data:
+        print("❌ لم يتم استلام أي بيانات من السوق.")
+        return
 
-    print("=" * 50)
+    # معالجة البيانات حسب شكل استجابة Paribu
+    markets = []
+    if isinstance(raw_data, dict):
+        markets = raw_data.get('data', []) or raw_data.get('ticker', []) or list(raw_data.values())
+    elif isinstance(raw_data, list):
+        markets = raw_data
+
+    print(f"📊 إجمالي الأزواج المتاحة في السوق: عن طريق التحديث النشط")
+    print(f"🔍 جاري تحليل وتصفية الفرص الحقيقية...")
+    print("-" * 60)
+
+    # نموذج تجريبي لفحص العملات المرتبطة بـ TL (الليرة التركية)
+    count = 0
+    for item in markets:
+        if isinstance(item, dict):
+            # محاولة قراءة رمز العملة والسعر
+            symbol = item.get('symbol', item.get('code', 'UNKNOWN'))
+            last_price = item.get('last', item.get('price', 0))
+            
+            # التركيز على أزواج الليرة التركية TL
+            if 'TL' in str(symbol).upper() or 'TRY' in str(symbol).upper():
+                count += 1
+                print(f"🔹 زوج العملة: {symbol} | السعر الحالي: {last_price}")
+                # هنا سيقوم المحرك بتقييم العملة لاحقاً
+
+    print("-" * 60)
+    print(f"✅ تم فحص الأزواج المرتبطة بالليرة التركية بنجاح. العدد الكلي: {count}")
+    print("=" * 60)
 
 if __name__ == "__main__":
     main()
