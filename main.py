@@ -13,8 +13,7 @@ def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id,
-        "text": message,
-        "parse_mode": "HTML"
+        "text": message
     }
     try:
         response = requests.post(url, json=payload)
@@ -41,11 +40,11 @@ def evaluate_coin(symbol, price, volume):
     score = min(max(score, 0), 100)
     
     if score >= 75:
-        rating = "EXCEPTIONAL 🚀 (فرصة استثنائية)"
+        rating = "EXCEPTIONAL (فرصة استثنائية)"
     elif score >= 60:
-        rating = "STRONG_ENTRY 🔥 (دخول قوي)"
+        rating = "STRONG_ENTRY (دخول قوي)"
     else:
-        rating = "GOOD 📈 (مستقرة للمراقبة)"
+        rating = "GOOD (مستقرة للمراقبة)"
         
     return score, rating
 
@@ -76,7 +75,7 @@ def main():
     elif isinstance(raw_data, list):
         markets = raw_data
 
-    report_lines = ["<b>🤖 تقرير فحص سوق Paribu (الليرة التركية)</b>\n"]
+    report_lines = ["🤖 تقرير فحص سوق Paribu (الليرة التركية)\n"]
     count = 0
     strong_count = 0
 
@@ -92,9 +91,9 @@ def main():
                 
                 score, rating = evaluate_coin(symbol, price, volume)
                 
-                if score >= 60:  # التركيز على الفرص القوية والاستثنائية للإرسال
+                if score >= 60:
                     strong_count += 1
-                    line = f"🌟 <b>{symbol}</b>\n💰 السعر: <code>{price}</code>\n📊 التقييم: <b>{score}/100</b>\n➔ {rating}\n-------------------\n"
+                    line = f"🌟 العملة: {symbol}\n💰 السعر: {price}\n📊 التقييم: {score}/100\n➔ {rating}\n-------------------\n"
                     report_lines.append(line)
 
     report_text = "\n".join(report_lines)
@@ -103,7 +102,6 @@ def main():
 
     print(f"📊 إجمالي الأزواج المفحوصة: {count} | الفرص القوية المرسلة: {strong_count}")
     
-    # إرسال التقرير إلى تليجرام
     send_telegram_message(report_text)
     print("=" * 65)
 
