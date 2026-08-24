@@ -1,20 +1,19 @@
 name: Run Paribu Spot Scanner
 
 on:
+  workflow_dispatch:
   schedule:
-    # يعمل تلقائياً كل 30 دقيقة (يمكنك تعديلها لاحقاً)
-    - cron: '*/30 * * * *'
-  workflow_dispatch: # يتيح لك تشغيله يدوياً متى شئت بضغطة زر
+    - cron: '0 * * * *'
 
 jobs:
   run-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
@@ -23,5 +22,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run main scanner
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python main.py
+
