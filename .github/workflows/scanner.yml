@@ -1,0 +1,27 @@
+name: Run Paribu Spot Scanner
+
+on:
+  schedule:
+    # يعمل تلقائياً كل 30 دقيقة (يمكنك تعديلها لاحقاً)
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # يتيح لك تشغيله يدوياً متى شئت بضغطة زر
+
+jobs:
+  run-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run main scanner
+        run: |
+          python main.py
