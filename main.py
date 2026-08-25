@@ -1,30 +1,27 @@
 from __future__ import annotations
 
-import os
-import sys
 import requests
 from typing import List
 
 from scanner import MarketScanner, Opportunity
-
 
 # ============================================================
 # Telegram Notification & Pipeline Orchestrator
 # Spot Scanner project
 # ============================================================
 
-# Telegram Credentials
+# بيانات تليجرام الخاصة بك (مدمجة وجاهزة)
 TELEGRAM_BOT_TOKEN = "8857594281:AAFobeDoL90hynOWLwPuFR9S1Y7WSkOcQc"
 TELEGRAM_CHAT_ID = "306099591"
 
 
-def send_telegram_message(message: str) -> bool:
+def send_telegram_message(message: str) -> None:
     """
     Sends a formatted Markdown message to Telegram chat via Bot API.
     """
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("[!] Telegram credentials not found. Printing to console only.")
-        return False
+        print("[!] Telegram credentials are missing.")
+        return
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
@@ -38,13 +35,10 @@ def send_telegram_message(message: str) -> bool:
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code == 200:
             print("[+] Telegram alert sent successfully.")
-            return True
         else:
             print(f"[!] Telegram API error: {response.status_code} - {response.text}")
-            return False
     except Exception as exc:
         print(f"[!] Exception sending Telegram message: {exc}")
-        return False
 
 
 def format_opportunity_message(opp: Opportunity, rank: int) -> str:
@@ -71,19 +65,25 @@ def run_pipeline() -> None:
     print("STARTING SPOT SCANNER PIPELINE")
     print("=" * 60)
 
+    # تشغيل الفحص للبحث عن أفضل 3 فرص
     scanner = MarketScanner(top_n=3)
-    opportunities: List[Opportunity] = scanner.scan_market()
+    try:
+        opportunities: List[Opportunity] = scanner.scan_market()
+    except Exception as e:
+        print(f"[!] Error during market scan: {e}")
+        return
 
     print("\n" + "=" * 60)
     print("GENERATED REPORT:")
     print("=" * 60)
 
     if not opportunities:
-        summary_msg = "🔍 *Spot Market Scan Complete*\n\nNo opportunities passed the strict hard filters during this run."
+        summary_msg = "🔍 *Spot Market Scan Complete*\n\nNo opportunities passed the strict hard filters during this run. The market might be overbought or lacking momentum."
         print(summary_msg)
         send_telegram_message(summary_msg)
     else:
         intro_msg = f"🔍 *Spot Market Scan Complete*\nFound *{len(opportunities)}* high-probability opportunity(ies):"
+        print(intro_msg)
         send_telegram_message(intro_msg)
 
         for rank, opp in enumerate(opportunities, 1):
