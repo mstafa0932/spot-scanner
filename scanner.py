@@ -1,214 +1,154 @@
-"""
-Spot Scanner - المرحلة الأولى
-محرك تقييم فرص Spot من 100 نقطة.
 
-مهم:
-- لا ينفذ أي شراء أو بيع.
-- لا يحتاج Paribu API Key.
-- لا يحتوي على أي أسرار.
-- هذه المرحلة مخصصة لبناء واختبار قواعد التقييم.
-"""
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from decimal import Decimal
+from typing import Optional, List
+
+from market_data import get_market_snapshot, Ticker
+from indicator_engine import analyze_symbol, IndicatorResult
 
 
-@dataclass
-class MarketData:
-    # BTC / السوق العام
-    btc_4h_score: float
-    btc_1h_score: float
-    market_score: float
-    volatility_score: float
-
-    # اتجاه العملة
-    coin_4h_score: float
-    coin_1h_score: float
-
-    # هيكل السعر
-    structure_score: float
-    support_score: float
-    price_action_score: float
-
-    # الحجم والسيولة
-    volume_score: float
-    liquidity_score: float
-    volume_confirmation_score: float
-
-    # الزخم
-    rsi_score: float
-    macd_score: float
-    momentum_score: float
-    timeframe_alignment_score: float
-
-    # الاختراق وإعادة الاختبار
-    breakout_score: float
-    retest_score: float
-    breakout_confirmation_score: float
-
-    # جودة الدخول والمخاطرة
-    entry_quality_score: float
-    risk_reward: float
-    target_quality_score: float
-    stop_quality_score: float
+# ============================================================
+# Spot Scanner & Ranking Engine
+# Spot Scanner project
+# ============================================================
 
 
-def clamp(value: float, minimum: float, maximum: float) -> float:
-    """حصر الرقم داخل نطاق محدد."""
-    return max(minimum, min(value, maximum))
+@dataclass(frozen=True)
+class Opportunity:
+    symbol: str
+    score: int
+    current_price: Decimal
+    rsi: Optional[Decimal]
+    atr: Optional[Decimal]
+    entry_price: Decimal
+    stop_loss: Decimal
+    tp_1: Decimal
+    tp_2: Decimal
+    reason: str
 
 
-def calculate_score(data: MarketData) -> float:
-    """
-    حساب الدرجة النهائية من 100.
+class MarketScanner:
+    def __init__(self, top_n: int = 3):
+        self.top_n = top_n
 
-    الأوزان:
-    BTC والسوق       20
-    اتجاه العملة     15
-    الهيكل والدعم     15
-    الحجم والسيولة    15
-    الزخم             10
-    الاختراق           10
-    الدخول/RR          15
-    """
+    def scan_market(self) -> List[Opportunity]:
+        """
+        Scans all Paribu TL pairs, applies hard filters, computes scores,
+        and returns the top N best opportunities.
+        """
+        market_snapshot = get_market_snapshot()
+        candidates: List[Opportunity] = []
 
-    btc_market = (
-        data.btc_4h_score
-        + data.btc_1h_score
-        + data.market_score
-        + data.volatility_score
-    )
+        print(f"[*] Starting market scan across {len(market_snapshot)} pairs...")
 
-    coin_trend = data.coin_4h_score + data.coin_1h_score
+        for symbol, ticker in market_snapshot.items():
+            # 1. Basic Ticker Hard Filters
+            if ticker.quote_volume is None or ticker.quote_volume < Decimal("500000"):
+                # Skip low volume markets (< 500k TL volume)
+                continue
 
-    structure = (
-        data.structure_score
-        + data.support_score
-        + data.price_action_score
-    )
+            if ticker.spread_percent is not None and ticker.spread_percent > Decimal("1.5"):
+                # Skip wide spreads (> 1.5%)
+                continue
 
-    volume_liquidity = (
-        data.volume_score
-        + data.liquidity_score
-        + data.volume_confirmation_score
-    )
+            # 2. Fetch Candle and Technical Indicators (15m timeframe)
+            ind_result = analyze_symbol(symbol, resolution="15", limit=50)
+            if not ind_result or ind_result.rsi_14 is None or ind_result.atr_14 is None:
+                continue
 
-    momentum = (
-        data.rsi_score
-        + data.macd_score
-        + data.momentum_score
-        + data.timeframe_alignment_score
-    )
+            # 3. Strict Hard Filters (Anti-FOMO & Overbought checks)
+            # Hard Filter: Reject if RSI is in extreme overbought zone
+            if ind_result.rsi_14 > Decimal("75"):
+                continue
 
-    breakout = (
-        data.breakout_score
-        + data.retest_score
-        + data.breakout_confirmation_score
-    )
+            # Hard Filter: Reject if price is way below short-term trend without momentum
+            if ind_result.is_above_ema9 is False and ind_result.is_above_ema21 is False:
+                # Weak downward structure, skip for long scanner
+                continue
 
-    entry = (
-        data.entry_quality_score
-        + data.target_quality_score
-        + data.stop_quality_score
-    )
+            # 4. Scoring Engine (100-Point Scale)
+            score = 50  Base score
 
-    # تحويل R:R إلى نقاط
-    if data.risk_reward < 1.5:
-        risk_reward_score = 0
-    elif data.risk_reward < 2.0:
-        risk_reward_score = 2
-    elif data.risk_reward < 3.0:
-        risk_reward_score = 4
+            # RSI scoring (Prefer healthy bullish momentum between 50 and 70)
+            rsi = ind_result.rsi_14
+            if Decimal("50") <= rsi <= Decimal("68"):
+                score += 20
+            elif Decimal("40") <= rsi < Decimal("50"):
+                score += 10
+            elif rsi > Decimal("72"):
+                score -= 15  # Approaching overbought
+
+            # Trend scoring (EMA alignment)
+            if ind_result.is_above_ema9:
+                score += 15
+            if ind_result.is_above_ema21:
+                score += 15
+
+            # Clamp score between 0 and 100
+            score = max(0, min(100, score))
+
+            # Minimum score threshold to qualify as a strong candidate
+            if score < 70:
+                continue
+
+            # 5. Dynamic Risk/Reward & Precise Decimal Pricing Engine
+            price = ind_result.current_close
+            atr = ind_result.atr_14
+
+            # Stop loss placed below 1.5 * ATR
+            stop_loss = price - (atr * Decimal("1.5"))
+            
+            # Targets based on multiples of ATR risk
+            risk = price - stop_loss
+            tp_1 = price + (risk * Decimal("1.5"))  # R:R 1.5
+            tp_2 = price + (risk * Decimal("2.5"))  # R:R 2.5
+
+            # Ensure strict Decimal preservation (no blind rounding)
+            candidates.append(
+                Opportunity(
+                    symbol=symbol,
+                    score=score,
+                    current_price=price,
+                    rsi=rsi,
+                    atr=atr,
+                    entry_price=price,
+                    stop_loss=stop_loss,
+                    tp_1=tp_1,
+                    tp_2=tp_2,
+                    reason=f"RSI: {rsi.quantize(Decimal('0.1'))} | Trend: Bullish EMA Alignment"
+                )
+            )
+
+        # 6. Ranking Engine: Sort by score descending and take Top N
+        candidates.sort(key=lambda x: x.score, reverse=True)
+        return candidates[:self.top_n]
+
+
+def run_scanner_test() -> None:
+    print("=" * 70)
+    print("SPOT SCANNER & RANKING ENGINE TEST")
+    print("=" * 70)
+    
+    scanner = MarketScanner(top_n=3)
+    top_opportunities = scanner.scan_market()
+
+    print(f"\nScan Complete. Top Opportunities Found: {len(top_opportunities)}")
+    print("-" * 70)
+
+    if not top_opportunities:
+        print("No opportunities passed the strict hard filters at this moment.")
     else:
-        risk_reward_score = 5
-
-    total = (
-        btc_market
-        + coin_trend
-        + structure
-        + volume_liquidity
-        + momentum
-        + breakout
-        + entry
-        + risk_reward_score
-    )
-
-    return round(clamp(total, 0, 100), 2)
-
-
-def decision(score: float, risk_reward: float) -> str:
-    """تحديد حالة الفرصة."""
-
-    # شرط رفض مطلق
-    if risk_reward < 1.5:
-        return "REJECT"
-
-    if score >= 90:
-        return "EXCEPTIONAL"
-
-    if score >= 85:
-        return "STRONG_ENTRY"
-
-    if score >= 80:
-        return "WATCH"
-
-    return "REJECT"
-
-
-def analyze_coin(symbol: str, data: MarketData) -> dict:
-    """تحليل عملة وإرجاع نتيجة منظمة."""
-
-    score = calculate_score(data)
-    status = decision(score, data.risk_reward)
-
-    return {
-        "symbol": symbol,
-        "score": score,
-        "risk_reward": data.risk_reward,
-        "decision": status,
-    }
+        for i, opp in enumerate(top_opportunities, 1):
+            print(f"#{i} | Symbol: {opp.symbol:12} | Score: {opp.score}/100")
+            print(f"     Entry:      {opp.entry_price}")
+            print(f"     Stop Loss:  {opp.stop_loss}")
+            print(f"     TP 1:       {opp.tp_1}")
+            print(f"     TP 2:       {opp.tp_2}")
+            print(f"     Reason:     {opp.reason}")
+            print("-" * 70)
 
 
 if __name__ == "__main__":
-
-    # اختبار داخلي فقط.
-    # هذه ليست بيانات سوق حقيقية.
-    example = MarketData(
-        btc_4h_score=7,
-        btc_1h_score=4,
-        market_score=3,
-        volatility_score=3,
-
-        coin_4h_score=8,
-        coin_1h_score=6,
-
-        structure_score=5,
-        support_score=5,
-        price_action_score=4,
-
-        volume_score=5,
-        liquidity_score=5,
-        volume_confirmation_score=4,
-
-        rsi_score=3,
-        macd_score=3,
-        momentum_score=2,
-        timeframe_alignment_score=2,
-
-        breakout_score=4,
-        retest_score=4,
-        breakout_confirmation_score=2,
-
-        entry_quality_score=5,
-        risk_reward=2.7,
-        target_quality_score=3,
-        stop_quality_score=2,
-    )
-
-    result = analyze_coin("TEST/TRY", example)
-
-    print("=== SPOT SCANNER TEST ===")
-    print(f"Symbol: {result['symbol']}")
-    print(f"Score: {result['score']}/100")
-    print(f"Risk/Reward: 1:{result['risk_reward']}")
-    print(f"Decision: {result['decision']}")
+    run_scanner_test()
