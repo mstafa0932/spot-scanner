@@ -1,146 +1,95 @@
+from __future__ import annotations
+
 import os
+import time
+from decimal import Decimal
+from typing import List
+
 import requests
-from market_data import get_market_data
 
-def send_telegram_message(message):
-    token = os.environ.get('TELEGRAM_TOKEN')
-    chat_id = os.environ.get('TELEGRAM_CHAT_ID')
-    if not token or not chat_id:
+from scanner import MarketScanner, Opportunity
+
+
+# ============================================================
+# Main Orchestrator & Notification Engine
+# Spot Scanner project
+# ============================================================
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+
+def send_telegram_message(text: str) -> None:
+    """Send alert message via Telegram Bot if credentials are configured."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print("[!] Telegram credentials not found. Printing to console only.")
         return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": message}
+
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": text,
+        "parse_mode": "Markdown",
+    }
+
     try:
-        requests.post(url, json=payload, timeout=10)
-    except:
-        pass
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code != 200:
+            print(f"[!] Telegram API Error: {response.text}")
+        else:
+            print("[+] Alert successfully sent to Telegram.")
+    except Exception as exc:
+        print(f"[!] Failed to send Telegram notification: {exc}")
 
-def calculate_dynamic_targets(entry_price, high_24h, low_24h):
-    """
-    حساب الأهداف ووقف الخسارة برمجياً بناءً على التذبذب اليومي (Volatility)
-    وليس مجرد نسب ثابتة عمياء.
-    """
-    daily_range = high_24h - low_24h
-    if daily_range <= 0 or daily_range > (entry_price * 0.5): 
-        # حماية من البيانات الخاطئة، استخدام نسب افتراضية ذكية
-        return entry_price * 1.03, entry_price * 1.06, entry_price * 0.95
-    
-    # تحديد الأهداف بناءً على قوة المدى اليومي للعملة
-    tp1 = entry_price + (daily_range * 0.35)
-    tp2 = entry_price + (daily_range * 0.65)
-    sl = entry_price - (daily_range * 0.30)
-    return tp1, tp2, sl
 
-def advanced_evaluate_coin(price, high, low, volume, percent_change):
-    """
-    محرك التقييم الاحترافي (Scoring Engine 2.0)
-    يحلل: السيولة + مسار الشمعة + التذبذب + التشبع الشرائي
-    """
-    score = 0.0
-    
-    # 1. تحليل السيولة (Volume) - أقصى نقطة 30
-    if volume > 5000000: score += 30
-    elif volume > 1000000: score += 20
-    elif volume > 250000: score += 10
-    
-    # 2. تحليل شكل الشمعة والزخم (Price Action) - أقصى نقطة 40
-    # أين يقع السعر الحالي بالنسبة للقمة والقاع؟ (1.0 يعني عند القمة تماماً)
-    daily_range = high - low
-    if daily_range > 0:
-        candle_position = (price - low) / daily_range
-        if candle_position >= 0.8: score += 40      # اختراق قوي للقمم
-        elif candle_position >= 0.6: score += 25    # إيجابية ممتازة
-        elif candle_position >= 0.4: score += 10    # تجميع في المنتصف
-        else: score -= 15                           # ضعف بيعي
-        
-    # 3. تحليل الاتجاه وتجنب التشبع (Trend & Overbought) - أقصى نقطة 30
-    if 2.0 <= percent_change <= 8.0:
-        score += 30 # صعود صحي وفي بداية الترند
-    elif 8.0 < percent_change <= 15.0:
-        score += 15 # صعود قوي (يجب الحذر قليلاً)
-    elif percent_change > 15.0:
-        score -= 20 # خطر التعلق في القمة (تشبع شرائي)
-    elif percent_change < 0:
-        score -= 30 # مسار هابط، نبتعد عنه في المضاربة
-        
-    # ضبط النتيجة لتكون من 100
-    score = min(max(score, 0), 100)
-    
-    if score >= 85: rating = "💎 EXCEPTIONAL (اختراق ذهبي)"
-    elif score >= 70: rating = "🔥 STRONG_ENTRY (جاهزة للانطلاق)"
-    else: rating = "👀 MONITOR (تحت المراقبة)"
-        
-    return score, rating
+def format_opportunity_message(opportunities: List[Opportunity]) -> str:
+    """Format the top opportunities into a clean, professional Telegram message."""
+    if not opportunities:
+        return "🔍 *Spot Market Scan Complete*\n\nNo opportunities passed the strict hard filters during this run."
 
-def main():
-    raw_data = get_market_data()
-    if not raw_data:
+    lines = ["🚀 *Paribu Spot Scanner - Top Opportunities* 🚀\n"]
+    
+    for i, opp in enumerate(opportunities, 1):
+        lines.append(f"*{i}. Symbol:* `{opp.symbol}` (Score: *{opp.score}/100*)")
+        lines.append(f"   • *Current Price:* `{opp.current_price}`")
+        lines.append(f"   • *Entry:* `{opp.entry_price}`")
+        lines.append(f"   • *Stop Loss:* `{opp.stop_loss}`")
+        lines.append(f"   • *TP 1 (R:R 1.5):* `{opp.tp_1}`")
+        lines.append(f"   • *TP 2 (R:R 2.5):* `{opp.tp_2}`")
+        lines.append(f"   • *Reason:* {opp.reason}")
+        lines.append("")
+
+    lines.append(f"🕒 *Scan Time (UTC):* `{time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}`")
+    return "\n".join(lines)
+
+
+def main() -> None:
+    print("=" * 70)
+    print("STARTING SPOT SCANNER PIPELINE")
+    print("=" * 70)
+
+    # Initialize scanner for top 3 opportunities
+    scanner = MarketScanner(top_n=3)
+    
+    try:
+        top_opportunities = scanner.scan_market()
+    except Exception as exc:
+        print(f"[!] Error during market scan: {exc}")
         return
 
-    # توحيد شكل البيانات القادمة من Paribu
-    markets = []
-    if isinstance(raw_data, dict):
-        if 'data' in raw_data: markets = raw_data['data']
-        elif 'ticker' in raw_data: markets = raw_data['ticker']
-        else:
-            for k, v in raw_data.items():
-                if isinstance(v, dict):
-                    v['symbol'] = k
-                    markets.append(v)
-    elif isinstance(raw_data, list):
-        markets = raw_data
+    # Format message
+    message = format_opportunity_message(top_opportunities)
 
-    # --- فلتر حماية رأس المال بناءً على البيتكوين ---
-    for m in markets:
-        sym = m.get('symbol', '').upper()
-        if sym in ['BTC_TL', 'BTC']:
-            try:
-                btc_change = float(m.get('percentChange', 0))
-                if btc_change <= -4.0:
-                    send_telegram_message("🚨 **تنبيه أمني:** انهيار في البيتكوين! تم إيقاف الصفقات اللحظية لحماية رأس المال.")
-                    return
-            except: pass
-            break
+    # Output to console
+    print("\n" + "=" * 50)
+    print("GENERATED REPORT:")
+    print("=" * 50)
+    print(message)
+    print("=" * 50 + "\n")
 
-    # --- مسح السوق واستخراج الفرص الذهبية ---
-    msg = "📊 **رادار السيولة المتقدم (الذكاء الاصطناعي)**\n\n"
-    found = False
+    # Send notification
+    send_telegram_message(message)
 
-    for market in markets:
-        symbol = market.get('symbol', 'UNKNOWN')
-        if not symbol.endswith('_TL'):
-            continue
-
-        try:
-            # استخراج أدق التفاصيل من API بمرونة عالية
-            price = float(market.get('last') or market.get('price', 0))
-            high = float(market.get('high24hr') or market.get('high', price))
-            low = float(market.get('low24hr') or market.get('low', price))
-            volume = float(market.get('volumeQuote') or market.get('volume', 0))
-            change = float(market.get('percentChange', 0))
-
-            if price <= 0: continue
-
-            # إرسال البيانات للمحرك الاحترافي
-            score, rating = advanced_evaluate_coin(price, high, low, volume, change)
-
-            # تصفية قاسية: نأخذ فقط الفرص القوية جداً (70 فأكثر)
-            if score >= 70:
-                found = True
-                tp1, tp2, sl = calculate_dynamic_targets(price, high, low)
-                
-                msg += f"العملة: #{symbol}\n"
-                msg += f"التقييم: {rating} ({int(score)}/100)\n"
-                msg += f"💰 الدخول: {price:.4f} ₺\n"
-                msg += f"🎯 هدف 1: {tp1:.4f} ₺\n"
-                msg += f"🚀 هدف 2: {tp2:.4f} ₺\n"
-                msg += f"🛑 الوقف: {sl:.4f} ₺\n"
-                msg += f"📈 التغير: +{change:.2f}%\n"
-                msg += "━━━━━━━━━━━━━━\n"
-        except Exception:
-            continue
-
-    if found:
-        send_telegram_message(msg)
 
 if __name__ == "__main__":
     main()
