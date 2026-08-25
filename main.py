@@ -10,7 +10,6 @@ from scanner import MarketScanner, Opportunity
 # Spot Scanner project
 # ============================================================
 
-# بيانات تليجرام الخاصة بك (مدمجة وجاهزة)
 TELEGRAM_BOT_TOKEN = "8857594281:AAFobeDoL90hynOWLwPuFR9S1Y7WSkOcQc"
 TELEGRAM_CHAT_ID = "306099591"
 
@@ -65,7 +64,6 @@ def run_pipeline() -> None:
     print("STARTING SPOT SCANNER PIPELINE")
     print("=" * 60)
 
-    # تشغيل الفحص للبحث عن أفضل 3 فرص
     scanner = MarketScanner(top_n=3)
     try:
         opportunities: List[Opportunity] = scanner.scan_market()
@@ -78,7 +76,7 @@ def run_pipeline() -> None:
     print("=" * 60)
 
     if not opportunities:
-        summary_msg = "🔍 *Spot Market Scan Complete*\n\nNo opportunities passed the strict hard filters during this run. The market might be overbought or lacking momentum."
+        summary_msg = "🔍 *Spot Market Scan Complete*\n\nNo opportunities passed the strict hard filters during this run."
         print(summary_msg)
         send_telegram_message(summary_msg)
     else:
