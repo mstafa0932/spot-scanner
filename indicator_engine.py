@@ -1,183 +1,87 @@
-from __future__ import annotations
+import pandas as pd
 
-from dataclasses import dataclass
-from decimal import Decimal
-from typing import Optional
-
-from candle_data import Candle, get_recent_candles, ParibuCandleError
-
-
-# ============================================================
-# Technical Indicator Engine
-# Spot Scanner project
-#
-# Computes real technical indicators using Decimal precision.
-# ============================================================
-
-
-@dataclass(frozen=True)
 class IndicatorResult:
-    symbol: str
-    resolution: str
-    current_close: Decimal
-    rsi_14: Optional[Decimal]
-    atr_14: Optional[Decimal]
-    ema_9: Optional[Decimal]
-    ema_21: Optional[Decimal]
-    is_above_ema9: Optional[bool]
-    is_above_ema21: Optional[bool]
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+        if df.empty or len(df) < 200:
+            self.valid = False
+            return
+        
+        self.valid = True
+        self.current_close = df['close'].iloc[-1]
+        self.current_open = df['open'].iloc[-1]
+        self.current_high = df['high'].iloc[-1]
+        self.current_low = df['low'].iloc[-1]
+        self.current_volume = df['volume'].iloc[-1]
+
+        # قراءة المتوسطات المتحركة (الاتجاه)
+        self.ema9 = df['EMA_9'].iloc[-1]
+        self.ema21 = df['EMA_21'].iloc[-1]
+        self.ema50 = df['EMA_50'].iloc[-1]
+        self.ema200 = df['EMA_200'].iloc[-1]
+
+        # قراءة الزخم (RSI & MACD)
+        self.rsi_14 = df['RSI_14'].iloc[-1]
+        self.macd_line = df['MACD_line'].iloc[-1]
+        self.macd_signal = df['MACD_signal'].iloc[-1]
+        
+        # قراءة السيولة والتقلبات (Volume & ATR)
+        self.atr_14 = df['ATR_14'].iloc[-1]
+        self.vol_sma = df['VOL_SMA_20'].iloc[-1]
+        
+        # 1. فلتر السيولة: هل الفوليوم الحالي أعلى من المتوسط؟
+        self.is_high_volume = self.current_volume > (self.vol_sma * 1.5)
+
+        # 2. فلتر الشموع اليابانية: هل هناك شمعة انعكاسية (Pinbar)؟
+        body = abs(self.current_close - self.current_open)
+        lower_wick = min(self.current_open, self.current_close) - self.current_low
+        self.is_bullish_pinbar = lower_wick > (body * 2) and body > 0
+
+        # 3. فلتر الاتجاه: هل العملة في مسار صاعد؟
+        self.is_uptrend = (self.current_close > self.ema50) and (self.ema50 > self.ema200)
+
+        # 4. فلتر التصحيح (Pullback): تجنب الشراء من القمة (FOMO)
+        self.is_pullback = (self.current_low <= self.ema21) and (self.current_close > self.ema21)
 
 
-# ------------------------------------------------------------
-# Core Calculations (Strict Decimal Math)
-# ------------------------------------------------------------
-
-def calculate_rsi(candles: list[Candle], period: int = 14) -> Optional[Decimal]:
+def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Calculate Wilder's Relative Strength Index (RSI) using Decimal.
+    محرك الحساب: يقوم بحساب جميع المؤشرات الفنية العالمية بدقة
     """
-    if len(candles) < period + 1:
-        return None
+    if df.empty or len(df) < 200:
+        return df
 
-    gains = []
-    losses = []
+    # المتوسطات المتحركة
+    df['EMA_9'] = df['close'].ewm(span=9, adjust=False).mean()
+    df['EMA_21'] = df['close'].ewm(span=21, adjust=False).mean()
+    df['EMA_50'] = df['close'].ewm(span=50, adjust=False).mean()
+    df['EMA_200'] = df['close'].ewm(span=200, adjust=False).mean()
 
-    for i in range(1, len(candles)):
-        change = candles[i].close - candles[i - 1].close
-        if change > 0:
-            gains.append(change)
-            losses.append(Decimal("0"))
-        else:
-            gains.append(Decimal("0"))
-            losses.append(abs(change))
+    # مؤشر القوة النسبية RSI
+    delta = df['close'].diff()
+    gain = delta.clip(lower=0).rolling(window=14).mean()
+    loss = -1 * delta.clip(upper=0).rolling(window=14).mean()
+    rs = gain / loss
+    df['RSI_14'] = 100 - (100 / (1 + rs))
 
-    # Initial averages (SMA for the first period)
-    avg_gain = sum(gains[:period], Decimal("0")) / Decimal(period)
-    avg_loss = sum(losses[:period], Decimal("0")) / Decimal(period)
+    # مؤشر الماكد MACD
+    ema12 = df['close'].ewm(span=12, adjust=False).mean()
+    ema26 = df['close'].ewm(span=26, adjust=False).mean()
+    df['MACD_line'] = ema12 - ema26
+    df['MACD_signal'] = df['MACD_line'].ewm(span=9, adjust=False).mean()
 
-    # Wilder's smoothing for the remaining periods
-    for i in range(period, len(gains)):
-        avg_gain = (avg_gain * Decimal(period - 1) + gains[i]) / Decimal(period)
-        avg_loss = (avg_loss * Decimal(period - 1) + losses[i]) / Decimal(period)
+    # مؤشر المدى الحقيقي ATR (لإدارة المخاطر)
+    high_low = df['high'] - df['low']
+    high_close = (df['high'] - df['close'].shift()).abs()
+    low_close = (df['low'] - df['close'].shift()).abs()
+    true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    df['ATR_14'] = true_range.rolling(14).mean()
 
-    if avg_loss == 0:
-        return Decimal("100")
+    # متوسط السيولة (Volume SMA)
+    df['VOL_SMA_20'] = df['volume'].rolling(window=20).mean()
 
-    rs = avg_gain / avg_loss
-    rsi = Decimal("100") - (Decimal("100") / (Decimal("1") + rs))
-    return rsi
+    return df
 
-
-def calculate_atr(candles: list[Candle], period: int = 14) -> Optional[Decimal]:
-    """
-    Calculate Average True Range (ATR) using Wilder's smoothing method.
-    """
-    if len(candles) < period + 1:
-        return None
-
-    true_ranges = []
-    for i in range(1, len(candles)):
-        high = candles[i].high
-        low = candles[i].low
-        prev_close = candles[i - 1].close
-        tr = max(high - low, abs(high - prev_close), abs(low - prev_close))
-        true_ranges.append(tr)
-
-    # Initial ATR (SMA of True Ranges)
-    atr = sum(true_ranges[:period], Decimal("0")) / Decimal(period)
-
-    # Wilder's smoothing
-    for i in range(period, len(true_ranges)):
-        atr = (atr * Decimal(period - 1) + true_ranges[i]) / Decimal(period)
-
-    return atr
-
-
-def calculate_ema(candles: list[Candle], period: int = 9) -> Optional[Decimal]:
-    """
-    Calculate Exponential Moving Average (EMA).
-    """
-    if len(candles) < period:
-        return None
-
-    closes = [c.close for c in candles]
-    multiplier = Decimal("2") / Decimal(period + 1)
-
-    # Initial EMA is the Simple Moving Average (SMA) of the first period
-    sma = sum(closes[:period], Decimal("0")) / Decimal(period)
-    ema = sma
-
-    for price in closes[period:]:
-        ema = (price - ema) * multiplier + ema
-
-    return ema
-
-
-# ------------------------------------------------------------
-# High-Level Indicator Analysis
-# ------------------------------------------------------------
-
-def analyze_symbol(symbol: str, resolution: str = "15", limit: int = 50) -> Optional[IndicatorResult]:
-    """
-    Fetch recent candles and compute all necessary indicators for a given symbol.
-    """
-    try:
-        candles = get_recent_candles(symbol, resolution=resolution, limit=limit)
-    except ParibuCandleError:
-        return None
-
-    if not candles:
-        return None
-
-    current_close = candles[-1].close
-
-    rsi = calculate_rsi(candles, period=14)
-    atr = calculate_atr(candles, period=14)
-    ema9 = calculate_ema(candles, period=9)
-    ema21 = calculate_ema(candles, period=21)
-
-    is_above_ema9 = (current_close > ema9) if ema9 is not None else None
-    is_above_ema21 = (current_close > ema21) if ema21 is not None else None
-
-    return IndicatorResult(
-        symbol=symbol,
-        resolution=resolution,
-        current_close=current_close,
-        rsi_14=rsi,
-        atr_14=atr,
-        ema_9=ema9,
-        ema_21=ema21,
-        is_above_ema9=is_above_ema9,
-        is_above_ema21=is_above_ema21,
-    )
-
-
-# ------------------------------------------------------------
-# Diagnostic Test
-# ------------------------------------------------------------
-
-def run_connection_test() -> None:
-    symbol = "BTC_TL"
-    print("=" * 70)
-    print("TECHNICAL INDICATOR ENGINE TEST")
-    print("=" * 70)
-    print(f"Analyzing {symbol} on 15m resolution...")
-
-    result = analyze_symbol(symbol, resolution="15", limit=50)
-    if not result:
-        print("Failed to retrieve or analyze candles.")
-        return
-
-    print("Status: OK")
-    print(f"Current Close: {result.current_close}")
-    print(f"RSI (14):     {result.rsi_14.quantize(Decimal('0.01')) if result.rsi_14 else 'N/A'}")
-    print(f"ATR (14):     {result.atr_14.quantize(Decimal('0.0001')) if result.atr_14 else 'N/A'}")
-    print(f"EMA (9):      {result.ema_9}")
-    print(f"EMA (21):     {result.ema_21}")
-    print(f"Above EMA 9:  {result.is_above_ema9}")
-    print(f"Above EMA 21: {result.is_above_ema21}")
-    print("=" * 70)
-
-
-if __name__ == "__main__":
-    run_connection_test()
+def analyze_symbol(df: pd.DataFrame) -> IndicatorResult:
+    df_calculated = calculate_indicators(df)
+    return IndicatorResult(df_calculated)
