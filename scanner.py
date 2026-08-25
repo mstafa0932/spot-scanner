@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -69,7 +68,7 @@ class MarketScanner:
                 continue
 
             # 4. Scoring Engine (100-Point Scale)
-            score = 50  Base score
+            score = 50  # Base score
 
             # RSI scoring (Prefer healthy bullish momentum between 50 and 70)
             rsi = ind_result.rsi_14
