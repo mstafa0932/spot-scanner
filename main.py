@@ -10,7 +10,7 @@ from scanner import MarketScanner, Opportunity
 # Spot Scanner project
 # ============================================================
 
-TELEGRAM_BOT_TOKEN = "8857594281:AAFobeDoL90hynOWLwPuFR9S1Y7WSkOcQc"
+TELEGRAM_BOT_TOKEN = "8857594281:AAHXgv8aOwha2DUE-PX-sur5U_k4sT2N9U4"
 TELEGRAM_CHAT_ID = "306099591"
 
 
