@@ -14,7 +14,6 @@ from urllib3.util.retry import Retry
 
 PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
 
-# رابط الشموع مع دعم طباعة التشخيص لمتابعة أي استجابة غير متوقعة في سجلات GitHub Actions
 PARIBU_CANDLES_URL_TEMPLATE = "https://www.paribu.com/api/v1/chart/ohlc?symbol={symbol}&period={resolution}&limit={limit}"
 
 REQUEST_TIMEOUT = 15
@@ -531,7 +530,7 @@ def fetch_candles(
                 "high": float(h),
                 "low": float(l),
                 "close": float(c),
-                "volume": float(v) istv if v is not None else 0.0,
+                "volume": float(v) if v is not None else 0.0,
             }
         )
 
