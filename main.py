@@ -1,96 +1,57 @@
-from __future__ import annotations
 import os
 import requests
-from typing import List
-from scanner import MarketScanner, Opportunity
+from scanner import MarketScanner
 
-# ============================================================ #
-# Telegram Notification & Pipeline Orchestrator                #
-# Spot Scanner Project (Advanced Engine)                       #
-# ============================================================ #
-
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
-
-def send_telegram_message(message: str) -> bool:
-    """إرسال التنبيهات إلى تليجرام مع التأكد من الأمان"""
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("[!] Telegram credentials are missing in Environment Variables.")
-        return False
-
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": True,
-    }
-
+def send_telegram_msg(token: str, chat_id: str, text: str):
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
     try:
-        response = requests.post(url, json=payload, timeout=10)
-        if response.status_code == 200:
-            print("[+] Telegram alert sent successfully.")
-            return True
-        print(f"[!] Telegram API error: {response.status_code} - {response.text}")
-        return False
-    except requests.RequestException as exc:
-        print(f"[!] Telegram connection error: {exc}")
-        return False
+        res = requests.post(url, json=payload, timeout=10)
+        res.raise_for_status()
+    except Exception as e:
+        print(f"[!] Failed to send Telegram notification: {e}")
 
-def format_opportunity_message(opp: Opportunity, rank: int) -> str:
-    """تنسيق رسالة الفرصة بشكل احترافي مع تمييز الإشارات الذهبية"""
-    header = "🌟 *SUPER SPOT SIGNAL* 🌟" if opp.is_super_signal else "🔥 *SPOT ENTRY SIGNAL*"
-    
-    return (
-        f"{header} *#{rank}*\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"🔹 *Symbol:* `{opp.symbol}`\n"
-        f"📊 *Score:* `{opp.score}/100`\n"
-        f"💡 *Reason:* {opp.reason}\n\n"
-        f"💵 *Entry:* `{opp.entry_price}`\n"
-        f"🛑 *Stop Loss:* `{opp.stop_loss}`\n"
-        f"🎯 *TP1:* `{opp.tp_1}`\n"
-        f"🚀 *TP2:* `{opp.tp_2}`\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"⚠️ *Spot Trading — Strict Filters Active*"
-    )
+def main():
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
-def run_pipeline() -> None:
-    """المحرك الرئيسي لتشغيل البوت وإرسال النتائج"""
-    print("=" * 60)
-    print("STARTING ADVANCED SPOT SCANNER PIPELINE")
-    print("=" * 60)
-
-    # طلب فحص أفضل 10 فرص كحد أقصى
-    scanner = MarketScanner(top_n=10)
-
-    try:
-        opportunities: List[Opportunity] = scanner.scan_market()
-    except Exception as exc:
-        print(f"[!] Error during market scan: {exc}")
+    if not token or not chat_id:
+        print("[!] Telegram credentials missing in environment variables.")
         return
 
-    print("\n" + "=" * 60)
-    print("SCAN COMPLETE")
-    print("=" * 60)
+    print("[*] Starting Paribu Spot Scanner Pipeline...")
+    scanner = MarketScanner(top_n=3)
+    opportunities, stats = scanner.scan_market()
 
-    # حالة عدم وجود فرص تطابق الفلاتر الصارمة
-    if not opportunities:
-        print("[INFO] No qualified opportunities found during this run.")
-        summary_msg = (
-            "🔍 *Spot Market Scan Complete*\n\n"
-            "No opportunities passed the strict institutional filters during this run."
+    if opportunities:
+        message = "🚨 *فرصة تداول جديدة على Paribu* 🚨\n\n"
+        for opp in opportunities:
+            message += (
+                f"📌 *العملة:* `{opp.symbol}`\n"
+                f"🎯 *النقاط:* {opp.score}/100\n"
+                f"💡 *السبب:* {opp.reason}\n"
+                f"💵 *سعر الدخول:* `{opp.entry_price}` TL\n"
+                f"🛑 *وقف الخسارة:* `{opp.stop_loss}` TL\n"
+                f"🎯 *الهدف الأول:* `{opp.tp_1}` TL\n"
+                f"🚀 *الهدف الثاني:* `{opp.tp_2}` TL\n"
+                f"-----------------------------------\n"
+            )
+    else:
+        message = (
+            "🔍 *تقرير الفحص الدوري - Paribu*\n\n"
+            "✅ *حالة النظام:* البوت يعمل بنجاح.\n"
+            "⚠️ *النتيجة:* لا توجد صفقات مطابقة للشروط حالياً.\n\n"
+            "📊 *تفاصيل الفحص:*\n"
+            f"• الأزواج الممسوحة: `{stats['total']}`\n"
+            f"• اجتازت السيولة والـ Spread: `{stats['liquidity_pass']}`\n"
+            f"• اكملت تحليل المؤشرات: `{stats['valid_candles']}`\n"
+            f"• حققت تقييم الدخول (65+ نقطة): `{stats['passed_score']}`\n\n"
+            "💡 *السبب:* لم تتجاوز أي عملة التقييم المطلوب (65/100) لحماية رأس المال."
         )
-        send_telegram_message(summary_msg)
-        return
 
-    # حالة العثور على فرص مطابقة
-    print(f"[+] Found {len(opportunities)} qualified opportunity(ies).")
-    for rank, opp in enumerate(opportunities, 1):
-        message = format_opportunity_message(opp, rank)
-        print("\n" + message)
-        print("-" * 40)
-        send_telegram_message(message)
+    send_telegram_msg(token, chat_id, message)
+    print("[+] Telegram notification sent successfully.")
 
 if __name__ == "__main__":
-    run_pipeline()
+    main()
+
