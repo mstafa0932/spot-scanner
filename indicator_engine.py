@@ -1,87 +1,102 @@
 import pandas as pd
+from dataclasses import dataclass
 
+@dataclass
 class IndicatorResult:
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
-        if df.empty or len(df) < 200:
-            self.valid = False
-            return
-        
-        self.valid = True
-        self.current_close = df['close'].iloc[-1]
-        self.current_open = df['open'].iloc[-1]
-        self.current_high = df['high'].iloc[-1]
-        self.current_low = df['low'].iloc[-1]
-        self.current_volume = df['volume'].iloc[-1]
-
-        # قراءة المتوسطات المتحركة (الاتجاه)
-        self.ema9 = df['EMA_9'].iloc[-1]
-        self.ema21 = df['EMA_21'].iloc[-1]
-        self.ema50 = df['EMA_50'].iloc[-1]
-        self.ema200 = df['EMA_200'].iloc[-1]
-
-        # قراءة الزخم (RSI & MACD)
-        self.rsi_14 = df['RSI_14'].iloc[-1]
-        self.macd_line = df['MACD_line'].iloc[-1]
-        self.macd_signal = df['MACD_signal'].iloc[-1]
-        
-        # قراءة السيولة والتقلبات (Volume & ATR)
-        self.atr_14 = df['ATR_14'].iloc[-1]
-        self.vol_sma = df['VOL_SMA_20'].iloc[-1]
-        
-        # 1. فلتر السيولة: هل الفوليوم الحالي أعلى من المتوسط؟
-        self.is_high_volume = self.current_volume > (self.vol_sma * 1.5)
-
-        # 2. فلتر الشموع اليابانية: هل هناك شمعة انعكاسية (Pinbar)؟
-        body = abs(self.current_close - self.current_open)
-        lower_wick = min(self.current_open, self.current_close) - self.current_low
-        self.is_bullish_pinbar = lower_wick > (body * 2) and body > 0
-
-        # 3. فلتر الاتجاه: هل العملة في مسار صاعد؟
-        self.is_uptrend = (self.current_close > self.ema50) and (self.ema50 > self.ema200)
-
-        # 4. فلتر التصحيح (Pullback): تجنب الشراء من القمة (FOMO)
-        self.is_pullback = (self.current_low <= self.ema21) and (self.current_close > self.ema21)
-
+    valid: bool = False
+    current_close: float = 0.0
+    current_open: float = 0.0
+    current_high: float = 0.0
+    current_low: float = 0.0
+    current_volume: float = 0.0
+    ema9: float = 0.0
+    ema21: float = 0.0
+    ema50: float = 0.0
+    ema200: float = 0.0
+    rsi_14: float = 0.0
+    macd_line: float = 0.0
+    macd_signal: float = 0.0
+    atr_14: float = 0.0
+    vol_sma: float = 0.0
+    is_above_ema9: bool = False
+    is_above_ema21: bool = False
+    is_high_volume: bool = False
+    is_bullish_pinbar: bool = False
+    is_uptrend: bool = False
+    is_pullback: bool = False
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    محرك الحساب: يقوم بحساب جميع المؤشرات الفنية العالمية بدقة
-    """
-    if df.empty or len(df) < 200:
+    if df.empty or len(df) < 50:
         return df
 
-    # المتوسطات المتحركة
     df['EMA_9'] = df['close'].ewm(span=9, adjust=False).mean()
     df['EMA_21'] = df['close'].ewm(span=21, adjust=False).mean()
     df['EMA_50'] = df['close'].ewm(span=50, adjust=False).mean()
     df['EMA_200'] = df['close'].ewm(span=200, adjust=False).mean()
 
-    # مؤشر القوة النسبية RSI
     delta = df['close'].diff()
     gain = delta.clip(lower=0).rolling(window=14).mean()
-    loss = -1 * delta.clip(upper=0).rolling(window=14).mean()
-    rs = gain / loss
+    loss = (-1 * delta.clip(upper=0)).rolling(window=14).mean()
+    rs = gain / loss.replace(0, 1e-9)
     df['RSI_14'] = 100 - (100 / (1 + rs))
 
-    # مؤشر الماكد MACD
     ema12 = df['close'].ewm(span=12, adjust=False).mean()
     ema26 = df['close'].ewm(span=26, adjust=False).mean()
     df['MACD_line'] = ema12 - ema26
     df['MACD_signal'] = df['MACD_line'].ewm(span=9, adjust=False).mean()
 
-    # مؤشر المدى الحقيقي ATR (لإدارة المخاطر)
     high_low = df['high'] - df['low']
     high_close = (df['high'] - df['close'].shift()).abs()
     low_close = (df['low'] - df['close'].shift()).abs()
     true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
     df['ATR_14'] = true_range.rolling(14).mean()
 
-    # متوسط السيولة (Volume SMA)
     df['VOL_SMA_20'] = df['volume'].rolling(window=20).mean()
-
     return df
 
 def analyze_symbol(df: pd.DataFrame) -> IndicatorResult:
-    df_calculated = calculate_indicators(df)
-    return IndicatorResult(df_calculated)
+    if df.empty or len(df) < 50:
+        return IndicatorResult(valid=False)
+
+    df_calc = calculate_indicators(df)
+    last = df_calc.iloc[-1]
+
+    c_close = float(last['close'])
+    c_open = float(last['open'])
+    c_high = float(last['high'])
+    c_low = float(last['low'])
+    c_vol = float(last['volume'])
+
+    ema9 = float(last['EMA_9'])
+    ema21 = float(last['EMA_21'])
+    ema50 = float(last['EMA_50'])
+    ema200 = float(last['EMA_200'])
+    vol_sma = float(last['VOL_SMA_20']) if not pd.isna(last['VOL_SMA_20']) else 0.0
+
+    body = abs(c_close - c_open)
+    lower_wick = min(c_open, c_close) - c_low
+
+    return IndicatorResult(
+        valid=True,
+        current_close=c_close,
+        current_open=c_open,
+        current_high=c_high,
+        current_low=c_low,
+        current_volume=c_vol,
+        ema9=ema9,
+        ema21=ema21,
+        ema50=ema50,
+        ema200=ema200,
+        rsi_14=float(last['RSI_14']),
+        macd_line=float(last['MACD_line']),
+        macd_signal=float(last['MACD_signal']),
+        atr_14=float(last['ATR_14']),
+        vol_sma=vol_sma,
+        is_above_ema9=(c_close > ema9),
+        is_above_ema21=(c_close > ema21),
+        is_high_volume=(c_vol > (vol_sma * 1.5)) if vol_sma > 0 else False,
+        is_bullish_pinbar=(lower_wick > (body * 2)) and (body > 0),
+        is_uptrend=(c_close > ema50),
+        is_pullback=(c_low <= ema21) and (c_close > ema21)
+    )
+
