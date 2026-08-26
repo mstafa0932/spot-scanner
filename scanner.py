@@ -1,50 +1,30 @@
-from dataclasses import dataclass
-from decimal import Decimal
-from market_data import get_market_snapshot, fetch_candles
-from indicator_engine import analyze_symbol
-
-@dataclass
-class Opportunity:
-    symbol: str
-    score: int
-    reason: str
-    entry_price: float
-    stop_loss: float
-    tp_1: float
-    tp_2: float
-
-class MarketScanner:
-    def __init__(self, top_n: int = 3):
-        self.top_n = top_n
-
-    def scan_market(self) -> list[Opportunity]:
+    def scan_market(self) -> tuple[list[Opportunity], dict]:
         snapshot = get_market_snapshot()
         opportunities = []
 
-        total_markets = len(snapshot)
-        passed_liquidity = 0
-        valid_candles = 0
-        passed_score = 0
+        stats = {
+            "total": len(snapshot),
+            "liquidity_pass": 0,
+            "valid_candles": 0,
+            "passed_score": 0
+        }
 
-        print(f"[DIAGNOSTIC] Starting scan across {total_markets} TRY markets...")
+        print(f"[DIAGNOSTIC] Starting scan across {stats['total']} TRY markets...")
 
         for symbol, ticker in snapshot.items():
-            # فلتر السيولة والـ Spread
             if ticker.quote_volume is None or ticker.quote_volume < Decimal("100000"):
                 continue
             if ticker.spread_percent is not None and ticker.spread_percent > Decimal("1.5"):
                 continue
-            passed_liquidity += 1
+            stats["liquidity_pass"] += 1
 
-            # جلب الشموع وتحليلها
             df = fetch_candles(symbol, resolution="15", limit=250)
             ind = analyze_symbol(df)
 
             if not ind.valid:
                 continue
-            valid_candles += 1
+            stats["valid_candles"] += 1
 
-            # حساب نقاط الجودة (Scoring / 100)
             score = 0
             reasons = []
 
@@ -64,9 +44,8 @@ class MarketScanner:
                 score += 15
                 reasons.append("فوليوم مرتفع")
 
-            # الشرط الصارم للتأهل: 65+ نقطة
             if score >= 65:
-                passed_score += 1
+                stats["passed_score"] += 1
                 entry = ind.current_close
                 atr = ind.atr_14 if ind.atr_14 > 0 else (entry * 0.02)
                 sl = max(entry - (1.5 * atr), ind.current_low * 0.99)
@@ -84,7 +63,6 @@ class MarketScanner:
                     tp_2=round(tp2, 4)
                 ))
 
-        print(f"[DIAGNOSTIC] Liquidity Pass: {passed_liquidity} | Valid Candles: {valid_candles} | High Score Pass: {passed_score}")
-
         opportunities.sort(key=lambda x: x.score, reverse=True)
-        return opportunities[:self.top_n]
+        return opportunities[:self.top_n], stats
+
