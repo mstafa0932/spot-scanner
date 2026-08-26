@@ -1,102 +1,488 @@
-import pandas as pd
+from __future__ import annotations
+
 from dataclasses import dataclass
+from decimal import Decimal
+from typing import Optional
 
-@dataclass
+import pandas as pd
+
+
+@dataclass(frozen=True)
 class IndicatorResult:
-    valid: bool = False
-    current_close: float = 0.0
-    current_open: float = 0.0
-    current_high: float = 0.0
-    current_low: float = 0.0
-    current_volume: float = 0.0
-    ema9: float = 0.0
-    ema21: float = 0.0
-    ema50: float = 0.0
-    ema200: float = 0.0
-    rsi_14: float = 0.0
-    macd_line: float = 0.0
-    macd_signal: float = 0.0
-    atr_14: float = 0.0
-    vol_sma: float = 0.0
-    is_above_ema9: bool = False
-    is_above_ema21: bool = False
-    is_high_volume: bool = False
-    is_bullish_pinbar: bool = False
-    is_uptrend: bool = False
-    is_pullback: bool = False
 
-def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty or len(df) < 50:
-        return df
+    current_close: Decimal
 
-    df['EMA_9'] = df['close'].ewm(span=9, adjust=False).mean()
-    df['EMA_21'] = df['close'].ewm(span=21, adjust=False).mean()
-    df['EMA_50'] = df['close'].ewm(span=50, adjust=False).mean()
-    df['EMA_200'] = df['close'].ewm(span=200, adjust=False).mean()
+    ema9: Decimal
+    ema21: Decimal
+    ema50: Decimal
+    ema200: Decimal
 
-    delta = df['close'].diff()
-    gain = delta.clip(lower=0).rolling(window=14).mean()
-    loss = (-1 * delta.clip(upper=0)).rolling(window=14).mean()
-    rs = gain / loss.replace(0, 1e-9)
-    df['RSI_14'] = 100 - (100 / (1 + rs))
+    rsi14: Decimal
 
-    ema12 = df['close'].ewm(span=12, adjust=False).mean()
-    ema26 = df['close'].ewm(span=26, adjust=False).mean()
-    df['MACD_line'] = ema12 - ema26
-    df['MACD_signal'] = df['MACD_line'].ewm(span=9, adjust=False).mean()
+    macd_line: Decimal
+    macd_signal: Decimal
 
-    high_low = df['high'] - df['low']
-    high_close = (df['high'] - df['close'].shift()).abs()
-    low_close = (df['low'] - df['close'].shift()).abs()
-    true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    df['ATR_14'] = true_range.rolling(14).mean()
+    atr14: Decimal
 
-    df['VOL_SMA_20'] = df['volume'].rolling(window=20).mean()
-    return df
+    volume_ratio: Decimal
 
-def analyze_symbol(df: pd.DataFrame) -> IndicatorResult:
-    if df.empty or len(df) < 50:
-        return IndicatorResult(valid=False)
+    recent_return_3: Decimal
+    recent_return_12: Decimal
 
-    df_calc = calculate_indicators(df)
-    last = df_calc.iloc[-1]
+    distance_ema9_pct: Decimal
+    distance_ema21_pct: Decimal
 
-    c_close = float(last['close'])
-    c_open = float(last['open'])
-    c_high = float(last['high'])
-    c_low = float(last['low'])
-    c_vol = float(last['volume'])
+    swing_low: Decimal
+    resistance_48: Decimal
+    resistance_96: Decimal
 
-    ema9 = float(last['EMA_9'])
-    ema21 = float(last['EMA_21'])
-    ema50 = float(last['EMA_50'])
-    ema200 = float(last['EMA_200'])
-    vol_sma = float(last['VOL_SMA_20']) if not pd.isna(last['VOL_SMA_20']) else 0.0
+    is_uptrend: bool
+    is_above_ema9: bool
+    is_above_ema21: bool
 
-    body = abs(c_close - c_open)
-    lower_wick = min(c_open, c_close) - c_low
+    is_pullback: bool
+    is_bullish_candle: bool
+
+    breakout: bool
+
+    valid: bool
+
+
+def calculate_indicators(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+
+    x = df.copy()
+
+    required = (
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+    )
+
+    for column in required:
+        x[column] = pd.to_numeric(
+            x[column],
+            errors="coerce",
+        )
+
+    x = x.dropna(
+        subset=(
+            "open",
+            "high",
+            "low",
+            "close",
+        )
+    ).reset_index(drop=True)
+
+    if len(x) < 205:
+        return x
+
+    # EMA
+    x["EMA9"] = (
+        x["close"]
+        .ewm(
+            span=9,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    x["EMA21"] = (
+        x["close"]
+        .ewm(
+            span=21,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    x["EMA50"] = (
+        x["close"]
+        .ewm(
+            span=50,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    x["EMA200"] = (
+        x["close"]
+        .ewm(
+            span=200,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    # RSI Wilder-style EMA smoothing
+    delta = x["close"].diff()
+
+    gain = delta.clip(
+        lower=0
+    )
+
+    loss = -delta.clip(
+        upper=0
+    )
+
+    avg_gain = (
+        gain.ewm(
+            alpha=1 / 14,
+            adjust=False,
+            min_periods=14,
+        )
+        .mean()
+    )
+
+    avg_loss = (
+        loss.ewm(
+            alpha=1 / 14,
+            adjust=False,
+            min_periods=14,
+        )
+        .mean()
+    )
+
+    rs = (
+        avg_gain
+        / avg_loss.replace(0, pd.NA)
+    )
+
+    x["RSI14"] = (
+        100
+        - (
+            100
+            / (1 + rs)
+        )
+    )
+
+    # MACD
+    ema12 = (
+        x["close"]
+        .ewm(
+            span=12,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    ema26 = (
+        x["close"]
+        .ewm(
+            span=26,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    x["MACD"] = ema12 - ema26
+
+    x["MACD_SIGNAL"] = (
+        x["MACD"]
+        .ewm(
+            span=9,
+            adjust=False,
+        )
+        .mean()
+    )
+
+    # ATR
+    previous_close = x["close"].shift(1)
+
+    true_range = pd.concat(
+        [
+            x["high"] - x["low"],
+            (
+                x["high"]
+                - previous_close
+            ).abs(),
+            (
+                x["low"]
+                - previous_close
+            ).abs(),
+        ],
+        axis=1,
+    ).max(axis=1)
+
+    x["ATR14"] = (
+        true_range
+        .ewm(
+            alpha=1 / 14,
+            adjust=False,
+            min_periods=14,
+        )
+        .mean()
+    )
+
+    # Volume
+    x["VOL_SMA20"] = (
+        x["volume"]
+        .rolling(20)
+        .mean()
+    )
+
+    return x
+
+
+def analyze_symbol(
+    df: pd.DataFrame,
+) -> Optional[IndicatorResult]:
+
+    x = calculate_indicators(df)
+
+    if len(x) < 205:
+        return None
+
+    # Last candle may still be open.
+    # Use the last CLOSED candle.
+    i = -2
+
+    row = x.iloc[i]
+
+    try:
+
+        close = Decimal(
+            str(row["close"])
+        )
+
+        ema9 = Decimal(
+            str(row["EMA9"])
+        )
+
+        ema21 = Decimal(
+            str(row["EMA21"])
+        )
+
+        ema50 = Decimal(
+            str(row["EMA50"])
+        )
+
+        ema200 = Decimal(
+            str(row["EMA200"])
+        )
+
+        rsi = Decimal(
+            str(row["RSI14"])
+        )
+
+        macd = Decimal(
+            str(row["MACD"])
+        )
+
+        macd_signal = Decimal(
+            str(row["MACD_SIGNAL"])
+        )
+
+        atr = Decimal(
+            str(row["ATR14"])
+        )
+
+        vol_sma = Decimal(
+            str(row["VOL_SMA20"])
+        )
+
+    except Exception:
+        return None
+
+    if atr <= 0:
+        return None
+
+    if vol_sma <= 0:
+        return None
+
+    previous_3 = Decimal(
+        str(
+            x["close"]
+            .iloc[i - 3]
+        )
+    )
+
+    previous_12 = Decimal(
+        str(
+            x["close"]
+            .iloc[i - 12]
+        )
+    )
+
+    recent_return_3 = (
+        close / previous_3
+        - 1
+    ) * 100
+
+    recent_return_12 = (
+        close / previous_12
+        - 1
+    ) * 100
+
+    distance_ema9 = (
+        close / ema9
+        - 1
+    ) * 100
+
+    distance_ema21 = (
+        close / ema21
+        - 1
+    ) * 100
+
+    volume = Decimal(
+        str(row["volume"])
+    )
+
+    volume_ratio = (
+        volume / vol_sma
+    )
+
+    is_uptrend = (
+        close > ema50
+        and ema50 > ema200
+    )
+
+    is_above_ema9 = (
+        close > ema9
+    )
+
+    is_above_ema21 = (
+        close > ema21
+    )
+
+    recent_low = Decimal(
+        str(
+            x["low"]
+            .iloc[
+                i - 3:
+                i + 1
+            ].min()
+        )
+    )
+
+    is_pullback = (
+        recent_low <= ema21
+        and close > ema21
+    )
+
+    candle_open = Decimal(
+        str(row["open"])
+    )
+
+    candle_high = Decimal(
+        str(row["high"])
+    )
+
+    candle_low = Decimal(
+        str(row["low"])
+    )
+
+    body = abs(
+        close - candle_open
+    )
+
+    bullish_candle = (
+        close > candle_open
+    )
+
+    lower_wick = (
+        min(
+            candle_open,
+            close,
+        )
+        - candle_low
+    )
+
+    bullish_pinbar = (
+        body > 0
+        and lower_wick
+        >= body * Decimal("2")
+    )
+
+    is_bullish_candle = (
+        bullish_candle
+        or bullish_pinbar
+    )
+
+    resistance_48 = Decimal(
+        str(
+            x["high"]
+            .iloc[
+                i - 48:
+                i
+            ].max()
+        )
+    )
+
+    resistance_96 = Decimal(
+        str(
+            x["high"]
+            .iloc[
+                i - 96:
+                i
+            ].max()
+        )
+    )
+
+    swing_low = Decimal(
+        str(
+            x["low"]
+            .iloc[
+                i - 24:
+                i
+            ].min()
+        )
+    )
+
+    previous_close = Decimal(
+        str(
+            x["close"]
+            .iloc[i - 1]
+        )
+    )
+
+    breakout = (
+        close > resistance_48
+        and previous_close
+        <= resistance_48
+    )
 
     return IndicatorResult(
-        valid=True,
-        current_close=c_close,
-        current_open=c_open,
-        current_high=c_high,
-        current_low=c_low,
-        current_volume=c_vol,
+
+        current_close=close,
+
         ema9=ema9,
         ema21=ema21,
         ema50=ema50,
         ema200=ema200,
-        rsi_14=float(last['RSI_14']),
-        macd_line=float(last['MACD_line']),
-        macd_signal=float(last['MACD_signal']),
-        atr_14=float(last['ATR_14']),
-        vol_sma=vol_sma,
-        is_above_ema9=(c_close > ema9),
-        is_above_ema21=(c_close > ema21),
-        is_high_volume=(c_vol > (vol_sma * 1.5)) if vol_sma > 0 else False,
-        is_bullish_pinbar=(lower_wick > (body * 2)) and (body > 0),
-        is_uptrend=(c_close > ema50),
-        is_pullback=(c_low <= ema21) and (c_close > ema21)
-    )
 
+        rsi14=rsi,
+
+        macd_line=macd,
+        macd_signal=macd_signal,
+
+        atr14=atr,
+
+        volume_ratio=volume_ratio,
+
+        recent_return_3=recent_return_3,
+        recent_return_12=recent_return_12,
+
+        distance_ema9_pct=distance_ema9,
+        distance_ema21_pct=distance_ema21,
+
+        swing_low=swing_low,
+
+        resistance_48=resistance_48,
+        resistance_96=resistance_96,
+
+        is_uptrend=is_uptrend,
+        is_above_ema9=is_above_ema9,
+        is_above_ema21=is_above_ema21,
+
+        is_pullback=is_pullback,
+
+        is_bullish_candle=is_bullish_candle,
+
+        breakout=breakout,
+
+        valid=True,
+    )
