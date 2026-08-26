@@ -1,133 +1,90 @@
-from typing import List
-import requests
-import pandas as pd
+from dataclasses import dataclass
+from decimal import Decimal
+from market_data import get_market_snapshot, fetch_candles
+from indicator_engine import analyze_symbol
 
-from market_data import fetch_tickers, base_asset
-from indicator_engine import analyze_symbol, IndicatorResult
-
+@dataclass
 class Opportunity:
-    def __init__(self, symbol: str, score: int, reason: str, entry_price: str, stop_loss: str, tp_1: str, tp_2: str, is_super_signal: bool):
-        self.symbol = symbol
-        self.score = score
-        self.reason = reason
-        self.entry_price = entry_price
-        self.stop_loss = stop_loss
-        self.tp_1 = tp_1
-        self.tp_2 = tp_2
-        self.is_super_signal = is_super_signal
-
-def get_klines_df(base_coin: str, timeframe: str = '1h', limit: int = 250) -> pd.DataFrame:
-    """جلب شموع التداول الفنية التاريخية للتحليل"""
-    pair = f"{base_coin}USDT"
-    url = f"https://api.binance.com/api/v3/klines?symbol={pair}&interval={timeframe}&limit={limit}"
-    try:
-        res = requests.get(url, timeout=5)
-        if res.status_code != 200:
-            return pd.DataFrame()
-        raw = res.json()
-        if not isinstance(raw, list) or len(raw) < 200:
-            return pd.DataFrame()
-        
-        df = pd.DataFrame(raw).iloc[:, :6]
-        df.columns = ['time', 'open', 'high', 'low', 'close', 'volume']
-        for col in ['open', 'high', 'low', 'close', 'volume']:
-            df[col] = df[col].astype(float)
-        return df
-    except Exception:
-        return pd.DataFrame()
+    symbol: str
+    score: int
+    reason: str
+    entry_price: float
+    stop_loss: float
+    tp_1: float
+    tp_2: float
 
 class MarketScanner:
-    def __init__(self, top_n: int = 10):
+    def __init__(self, top_n: int = 3):
         self.top_n = top_n
 
-    def scan_market(self) -> List[Opportunity]:
-        print("[*] Fetching Paribu markets...")
-        try:
-            tickers = fetch_tickers(tl_only=True)
-            print(f"[*] Loaded {len(tickers)} Paribu TL markets.")
-        except Exception as e:
-            print(f"[!] Error fetching Paribu tickers: {e}")
-            return []
-
+    def scan_market(self) -> list[Opportunity]:
+        snapshot = get_market_snapshot()
         opportunities = []
 
-        for ticker in tickers:
-            try:
-                coin = base_asset(ticker.symbol)
-                if coin in ["USDT", "USDC", "TRY", "TL"]:
-                    continue
+        total_markets = len(snapshot)
+        passed_liquidity = 0
+        valid_candles = 0
+        passed_score = 0
 
-                # جلب الشموع وتحليل الفلاتر
-                df = get_klines_df(coin, timeframe='1h', limit=250)
-                if df.empty:
-                    continue
+        print(f"[DIAGNOSTIC] Starting scan across {total_markets} TRY markets...")
 
-                ind: IndicatorResult = analyze_symbol(df)
-                if not ind.valid:
-                    continue
-
-                score = 0
-                reasons = []
-
-                # 1. فلتر الاتجاه الصاعد
-                if not ind.is_uptrend:
-                    continue
-                score += 30
-                reasons.append("Uptrend (EMA50>200)")
-
-                # 2. نمط التصحيح أو الشمعة الانعكاسية
-                if ind.is_pullback:
-                    score += 25
-                    reasons.append("Pullback to EMA21")
-                elif ind.is_bullish_pinbar:
-                    score += 25
-                    reasons.append("Bullish Pinbar Reversal")
-                else:
-                    continue
-
-                # 3. تأكيد السيولة والزخم
-                if ind.is_high_volume:
-                    score += 20
-                    reasons.append("High Volume")
-
-                if ind.macd_line > ind.macd_signal:
-                    score += 15
-                    reasons.append("MACD Bullish")
-
-                if 40 <= ind.rsi_14 <= 65:
-                    score += 10
-                    reasons.append("Healthy RSI")
-
-                if score < 70:
-                    continue
-
-                # حساب الأسعار بالليرة التركية من منصة باريبو مباشرة
-                entry = float(ticker.last)
-                
-                # حساب الوقف والفرق المستهدف بناءً على تذبذب ATR
-                atr_pct = (ind.atr_14 / ind.current_close) if ind.current_close > 0 else 0.02
-                risk_amount = entry * (atr_pct * 1.5)
-                
-                sl = max(0.0, entry - risk_amount)
-                tp1 = entry + (risk_amount * 1.5)
-                tp2 = entry + (risk_amount * 3.0)
-
-                fmt = "{:.4f}" if entry < 1 else "{:.2f}"
-
-                opp = Opportunity(
-                    symbol=ticker.symbol,
-                    score=score,
-                    reason=" | ".join(reasons),
-                    entry_price=fmt.format(entry),
-                    stop_loss=fmt.format(sl),
-                    tp_1=fmt.format(tp1),
-                    tp_2=fmt.format(tp2),
-                    is_super_signal=(score >= 85)
-                )
-                opportunities.append(opp)
-
-            except Exception:
+        for symbol, ticker in snapshot.items():
+            # فلتر السيولة والـ Spread
+            if ticker.quote_volume is None or ticker.quote_volume < Decimal("100000"):
                 continue
+            if ticker.spread_percent is not None and ticker.spread_percent > Decimal("1.5"):
+                continue
+            passed_liquidity += 1
+
+            # جلب الشموع وتحليلها
+            df = fetch_candles(symbol, resolution="15", limit=250)
+            ind = analyze_symbol(df)
+
+            if not ind.valid:
+                continue
+            valid_candles += 1
+
+            # حساب نقاط الجودة (Scoring / 100)
+            score = 0
+            reasons = []
+
+            if ind.is_uptrend:
+                score += 30
+                reasons.append("اتجاه صاعد")
+            if ind.is_above_ema9 and ind.is_above_ema21:
+                score += 20
+                reasons.append("فوق EMA9/21")
+            if 40 <= ind.rsi_14 <= 65:
+                score += 20
+                reasons.append(f"RSI متوازن ({ind.rsi_14:.1f})")
+            if ind.is_pullback:
+                score += 15
+                reasons.append("تصحيح مثالي")
+            if ind.is_high_volume:
+                score += 15
+                reasons.append("فوليوم مرتفع")
+
+            # الشرط الصارم للتأهل: 65+ نقطة
+            if score >= 65:
+                passed_score += 1
+                entry = ind.current_close
+                atr = ind.atr_14 if ind.atr_14 > 0 else (entry * 0.02)
+                sl = max(entry - (1.5 * atr), ind.current_low * 0.99)
+                risk = entry - sl
+                tp1 = entry + (1.5 * risk)
+                tp2 = entry + (3.0 * risk)
+
+                opportunities.append(Opportunity(
+                    symbol=symbol,
+                    score=score,
+                    reason=", ".join(reasons),
+                    entry_price=round(entry, 4),
+                    stop_loss=round(sl, 4),
+                    tp_1=round(tp1, 4),
+                    tp_2=round(tp2, 4)
+                ))
+
+        print(f"[DIAGNOSTIC] Liquidity Pass: {passed_liquidity} | Valid Candles: {valid_candles} | High Score Pass: {passed_score}")
 
         opportunities.sort(key=lambda x: x.score, reverse=True)
         return opportunities[:self.top_n]
