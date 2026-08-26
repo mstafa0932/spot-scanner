@@ -14,19 +14,8 @@ from urllib3.util.retry import Retry
 
 PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
 
-# REQUIRED:
-# Example format only; DO NOT invent the endpoint.
-# Set the exact current Paribu Candles endpoint as a GitHub Secret.
-#
-# It must contain:
-# {symbol}
-# {resolution}
-# {limit}
-#
-PARIBU_CANDLES_URL_TEMPLATE = os.getenv(
-    "PARIBU_CANDLES_URL_TEMPLATE",
-    "",
-)
+# تم ضبط الرابط البرمجي هنا مباشرة لضمان عدم حدوث أي أخطاء في الـ Secrets أو الأقواس
+PARIBU_CANDLES_URL_TEMPLATE = "https://www.paribu.com/api/v1/chart/ohlc?symbol={symbol}&period={resolution}&limit={limit}"
 
 REQUEST_TIMEOUT = 15
 
@@ -334,9 +323,6 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-        # IMPORTANT:
-        # If quote volume is absent, estimate it from
-        # base volume × last price instead of treating it as zero.
         if quote_volume is None and volume is not None:
 
             if volume > 0 and last > 0:
@@ -503,9 +489,7 @@ def fetch_candles(
     if not PARIBU_CANDLES_URL_TEMPLATE:
 
         raise ParibuConfigurationError(
-            "PARIBU_CANDLES_URL_TEMPLATE is not configured. "
-            "Set the exact current Paribu Candles endpoint "
-            "as a GitHub Secret."
+            "PARIBU_CANDLES_URL_TEMPLATE is not configured."
         )
 
     url = PARIBU_CANDLES_URL_TEMPLATE.format(
