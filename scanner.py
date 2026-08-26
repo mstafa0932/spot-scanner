@@ -1,3 +1,22 @@
+from dataclasses import dataclass
+from decimal import Decimal
+from market_data import get_market_snapshot, fetch_candles
+from indicator_engine import analyze_symbol
+
+@dataclass
+class Opportunity:
+    symbol: str
+    score: int
+    reason: str
+    entry_price: float
+    stop_loss: float
+    tp_1: float
+    tp_2: float
+
+class MarketScanner:
+    def __init__(self, top_n: int = 3):
+        self.top_n = top_n
+
     def scan_market(self) -> tuple[list[Opportunity], dict]:
         snapshot = get_market_snapshot()
         opportunities = []
