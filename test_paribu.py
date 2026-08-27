@@ -1,6 +1,5 @@
 import requests
 
-# تجربة Endpoint دفتر الأوامر
 url = "https://api.paribu.com/orderbook"
 params = {"symbol": "btc_tl", "limit": 10}
 headers = {
@@ -12,12 +11,12 @@ try:
     print("Status Code:", response.status_code)
     if response.status_code == 200:
         data = response.json()
-        print("JSON Keys:", list(data.keys()) if isinstance(data, dict) else "List Response")
-        # طباعة عينة من أفضل Ask و Bid
-        if isinstance(data, dict):
+        if isinstance(data, list):
+            print("List Length:", len(data))
+            print("Sample Element:", data[0] if len(data) > 0 else "Empty")
+        elif isinstance(data, dict):
+            print("Dict Keys:", list(data.keys()))
             print("Sample Ask:", data.get("asks", [])[:1])
             print("Sample Bid:", data.get("bids", [])[:1])
-    else:
-        print("Error Response:", response.text[:200])
 except Exception as e:
-    print("Connection Error:", e)
+    print("Error:", e)
