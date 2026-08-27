@@ -1,15 +1,3 @@
-from __future__ import annotations
-
-import os
-import requests
-
-from scanner import (
-    MarketScanner,
-    ScanStats,
-    Opportunity,
-)
-
-
 def send_telegram(text: str) -> None:
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
@@ -22,7 +10,7 @@ def send_telegram(text: str) -> None:
     payload = {
         "chat_id": chat_id,
         "text": text,
-        "parse_mode": "Markdown",
+        "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }
 
@@ -35,9 +23,9 @@ def send_telegram(text: str) -> None:
 
 def format_opportunity(opp: Opportunity, rank: int) -> str:
     return (
-        f"🎯 **SPOT OPPORTUNITY #{rank}**\n"
+        f"🎯 <b>SPOT OPPORTUNITY #{rank}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
-        f"🪙 **{opp.symbol}**\n"
+        f"🪙 <b>{opp.symbol}</b>\n"
         f"💪 القوة: {opp.strength}\n"
         f"📊 التقييم: {opp.score}/100\n"
         f"🧩 النوع: {opp.setup}\n\n"
@@ -56,7 +44,7 @@ def format_opportunity(opp: Opportunity, rank: int) -> str:
 
 def format_no_signal_report(stats: ScanStats) -> str:
     return (
-        "🔍 **Paribu — تقرير فحص السوق الدوري**\n"
+        "🔍 <b>Paribu — تقرير فحص السوق الدوري</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
         f"📊 إجمالي الأزواج المنسوخة: {stats.total_markets}\n"
         f"💧 تجاوزت شرط السيولة: {stats.liquidity_pass}\n"
@@ -66,32 +54,3 @@ def format_no_signal_report(stats: ScanStats) -> str:
         "━━━━━━━━━━━━━━━━━━━━\n"
         "💡 النتيجة: تم فحص السوق كاملاً بنجاح، ولا توجد فرص تنطبق عليها الشروط الصارمة حالياً."
     )
-
-
-def main():
-    scanner = MarketScanner()
-    opportunities, stats = scanner.scan_market()
-
-    if opportunities:
-        header = (
-            "🔥 **Paribu — فرص Spot**\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            f"تم العثور على {len(opportunities)} فرصة مرتبة.\n"
-            "الأفضل أولًا:"
-        )
-
-        print(header)
-        send_telegram(header)
-
-        for rank, opportunity in enumerate(opportunities, start=1):
-            message = format_opportunity(opportunity, rank)
-            print("\n" + message)
-            send_telegram(message)
-    else:
-        report = format_no_signal_report(stats)
-        print(report)
-        send_telegram(report)
-
-
-if __name__ == "__main__":
-    main()
