@@ -4,28 +4,30 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
 import time
+import logging
+from functools import lru_cache
 
 import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("ParibuMarketData")
+
 PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
 BINANCE_EXCHANGE_INFO_URL = "https://data-api.binance.vision/api/v3/exchangeInfo"
 BINANCE_CANDLES_URL = "https://data-api.binance.vision/api/v3/klines"
 
 REQUEST_TIMEOUT = 15
-
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/120.0.0.0 Safari/537.36"
 )
 
-# قاموس لتوجيه الرموز التي قد تختلف تسميتها بين Paribu و Binance
-SYMBOL_MAPPING = {
-    # مثال: إذا كانت عملة معينة تسمى بشكل مختلف على Binance
-    # "AVAX_TL": "AVAXUSDT",
+SYMBOL_MAPPING: dict[str, str] = {
+    # مثال: "OLD_SYMBOL_TL": "NEWUSDT"
 }
 
 
@@ -123,7 +125,9 @@ def extract_ticker_records(payload: Any) -> dict[str, dict[str, Any]]:
     for container_name in ("data", "result", "tickers", "markets"):
         container = payload.get(container_name)
         if isinstance(container, dict):
-            return {str(key): value for key, value in container.items() if isinstance(value, dict)}
+            inner_dict = {str(key): value for key, value in container.items() if isinstance(value, dict)}
+            if inner_dict:
+                return inner_dict
     
     raise ParibuSchemaError("Could not find ticker records in Paribu response.")
 
@@ -197,8 +201,9 @@ def get_market_snapshot() -> dict[str, Ticker]:
     return {ticker.symbol: ticker for ticker in fetch_tickers()}
 
 
+@lru_cache(maxsize=1)
 def get_binance_trading_pairs() -> set[str]:
-    """تحميل exchangeInfo لمعرفة الأزواج المتاحة وحالتها TRADING"""
+    """تحميل قائمة الأزواج النشطة من Binance مع تخزين مؤقت لمنع التكرار"""
     try:
         data = get_json(BINANCE_EXCHANGE_INFO_URL)
         symbols_set = set()
@@ -206,18 +211,32 @@ def get_binance_trading_pairs() -> set[str]:
             if s.get("status") == "TRADING" and s.get("quoteAsset") == "USDT":
                 symbols_set.add(s.get("baseAsset").upper())
         return symbols_set
-    except Exception:
+    except Exception as exc:
+        logger.warning(f"Could not fetch Binance exchangeInfo: {exc}")
         return set()
 
 
-def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFrame:
-    """جلب الكلينز مع مطعية دقيقة واستبعاد الشمعة الحالية المفتوحة"""
+def fetch_candles(
+    symbol: str, 
+    resolution: str, 
+    limit: int = 250, 
+    valid_binance_bases: Optional[set[str]] = None
+) -> pd.DataFrame:
+    """جلب الشموع المغلقة مع الحماية الكاملة والتخزين المؤقت للطلبات"""
     norm_symbol = normalize_symbol(symbol)
+    
     if norm_symbol in SYMBOL_MAPPING:
         binance_symbol = SYMBOL_MAPPING[norm_symbol]
     else:
-        base_coin = norm_symbol.split("_")[0].upper()
+        base_coin = norm_symbol.rsplit("_", 1)[0].upper()
         binance_symbol = f"{base_coin}USDT"
+        
+        if valid_binance_bases is None:
+            valid_binance_bases = get_binance_trading_pairs()
+
+        if valid_binance_bases and base_coin not in valid_binance_bases:
+            logger.info(f"[NOT_SUPPORTED_ON_BINANCE] Symbol {symbol} (Mapped: {binance_symbol}) does not exist or not TRADING.")
+            raise ParibuSchemaError(f"Symbol {base_coin} not active on Binance.")
 
     params = {
         "symbol": binance_symbol,
@@ -228,10 +247,11 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
     try:
         payload = get_json(BINANCE_CANDLES_URL, params=params)
     except Exception as exc:
-        print(f"[DEBUG] Failed candle fetch for {symbol} (mapped to {binance_symbol}): {exc}")
+        logger.error(f"[HTTP_OR_CONNECTION_ERROR] Failed fetching candles for {symbol} -> {binance_symbol}: {exc}")
         raise
 
     if not isinstance(payload, list):
+        logger.error(f"[INVALID_SCHEMA] Invalid candle payload type for {binance_symbol}")
         raise ParibuSchemaError(f"Invalid candle response for {binance_symbol}")
 
     parsed = []
@@ -251,12 +271,12 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
             "volume": float(v) if v is not None else 0.0,
         })
 
-    # استبعاد الشمعة الأخيرة المفتوحة لضمان الاعتماد على الإغلاق المؤكد فقط
     if len(parsed) > 1:
         parsed.pop()
 
     if len(parsed) < 205:
-        raise ParibuSchemaError(f"{symbol} {resolution}: only {len(parsed)} closed candles found. At least 205 required.")
+        logger.warning(f"[INSUFFICIENT_CANDLES] {symbol} ({resolution}): only {len(parsed)} closed candles found. Required >= 205.")
+        raise ParibuSchemaError(f"{symbol} {resolution}: only {len(parsed)} closed candles found.")
 
     df = pd.DataFrame(parsed)
     return df.dropna(subset=("open", "high", "low", "close")).reset_index(drop=True)
