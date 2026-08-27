@@ -15,7 +15,6 @@ from market_data import (
     Ticker,
     fetch_candles,
     get_market_snapshot,
-
 )
 
 # ============================================================
@@ -31,7 +30,8 @@ MIN_REQUIRED_TP1_PCT = Decimal("1.80")    # Min price distance to TP1: 1.80%
 MIN_REQUIRED_RR = Decimal("1.50")         # Min Risk-to-Reward ratio
 
 LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# تم ضبط المستوى على DEBUG لعرض تفاصيل الفحص والرفض كاملة في السجلات
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 # ============================================================
@@ -242,6 +242,7 @@ def run_scanner() -> None:
 
     try:
         snapshot = get_market_snapshot()
+        LOGGER.info(f"Fetched {len(snapshot)} pairs from Paribu.")
     except ParibuDataError as exc:
         LOGGER.error(f"Could not fetch Paribu market snapshot: {exc}")
         return
@@ -266,6 +267,7 @@ def run_scanner() -> None:
         # Run indicators calculation (using closed candle i=-2 internally)
         ind = calculate_indicators(df)
         if not ind.get("is_valid_setup", False):
+            LOGGER.debug(f"Skipping {symbol}: indicators setup not valid.")
             continue
 
         binance_close = Decimal(str(ind["close"]))
