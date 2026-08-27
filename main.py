@@ -110,13 +110,22 @@ def format_opportunity(
 def format_no_signal_report(
     stats: ScanStats,
 ) -> str:
+    # تنسيق قسم التنبيهات المبكرة إذا كانت متوفرة في كائن الإحصائيات أو المراقبة
+    early_alerts_text = ""
+    watchlist = getattr(stats, "early_watch_list", [])
+    if watchlist:
+        early_alerts_text = "\n🔍 **قائمة المراقبة المبكرة:**\n"
+        sorted_watchlist = sorted(watchlist, key=lambda x: x.get("score", 0), reverse=True)
+        for item in sorted_watchlist[:5]:
+            early_alerts_text += f"• `{item['symbol']}` ➔ {item['reason']} (النقاط: {item.get('score', 'N/A')})\n"
+        early_alerts_text += "━━━━━━━━━━━━━━━━━━━━\n"
 
     return (
         "🔍 Paribu — التقرير الدوري\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
         "✅ البوت يعمل.\n"
         "⚠️ لا توجد توصية دخول مطابقة حاليًا.\n\n"
-
+        f"{early_alerts_text}"
         f"📊 الأزواج المفحوصة: "
         f"{stats.total_markets}\n\n"
 
