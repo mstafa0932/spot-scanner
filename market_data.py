@@ -81,11 +81,9 @@ def get_market_snapshot() -> Dict[str, Ticker]:
 
 
 def fetch_candles(symbol: str, resolution: str = "15m", limit: int = 250) -> pd.DataFrame:
-    # Convert Paribu symbol (e.g. XRP_TL) to KuCoin format (XRP-USDT)
     base_currency = symbol.split("_")[0]
     kucoin_symbol = f"{base_currency}-USDT"
 
-    # Map resolution to KuCoin format
     resolution_map = {
         "1m": "1min",
         "3m": "3min",
@@ -103,32 +101,34 @@ def fetch_candles(symbol: str, resolution: str = "15m", limit: int = 250) -> pd.
         "type": k_type,
     }
 
-    resp = requests.get(KUCOIN_KLINES_URL, params=params, timeout=10)
-    resp.raise_for_status()
-    result = resp.json()
+    try:
+        resp = requests.get(KUCOIN_KLINES_URL, params=params, timeout=10)
+        resp.raise_for_status()
+        result = resp.json()
 
-    if result.get("code") != "200000":
-        raise ValueError(f"KuCoin API error for {kucoin_symbol}: {result.get('msg')}")
+        if result.get("code") != "200000":
+            raise ValueError(result.get("msg", "Unknown error"))
 
-    data = result.get("data", [])
-    if not isinstance(data, list) or not data:
-        raise ValueError(f"No candle data returned from KuCoin for {kucoin_symbol}")
+        data = result.get("data", [])
+        if not isinstance(data, list) or not data:
+            raise ValueError("Empty candle data")
 
-    # KuCoin returns data in reverse chronological order (newest first)
-    # Format: [time, open, close, high, low, volume, turnover]
-    rows = []
-    for candle in reversed(data[:limit]):
-        rows.append({
-            "timestamp": int(candle[0]) * 1000,
-            "open": float(candle[1]),
-            "high": float(candle[3]),
-            "low": float(candle[4]),
-            "close": float(candle[2]),
-            "volume": float(candle[5]),
-        })
+        rows = []
+        for candle in reversed(data[:limit]):
+            rows.append({
+                "timestamp": int(candle[0]) * 1000,
+                "open": float(candle[1]),
+                "high": float(candle[3]),
+                "low": float(candle[4]),
+                "close": float(candle[2]),
+                "volume": float(candle[5]),
+            })
 
-    df = pd.DataFrame(rows)
-    for col in ["open", "high", "low", "close", "volume"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+        df = pd.DataFrame(rows)
+        for col in ["open", "high", "low", "close", "volume"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    return df
+        return df
+    except Exception as exc:
+        # تسجيل الصامت للعملات الغيرعنصرة لتجنب إزعاج السجلات
+        raise ValueError(f"Unsupported or unavailable pair on KuCoin: {kucoin_symbol}") from exc
