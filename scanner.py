@@ -399,6 +399,7 @@ def score_candidate(
 
 def calculate_trade_levels(
     ind: IndicatorResult,
+    ticker: Ticker,
 ) -> Tuple[
     Decimal,
     Decimal,
@@ -407,21 +408,33 @@ def calculate_trade_levels(
     Decimal,
     str,
 ]:
+    binance_current = ind.current_close
+    paribu_current = getattr(ticker, "last", None)
 
-    current = ind.current_close
+    if paribu_current is None or paribu_current <= 0:
+        raise ValueError("Invalid Paribu ticker last price.")
 
-    # Pullback entry:
-    entry = current
+    if binance_current <= 0:
+        raise ValueError("Invalid Binance current price.")
 
-    stop_by_atr = (
-        current
+    # معامل التحويل الرياضي الموحد بين Binance و Paribu
+    scale = paribu_current / binance_current
+
+    # خط دفاع أخير ضد أي انحراف سعر شاذ
+    if scale < Decimal("0.0001") or scale > Decimal("10000"):
+        raise ValueError("Abnormal scaling factor between Binance and Paribu.")
+
+    entry = paribu_current
+
+    binance_stop_by_atr = (
+        binance_current
         - (
             ind.atr14
             * ATR_STOP_MULTIPLIER
         )
     )
 
-    stop_by_structure = (
+    binance_stop_by_structure = (
         ind.swing_low
         - (
             ind.atr14
@@ -429,35 +442,34 @@ def calculate_trade_levels(
         )
     )
 
-    stop = max(
+    binance_stop = max(
         Decimal("0"),
         min(
-            stop_by_atr,
-            stop_by_structure,
+            binance_stop_by_atr,
+            binance_stop_by_structure,
         ),
     )
 
-    if stop <= 0:
+    if binance_stop <= 0:
         raise ValueError(
             "Invalid stop loss."
         )
 
-    risk = current - stop
+    stop = binance_stop * scale
+
+    risk = entry - stop
 
     if risk <= 0:
         raise ValueError(
             "Invalid risk distance."
         )
 
-    # Actual market resistance targets.
-    resistance1 = ind.resistance_48
-
+    resistance1 = ind.resistance_48 * scale
     resistance2 = max(
         ind.resistance_48,
         ind.resistance_96,
-    )
+    ) * scale
 
-    # TP1 should be before the major resistance.
     tp1_by_risk = (
         entry
         + (
@@ -471,9 +483,7 @@ def calculate_trade_levels(
         resistance1,
     )
 
-    # If resistance is below entry, fallback to risk-based target.
     if tp1 <= entry:
-
         tp1 = tp1_by_risk
 
     tp2_by_risk = (
@@ -499,7 +509,6 @@ def calculate_trade_levels(
     ) / risk
 
     if rr < MIN_RR:
-
         raise ValueError(
             "Risk/reward below minimum."
         )
@@ -785,7 +794,8 @@ class MarketScanner:
                     rr,
                     setup,
                 ) = calculate_trade_levels(
-                    ind
+                    ind,
+                    ticker,
                 )
 
             except ValueError as exc:
@@ -816,6 +826,10 @@ class MarketScanner:
                 entry
             )
 
+            paribu_current = getattr(ticker, "last", None)
+            if paribu_current is None or paribu_current <= 0:
+                paribu_current = entry
+
             opportunity = Opportunity(
 
                 symbol=ticker.symbol,
@@ -831,7 +845,7 @@ class MarketScanner:
                 setup=setup,
 
                 current_price=quantize_price(
-                    ind.current_close,
+                    paribu_current,
                     step,
                 ),
 
