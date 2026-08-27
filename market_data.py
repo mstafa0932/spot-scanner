@@ -22,6 +22,12 @@ USER_AGENT = (
     "Chrome/120.0.0.0 Safari/537.36"
 )
 
+# قاموس لتوجيه الرموز التي قد تختلف تسميتها بين Paribu و Binance
+SYMBOL_MAPPING = {
+    # مثال: إذا كانت عملة معينة تسمى بشكل مختلف على Binance
+    # "AVAX_TL": "AVAXUSDT",
+}
+
 
 class ParibuDataError(Exception):
     pass
@@ -192,7 +198,7 @@ def get_market_snapshot() -> dict[str, Ticker]:
 
 
 def get_binance_trading_pairs() -> set[str]:
-    """تحميل exchangeInfo مرة واحدة لمعرفة الأزواج المتاحة وحالتها TRADING"""
+    """تحميل exchangeInfo لمعرفة الأزواج المتاحة وحالتها TRADING"""
     try:
         data = get_json(BINANCE_EXCHANGE_INFO_URL)
         symbols_set = set()
@@ -205,17 +211,26 @@ def get_binance_trading_pairs() -> set[str]:
 
 
 def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFrame:
-    """جلب الكلينز مع استبعاد الشمعة الحالية المفتوحة واعتماد الشموع المغلقة فقط"""
-    base_coin = symbol.split("_")[0].upper()
-    binance_symbol = f"{base_coin}USDT"
+    """جلب الكلينز مع مطعية دقيقة واستبعاد الشمعة الحالية المفتوحة"""
+    norm_symbol = normalize_symbol(symbol)
+    if norm_symbol in SYMBOL_MAPPING:
+        binance_symbol = SYMBOL_MAPPING[norm_symbol]
+    else:
+        base_coin = norm_symbol.split("_")[0].upper()
+        binance_symbol = f"{base_coin}USDT"
 
     params = {
         "symbol": binance_symbol,
         "interval": resolution,
-        "limit": limit + 1  # زيادة طلب شمعة إضافية لاستبعاد المفتوحة
+        "limit": limit + 1
     }
 
-    payload = get_json(BINANCE_CANDLES_URL, params=params)
+    try:
+        payload = get_json(BINANCE_CANDLES_URL, params=params)
+    except Exception as exc:
+        print(f"[DEBUG] Failed candle fetch for {symbol} (mapped to {binance_symbol}): {exc}")
+        raise
+
     if not isinstance(payload, list):
         raise ParibuSchemaError(f"Invalid candle response for {binance_symbol}")
 
@@ -223,8 +238,6 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
     for row in payload:
         if len(row) < 6:
             continue
-        # Binance klines format: [Open time, Open, High, Low, Close, Volume, Close time, ...]
-        # نحتفظ بالشموع السابقة ونستبعد الأخيرة إن لم تكن مغلقة تماماً
         o, h, l, c, v = D(row[1]), D(row[2]), D(row[3]), D(row[4]), D(row[5])
         if None in (o, h, l, c):
             continue
@@ -238,7 +251,7 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
             "volume": float(v) if v is not None else 0.0,
         })
 
-    # استبعاد الشمعة الأخيرة (الحالية المفتوحة) والاعتِماد على الشموع المغلقة السابقة
+    # استبعاد الشمعة الأخيرة المفتوحة لضمان الاعتماد على الإغلاق المؤكد فقط
     if len(parsed) > 1:
         parsed.pop()
 
