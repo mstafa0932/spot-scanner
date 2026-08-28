@@ -28,19 +28,15 @@ if not LOGGER.handlers:
 
 
 # ============================================================
-# ENDPOINTS
+# PUBLIC MARKET-DATA ENDPOINTS
 # ============================================================
 
 PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
 
 # IMPORTANT:
-# Leave empty until the exact current Paribu Order Book REST
-# endpoint is confirmed from the official API documentation.
-#
-# Set it later as a GitHub Actions Secret:
-#
-# PARIBU_ORDERBOOK_URL
-#
+# Keep this empty until the exact current Paribu public
+# Order Book REST path is confirmed from Paribu's official
+# API documentation. We intentionally do NOT guess it.
 PARIBU_ORDERBOOK_URL = os.getenv(
     "PARIBU_ORDERBOOK_URL",
     "",
@@ -70,7 +66,9 @@ REQUEST_TIMEOUT = int(
 )
 
 MIN_CANDLES = 205
+
 DEFAULT_CANDLE_LIMIT = 250
+
 DEFAULT_ORDERBOOK_DEPTH = 50
 
 USER_AGENT = (
@@ -85,7 +83,12 @@ USER_AGENT = (
 # ============================================================
 
 class ParibuDataError(Exception):
-    """Backward-compatible base exception."""
+    """
+    Compatibility exception.
+
+    scanner.py currently imports this name, so it must remain
+    available from market_data.py.
+    """
 
 
 class MarketDataError(ParibuDataError):
@@ -113,21 +116,23 @@ class OrderBookUnavailableError(ParibuDataError):
 
 
 # ============================================================
-# DECIMAL
+# DECIMAL HELPERS
 # ============================================================
 
 def to_decimal(
     value: Any,
 ) -> Optional[Decimal]:
+    """
+    Safely convert API values to Decimal.
+
+    None / invalid / non-finite values become None.
+    """
 
     if value is None or value == "":
         return None
 
     try:
-
-        result = Decimal(
-            str(value)
-        )
+        result = Decimal(str(value))
 
         if not result.is_finite():
             return None
@@ -139,7 +144,6 @@ def to_decimal(
         ValueError,
         TypeError,
     ):
-
         return None
 
 
@@ -150,6 +154,11 @@ def to_decimal(
 def normalize_symbol(
     symbol: str,
 ) -> str:
+    """
+    Normalize:
+        BTC/TL  -> BTC_TL
+        btc-tl  -> BTC_TL
+    """
 
     return (
         str(symbol)
@@ -164,24 +173,24 @@ def normalize_symbol(
 def base_asset(
     symbol: str,
 ) -> str:
+    """
+    BTC_TL -> BTC
+    """
 
     normalized = normalize_symbol(
         symbol
     )
 
     if "_" in normalized:
-
         return normalized.split(
             "_",
             1,
         )[0]
 
     if normalized.endswith("TRY"):
-
         return normalized[:-3]
 
     if normalized.endswith("TL"):
-
         return normalized[:-2]
 
     return normalized
@@ -206,7 +215,9 @@ def binance_symbol_for(
 ) -> str:
 
     return (
-        base_asset(paribu_symbol)
+        base_asset(
+            paribu_symbol
+        )
         + "USDT"
     )
 
@@ -238,7 +249,7 @@ def create_session() -> requests.Session:
         connect=3,
         read=3,
         status=3,
-        backoff_factor=0.4,
+        backoff_factor=0.35,
         status_forcelist=(
             408,
             425,
@@ -364,10 +375,7 @@ class Ticker:
             return None
 
         return (
-            (
-                self.ask
-                - self.bid
-            )
+            (self.ask - self.bid)
             / self.bid
             * Decimal("100")
         )
@@ -405,22 +413,21 @@ def extract_ticker_records(
             dict,
         ):
 
-            records = {
-                str(k): v
-                for k, v in container.items()
-                if isinstance(v, dict)
+            result = {
+                str(key): value
+                for key, value in container.items()
+                if isinstance(value, dict)
             }
 
-            if records:
-
-                return records
+            if result:
+                return result
 
         if isinstance(
             container,
             list,
         ):
 
-            records = {}
+            result = {}
 
             for item in container:
 
@@ -444,18 +451,17 @@ def extract_ticker_records(
 
                 if symbol:
 
-                    records[
+                    result[
                         str(symbol)
                     ] = item
 
-            if records:
-
-                return records
+            if result:
+                return result
 
     direct = {
-        str(k): v
-        for k, v in payload.items()
-        if isinstance(v, dict)
+        str(key): value
+        for key, value in payload.items()
+        if isinstance(value, dict)
     }
 
     if direct:
@@ -473,13 +479,11 @@ def fetch_tickers() -> list[Ticker]:
         PARIBU_TICKER_URL
     )
 
-    records = (
-        extract_ticker_records(
-            payload
-        )
+    records = extract_ticker_records(
+        payload
     )
 
-    tickers = []
+    result: list[Ticker] = []
 
     for raw_symbol, raw_data in records.items():
 
@@ -488,7 +492,6 @@ def fetch_tickers() -> list[Ticker]:
         )
 
         if not is_tl_pair(symbol):
-
             continue
 
         last = to_decimal(
@@ -508,7 +511,6 @@ def fetch_tickers() -> list[Ticker]:
             last is None
             or last <= 0
         ):
-
             continue
 
         bid = to_decimal(
@@ -559,7 +561,7 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-        # Safe fallback if only base volume is supplied.
+        # Only use this as a fallback estimate.
         if (
             quote_volume is None
             and volume is not None
@@ -584,7 +586,7 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-        tickers.append(
+        result.append(
             Ticker(
                 symbol=symbol,
                 last=last,
@@ -596,22 +598,22 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-    if not tickers:
+    if not result:
 
         raise SchemaError(
             "No usable Paribu TL markets found."
         )
 
-    tickers.sort(
-        key=lambda x: (
-            x.quote_volume
-            if x.quote_volume is not None
+    result.sort(
+        key=lambda item: (
+            item.quote_volume
+            if item.quote_volume is not None
             else Decimal("0")
         ),
         reverse=True,
     )
 
-    return tickers
+    return result
 
 
 def get_market_snapshot() -> dict[
@@ -646,10 +648,10 @@ def get_binance_spot_symbols() -> frozenset[str]:
     ):
 
         raise SchemaError(
-            "Invalid Binance exchangeInfo."
+            "Invalid Binance exchangeInfo response."
         )
 
-    valid = set()
+    valid: set[str] = set()
 
     for item in symbols:
 
@@ -672,17 +674,15 @@ def get_binance_spot_symbols() -> frozenset[str]:
             "permissions"
         )
 
-        if not symbol:
+        if (
+            not symbol
+            or status != "TRADING"
+        ):
 
             continue
 
-        if status != "TRADING":
-
-            continue
-
-        # Binance may expose permission sets differently.
-        # If permissions are absent, status=TRADING is still
-        # accepted for compatibility with the public API.
+        # Some API responses expose permissions,
+        # while some compatible responses may not.
         if (
             isinstance(
                 permissions,
@@ -701,26 +701,20 @@ def get_binance_spot_symbols() -> frozenset[str]:
     if not valid:
 
         raise SchemaError(
-            "Binance returned no active symbols."
+            "Binance returned no active Spot symbols."
         )
 
-    return frozenset(
-        valid
-    )
+    return frozenset(valid)
 
 
 def is_binance_symbol_available(
     paribu_symbol: str,
 ) -> bool:
 
-    candidate = (
+    return (
         binance_symbol_for(
             paribu_symbol
         )
-    )
-
-    return (
-        candidate
         in get_binance_spot_symbols()
     )
 
@@ -748,7 +742,7 @@ def get_bybit_spot_symbols() -> frozenset[str]:
     ):
 
         raise APIError(
-            f"Bybit instruments error: "
+            "Bybit instruments error: "
             f"{payload.get('retMsg')}"
         )
 
@@ -770,7 +764,16 @@ def get_bybit_spot_symbols() -> frozenset[str]:
         [],
     )
 
-    valid = set()
+    if not isinstance(
+        items,
+        list,
+    ):
+
+        raise SchemaError(
+            "Invalid Bybit Spot symbol list."
+        )
+
+    valid: set[str] = set()
 
     for item in items:
 
@@ -798,9 +801,7 @@ def get_bybit_spot_symbols() -> frozenset[str]:
                 str(symbol).upper()
             )
 
-    return frozenset(
-        valid
-    )
+    return frozenset(valid)
 
 
 def is_bybit_symbol_available(
@@ -808,7 +809,9 @@ def is_bybit_symbol_available(
 ) -> bool:
 
     candidate = (
-        base_asset(paribu_symbol)
+        base_asset(
+            paribu_symbol
+        )
         + "USDT"
     )
 
@@ -835,15 +838,21 @@ def validate_candles(
         "volume",
     )
 
-    for column in required:
+    missing = [
+        column
+        for column in required
+        if column not in df.columns
+    ]
 
-        if column not in df.columns:
+    if missing:
 
-            raise SchemaError(
-                f"Missing candle column: {column}"
-            )
+        raise SchemaError(
+            "Missing candle columns: "
+            + ", ".join(missing)
+        )
 
     for column in (
+        "timestamp",
         "open",
         "high",
         "low",
@@ -855,11 +864,6 @@ def validate_candles(
             df[column],
             errors="coerce",
         )
-
-    df["timestamp"] = pd.to_numeric(
-        df["timestamp"],
-        errors="coerce",
-    )
 
     df = df.dropna(
         subset=(
@@ -964,14 +968,16 @@ def fetch_binance_candles(
         )
     )
 
+    # Important:
+    # We check the symbol before asking for candles.
     if not is_binance_symbol_available(
         normalized
     ):
 
         raise CandleUnavailableError(
             f"{normalized}: "
-            f"{provider_symbol} is not available "
-            f"as active Binance Spot."
+            f"{provider_symbol} is not an active "
+            f"Binance Spot symbol."
         )
 
     limit = max(
@@ -1034,7 +1040,9 @@ def fetch_binance_candles(
 
         rows.append(
             {
-                "timestamp": int(row[0]),
+                "timestamp": int(
+                    row[0]
+                ),
                 "open": float(o),
                 "high": float(h),
                 "low": float(l),
@@ -1051,10 +1059,9 @@ def fetch_binance_candles(
         pd.DataFrame(rows)
     )
 
-    # IMPORTANT:
-    # Keep the latest candle.
+    # Do NOT remove the newest candle.
     # indicator_engine.py must use i = -2
-    # to analyze the latest CLOSED candle.
+    # to analyze the latest closed candle.
     df.attrs["source"] = "Binance"
     df.attrs["provider_symbol"] = (
         provider_symbol
@@ -1062,7 +1069,9 @@ def fetch_binance_candles(
     df.attrs["paribu_symbol"] = (
         normalized
     )
-    df.attrs["resolution"] = resolution
+    df.attrs["resolution"] = (
+        resolution
+    )
 
     return df
 
@@ -1109,6 +1118,7 @@ def fetch_bybit_candles(
         + "USDT"
     )
 
+    # Pre-check pair before requesting candles.
     if not is_bybit_symbol_available(
         normalized
     ):
@@ -1161,8 +1171,8 @@ def fetch_bybit_candles(
     ):
 
         raise SchemaError(
-            f"Invalid Bybit result "
-            f"for {provider_symbol}."
+            f"Invalid Bybit result for "
+            f"{provider_symbol}."
         )
 
     raw_rows = result.get(
@@ -1236,13 +1246,15 @@ def fetch_bybit_candles(
     df.attrs["paribu_symbol"] = (
         normalized
     )
-    df.attrs["resolution"] = resolution
+    df.attrs["resolution"] = (
+        resolution
+    )
 
     return df
 
 
 # ============================================================
-# UNIFIED CANDLE FUNCTION
+# UNIFIED CANDLE FETCH
 # ============================================================
 
 def fetch_candles(
@@ -1255,9 +1267,9 @@ def fetch_candles(
         symbol
     )
 
-    errors = []
+    errors: list[str] = []
 
-    # Binance first.
+    # Provider 1 — Binance
     try:
 
         return fetch_binance_candles(
@@ -1273,13 +1285,13 @@ def fetch_candles(
         )
 
         LOGGER.warning(
-            "%s %s Binance failed: %s",
+            "%s %s Binance candle failure: %s",
             normalized,
             resolution,
             exc,
         )
 
-    # Bybit fallback.
+    # Provider 2 — Bybit
     try:
 
         return fetch_bybit_candles(
@@ -1295,7 +1307,7 @@ def fetch_candles(
         )
 
         LOGGER.warning(
-            "%s %s Bybit failed: %s",
+            "%s %s Bybit candle failure: %s",
             normalized,
             resolution,
             exc,
@@ -1309,7 +1321,7 @@ def fetch_candles(
 
 
 # ============================================================
-# OPTIONAL PARIBU ORDER BOOK
+# PARIBU ORDER BOOK
 # ============================================================
 
 def fetch_order_book(
@@ -1320,7 +1332,10 @@ def fetch_order_book(
     if not PARIBU_ORDERBOOK_URL:
 
         raise OrderBookUnavailableError(
-            "PARIBU_ORDERBOOK_URL is not configured."
+            "PARIBU_ORDERBOOK_URL is not configured. "
+            "Depth-based execution analysis is therefore "
+            "disabled until the verified Paribu endpoint "
+            "is supplied."
         )
 
     normalized = normalize_symbol(
@@ -1347,7 +1362,7 @@ def fetch_order_book(
     ):
 
         raise SchemaError(
-            f"Invalid order book response "
+            f"Invalid Paribu order-book response "
             f"for {normalized}."
         )
 
@@ -1394,12 +1409,69 @@ def fetch_order_book(
 
     raise SchemaError(
         f"{normalized}: "
-        "asks/bids were not found."
+        "response did not contain asks/bids."
     )
 
 
 # ============================================================
-# DIAGNOSTICS
+# LEVEL-1 EXECUTION SNAPSHOT
+# ============================================================
+
+def get_execution_snapshot(
+    symbol: str,
+    depth: int = DEFAULT_ORDERBOOK_DEPTH,
+) -> dict[str, Any]:
+
+    normalized = normalize_symbol(
+        symbol
+    )
+
+    snapshot = (
+        get_market_snapshot()
+    )
+
+    ticker = snapshot.get(
+        normalized
+    )
+
+    if ticker is None:
+
+        raise MarketDataError(
+            f"{normalized}: "
+            "not found in Paribu ticker."
+        )
+
+    result = {
+        "symbol": normalized,
+        "paribu_last": ticker.last,
+        "paribu_bid": ticker.bid,
+        "paribu_ask": ticker.ask,
+        "spread_pct": ticker.spread_percent,
+        "orderbook": None,
+    }
+
+    # Order book is optional until the verified endpoint
+    # is configured.
+    try:
+
+        result["orderbook"] = (
+            fetch_order_book(
+                normalized,
+                depth,
+            )
+        )
+
+    except OrderBookUnavailableError as exc:
+
+        result[
+            "orderbook_error"
+        ] = str(exc)
+
+    return result
+
+
+# ============================================================
+# HEALTH CHECK
 # ============================================================
 
 def health_check() -> dict[str, Any]:
@@ -1450,7 +1522,9 @@ def health_check() -> dict[str, Any]:
             exc,
         )
 
-    result["seconds"] = round(
+    result[
+        "seconds"
+    ] = round(
         time.time() - started,
         2,
     )
@@ -1458,16 +1532,22 @@ def health_check() -> dict[str, Any]:
     return result
 
 
+# ============================================================
+# COMMAND-LINE TEST
+# ============================================================
+
 if __name__ == "__main__":
 
     print(
-        "=== MARKET DATA HEALTH CHECK ==="
+        "=== PARIBU MARKET DATA HEALTH CHECK ==="
     )
 
     try:
 
+        result = health_check()
+
         print(
-            health_check()
+            result
         )
 
     except Exception as exc:
