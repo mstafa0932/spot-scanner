@@ -20,7 +20,6 @@ Design:
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
-import os
 import time
 
 import pandas as pd
@@ -44,19 +43,7 @@ BINANCE_BASE_URLS = (
 
 BYBIT_BASE_URL = "https://api.bybit.com"
 
-KUCOIN_BASE_URL = "https://api.kucoin.com"
-
-KUCOIN_INTERVALS = {
-    "1m": "1min", "3m": "3min", "5m": "5min", "15m": "15min",
-    "30m": "30min", "1h": "1hour", "2h": "2hour", "4h": "4hour",
-    "6h": "6hour", "8h": "8hour", "12h": "12hour", "1d": "1day",
-    "1w": "1week",
-}
-
-# Only use a verified Paribu order-book endpoint if explicitly configured.
-PARIBU_ORDERBOOK_URL = os.getenv("PARIBU_ORDERBOOK_URL", "").strip()
-
-REQUEST_TIMEOUT = int(os.getenv("MARKET_DATA_TIMEOUT", "15"))
+REQUEST_TIMEOUT = 10
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -76,40 +63,19 @@ class ParibuDataError(Exception):
     pass
 
 
-# Backward-compatible exception names used by scanner.py.
-class MarketDataError(ParibuDataError):
-    pass
-
-
-class NetworkError(ParibuDataError):
-    pass
-
-
-class APIError(ParibuDataError):
-    pass
-
-
-class SchemaError(ParibuDataError):
-    pass
-
-
-class OrderBookUnavailableError(ParibuDataError):
-    pass
-
-
 class ParibuConfigurationError(ParibuDataError):
     pass
 
 
-class ParibuHTTPError(NetworkError):
+class ParibuHTTPError(ParibuDataError):
     pass
 
 
-class ParibuSchemaError(SchemaError):
+class ParibuSchemaError(ParibuDataError):
     pass
 
 
-class CandleUnavailableError(MarketDataError):
+class CandleUnavailableError(ParibuDataError):
     pass
 
 
@@ -895,112 +861,6 @@ def _fetch_bybit_candles(
 
 
 # ---------------------------------------------------------------------------
-# KuCoin candles — third fallback
-# ---------------------------------------------------------------------------
-
-def _parse_kucoin_klines(payload: Any, symbol: str) -> pd.DataFrame:
-    if not isinstance(payload, dict):
-        raise ParibuSchemaError(f"KuCoin returned invalid payload for {symbol}.")
-
-    if payload.get("code") != "200000":
-        raise CandleUnavailableError(
-            f"KuCoin error {payload.get('code')}: {payload.get('msg', 'unknown error')}"
-        )
-
-    raw_rows = payload.get("data")
-    if not isinstance(raw_rows, list):
-        raise CandleUnavailableError(f"KuCoin returned no candle list for {symbol}.")
-
-    rows = []
-    # KuCoin Spot: [time, open, close, high, low, volume, turnover]
-    for row in raw_rows:
-        if not isinstance(row, (list, tuple)) or len(row) < 6:
-            continue
-        ts, o, c, h, l, v = D(row[0]), D(row[1]), D(row[2]), D(row[3]), D(row[4]), D(row[5])
-        if None in (ts, o, c, h, l):
-            continue
-        rows.append({
-            "timestamp": int(ts) * 1000,
-            "open": float(o),
-            "high": float(h),
-            "low": float(l),
-            "close": float(c),
-            "volume": float(v) if v is not None else 0.0,
-        })
-
-    if not rows:
-        raise CandleUnavailableError(f"KuCoin returned no usable candles for {symbol}.")
-    return validate_candles(pd.DataFrame(rows))
-
-
-def _fetch_kucoin_candles(symbol: str, resolution: str, limit: int) -> pd.DataFrame:
-    base_asset = base_asset_from_paribu(symbol)
-    if not base_asset:
-        raise CandleUnavailableError(f"Could not determine base asset from {symbol}.")
-
-    interval = KUCOIN_INTERVALS.get(normalize_resolution(resolution))
-    if interval is None:
-        raise ParibuConfigurationError(f"Unsupported KuCoin candle resolution: {resolution}")
-
-    provider_symbol = f"{base_asset}-USDT"
-    request_limit = max(50, min(int(limit), 1500))
-
-    payload = get_json(
-        f"{KUCOIN_BASE_URL}/api/v1/market/candles",
-        params={"symbol": provider_symbol, "type": interval},
-    )
-    df = _parse_kucoin_klines(payload, provider_symbol)
-    df = df.sort_values("timestamp").reset_index(drop=True)
-    if len(df) > request_limit:
-        df = df.iloc[-request_limit:].reset_index(drop=True)
-
-    df.attrs["source"] = "kucoin"
-    df.attrs["provider_symbol"] = provider_symbol
-    df.attrs["paribu_symbol"] = normalize_symbol(symbol)
-    df.attrs["resolution"] = normalize_resolution(resolution)
-    return df
-
-
-# ---------------------------------------------------------------------------
-# Order-book compatibility function required by scanner.py
-# ---------------------------------------------------------------------------
-
-def fetch_order_book(symbol: str, depth: int = 50) -> dict[str, Any]:
-    if not PARIBU_ORDERBOOK_URL:
-        raise OrderBookUnavailableError(
-            "PARIBU_ORDERBOOK_URL is not configured. Paribu ticker bid/ask remains available."
-        )
-
-    normalized = normalize_symbol(symbol)
-    payload = get_json(
-        PARIBU_ORDERBOOK_URL,
-        params={"symbol": normalized.lower(), "limit": max(1, min(int(depth), 1000))},
-    )
-
-    if not isinstance(payload, dict):
-        raise ParibuSchemaError(f"Invalid order-book response for {normalized}.")
-
-    candidates = (payload, payload.get("data"), payload.get("result"), payload.get("orderBook"), payload.get("orderbook"))
-    for candidate in candidates:
-        if not isinstance(candidate, dict):
-            continue
-        asks = candidate.get("asks")
-        bids = candidate.get("bids")
-        if asks is None and isinstance(candidate.get("sell"), dict):
-            asks = candidate["sell"]
-        if bids is None and isinstance(candidate.get("buy"), dict):
-            bids = candidate["buy"]
-        if asks is not None and bids is not None:
-            return {
-                "symbol": normalized, "asks": asks, "bids": bids,
-                "timestamp": candidate.get("timestamp", candidate.get("ts")),
-                "source": "Paribu",
-            }
-
-    raise ParibuSchemaError(f"{normalized}: asks/bids (or sell/buy) were not found.")
-
-
-# ---------------------------------------------------------------------------
 # Public candle function used by scanner.py
 # ---------------------------------------------------------------------------
 
@@ -1058,20 +918,6 @@ def fetch_candles(
             f"Bybit: {exc}"
         )
 
-    # Provider 3: KuCoin Spot. This is the important fallback for
-    # GitHub Actions environments where Binance/Bybit can be geo-blocked.
-    try:
-        return _fetch_kucoin_candles(
-            normalized_symbol,
-            resolution,
-            limit,
-        )
-
-    except Exception as exc:
-        errors.append(
-            f"KuCoin: {exc}"
-        )
-
     raise CandleUnavailableError(
         f"No candle provider succeeded for "
         f"{normalized_symbol} {resolution}. "
@@ -1101,7 +947,6 @@ def health_check() -> dict[str, Any]:
         "candle_providers": [
             "binance",
             "bybit",
-            "kucoin",
         ],
         "min_valid_candles": MIN_VALID_CANDLES,
     }
