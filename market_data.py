@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from typing import Any, Optional
 from functools import lru_cache
+from typing import Any, Optional
+import logging
 import os
 import time
-import logging
 
 import pandas as pd
 import requests
@@ -34,18 +34,19 @@ if not LOGGER.handlers:
 PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
 
 # IMPORTANT:
-# Set this ONLY after verifying Paribu's current API documentation.
+# Leave empty until the exact current Paribu Order Book REST
+# endpoint is confirmed from the official API documentation.
 #
-# Example:
-# export PARIBU_ORDERBOOK_URL="https://<verified-paribu-endpoint>"
+# Set it later as a GitHub Actions Secret:
 #
-# Do NOT guess this URL.
+# PARIBU_ORDERBOOK_URL
+#
 PARIBU_ORDERBOOK_URL = os.getenv(
     "PARIBU_ORDERBOOK_URL",
     "",
 )
 
-BINANCE_INFO_URL = (
+BINANCE_EXCHANGE_INFO_URL = (
     "https://api.binance.com/api/v3/exchangeInfo"
 )
 
@@ -61,7 +62,6 @@ BYBIT_KLINES_URL = (
     "https://api.bybit.com/v5/market/kline"
 )
 
-
 REQUEST_TIMEOUT = int(
     os.getenv(
         "MARKET_DATA_TIMEOUT",
@@ -70,15 +70,13 @@ REQUEST_TIMEOUT = int(
 )
 
 MIN_CANDLES = 205
-
 DEFAULT_CANDLE_LIMIT = 250
-
 DEFAULT_ORDERBOOK_DEPTH = 50
 
-
 USER_AGENT = (
-    "spot-scanner/2.0 "
-    "(public-market-data-only)"
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/120.0.0.0 Safari/537.36"
 )
 
 
@@ -86,31 +84,31 @@ USER_AGENT = (
 # EXCEPTIONS
 # ============================================================
 
-class MarketDataError(Exception):
-    """Base market-data exception."""
+class ParibuDataError(Exception):
+    """Backward-compatible base exception."""
 
 
-class NetworkError(MarketDataError):
+class MarketDataError(ParibuDataError):
     pass
 
 
-class APIError(MarketDataError):
+class NetworkError(ParibuDataError):
     pass
 
 
-class SchemaError(MarketDataError):
+class APIError(ParibuDataError):
     pass
 
 
-class MissingConfigurationError(MarketDataError):
+class SchemaError(ParibuDataError):
     pass
 
 
-class CandleUnavailableError(MarketDataError):
+class CandleUnavailableError(ParibuDataError):
     pass
 
 
-class OrderBookUnavailableError(MarketDataError):
+class OrderBookUnavailableError(ParibuDataError):
     pass
 
 
@@ -146,7 +144,7 @@ def to_decimal(
 
 
 # ============================================================
-# SYMBOLS
+# SYMBOL HELPERS
 # ============================================================
 
 def normalize_symbol(
@@ -172,15 +170,18 @@ def base_asset(
     )
 
     if "_" in normalized:
+
         return normalized.split(
             "_",
             1,
         )[0]
 
     if normalized.endswith("TRY"):
+
         return normalized[:-3]
 
     if normalized.endswith("TL"):
+
         return normalized[:-2]
 
     return normalized
@@ -200,7 +201,7 @@ def is_tl_pair(
     )
 
 
-def to_binance_spot_symbol(
+def binance_symbol_for(
     paribu_symbol: str,
 ) -> str:
 
@@ -210,8 +211,22 @@ def to_binance_spot_symbol(
     )
 
 
+def _first(
+    data: dict[str, Any],
+    names: tuple[str, ...],
+) -> Any:
+
+    for name in names:
+
+        if name in data:
+
+            return data[name]
+
+    return None
+
+
 # ============================================================
-# HTTP
+# HTTP SESSION
 # ============================================================
 
 def create_session() -> requests.Session:
@@ -223,7 +238,7 @@ def create_session() -> requests.Session:
         connect=3,
         read=3,
         status=3,
-        backoff_factor=0.5,
+        backoff_factor=0.4,
         status_forcelist=(
             408,
             425,
@@ -251,10 +266,16 @@ def create_session() -> requests.Session:
         adapter,
     )
 
+    session.mount(
+        "http://",
+        adapter,
+    )
+
     session.headers.update(
         {
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
+            "Connection": "keep-alive",
         }
     )
 
@@ -288,8 +309,7 @@ def get_json(
     if response.status_code != 200:
 
         raise APIError(
-            f"HTTP {response.status_code} "
-            f"from {url}: "
+            f"HTTP {response.status_code}: "
             f"{response.text[:500]}"
         )
 
@@ -305,7 +325,7 @@ def get_json(
 
 
 # ============================================================
-# TICKER
+# PARIBU TICKER
 # ============================================================
 
 @dataclass(frozen=True)
@@ -315,15 +335,15 @@ class Ticker:
 
     last: Decimal
 
-    bid: Optional[Decimal]
+    bid: Optional[Decimal] = None
 
-    ask: Optional[Decimal]
+    ask: Optional[Decimal] = None
 
-    volume: Optional[Decimal]
+    volume: Optional[Decimal] = None
 
-    quote_volume: Optional[Decimal]
+    quote_volume: Optional[Decimal] = None
 
-    change_percent: Optional[Decimal]
+    change_percent: Optional[Decimal] = None
 
     @property
     def spread_percent(
@@ -353,21 +373,7 @@ class Ticker:
         )
 
 
-def _first(
-    data: dict[str, Any],
-    names: tuple[str, ...],
-) -> Any:
-
-    for name in names:
-
-        if name in data:
-
-            return data[name]
-
-    return None
-
-
-def _extract_ticker_records(
+def extract_ticker_records(
     payload: Any,
 ) -> dict[
     str,
@@ -380,39 +386,41 @@ def _extract_ticker_records(
     ):
 
         raise SchemaError(
-            "Paribu ticker response "
-            "is not an object."
+            "Paribu ticker response is not an object."
         )
 
-    for key in (
+    for container_name in (
         "data",
         "result",
         "tickers",
         "markets",
     ):
 
-        container = payload.get(key)
+        container = payload.get(
+            container_name
+        )
 
         if isinstance(
             container,
             dict,
         ):
 
-            result = {
+            records = {
                 str(k): v
                 for k, v in container.items()
                 if isinstance(v, dict)
             }
 
-            if result:
-                return result
+            if records:
+
+                return records
 
         if isinstance(
             container,
             list,
         ):
 
-            result = {}
+            records = {}
 
             for item in container:
 
@@ -420,6 +428,7 @@ def _extract_ticker_records(
                     item,
                     dict,
                 ):
+
                     continue
 
                 symbol = _first(
@@ -429,19 +438,20 @@ def _extract_ticker_records(
                         "pair",
                         "market",
                         "market_symbol",
+                        "instrument",
                     ),
                 )
 
                 if symbol:
 
-                    result[
+                    records[
                         str(symbol)
                     ] = item
 
-            if result:
-                return result
+            if records:
 
-    # Legacy/direct form:
+                return records
+
     direct = {
         str(k): v
         for k, v in payload.items()
@@ -449,10 +459,11 @@ def _extract_ticker_records(
     }
 
     if direct:
+
         return direct
 
     raise SchemaError(
-        "No ticker records found."
+        "Could not find Paribu ticker records."
     )
 
 
@@ -463,25 +474,26 @@ def fetch_tickers() -> list[Ticker]:
     )
 
     records = (
-        _extract_ticker_records(
+        extract_ticker_records(
             payload
         )
     )
 
-    result: list[Ticker] = []
+    tickers = []
 
-    for raw_symbol, raw in records.items():
+    for raw_symbol, raw_data in records.items():
 
         symbol = normalize_symbol(
             raw_symbol
         )
 
         if not is_tl_pair(symbol):
+
             continue
 
         last = to_decimal(
             _first(
-                raw,
+                raw_data,
                 (
                     "last",
                     "lastPrice",
@@ -492,12 +504,16 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-        if last is None or last <= 0:
+        if (
+            last is None
+            or last <= 0
+        ):
+
             continue
 
         bid = to_decimal(
             _first(
-                raw,
+                raw_data,
                 (
                     "bid",
                     "bestBid",
@@ -509,7 +525,7 @@ def fetch_tickers() -> list[Ticker]:
 
         ask = to_decimal(
             _first(
-                raw,
+                raw_data,
                 (
                     "ask",
                     "bestAsk",
@@ -521,28 +537,29 @@ def fetch_tickers() -> list[Ticker]:
 
         volume = to_decimal(
             _first(
-                raw,
+                raw_data,
                 (
                     "volume",
                     "vol",
                     "baseVolume",
+                    "base_volume",
                 ),
             )
         )
 
         quote_volume = to_decimal(
             _first(
-                raw,
+                raw_data,
                 (
                     "quoteVolume",
                     "quote_volume",
-                    "turnover",
                     "volumeQuote",
+                    "turnover",
                 ),
             )
         )
 
-        # Fallback estimate only.
+        # Safe fallback if only base volume is supplied.
         if (
             quote_volume is None
             and volume is not None
@@ -555,7 +572,7 @@ def fetch_tickers() -> list[Ticker]:
 
         change_percent = to_decimal(
             _first(
-                raw,
+                raw_data,
                 (
                     "changePercent",
                     "change_percent",
@@ -567,7 +584,7 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-        result.append(
+        tickers.append(
             Ticker(
                 symbol=symbol,
                 last=last,
@@ -579,13 +596,13 @@ def fetch_tickers() -> list[Ticker]:
             )
         )
 
-    if not result:
+    if not tickers:
 
         raise SchemaError(
-            "No usable Paribu TL tickers."
+            "No usable Paribu TL markets found."
         )
 
-    result.sort(
+    tickers.sort(
         key=lambda x: (
             x.quote_volume
             if x.quote_volume is not None
@@ -594,7 +611,7 @@ def fetch_tickers() -> list[Ticker]:
         reverse=True,
     )
 
-    return result
+    return tickers
 
 
 def get_market_snapshot() -> dict[
@@ -609,14 +626,14 @@ def get_market_snapshot() -> dict[
 
 
 # ============================================================
-# BINANCE SYMBOL VALIDATION
+# BINANCE SYMBOL REGISTRY
 # ============================================================
 
 @lru_cache(maxsize=1)
 def get_binance_spot_symbols() -> frozenset[str]:
 
     payload = get_json(
-        BINANCE_INFO_URL
+        BINANCE_EXCHANGE_INFO_URL
     )
 
     symbols = payload.get(
@@ -640,6 +657,7 @@ def get_binance_spot_symbols() -> frozenset[str]:
             item,
             dict,
         ):
+
             continue
 
         symbol = item.get(
@@ -654,38 +672,49 @@ def get_binance_spot_symbols() -> frozenset[str]:
             "permissions"
         )
 
-        is_spot = (
+        if not symbol:
+
+            continue
+
+        if status != "TRADING":
+
+            continue
+
+        # Binance may expose permission sets differently.
+        # If permissions are absent, status=TRADING is still
+        # accepted for compatibility with the public API.
+        if (
             isinstance(
                 permissions,
                 list,
             )
-            and (
-                "SPOT"
-                in permissions
-            )
-        )
-
-        if (
-            symbol
-            and status == "TRADING"
-            and is_spot
+            and permissions
+            and "SPOT" not in permissions
         ):
 
-            valid.add(
-                str(symbol).upper()
-            )
+            continue
+
+        valid.add(
+            str(symbol).upper()
+        )
+
+    if not valid:
+
+        raise SchemaError(
+            "Binance returned no active symbols."
+        )
 
     return frozenset(
         valid
     )
 
 
-def is_binance_spot_symbol_available(
+def is_binance_symbol_available(
     paribu_symbol: str,
 ) -> bool:
 
     candidate = (
-        to_binance_spot_symbol(
+        binance_symbol_for(
             paribu_symbol
         )
     )
@@ -697,7 +726,7 @@ def is_binance_spot_symbol_available(
 
 
 # ============================================================
-# BYBIT SYMBOL VALIDATION
+# BYBIT SYMBOL REGISTRY
 # ============================================================
 
 @lru_cache(maxsize=1)
@@ -718,8 +747,8 @@ def get_bybit_spot_symbols() -> frozenset[str]:
         None,
     ):
 
-        raise SchemaError(
-            "Bybit instruments-info error: "
+        raise APIError(
+            f"Bybit instruments error: "
             f"{payload.get('retMsg')}"
         )
 
@@ -733,22 +762,13 @@ def get_bybit_spot_symbols() -> frozenset[str]:
     ):
 
         raise SchemaError(
-            "Invalid Bybit instruments response."
+            "Invalid Bybit instruments result."
         )
 
     items = result.get(
         "list",
         [],
     )
-
-    if not isinstance(
-        items,
-        list,
-    ):
-
-        raise SchemaError(
-            "Invalid Bybit spot symbol list."
-        )
 
     valid = set()
 
@@ -758,6 +778,7 @@ def get_bybit_spot_symbols() -> frozenset[str]:
             item,
             dict,
         ):
+
             continue
 
         symbol = item.get(
@@ -782,7 +803,7 @@ def get_bybit_spot_symbols() -> frozenset[str]:
     )
 
 
-def is_bybit_spot_symbol_available(
+def is_bybit_symbol_available(
     paribu_symbol: str,
 ) -> bool:
 
@@ -801,7 +822,7 @@ def is_bybit_spot_symbol_available(
 # CANDLE VALIDATION
 # ============================================================
 
-def _validate_candles(
+def validate_candles(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
 
@@ -814,18 +835,13 @@ def _validate_candles(
         "volume",
     )
 
-    missing = [
-        column
-        for column in required
-        if column not in df.columns
-    ]
+    for column in required:
 
-    if missing:
+        if column not in df.columns:
 
-        raise SchemaError(
-            "Missing candle columns: "
-            + ", ".join(missing)
-        )
+            raise SchemaError(
+                f"Missing candle column: {column}"
+            )
 
     for column in (
         "open",
@@ -840,8 +856,14 @@ def _validate_candles(
             errors="coerce",
         )
 
+    df["timestamp"] = pd.to_numeric(
+        df["timestamp"],
+        errors="coerce",
+    )
+
     df = df.dropna(
         subset=(
+            "timestamp",
             "open",
             "high",
             "low",
@@ -858,13 +880,19 @@ def _validate_candles(
         & (
             df["high"]
             >= df[
-                ["open", "close"]
+                [
+                    "open",
+                    "close",
+                ]
             ].max(axis=1)
         )
         & (
             df["low"]
             <= df[
-                ["open", "close"]
+                [
+                    "open",
+                    "close",
+                ]
             ].min(axis=1)
         )
     ]
@@ -923,31 +951,27 @@ def fetch_binance_candles(
         symbol
     )
 
-    binance_symbol = (
-        to_binance_spot_symbol(
+    if resolution not in BINANCE_INTERVALS:
+
+        raise ValueError(
+            f"Unsupported Binance interval: "
+            f"{resolution}"
+        )
+
+    provider_symbol = (
+        binance_symbol_for(
             normalized
         )
     )
 
-    if not is_binance_spot_symbol_available(
+    if not is_binance_symbol_available(
         normalized
     ):
 
         raise CandleUnavailableError(
             f"{normalized}: "
-            f"{binance_symbol} is not a "
-            f"currently tradable Binance Spot symbol."
-        )
-
-    interval = BINANCE_INTERVALS.get(
-        resolution
-    )
-
-    if interval is None:
-
-        raise ValueError(
-            f"Unsupported Binance interval: "
-            f"{resolution}"
+            f"{provider_symbol} is not available "
+            f"as active Binance Spot."
         )
 
     limit = max(
@@ -961,8 +985,10 @@ def fetch_binance_candles(
     payload = get_json(
         BINANCE_KLINES_URL,
         params={
-            "symbol": binance_symbol,
-            "interval": interval,
+            "symbol": provider_symbol,
+            "interval": BINANCE_INTERVALS[
+                resolution
+            ],
             "limit": limit,
         },
     )
@@ -973,8 +999,8 @@ def fetch_binance_candles(
     ):
 
         raise SchemaError(
-            f"Invalid Binance kline response "
-            f"for {binance_symbol}."
+            f"Invalid Binance klines response "
+            f"for {provider_symbol}."
         )
 
     rows = []
@@ -988,6 +1014,7 @@ def fetch_binance_candles(
             )
             or len(row) < 6
         ):
+
             continue
 
         o = to_decimal(row[1])
@@ -1002,13 +1029,12 @@ def fetch_binance_candles(
             l,
             c,
         ):
+
             continue
 
         rows.append(
             {
-                "timestamp": int(
-                    row[0]
-                ),
+                "timestamp": int(row[0]),
                 "open": float(o),
                 "high": float(h),
                 "low": float(l),
@@ -1021,15 +1047,17 @@ def fetch_binance_candles(
             }
         )
 
-    df = _validate_candles(
+    df = validate_candles(
         pd.DataFrame(rows)
     )
 
-    # Keep the current candle.
-    # indicator_engine.py must use -2.
+    # IMPORTANT:
+    # Keep the latest candle.
+    # indicator_engine.py must use i = -2
+    # to analyze the latest CLOSED candle.
     df.attrs["source"] = "Binance"
     df.attrs["provider_symbol"] = (
-        binance_symbol
+        provider_symbol
     )
     df.attrs["paribu_symbol"] = (
         normalized
@@ -1040,7 +1068,7 @@ def fetch_binance_candles(
 
 
 # ============================================================
-# BYBIT CANDLES FALLBACK
+# BYBIT CANDLES
 # ============================================================
 
 BYBIT_INTERVALS = {
@@ -1069,12 +1097,19 @@ def fetch_bybit_candles(
         symbol
     )
 
+    if resolution not in BYBIT_INTERVALS:
+
+        raise ValueError(
+            f"Unsupported Bybit interval: "
+            f"{resolution}"
+        )
+
     provider_symbol = (
         base_asset(normalized)
         + "USDT"
     )
 
-    if not is_bybit_spot_symbol_available(
+    if not is_bybit_symbol_available(
         normalized
     ):
 
@@ -1082,17 +1117,6 @@ def fetch_bybit_candles(
             f"{normalized}: "
             f"{provider_symbol} is not an active "
             f"Bybit Spot symbol."
-        )
-
-    interval = BYBIT_INTERVALS.get(
-        resolution
-    )
-
-    if interval is None:
-
-        raise ValueError(
-            f"Unsupported Bybit interval: "
-            f"{resolution}"
         )
 
     limit = max(
@@ -1108,7 +1132,9 @@ def fetch_bybit_candles(
         params={
             "category": "spot",
             "symbol": provider_symbol,
-            "interval": interval,
+            "interval": BYBIT_INTERVALS[
+                resolution
+            ],
             "limit": limit,
         },
     )
@@ -1120,7 +1146,7 @@ def fetch_bybit_candles(
         None,
     ):
 
-        raise CandleUnavailableError(
+        raise APIError(
             f"Bybit kline error: "
             f"{payload.get('retMsg')}"
         )
@@ -1164,6 +1190,7 @@ def fetch_bybit_candles(
             )
             or len(row) < 6
         ):
+
             continue
 
         ts = to_decimal(row[0])
@@ -1180,6 +1207,7 @@ def fetch_bybit_candles(
             l,
             c,
         ):
+
             continue
 
         rows.append(
@@ -1197,7 +1225,7 @@ def fetch_bybit_candles(
             }
         )
 
-    df = _validate_candles(
+    df = validate_candles(
         pd.DataFrame(rows)
     )
 
@@ -1214,7 +1242,7 @@ def fetch_bybit_candles(
 
 
 # ============================================================
-# PUBLIC CANDLE FUNCTION
+# UNIFIED CANDLE FUNCTION
 # ============================================================
 
 def fetch_candles(
@@ -1229,10 +1257,7 @@ def fetch_candles(
 
     errors = []
 
-    # --------------------------------------------------------
-    # Binance first
-    # --------------------------------------------------------
-
+    # Binance first.
     try:
 
         return fetch_binance_candles(
@@ -1248,16 +1273,13 @@ def fetch_candles(
         )
 
         LOGGER.warning(
-            "%s %s Binance candles failed: %s",
+            "%s %s Binance failed: %s",
             normalized,
             resolution,
             exc,
         )
 
-    # --------------------------------------------------------
-    # Bybit fallback
-    # --------------------------------------------------------
-
+    # Bybit fallback.
     try:
 
         return fetch_bybit_candles(
@@ -1273,7 +1295,7 @@ def fetch_candles(
         )
 
         LOGGER.warning(
-            "%s %s Bybit candles failed: %s",
+            "%s %s Bybit failed: %s",
             normalized,
             resolution,
             exc,
@@ -1287,7 +1309,7 @@ def fetch_candles(
 
 
 # ============================================================
-# PARIBU ORDER BOOK
+# OPTIONAL PARIBU ORDER BOOK
 # ============================================================
 
 def fetch_order_book(
@@ -1297,10 +1319,8 @@ def fetch_order_book(
 
     if not PARIBU_ORDERBOOK_URL:
 
-        raise MissingConfigurationError(
-            "PARIBU_ORDERBOOK_URL is not configured. "
-            "Verify the current Paribu API documentation "
-            "and set the exact endpoint as a GitHub Secret."
+        raise OrderBookUnavailableError(
+            "PARIBU_ORDERBOOK_URL is not configured."
         )
 
     normalized = normalize_symbol(
@@ -1327,18 +1347,17 @@ def fetch_order_book(
     ):
 
         raise SchemaError(
-            f"Invalid Paribu order book "
-            f"response for {normalized}."
+            f"Invalid order book response "
+            f"for {normalized}."
         )
 
-    # Accept direct or wrapped order-book structures.
-    candidates = [
+    candidates = (
         payload,
         payload.get("data"),
         payload.get("result"),
         payload.get("orderBook"),
         payload.get("orderbook"),
-    ]
+    )
 
     for candidate in candidates:
 
@@ -1346,6 +1365,7 @@ def fetch_order_book(
             candidate,
             dict,
         ):
+
             continue
 
         asks = candidate.get(
@@ -1367,476 +1387,75 @@ def fetch_order_book(
                 "bids": bids,
                 "timestamp": candidate.get(
                     "timestamp",
-                    candidate.get(
-                        "ts"
-                    ),
+                    candidate.get("ts"),
                 ),
+                "source": "Paribu",
             }
 
     raise SchemaError(
         f"{normalized}: "
-        "Paribu response did not contain "
-        "asks/bids."
-    )
-
-
-def best_bid_ask(
-    order_book: dict[str, Any],
-) -> tuple[
-    Decimal,
-    Decimal,
-]:
-
-    bids = order_book.get(
-        "bids",
-        []
-    )
-
-    asks = order_book.get(
-        "asks",
-        []
-    )
-
-    if not bids or not asks:
-
-        raise OrderBookUnavailableError(
-            "Order book is empty."
-        )
-
-    parsed_bids = []
-    parsed_asks = []
-
-    for row in bids:
-
-        if (
-            isinstance(row, (list, tuple))
-            and len(row) >= 2
-        ):
-
-            price = to_decimal(
-                row[0]
-            )
-
-            qty = to_decimal(
-                row[1]
-            )
-
-            if (
-                price is not None
-                and qty is not None
-                and price > 0
-                and qty > 0
-            ):
-
-                parsed_bids.append(
-                    (price, qty)
-                )
-
-    for row in asks:
-
-        if (
-            isinstance(row, (list, tuple))
-            and len(row) >= 2
-        ):
-
-            price = to_decimal(
-                row[0]
-            )
-
-            qty = to_decimal(
-                row[1]
-            )
-
-            if (
-                price is not None
-                and qty is not None
-                and price > 0
-                and qty > 0
-            ):
-
-                parsed_asks.append(
-                    (price, qty)
-                )
-
-    if (
-        not parsed_bids
-        or not parsed_asks
-    ):
-
-        raise OrderBookUnavailableError(
-            "No valid bid/ask levels."
-        )
-
-    best_bid = max(
-        parsed_bids,
-        key=lambda x: x[0],
-    )[0]
-
-    best_ask = min(
-        parsed_asks,
-        key=lambda x: x[0],
-    )[0]
-
-    if best_ask <= best_bid:
-
-        raise OrderBookUnavailableError(
-            "Invalid order book: "
-            "best ask <= best bid."
-        )
-
-    return (
-        best_bid,
-        best_ask,
-    )
-
-
-def order_book_spread_pct(
-    order_book: dict[str, Any],
-) -> Decimal:
-
-    best_bid, best_ask = (
-        best_bid_ask(
-            order_book
-        )
-    )
-
-    return (
-        (best_ask - best_bid)
-        / best_bid
-        * Decimal("100")
+        "asks/bids were not found."
     )
 
 
 # ============================================================
-# DEPTH / VWAP
+# DIAGNOSTICS
 # ============================================================
 
-def buy_vwap(
-    order_book: dict[str, Any],
-    trade_size_tl: Decimal,
-) -> tuple[
-    Decimal,
-    Decimal,
-]:
+def health_check() -> dict[str, Any]:
 
-    if trade_size_tl <= 0:
+    started = time.time()
 
-        raise ValueError(
-            "trade_size_tl must be > 0."
-        )
-
-    asks = []
-
-    for row in order_book.get(
-        "asks",
-        [],
-    ):
-
-        if (
-            not isinstance(row, (list, tuple))
-            or len(row) < 2
-        ):
-            continue
-
-        price = to_decimal(
-            row[0]
-        )
-
-        quantity = to_decimal(
-            row[1]
-        )
-
-        if (
-            price is not None
-            and quantity is not None
-            and price > 0
-            and quantity > 0
-        ):
-
-            asks.append(
-                (
-                    price,
-                    quantity,
-                )
-            )
-
-    asks.sort(
-        key=lambda x: x[0]
+    snapshot = (
+        get_market_snapshot()
     )
-
-    remaining = trade_size_tl
-    spent = Decimal("0")
-    quantity_bought = Decimal("0")
-
-    for price, available_qty in asks:
-
-        level_value = (
-            price
-            * available_qty
-        )
-
-        used_value = min(
-            remaining,
-            level_value,
-        )
-
-        used_qty = (
-            used_value / price
-        )
-
-        spent += used_value
-        quantity_bought += used_qty
-        remaining -= used_value
-
-        if remaining <= 0:
-            break
-
-    if remaining > 0:
-
-        raise OrderBookUnavailableError(
-            "Insufficient Paribu ask-side "
-            "liquidity for requested trade size."
-        )
-
-    if quantity_bought <= 0:
-
-        raise OrderBookUnavailableError(
-            "Could not calculate entry VWAP."
-        )
-
-    return (
-        spent / quantity_bought,
-        quantity_bought,
-    )
-
-
-def sell_vwap_to_target(
-    order_book: dict[str, Any],
-    target_price: Decimal,
-    quantity: Decimal,
-) -> Optional[Decimal]:
-
-    if (
-        target_price <= 0
-        or quantity <= 0
-    ):
-        return None
-
-    bids = []
-
-    for row in order_book.get(
-        "bids",
-        [],
-    ):
-
-        if (
-            not isinstance(row, (list, tuple))
-            or len(row) < 2
-        ):
-            continue
-
-        price = to_decimal(
-            row[0]
-        )
-
-        qty = to_decimal(
-            row[1]
-        )
-
-        if (
-            price is not None
-            and qty is not None
-            and price > 0
-            and qty > 0
-        ):
-
-            bids.append(
-                (
-                    price,
-                    qty,
-                )
-            )
-
-    bids.sort(
-        key=lambda x: x[0],
-        reverse=True,
-    )
-
-    remaining = quantity
-    proceeds = Decimal("0")
-    sold = Decimal("0")
-
-    for price, available_qty in bids:
-
-        if price < target_price:
-            continue
-
-        used_qty = min(
-            remaining,
-            available_qty,
-        )
-
-        proceeds += (
-            used_qty
-            * price
-        )
-
-        sold += used_qty
-        remaining -= used_qty
-
-        if remaining <= 0:
-            break
-
-    if sold <= 0:
-        return None
-
-    return (
-        proceeds / sold
-    )
-
-
-# ============================================================
-# COMPLETE EXECUTION SNAPSHOT
-# ============================================================
-
-def get_execution_snapshot(
-    symbol: str,
-    trade_size_tl: Decimal,
-    depth: int = DEFAULT_ORDERBOOK_DEPTH,
-) -> dict[str, Any]:
-
-    normalized = normalize_symbol(
-        symbol
-    )
-
-    snapshot = get_market_snapshot()
-
-    ticker = snapshot.get(
-        normalized
-    )
-
-    if ticker is None:
-
-        raise MarketDataError(
-            f"{normalized}: "
-            "not found in Paribu ticker."
-        )
-
-    order_book = fetch_order_book(
-        normalized,
-        depth,
-    )
-
-    best_bid, best_ask = (
-        best_bid_ask(
-            order_book
-        )
-    )
-
-    spread_pct = (
-        (best_ask - best_bid)
-        / best_bid
-        * Decimal("100")
-    )
-
-    entry_vwap, quantity = (
-        buy_vwap(
-            order_book,
-            trade_size_tl,
-        )
-    )
-
-    return {
-        "symbol": normalized,
-        "paribu_last": ticker.last,
-        "paribu_bid": best_bid,
-        "paribu_ask": best_ask,
-        "spread_pct": spread_pct,
-        "entry_vwap": entry_vwap,
-        "quantity": quantity,
-        "order_book": order_book,
-        "source": "Paribu",
-    }
-
-
-# ============================================================
-# HEALTH / DIAGNOSTICS
-# ============================================================
-
-def health_check(
-    sample_symbol: str = "BTC_TL",
-) -> dict[str, Any]:
 
     result = {
-        "timestamp": int(
-            time.time()
-        ),
-        "paribu_ticker": False,
-        "binance_symbol_registry": False,
-        "bybit_symbol_registry": False,
+        "paribu_ticker": True,
+        "markets": len(snapshot),
+        "binance_registry": False,
+        "bybit_registry": False,
         "orderbook_configured": bool(
             PARIBU_ORDERBOOK_URL
         ),
-        "markets": 0,
     }
 
-    snapshot = get_market_snapshot()
-
-    result["paribu_ticker"] = True
-    result["markets"] = len(
-        snapshot
-    )
-
     try:
+
         get_binance_spot_symbols()
+
         result[
-            "binance_symbol_registry"
+            "binance_registry"
         ] = True
+
     except Exception as exc:
+
         LOGGER.warning(
-            "Binance symbol registry failed: %s",
+            "Binance registry failed: %s",
             exc,
         )
 
     try:
+
         get_bybit_spot_symbols()
+
         result[
-            "bybit_symbol_registry"
+            "bybit_registry"
         ] = True
+
     except Exception as exc:
+
         LOGGER.warning(
-            "Bybit symbol registry failed: %s",
+            "Bybit registry failed: %s",
             exc,
         )
+
+    result["seconds"] = round(
+        time.time() - started,
+        2,
+    )
 
     return result
-
-
-def candle_health_check(
-    symbol: str = "BTC_TL",
-    resolution: str = "15m",
-) -> dict[str, Any]:
-
-    df = fetch_candles(
-        symbol,
-        resolution,
-        DEFAULT_CANDLE_LIMIT,
-    )
-
-    return {
-        "symbol": symbol,
-        "resolution": resolution,
-        "candles": len(df),
-        "source": df.attrs.get(
-            "source"
-        ),
-        "provider_symbol": df.attrs.get(
-            "provider_symbol"
-        ),
-        "last_timestamp": int(
-            df["timestamp"].iloc[-1]
-        ),
-    }
 
 
 if __name__ == "__main__":
@@ -1857,3 +1476,5 @@ if __name__ == "__main__":
             "HEALTH CHECK ERROR:",
             exc,
         )
+
+        raise SystemExit(1)
