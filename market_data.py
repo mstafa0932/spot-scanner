@@ -7,7 +7,8 @@ Paribu Spot market scanner data layer.
 Design:
 - Paribu remains the source of truth for the executable/current TL price,
   bid/ask and market liquidity.
-- Candles are fetched from KuCoin public market-data API to bypass GitHub Actions geo-blocks.
+- Candles are fetched primarily from Binance Data API (data-api.binance.vision)
+  to bypass geo-blocks, with KuCoin as a resilient fallback.
 - No trading is performed here.
 - This module does NOT impose trading filters. Filtering belongs to scanner.py.
 """
@@ -16,11 +17,14 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
 import time
+import logging
 
 import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -28,6 +32,7 @@ from urllib3.util.retry import Retry
 # ---------------------------------------------------------------------------
 
 PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
+BINANCE_DATA_BASE = "https://data-api.binance.vision"
 KUCOIN_BASE_URL = "https://api.kucoin.com"
 
 REQUEST_TIMEOUT = 10
@@ -253,7 +258,6 @@ def fetch_tickers() -> list[Ticker]:
         if last is None or last <= 0:
             continue
 
-        # تم التعديل هنا للتعرف على `highestBid` و `lowestAsk` الخاصة بـ Paribu
         bid = D(first_value(raw_data, ("bid", "bestBid", "best_bid", "highestBid", "highest_bid")))
         ask = D(first_value(raw_data, ("ask", "bestAsk", "best_ask", "lowestAsk", "lowest_ask")))
         
@@ -280,7 +284,6 @@ def fetch_tickers() -> list[Ticker]:
     if not tickers:
         raise ParibuSchemaError("No usable Paribu TL markets found.")
 
-    # ترتيب العملات حسب السيولة (الأعلى أولاً)
     tickers.sort(
         key=lambda ticker: (
             ticker.quote_volume
@@ -297,7 +300,7 @@ def get_market_snapshot() -> dict[str, Ticker]:
 
 
 # ---------------------------------------------------------------------------
-# Candle providers (KuCoin for GitHub Actions bypass)
+# Candle validation and normalization
 # ---------------------------------------------------------------------------
 
 KUCOIN_INTERVALS = {
@@ -352,6 +355,48 @@ def validate_candles(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
+# ---------------------------------------------------------------------------
+# Candle Providers (Binance Primary + KuCoin Fallback)
+# ---------------------------------------------------------------------------
+
+def _fetch_binance_candles(symbol: str, resolution: str, limit: int) -> pd.DataFrame:
+    base_asset = base_asset_from_paribu(symbol)
+    if not base_asset:
+        raise CandleUnavailableError(f"Could not determine base asset from {symbol}.")
+
+    binance_symbol = f"{base_asset}USDT"
+    interval = normalize_resolution(resolution)
+
+    payload = get_json(
+        f"{BINANCE_DATA_BASE}/api/v3/klines",
+        params={
+            "symbol": binance_symbol,
+            "interval": interval,
+            "limit": validate_limit(limit),
+        },
+    )
+
+    if not isinstance(payload, list):
+        raise CandleUnavailableError(f"Binance returned unexpected data for {symbol}.")
+
+    rows = []
+    for item in payload:
+        rows.append({
+            "timestamp": int(item[0]),
+            "open": float(item[1]),
+            "high": float(item[2]),
+            "low": float(item[3]),
+            "close": float(item[4]),
+            "volume": float(item[5]),
+        })
+
+    df = validate_candles(pd.DataFrame(rows))
+    df.attrs["source"] = "binance"
+    df.attrs["provider_symbol"] = binance_symbol
+    df.attrs["paribu_symbol"] = normalize_symbol(symbol)
+    return df
+
 def _fetch_kucoin_candles(symbol: str, resolution: str, limit: int) -> pd.DataFrame:
     base_asset = base_asset_from_paribu(symbol)
     if not base_asset:
@@ -376,7 +421,6 @@ def _fetch_kucoin_candles(symbol: str, resolution: str, limit: int) -> pd.DataFr
         raise CandleUnavailableError(f"KuCoin returned no usable candles for {symbol}.")
 
     rows = []
-    # KuCoin returns data reversed (newest first), we slice and reverse it
     for row in reversed(data[:validate_limit(limit)]):
         rows.append({
             "timestamp": int(row[0]) * 1000,
@@ -398,20 +442,27 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
     if not normalized_symbol:
         raise ParibuConfigurationError("Empty symbol.")
 
+    # 1) Primary: Binance Data API
+    try:
+        return _fetch_binance_candles(normalized_symbol, resolution, limit)
+    except Exception as exc:
+        logger.warning(f"Binance fetch failed for {normalized_symbol}: {exc}", exc_info=True)
+
+    # 2) Fallback: KuCoin (with small delay to avoid rate limit)
+    time.sleep(0.2)
     try:
         return _fetch_kucoin_candles(normalized_symbol, resolution, limit)
     except Exception as exc:
-        raise CandleUnavailableError(f"Failed to fetch from provider for {normalized_symbol}: {exc}")
+        logger.error(f"KuCoin fetch failed for {normalized_symbol}: {exc}", exc_info=True)
+
+    raise CandleUnavailableError(f"All providers failed for {normalized_symbol}.")
 
 
 # ---------------------------------------------------------------------------
-# Order Book (Required by scanner.py)
+# Order Book
 # ---------------------------------------------------------------------------
 
 def fetch_order_book(symbol: str, limit: int = 20) -> dict[str, list[Any]]:
-    """
-    Fetches order book data (bids/asks).
-    """
     base_asset = base_asset_from_paribu(symbol)
     if not base_asset:
         return {"bids": [], "asks": []}
@@ -441,7 +492,7 @@ def health_check() -> dict[str, Any]:
         "markets": len(snapshot),
         "seconds": round(elapsed, 2),
         "paribu_ticker": True,
-        "candle_providers": ["kucoin"],
+        "candle_providers": ["binance", "kucoin"],
         "min_valid_candles": MIN_VALID_CANDLES,
     }
 
