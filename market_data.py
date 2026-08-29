@@ -459,25 +459,74 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
 
 
 # ---------------------------------------------------------------------------
-# Order Book
+# Order Book & Liquidity (Paribu)
 # ---------------------------------------------------------------------------
 
-def fetch_order_book(symbol: str, limit: int = 20) -> dict[str, list[Any]]:
-    base_asset = base_asset_from_paribu(symbol)
-    if not base_asset:
-        return {"bids": [], "asks": []}
-        
-    kucoin_symbol = f"{base_asset}-USDT"
-    url = f"{KUCOIN_BASE_URL}/api/v1/market/orderbook/level2_20"
+def get_paribu_orderbook(symbol: str) -> Optional[dict[str, Any]]:
+    """
+    Fetch the actual Paribu order book for the given symbol.
+    The endpoint expects the market in the format 'btc-tl'.
+    """
+    base = base_asset_from_paribu(symbol).lower()
+    formatted_symbol = f"{base}-tl"
+    url = "https://v4.paribu.com/market/board"
     
     try:
-        payload = get_json(url, params={"symbol": kucoin_symbol})
-        if payload.get("code") == "200000":
-            return payload.get("data", {"bids": [], "asks": []})
-    except Exception:
-        pass
+        payload = get_json(url, params={"market": formatted_symbol})
+        if payload and payload.get("success") and "payload" in payload:
+            return payload["payload"]
+    except Exception as exc:
+        logger.debug(f"Paribu orderbook fetch failed for {symbol}: {exc}")
+    
+    return None
+
+def get_effective_spread(
+    symbol: str, 
+    min_volume_tl: Decimal = Decimal("17000")
+) -> tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
+    """
+    Calculates the effective spread, ask, and bid by traversing the Paribu order book 
+    until the required min_volume_tl is satisfied.
+    Returns: (effective_spread_pct, effective_ask, effective_bid)
+    """
+    orderbook = get_paribu_orderbook(symbol)
+    if not orderbook or "asks" not in orderbook or "bids" not in orderbook:
+        return None, None, None
+
+    asks = orderbook["asks"]
+    bids = orderbook["bids"]
+
+    def calculate_effective_price(order_list: list[Any], target_volume: Decimal) -> Decimal:
+        cumulative_volume_tl = Decimal("0")
+        effective_price = Decimal("0")
         
-    return {"bids": [], "asks": []}
+        for item in order_list:
+            if len(item) < 2:
+                continue
+            price = D(item[0])
+            amount = D(item[1])
+            
+            if price is None or amount is None:
+                continue
+                
+            level_value_tl = price * amount
+            cumulative_volume_tl += level_value_tl
+            
+            if cumulative_volume_tl >= target_volume:
+                effective_price = price
+                break
+                
+        return effective_price
+
+    effective_ask = calculate_effective_price(asks, min_volume_tl)
+    effective_bid = calculate_effective_price(bids, min_volume_tl)
+
+    if effective_ask <= Decimal("0") or effective_bid <= Decimal("0"):
+        return None, None, None
+
+    effective_spread_pct = ((effective_ask - effective_bid) / effective_bid) * Decimal("100")
+
+    return effective_spread_pct, effective_ask, effective_bid
 
 
 # ---------------------------------------------------------------------------
