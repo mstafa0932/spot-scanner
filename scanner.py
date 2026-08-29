@@ -55,6 +55,10 @@ MAX_ALLOWED_SPREAD_PCT = Decimal(
     os.getenv("MAX_ALLOWED_SPREAD_PCT", "0.80")
 )
 
+MAX_EFFECTIVE_SPREAD_PCT = Decimal(
+    os.getenv("MAX_EFFECTIVE_SPREAD_PCT", "1.50")
+)
+
 MIN_REQUIRED_TP1_PCT = Decimal(
     os.getenv("MIN_REQUIRED_TP1_PCT", "1.80")
 )
@@ -69,7 +73,7 @@ MIN_REQUIRED_RR = Decimal(
 
 # Minimum TL volume required in the order book for depth validation
 MIN_ORDERBOOK_DEPTH_TL = Decimal(
-    os.getenv("MIN_ORDERBOOK_DEPTH_TL", "17000")
+    os.getenv("MIN_ORDERBOOK_DEPTH_TL", "7000")
 )
 
 # Default Paribu taker assumption. Change via environment variable
@@ -763,7 +767,7 @@ def run_scanner() -> None:
             ticker.symbol, min_volume_tl=MIN_ORDERBOOK_DEPTH_TL
         )
 
-        if effective_spread is None or effective_spread > MAX_ALLOWED_SPREAD_PCT:
+        if effective_spread is None or effective_spread > MAX_EFFECTIVE_SPREAD_PCT:
             stats.depth_fail += 1
             stats.add_reason("عمق دفتر الأوامر غير كافٍ أو السبريد الفعلي مرتفع")
             continue
