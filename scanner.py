@@ -51,8 +51,9 @@ MIN_QUOTE_VOLUME_TL = Decimal(
     os.getenv("MIN_QUOTE_VOLUME_TL", "500000")
 )
 
+# ✨ تم خفض الحد الأقصى للسبريد إلى 0.30% لضمان تنفيذ أفضل
 MAX_ALLOWED_SPREAD_PCT = Decimal(
-    os.getenv("MAX_ALLOWED_SPREAD_PCT", "0.80")
+    os.getenv("MAX_ALLOWED_SPREAD_PCT", "0.30")
 )
 
 MAX_EFFECTIVE_SPREAD_PCT = Decimal(
