@@ -98,6 +98,11 @@ REQUEST_TIMEOUT = int(
     os.getenv("TELEGRAM_TIMEOUT", "15")
 )
 
+# ✨ NEW: Minimum volume ratio (current volume vs average volume)
+MIN_VOLUME_RATIO = Decimal(
+    os.getenv("MIN_VOLUME_RATIO", "0.5")
+)
+
 LOGGER = logging.getLogger("spot_scanner")
 
 if not LOGGER.handlers:
@@ -147,6 +152,7 @@ class ScanStats:
     rr_fail: int = 0
     other_execution_fail: int = 0
     candidates_before_ranking: int = 0
+    volume_ratio_fail: int = 0          # ✨ NEW
     reject_reasons: dict[str, int] = field(default_factory=dict)
 
     def add_reason(self, reason: str) -> None:
@@ -697,6 +703,7 @@ def format_no_signal_report(stats: ScanStats) -> str:
         f"⭐ فشل Score: {stats.score_fail}\n"
         f"🎯 فشل TP1: {stats.tp1_fail}\n"
         f"📐 فشل R:R: {stats.rr_fail}\n"
+        f"📉 فشل حجم التداول: {stats.volume_ratio_fail}\n"    # ✨ NEW
         f"⚠️ رفض تنفيذ آخر: {stats.other_execution_fail}\n\n"
         "🔎 <b>أكثر أسباب الرفض:</b>\n"
         f"{reasons}\n\n"
@@ -826,6 +833,13 @@ def run_scanner() -> None:
 
         stats.indicator_success += 1
 
+        # ✨ NEW: Volume Ratio filter
+        volume_ratio = _to_decimal(indicators.get("volume_ratio"), Decimal("0")) or Decimal("0")
+        if volume_ratio < MIN_VOLUME_RATIO:
+            stats.volume_ratio_fail += 1
+            stats.add_reason(f"Volume ratio {volume_ratio:.2f}x < {MIN_VOLUME_RATIO}")
+            continue
+
         rsi = _to_decimal(indicators.get("rsi"), Decimal("50")) or Decimal("50")
 
         if rsi >= Decimal("75"):
@@ -891,8 +905,6 @@ def run_scanner() -> None:
             if reference_close > 0 and atr > 0
             else Decimal("0")
         )
-
-        volume_ratio = _to_decimal(indicators.get("volume_ratio"), Decimal("0")) or Decimal("0")
 
         setup = "BREAKOUT" if breakout else "PULLBACK" if pullback else "MOMENTUM"
         data_source = str(indicators.get("data_source", df.attrs.get("source", "unknown"))).upper()
