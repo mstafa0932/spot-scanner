@@ -42,8 +42,6 @@ MAX_SIGNALS_PER_RUN = int(
     os.getenv("MAX_SIGNALS_PER_RUN", "10")
 )
 
-# Lowered from 70 to 60 to avoid over-filtering while we validate
-# the live execution layer. This is NOT a promise of profitability.
 MIN_SCORE = int(
     os.getenv("MIN_SCORE", "60")
 )
@@ -281,8 +279,6 @@ def _to_decimal(value: Any, default: Optional[Decimal] = None) -> Optional[Decim
 
 
 def indicator_to_dict(result: Any, df: Any) -> Optional[dict[str, Any]]:
-    """Normalize the supported indicator_engine return styles."""
-
     if result is None:
         return None
 
@@ -299,7 +295,6 @@ def indicator_to_dict(result: Any, df: Any) -> Optional[dict[str, Any]]:
         data.setdefault("is_valid_setup", True)
         return data
 
-    # Dataclass/object-style result used by the current indicator engine.
     if hasattr(result, "current_close"):
         data = {
             "close": getattr(result, "current_close", None),
@@ -324,7 +319,6 @@ def indicator_to_dict(result: Any, df: Any) -> Optional[dict[str, Any]]:
 
         return data
 
-    # DataFrame-style fallback.
     try:
         import pandas as pd
 
@@ -419,7 +413,6 @@ def score_candidate(
     bullish_candle = bool(indicators.get("bullish_candle", False))
     macd_bullish = bool(indicators.get("macd_bullish", False))
 
-    # Trend: 25
     if is_uptrend:
         score += 15
         reasons.append("اتجاه صاعد")
@@ -427,7 +420,6 @@ def score_candidate(
         score += 10
         reasons.append("فوق EMA21")
 
-    # RSI: 15
     if Decimal("52") <= rsi <= Decimal("66"):
         score += 15
         reasons.append("RSI صحي")
@@ -436,12 +428,10 @@ def score_candidate(
     elif Decimal("66") < rsi <= Decimal("70"):
         score += 8
 
-    # MACD: 10
     if macd_bullish:
         score += 10
         reasons.append("MACD داعم")
 
-    # Volume: 15
     if volume_ratio >= Decimal("2"):
         score += 15
         reasons.append("حجم قوي")
@@ -453,7 +443,6 @@ def score_candidate(
     elif volume_ratio >= Decimal("1"):
         score += 5
 
-    # Setup: 15
     if pullback:
         score += 10
         reasons.append("Pullback")
@@ -464,7 +453,6 @@ def score_candidate(
         score += 3
         reasons.append("شمعة إيجابية")
 
-    # Local execution quality: 20
     spread = ticker.spread_percent
     if spread is not None:
         if spread <= Decimal("0.30"):
@@ -498,72 +486,24 @@ def score_candidate(
 
 
 # ============================================================
-# TRADE LEVELS
+# EXECUTION (DIRECT PARIBU LEVELS)
 # ============================================================
 
-def build_levels(
-    indicators: dict[str, Any],
-    ticker: Ticker,
-) -> tuple[Decimal, Decimal, Decimal, Decimal]:
-
-    entry = ticker.ask if ticker.ask and ticker.ask > 0 else ticker.last
-    close = _to_decimal(indicators.get("close"))
-    atr = _to_decimal(indicators.get("atr"))
-
-    if entry <= 0:
-        raise ValueError("Invalid Paribu Ask/Last price.")
-    if close is None or close <= 0:
-        raise ValueError("Invalid candle close.")
-    if atr is None or atr <= 0:
-        raise ValueError("Invalid ATR.")
-
-    atr_pct = atr / close
-
-    # Adaptive risk, bounded to sensible local percentages.
-    risk_pct = max(
-        Decimal("0.012"),
-        min(
-            atr_pct * Decimal("1.35"),
-            Decimal("0.06"),
-        ),
-    )
-
-    risk = entry * risk_pct
-    stop = entry - risk
-
-    if stop <= 0:
-        raise ValueError("Calculated stop loss <= 0.")
-
-    tp1 = entry + (risk * Decimal("1.60"))
-    tp2 = entry + (risk * Decimal("2.40"))
-
-    return entry, stop, tp1, tp2
-
-
-# ============================================================
-# LOCAL EXECUTION CHECK
-# ============================================================
-
-def evaluate_execution(
+def evaluate_trade(
     ticker: Ticker,
     indicators: dict[str, Any],
-    stop_loss: Decimal,
-    tp1: Decimal,
-    tp2: Decimal,
 ) -> ExecutionResult:
-
-    if ticker.bid is None or ticker.ask is None:
+    """
+    Evaluates the execution purely on Paribu prices.
+    Takes ATR percentage from the candle source (e.g. Binance)
+    and applies it to Paribu Ask to build precise local levels.
+    """
+    
+    if ticker.bid is None or ticker.ask is None or ticker.ask <= 0:
         return ExecutionResult(
-            False,
-            "بيانات Paribu Bid/Ask غير متوفرة",
-            ticker.ask or ticker.last,
-            stop_loss,
-            tp1,
-            tp2,
-            Decimal("0"),
-            Decimal("99"),
-            Decimal("0"),
-            Decimal("0"),
+            False, "بيانات Paribu Bid/Ask غير متوفرة",
+            ticker.last, Decimal("0"), Decimal("0"), Decimal("0"),
+            Decimal("0"), Decimal("99"), Decimal("0"), Decimal("0")
         )
 
     entry = ticker.ask
@@ -571,156 +511,87 @@ def evaluate_execution(
 
     if spread is None:
         return ExecutionResult(
-            False,
-            "السبريد المحلي غير صالح",
-            entry,
-            stop_loss,
-            tp1,
-            tp2,
-            Decimal("0"),
-            Decimal("99"),
-            Decimal("0"),
-            Decimal("0"),
+            False, "السبريد المحلي غير متوفر", entry,
+            Decimal("0"), Decimal("0"), Decimal("0"),
+            Decimal("0"), Decimal("99"), Decimal("0"), Decimal("0")
         )
 
-    # Hard local spread filter.
     if spread > MAX_ALLOWED_SPREAD_PCT:
         return ExecutionResult(
-            False,
-            f"Spread {spread:.2f}% > {MAX_ALLOWED_SPREAD_PCT}%",
-            entry,
-            stop_loss,
-            tp1,
-            tp2,
-            Decimal("0"),
-            spread,
-            Decimal("0"),
-            Decimal("0"),
+            False, f"Spread {spread:.2f}% > {MAX_ALLOWED_SPREAD_PCT}%", entry,
+            Decimal("0"), Decimal("0"), Decimal("0"),
+            Decimal("0"), spread, Decimal("0"), Decimal("0")
         )
 
-    reference_close = _to_decimal(indicators.get("close"))
-    if reference_close is None or reference_close <= 0:
+    close = _to_decimal(indicators.get("close"))
+    atr = _to_decimal(indicators.get("atr"))
+
+    if close is None or close <= 0 or atr is None or atr <= 0:
         return ExecutionResult(
-            False,
-            "سعر الشمعة المرجعية غير صالح",
-            entry,
-            stop_loss,
-            tp1,
-            tp2,
-            Decimal("0"),
-            spread,
-            Decimal("0"),
-            Decimal("0"),
+            False, "بيانات الشموع المرجعية غير صالحة", entry,
+            Decimal("0"), Decimal("0"), Decimal("0"),
+            Decimal("0"), spread, Decimal("0"), Decimal("0")
         )
 
-    stop_distance = abs(reference_close - stop_loss)
-    tp1_distance = abs(tp1 - reference_close)
-    tp2_distance = abs(tp2 - reference_close)
+    # Calculate ATR as a percentage from the global source
+    atr_pct = atr / close
 
-    stop_pct = stop_distance / reference_close
-    tp1_ref_pct = tp1_distance / reference_close
-    tp2_ref_pct = tp2_distance / reference_close
+    # Calculate local risk based on ATR% (min 1.2%, max 6.0%)
+    risk_pct = max(
+        Decimal("0.012"),
+        min(atr_pct * Decimal("1.35"), Decimal("0.06"))
+    )
 
-    local_stop = entry - (entry * stop_pct)
-    local_tp1 = entry + (entry * tp1_ref_pct)
-    local_tp2 = entry + (entry * tp2_ref_pct)
+    risk_amount = entry * risk_pct
+    stop_loss = entry - risk_amount
 
-    if local_stop <= 0 or local_tp1 <= entry or local_tp2 <= entry:
+    if stop_loss <= 0:
         return ExecutionResult(
-            False,
-            "المستويات المحلية غير منطقية",
-            entry,
-            local_stop,
-            local_tp1,
-            local_tp2,
-            Decimal("0"),
-            spread,
-            Decimal("0"),
-            Decimal("0"),
+            False, "حساب وقف الخسارة غير صالح", entry,
+            Decimal("0"), Decimal("0"), Decimal("0"),
+            Decimal("0"), spread, Decimal("0"), Decimal("0")
         )
 
-    tp1_pct = (local_tp1 - entry) / entry * Decimal("100")
+    tp1 = entry + (risk_amount * Decimal("1.60"))
+    tp2 = entry + (risk_amount * Decimal("2.40"))
+
+    tp1_pct = (tp1 - entry) / entry * Decimal("100")
 
     if tp1_pct < MIN_REQUIRED_TP1_PCT:
         return ExecutionResult(
-            False,
-            f"TP1 فقط {tp1_pct:.2f}% < {MIN_REQUIRED_TP1_PCT}%",
-            entry,
-            local_stop,
-            local_tp1,
-            local_tp2,
-            Decimal("0"),
-            spread,
-            tp1_pct,
-            Decimal("0"),
+            False, f"TP1 فقط {tp1_pct:.2f}% < {MIN_REQUIRED_TP1_PCT}%", entry,
+            stop_loss, tp1, tp2, Decimal("0"), spread, tp1_pct, Decimal("0")
         )
 
-    # Conservative round-trip cost: two taker fees + half of the local spread.
-    estimated_round_trip_cost = (
-        TAKER_FEE_PCT * Decimal("2")
-        + spread / Decimal("2")
-    )
-
+    # Cost = 2 * Taker Fee + half of the spread (assuming limit on sell if possible, or market hit)
+    estimated_round_trip_cost = (TAKER_FEE_PCT * Decimal("2")) + (spread / Decimal("2"))
     net_tp1_pct = tp1_pct - estimated_round_trip_cost
 
     if net_tp1_pct < MIN_NET_TP1_PCT:
         return ExecutionResult(
-            False,
-            f"صافي TP1 {net_tp1_pct:.2f}% منخفض بعد الرسوم",
-            entry,
-            local_stop,
-            local_tp1,
-            local_tp2,
-            Decimal("0"),
-            spread,
-            tp1_pct,
-            net_tp1_pct,
+            False, f"صافي TP1 {net_tp1_pct:.2f}% منخفض", entry,
+            stop_loss, tp1, tp2, Decimal("0"), spread, tp1_pct, net_tp1_pct
         )
 
-    risk = entry - local_stop
-    reward = local_tp1 - entry
+    risk_dist = entry - stop_loss
+    reward_dist = tp1 - entry
 
-    if risk <= 0 or reward <= 0:
+    if risk_dist <= 0 or reward_dist <= 0:
         return ExecutionResult(
-            False,
-            "مسافة المخاطرة/المكافأة غير صالحة",
-            entry,
-            local_stop,
-            local_tp1,
-            local_tp2,
-            Decimal("0"),
-            spread,
-            tp1_pct,
-            net_tp1_pct,
+            False, "مسافة المخاطرة/المكافأة غير صالحة", entry,
+            stop_loss, tp1, tp2, Decimal("0"), spread, tp1_pct, net_tp1_pct
         )
 
-    rr = reward / risk
+    rr = reward_dist / risk_dist
 
     if rr < MIN_REQUIRED_RR:
         return ExecutionResult(
-            False,
-            f"R:R {rr:.2f} < {MIN_REQUIRED_RR}",
-            entry,
-            local_stop,
-            local_tp1,
-            local_tp2,
-            rr,
-            spread,
-            tp1_pct,
-            net_tp1_pct,
+            False, f"R:R {rr:.2f} < {MIN_REQUIRED_RR}", entry,
+            stop_loss, tp1, tp2, rr, spread, tp1_pct, net_tp1_pct
         )
 
     return ExecutionResult(
-        True,
-        None,
-        entry,
-        local_stop,
-        local_tp1,
-        local_tp2,
-        rr,
-        spread,
-        tp1_pct,
-        net_tp1_pct,
+        True, None, entry, stop_loss, tp1, tp2, rr, spread, tp1_pct, net_tp1_pct
     )
 
 
@@ -762,17 +633,16 @@ def format_signal_message(
         f"📊 <b>Score:</b> {opportunity.score}/100\n"
         f"🧩 <b>Setup:</b> {opportunity.setup}\n"
         f"📡 <b>مصدر الشموع:</b> {html.escape(opportunity.data_source)}\n\n"
-        f"💵 <b>Paribu Ask:</b> <code>{fmt_price(opportunity.paribu_ask)}</code>\n"
-        f"💵 <b>الدخول:</b> <code>{fmt_price(opportunity.entry_price)}</code>\n"
+        f"💵 <b>سعر الشراء (Ask):</b> <code>{fmt_price(opportunity.entry_price)}</code>\n"
         f"🛑 <b>وقف الخسارة:</b> <code>{fmt_price(opportunity.stop_loss)}</code>\n"
         f"🎯 <b>TP1:</b> <code>{fmt_price(opportunity.tp1)}</code> (+{opportunity.tp1_pct}%)\n"
         f"🚀 <b>TP2:</b> <code>{fmt_price(opportunity.tp2)}</code>\n"
         f"📐 <b>R:R:</b> 1:{opportunity.rr}\n"
-        f"💰 <b>صافي TP1 بعد التكلفة التقديرية:</b> +{opportunity.net_tp1_pct}%\n"
-        f"📏 <b>Paribu Spread:</b> {opportunity.spread_pct}%\n\n"
+        f"💰 <b>صافي TP1 (بعد الرسوم):</b> +{opportunity.net_tp1_pct}%\n"
+        f"📏 <b>السبريد:</b> {opportunity.spread_pct}%\n\n"
         f"📈 <b>RSI:</b> {opportunity.rsi}\n"
         f"📊 <b>ATR:</b> {opportunity.atr_pct}%\n"
-        f"💧 <b>Volume:</b> {opportunity.volume_ratio}x\n"
+        f"💧 <b>حجم التداول:</b> {opportunity.volume_ratio}x\n"
         f"🧠 <b>السبب:</b> {html.escape(opportunity.reason)}\n\n"
         "⚠️ <b>Spot فقط — التنفيذ يدوي، ولا يوجد تنفيذ تلقائي.</b>"
     )
@@ -855,9 +725,6 @@ def run_scanner() -> None:
     )
 
     for ticker in tickers:
-        # ----------------------------------------------------
-        # Local Paribu liquidity
-        # ----------------------------------------------------
         if (
             ticker.quote_volume is None
             or ticker.quote_volume < MIN_QUOTE_VOLUME_TL
@@ -867,9 +734,6 @@ def run_scanner() -> None:
 
         stats.liquidity_pass += 1
 
-        # ----------------------------------------------------
-        # Local Paribu spread
-        # ----------------------------------------------------
         if ticker.spread_percent is None:
             stats.spread_fail += 1
             stats.add_reason("Bid/Ask غير متوفر")
@@ -889,9 +753,6 @@ def run_scanner() -> None:
 
         stats.technical_attempted += 1
 
-        # ----------------------------------------------------
-        # Candles
-        # ----------------------------------------------------
         try:
             df = fetch_candles(
                 ticker.symbol,
@@ -902,16 +763,9 @@ def run_scanner() -> None:
         except Exception as exc:
             stats.candle_fail += 1
             stats.add_reason("فشل جلب الشموع")
-            LOGGER.debug(
-                "Candle failure %s: %s",
-                ticker.symbol,
-                exc,
-            )
+            LOGGER.debug("Candle failure %s: %s", ticker.symbol, exc)
             continue
 
-        # ----------------------------------------------------
-        # Indicators
-        # ----------------------------------------------------
         try:
             raw_indicators = calculate_indicators(df)
             indicators = indicator_to_dict(
@@ -921,11 +775,7 @@ def run_scanner() -> None:
         except Exception as exc:
             stats.indicator_fail += 1
             stats.add_reason("فشل حساب المؤشرات")
-            LOGGER.debug(
-                "Indicator error %s: %s",
-                ticker.symbol,
-                exc,
-            )
+            LOGGER.debug("Indicator error %s: %s", ticker.symbol, exc)
             continue
 
         if indicators is None:
@@ -940,37 +790,17 @@ def run_scanner() -> None:
 
         stats.indicator_success += 1
 
-        # ----------------------------------------------------
-        # RSI hard safety filter
-        # ----------------------------------------------------
-        rsi = _to_decimal(
-            indicators.get("rsi"),
-            Decimal("50"),
-        ) or Decimal("50")
+        rsi = _to_decimal(indicators.get("rsi"), Decimal("50")) or Decimal("50")
 
         if rsi >= Decimal("75"):
             stats.add_reason("RSI مرتفع")
             continue
 
-        # ----------------------------------------------------
-        # Prevent clearly bearish setups, but do not force an
-        # overly narrow single setup.
-        # ----------------------------------------------------
-        is_uptrend = bool(
-            indicators.get("is_uptrend", False)
-        )
-        above_ema21 = bool(
-            indicators.get("is_above_ema21", False)
-        )
-        pullback = bool(
-            indicators.get("pullback", False)
-        )
-        breakout = bool(
-            indicators.get("breakout", False)
-        )
-        bullish_candle = bool(
-            indicators.get("bullish_candle", False)
-        )
+        is_uptrend = bool(indicators.get("is_uptrend", False))
+        above_ema21 = bool(indicators.get("is_above_ema21", False))
+        pullback = bool(indicators.get("pullback", False))
+        breakout = bool(indicators.get("breakout", False))
+        bullish_candle = bool(indicators.get("bullish_candle", False))
 
         if not (
             (is_uptrend and above_ema21)
@@ -981,51 +811,18 @@ def run_scanner() -> None:
             stats.add_reason("Setup غير واضح")
             continue
 
-        # ----------------------------------------------------
-        # Score
-        # ----------------------------------------------------
-        score, strength, reasons = score_candidate(
-            indicators,
-            ticker,
-        )
+        score, strength, reasons = score_candidate(indicators, ticker)
 
         if score < MIN_SCORE:
             stats.score_fail += 1
-            stats.add_reason(
-                f"Score {score} < {MIN_SCORE}"
-            )
+            stats.add_reason(f"Score {score} < {MIN_SCORE}")
             continue
 
-        # ----------------------------------------------------
-        # Local Paribu trade levels
-        # ----------------------------------------------------
-        try:
-            entry, stop, tp1, tp2 = build_levels(
-                indicators,
-                ticker,
-            )
-        except Exception as exc:
-            stats.rr_fail += 1
-            stats.add_reason("مستويات الصفقة غير صالحة")
-            LOGGER.debug(
-                "Level error %s: %s",
-                ticker.symbol,
-                exc,
-            )
-            continue
-
-        # ----------------------------------------------------
-        # Execution check uses Paribu Ask/Bid ONLY.
-        # No KuCoin order book is involved.
-        # ----------------------------------------------------
         stats.execution_attempted += 1
 
-        execution = evaluate_execution(
+        execution = evaluate_trade(
             ticker=ticker,
             indicators=indicators,
-            stop_loss=stop,
-            tp1=tp1,
-            tp2=tp2,
         )
 
         if not execution.is_executable:
@@ -1040,34 +837,18 @@ def run_scanner() -> None:
             else:
                 stats.other_execution_fail += 1
 
-            LOGGER.info(
-                "Rejected %s: %s",
-                ticker.symbol,
-                reason,
-            )
+            LOGGER.info("Rejected %s: %s", ticker.symbol, reason)
             continue
 
         stats.execution_pass += 1
         stats.candidates_before_ranking += 1
 
-        if not cooldown_allowed(
-            ticker.symbol,
-            state,
-        ):
+        if not cooldown_allowed(ticker.symbol, state):
             stats.add_reason("Cooldown")
             continue
 
-        # ----------------------------------------------------
-        # Final metrics
-        # ----------------------------------------------------
-        atr = _to_decimal(
-            indicators.get("atr"),
-            Decimal("0"),
-        ) or Decimal("0")
-        reference_close = _to_decimal(
-            indicators.get("close"),
-            ticker.last,
-        ) or ticker.last
+        atr = _to_decimal(indicators.get("atr"), Decimal("0")) or Decimal("0")
+        reference_close = _to_decimal(indicators.get("close"), ticker.last) or ticker.last
 
         atr_pct = (
             atr / reference_close * Decimal("100")
@@ -1075,31 +856,11 @@ def run_scanner() -> None:
             else Decimal("0")
         )
 
-        volume_ratio = _to_decimal(
-            indicators.get("volume_ratio"),
-            Decimal("0"),
-        ) or Decimal("0")
+        volume_ratio = _to_decimal(indicators.get("volume_ratio"), Decimal("0")) or Decimal("0")
 
-        setup = (
-            "BREAKOUT"
-            if breakout
-            else "PULLBACK"
-            if pullback
-            else "MOMENTUM"
-        )
-
-        data_source = str(
-            indicators.get(
-                "data_source",
-                df.attrs.get("source", "unknown"),
-            )
-        ).upper()
-
-        reason_text = (
-            " | ".join(reasons[:8])
-            if reasons
-            else "technical confirmation"
-        )
+        setup = "BREAKOUT" if breakout else "PULLBACK" if pullback else "MOMENTUM"
+        data_source = str(indicators.get("data_source", df.attrs.get("source", "unknown"))).upper()
+        reason_text = " | ".join(reasons[:8]) if reasons else "technical confirmation"
 
         candidates.append(
             Opportunity(
@@ -1111,38 +872,21 @@ def run_scanner() -> None:
                 current_price=ticker.last,
                 paribu_bid=ticker.bid,
                 paribu_ask=ticker.ask,
-                spread_pct=execution.spread_pct.quantize(
-                    Decimal("0.01")
-                ),
+                spread_pct=execution.spread_pct.quantize(Decimal("0.01")),
                 entry_price=execution.entry_price,
                 stop_loss=execution.stop_loss,
                 tp1=execution.tp1,
                 tp2=execution.tp2,
-                rr=execution.rr_ratio.quantize(
-                    Decimal("0.01")
-                ),
-                tp1_pct=execution.tp1_pct.quantize(
-                    Decimal("0.01")
-                ),
-                net_tp1_pct=execution.net_tp1_pct.quantize(
-                    Decimal("0.01")
-                ),
-                rsi=rsi.quantize(
-                    Decimal("0.1")
-                ),
-                atr_pct=atr_pct.quantize(
-                    Decimal("0.01")
-                ),
-                volume_ratio=volume_ratio.quantize(
-                    Decimal("0.01")
-                ),
+                rr=execution.rr_ratio.quantize(Decimal("0.01")),
+                tp1_pct=execution.tp1_pct.quantize(Decimal("0.01")),
+                net_tp1_pct=execution.net_tp1_pct.quantize(Decimal("0.01")),
+                rsi=rsi.quantize(Decimal("0.1")),
+                atr_pct=atr_pct.quantize(Decimal("0.01")),
+                volume_ratio=volume_ratio.quantize(Decimal("0.01")),
                 reason=reason_text,
             )
         )
 
-    # --------------------------------------------------------
-    # Rank best opportunities first.
-    # --------------------------------------------------------
     candidates.sort(
         key=lambda opportunity: (
             opportunity.score,
@@ -1157,9 +901,7 @@ def run_scanner() -> None:
 
     if not final:
         save_state(state)
-        send_telegram_message(
-            format_no_signal_report(stats)
-        )
+        send_telegram_message(format_no_signal_report(stats))
         LOGGER.info("No executable opportunities.")
         return
 
@@ -1173,30 +915,13 @@ def run_scanner() -> None:
     send_telegram_message(header)
 
     for rank, opportunity in enumerate(final, start=1):
-        if not send_telegram_message(
-            format_signal_message(
-                opportunity,
-                rank,
-            )
-        ):
-            LOGGER.error(
-                "Telegram failed for %s",
-                opportunity.symbol,
-            )
+        if not send_telegram_message(format_signal_message(opportunity, rank)):
+            LOGGER.error("Telegram failed for %s", opportunity.symbol)
             continue
 
-        state.setdefault(
-            "sent_signals",
-            {},
-        )[opportunity.symbol] = int(time.time())
-
+        state.setdefault("sent_signals", {})[opportunity.symbol] = int(time.time())
         save_state(state)
-
-        LOGGER.info(
-            "Signal sent: %s score=%s",
-            opportunity.symbol,
-            opportunity.score,
-        )
+        LOGGER.info("Signal sent: %s score=%s", opportunity.symbol, opportunity.score)
 
 
 if __name__ == "__main__":
@@ -1209,3 +934,4 @@ if __name__ == "__main__":
             f"<code>{html.escape(str(exc))}</code>"
         )
         raise
+
