@@ -948,6 +948,85 @@ def run_scanner() -> None:
 
     final = candidates[:MAX_SIGNALS_PER_RUN]
 
+    # ============================================================
+    # RE-FETCH LIVE PRICES BEFORE SENDING
+    # ============================================================
+    if final:
+        LOGGER.info("Refreshing live prices for final candidates...")
+        try:
+            latest_snapshot = get_market_snapshot()
+        except Exception as exc:
+            LOGGER.warning(f"Could not refresh live snapshot: {exc}")
+            latest_snapshot = {}
+
+        updated_final = []
+        for opp in final:
+            if opp.symbol in latest_snapshot:
+                fresh_ticker = latest_snapshot[opp.symbol]
+                fresh_ask = fresh_ticker.ask
+                fresh_bid = fresh_ticker.bid
+                fresh_spread = fresh_ticker.spread_percent
+
+                if fresh_ask is None or fresh_bid is None or fresh_spread is None or fresh_ask <= 0:
+                    updated_final.append(opp)
+                    continue
+
+                # Keep the same absolute risk and reward distances
+                old_risk_dist = opp.entry_price - opp.stop_loss
+                old_tp1_dist = opp.tp1 - opp.entry_price
+                old_tp2_dist = opp.tp2 - opp.entry_price
+
+                new_entry = fresh_ask
+                new_stop = new_entry - old_risk_dist
+                new_tp1 = new_entry + old_tp1_dist
+                new_tp2 = new_entry + old_tp2_dist
+
+                if new_stop <= 0:
+                    updated_final.append(opp)
+                    continue
+
+                new_tp1_pct = (new_tp1 - new_entry) / new_entry * Decimal("100")
+                estimated_cost = (TAKER_FEE_PCT * Decimal("2")) + (fresh_spread / Decimal("2"))
+                new_net_tp1_pct = new_tp1_pct - estimated_cost
+
+                # Re-validate minimums with updated price
+                if new_tp1_pct < MIN_REQUIRED_TP1_PCT or new_net_tp1_pct < MIN_NET_TP1_PCT:
+                    LOGGER.info(f"Drop {opp.symbol} after refresh: TP1% or net TP1% too low")
+                    continue
+
+                new_rr = (new_tp1 - new_entry) / (new_entry - new_stop)
+                if new_rr < MIN_REQUIRED_RR:
+                    LOGGER.info(f"Drop {opp.symbol} after refresh: RR too low")
+                    continue
+
+                updated_opp = Opportunity(
+                    symbol=opp.symbol,
+                    score=opp.score,
+                    strength=opp.strength,
+                    setup=opp.setup,
+                    data_source=opp.data_source,
+                    current_price=fresh_ticker.last,
+                    paribu_bid=fresh_bid,
+                    paribu_ask=fresh_ask,
+                    spread_pct=fresh_spread.quantize(Decimal("0.01")),
+                    entry_price=new_entry,
+                    stop_loss=new_stop,
+                    tp1=new_tp1,
+                    tp2=new_tp2,
+                    rr=new_rr.quantize(Decimal("0.01")),
+                    tp1_pct=new_tp1_pct.quantize(Decimal("0.01")),
+                    net_tp1_pct=new_net_tp1_pct.quantize(Decimal("0.01")),
+                    rsi=opp.rsi,
+                    atr_pct=opp.atr_pct,
+                    volume_ratio=opp.volume_ratio,
+                    reason=opp.reason,
+                )
+                updated_final.append(updated_opp)
+            else:
+                updated_final.append(opp)
+
+        final = updated_final[:MAX_SIGNALS_PER_RUN]
+
     if not final:
         save_state(state)
         send_telegram_message(format_no_signal_report(stats))
