@@ -44,7 +44,7 @@ MAX_SIGNALS_PER_RUN = int(
 )
 
 MIN_SCORE = int(
-    os.getenv("MIN_SCORE", "60")
+    os.getenv("MIN_SCORE", "75")
 )
 
 MIN_QUOTE_VOLUME_TL = Decimal(
@@ -65,11 +65,11 @@ MIN_REQUIRED_TP1_PCT = Decimal(
 )
 
 MIN_NET_TP1_PCT = Decimal(
-    os.getenv("MIN_NET_TP1_PCT", "1.00")
+    os.getenv("MIN_NET_TP1_PCT", "1.20")
 )
 
 MIN_REQUIRED_RR = Decimal(
-    os.getenv("MIN_REQUIRED_RR", "1.50")
+    os.getenv("MIN_REQUIRED_RR", "1.70")
 )
 
 # Minimum TL volume required in the order book for depth validation
