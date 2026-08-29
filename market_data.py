@@ -7,10 +7,7 @@ Paribu Spot market scanner data layer.
 Design:
 - Paribu remains the source of truth for the executable/current TL price,
   bid/ask and market liquidity.
-- Candles are fetched from reliable public market-data providers because
-  Paribu's undocumented candle URL is not suitable as a production dependency.
-- Candle provider order:
-    1) KuCoin public market-data API (Used to bypass GitHub Actions geo-blocks)
+- Candles are fetched from KuCoin public market-data API to bypass GitHub Actions geo-blocks.
 - No trading is performed here.
 - This module does NOT impose trading filters. Filtering belongs to scanner.py.
 """
@@ -210,6 +207,7 @@ def extract_ticker_records(
 ) -> dict[str, dict[str, Any]]:
     if not isinstance(payload, dict):
         raise ParibuSchemaError("Paribu ticker response is not a JSON object.")
+    
     for container_name in ("data", "result", "tickers", "markets"):
         container = payload.get(container_name)
         if isinstance(container, dict):
@@ -255,8 +253,10 @@ def fetch_tickers() -> list[Ticker]:
         if last is None or last <= 0:
             continue
 
-        bid = D(first_value(raw_data, ("bid", "bestBid", "best_bid")))
-        ask = D(first_value(raw_data, ("ask", "bestAsk", "best_ask")))
+        # تم التعديل هنا للتعرف على `highestBid` و `lowestAsk` الخاصة بـ Paribu
+        bid = D(first_value(raw_data, ("bid", "bestBid", "best_bid", "highestBid", "highest_bid")))
+        ask = D(first_value(raw_data, ("ask", "bestAsk", "best_ask", "lowestAsk", "lowest_ask")))
+        
         volume = D(first_value(raw_data, ("volume", "vol", "baseVolume", "base_volume")))
         quote_volume = D(first_value(raw_data, ("quoteVolume", "quote_volume", "volumeQuote", "turnover")))
 
@@ -280,6 +280,7 @@ def fetch_tickers() -> list[Ticker]:
     if not tickers:
         raise ParibuSchemaError("No usable Paribu TL markets found.")
 
+    # ترتيب العملات حسب السيولة (الأعلى أولاً)
     tickers.sort(
         key=lambda ticker: (
             ticker.quote_volume
@@ -296,7 +297,7 @@ def get_market_snapshot() -> dict[str, Ticker]:
 
 
 # ---------------------------------------------------------------------------
-# Candle providers (Switched to KuCoin for GitHub Actions bypass)
+# Candle providers (KuCoin for GitHub Actions bypass)
 # ---------------------------------------------------------------------------
 
 KUCOIN_INTERVALS = {
@@ -404,7 +405,7 @@ def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFram
 
 
 # ---------------------------------------------------------------------------
-# Order Book (Added to fix the import error in scanner.py)
+# Order Book (Required by scanner.py)
 # ---------------------------------------------------------------------------
 
 def fetch_order_book(symbol: str, limit: int = 20) -> dict[str, list[Any]]:
