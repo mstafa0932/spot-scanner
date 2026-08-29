@@ -17,6 +17,7 @@ from market_data import (
     Ticker,
     fetch_candles,
     get_market_snapshot,
+    get_effective_spread,
 )
 
 from indicator_engine import calculate_indicators
@@ -64,6 +65,11 @@ MIN_NET_TP1_PCT = Decimal(
 
 MIN_REQUIRED_RR = Decimal(
     os.getenv("MIN_REQUIRED_RR", "1.50")
+)
+
+# Minimum TL volume required in the order book for depth validation
+MIN_ORDERBOOK_DEPTH_TL = Decimal(
+    os.getenv("MIN_ORDERBOOK_DEPTH_TL", "17000")
 )
 
 # Default Paribu taker assumption. Change via environment variable
@@ -122,6 +128,8 @@ class ScanStats:
     liquidity_fail: int = 0
     spread_pass: int = 0
     spread_fail: int = 0
+    depth_pass: int = 0
+    depth_fail: int = 0
     technical_attempted: int = 0
     candle_success: int = 0
     candle_fail: int = 0
@@ -672,6 +680,8 @@ def format_no_signal_report(stats: ScanStats) -> str:
         f"❌ رفض السيولة: {stats.liquidity_fail}\n"
         f"📏 اجتازت السبريد: {stats.spread_pass}\n"
         f"❌ رفض السبريد: {stats.spread_fail}\n"
+        f"🧱 اجتازت عمق الدفتر: {stats.depth_pass}\n"
+        f"❌ رفض عمق الدفتر: {stats.depth_fail}\n"
         f"🧪 المحاولات الفنية: {stats.technical_attempted}\n"
         f"🕯️ نجاح الشموع: {stats.candle_success}\n"
         f"❌ أخطاء الشموع: {stats.candle_fail}\n"
@@ -747,6 +757,18 @@ def run_scanner() -> None:
             continue
 
         stats.spread_pass += 1
+
+        # Check effective order book depth and spread
+        effective_spread, eff_ask, eff_bid = get_effective_spread(
+            ticker.symbol, min_volume_tl=MIN_ORDERBOOK_DEPTH_TL
+        )
+
+        if effective_spread is None or effective_spread > MAX_ALLOWED_SPREAD_PCT:
+            stats.depth_fail += 1
+            stats.add_reason("عمق دفتر الأوامر غير كافٍ أو السبريد الفعلي مرتفع")
+            continue
+
+        stats.depth_pass += 1
 
         if stats.technical_attempted >= MAX_TECHNICAL_MARKETS:
             break
@@ -934,4 +956,3 @@ if __name__ == "__main__":
             f"<code>{html.escape(str(exc))}</code>"
         )
         raise
-
