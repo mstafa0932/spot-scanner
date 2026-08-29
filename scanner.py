@@ -44,16 +44,16 @@ MAX_SIGNALS_PER_RUN = int(
 )
 
 MIN_SCORE = int(
-    os.getenv("MIN_SCORE", "75")
+    os.getenv("MIN_SCORE", "72")
 )
 
 MIN_QUOTE_VOLUME_TL = Decimal(
     os.getenv("MIN_QUOTE_VOLUME_TL", "500000")
 )
 
-# ✨ تم خفض الحد الأقصى للسبريد إلى 0.30% لضمان تنفيذ أفضل
+# ✨ تم تعديل الحد الأقصى للسبريد إلى 0.40% لمرونة أفضل في التنفيذ
 MAX_ALLOWED_SPREAD_PCT = Decimal(
-    os.getenv("MAX_ALLOWED_SPREAD_PCT", "0.30")
+    os.getenv("MAX_ALLOWED_SPREAD_PCT", "0.40")
 )
 
 MAX_EFFECTIVE_SPREAD_PCT = Decimal(
@@ -69,7 +69,7 @@ MIN_NET_TP1_PCT = Decimal(
 )
 
 MIN_REQUIRED_RR = Decimal(
-    os.getenv("MIN_REQUIRED_RR", "1.70")
+    os.getenv("MIN_REQUIRED_RR", "1.60")
 )
 
 # Minimum TL volume required in the order book for depth validation
@@ -99,7 +99,7 @@ REQUEST_TIMEOUT = int(
     os.getenv("TELEGRAM_TIMEOUT", "15")
 )
 
-# ✨ NEW: Minimum volume ratio (current volume vs average volume)
+# Minimum volume ratio (current volume vs average volume)
 MIN_VOLUME_RATIO = Decimal(
     os.getenv("MIN_VOLUME_RATIO", "0.5")
 )
@@ -153,7 +153,7 @@ class ScanStats:
     rr_fail: int = 0
     other_execution_fail: int = 0
     candidates_before_ranking: int = 0
-    volume_ratio_fail: int = 0          # ✨ NEW
+    volume_ratio_fail: int = 0
     reject_reasons: dict[str, int] = field(default_factory=dict)
 
     def add_reason(self, reason: str) -> None:
@@ -704,7 +704,7 @@ def format_no_signal_report(stats: ScanStats) -> str:
         f"⭐ فشل Score: {stats.score_fail}\n"
         f"🎯 فشل TP1: {stats.tp1_fail}\n"
         f"📐 فشل R:R: {stats.rr_fail}\n"
-        f"📉 فشل حجم التداول: {stats.volume_ratio_fail}\n"    # ✨ NEW
+        f"📉 فشل حجم التداول: {stats.volume_ratio_fail}\n"
         f"⚠️ رفض تنفيذ آخر: {stats.other_execution_fail}\n\n"
         "🔎 <b>أكثر أسباب الرفض:</b>\n"
         f"{reasons}\n\n"
@@ -834,7 +834,6 @@ def run_scanner() -> None:
 
         stats.indicator_success += 1
 
-        # ✨ NEW: Volume Ratio filter
         volume_ratio = _to_decimal(indicators.get("volume_ratio"), Decimal("0")) or Decimal("0")
         if volume_ratio < MIN_VOLUME_RATIO:
             stats.volume_ratio_fail += 1
@@ -971,7 +970,6 @@ def run_scanner() -> None:
                     updated_final.append(opp)
                     continue
 
-                # Keep the same absolute risk and reward distances
                 old_risk_dist = opp.entry_price - opp.stop_loss
                 old_tp1_dist = opp.tp1 - opp.entry_price
                 old_tp2_dist = opp.tp2 - opp.entry_price
@@ -989,7 +987,6 @@ def run_scanner() -> None:
                 estimated_cost = (TAKER_FEE_PCT * Decimal("2")) + (fresh_spread / Decimal("2"))
                 new_net_tp1_pct = new_tp1_pct - estimated_cost
 
-                # Re-validate minimums with updated price
                 if new_tp1_pct < MIN_REQUIRED_TP1_PCT or new_net_tp1_pct < MIN_NET_TP1_PCT:
                     LOGGER.info(f"Drop {opp.symbol} after refresh: TP1% or net TP1% too low")
                     continue
