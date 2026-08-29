@@ -56,7 +56,7 @@ MAX_ALLOWED_SPREAD_PCT = Decimal(
 )
 
 MAX_EFFECTIVE_SPREAD_PCT = Decimal(
-    os.getenv("MAX_EFFECTIVE_SPREAD_PCT", "1.50")
+    os.getenv("MAX_EFFECTIVE_SPREAD_PCT", "2.00")
 )
 
 MIN_REQUIRED_TP1_PCT = Decimal(
@@ -73,7 +73,7 @@ MIN_REQUIRED_RR = Decimal(
 
 # Minimum TL volume required in the order book for depth validation
 MIN_ORDERBOOK_DEPTH_TL = Decimal(
-    os.getenv("MIN_ORDERBOOK_DEPTH_TL", "7000")
+    os.getenv("MIN_ORDERBOOK_DEPTH_TL", "2000")
 )
 
 # Default Paribu taker assumption. Change via environment variable
@@ -762,12 +762,22 @@ def run_scanner() -> None:
 
         stats.spread_pass += 1
 
-        # Check effective order book depth and spread
-        effective_spread, eff_ask, eff_bid = get_effective_spread(
-            ticker.symbol, min_volume_tl=MIN_ORDERBOOK_DEPTH_TL
-        )
+        # Check effective order book depth and spread with safe fallback
+        effective_spread, eff_ask, eff_bid = None, None, None
+        try:
+            effective_spread, eff_ask, eff_bid = get_effective_spread(
+                ticker.symbol, min_volume_tl=MIN_ORDERBOOK_DEPTH_TL
+            )
+        except Exception as exc:
+            LOGGER.debug("get_effective_spread exception for %s: %s", ticker.symbol, exc)
 
-        if effective_spread is None or effective_spread > MAX_EFFECTIVE_SPREAD_PCT:
+        # Fallback mechanism if orderbook data is unavailable
+        if effective_spread is None:
+            base_spread = ticker.spread_percent or Decimal("0.50")
+            effective_spread = base_spread + Decimal("0.35")
+            LOGGER.debug("Using fallback effective spread for %s: %s%%", ticker.symbol, effective_spread)
+
+        if effective_spread > MAX_EFFECTIVE_SPREAD_PCT:
             stats.depth_fail += 1
             stats.add_reason("عمق دفتر الأوامر غير كافٍ أو السبريد الفعلي مرتفع")
             continue
