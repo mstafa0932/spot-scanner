@@ -1,8 +1,8 @@
-From __future__ import annotations
+from __future__ import annotations
 
 """
 scanner.py
-Professional Paribu Spot scanner.
+Professional Paribu Spot scanner (Sniper Mode).
 
 Important:
 - No ccxt.
@@ -41,7 +41,7 @@ from indicator_engine import (
 
 
 # ============================================================
-# CONFIGURATION
+# CONFIGURATION (Sniper Mode Applied)
 # ============================================================
 
 STATE_FILE = Path(
@@ -54,21 +54,21 @@ STATE_FILE = Path(
 MAX_SIGNALS_PER_RUN = int(
     os.getenv(
         "MAX_SIGNALS_PER_RUN",
-        "3",
+        "2",
     )
 )
 
 MIN_SCORE = int(
     os.getenv(
         "MIN_SCORE",
-        "70",
+        "88",
     )
 )
 
 MIN_QUOTE_VOLUME_TL = Decimal(
     os.getenv(
         "MIN_QUOTE_VOLUME_TL",
-        "500000",
+        "5000000",
     )
 )
 
@@ -107,7 +107,6 @@ TAKER_FEE_PCT = Decimal(
     )
 )
 
-# Conservative allowance for local execution friction.
 SLIPPAGE_PCT = Decimal(
     os.getenv(
         "EXPECTED_SLIPPAGE_PCT",
@@ -142,10 +141,6 @@ ORDERBOOK_DEPTH = int(
         "20",
     )
 )
-
-# The current architecture intentionally does not require
-# an order-book endpoint to produce a signal.
-# Entry/spread always come from Paribu ticker bid/ask.
 
 
 # ============================================================
@@ -235,6 +230,7 @@ class Opportunity:
     rsi: Decimal
     atr_pct: Decimal
     volume_ratio: Decimal
+    quote_volume: Decimal
 
     resistance: Optional[Decimal]
     reason: str
@@ -528,53 +524,16 @@ def make_technical_snapshot(
     if len(df) < 2:
         return None
 
-    # First try the project's dataclass-style analyzer.
     try:
 
         result = analyze_symbol(df)
 
         if result is not None:
 
-            close = decimal(
-                get_attr(
-                    result,
-                    (
-                        "current_close",
-                        "close",
-                    ),
-                )
-            )
-
-            rsi = decimal(
-                get_attr(
-                    result,
-                    (
-                        "rsi14",
-                        "rsi_14",
-                        "rsi",
-                    ),
-                )
-            )
-
-            atr = decimal(
-                get_attr(
-                    result,
-                    (
-                        "atr14",
-                        "atr_14",
-                        "atr",
-                    ),
-                )
-            )
-
-            volume_ratio = decimal(
-                get_attr(
-                    result,
-                    (
-                        "volume_ratio",
-                    ),
-                )
-            )
+            close = decimal(get_attr(result, ("current_close", "close")))
+            rsi = decimal(get_attr(result, ("rsi14", "rsi_14", "rsi")))
+            atr = decimal(get_attr(result, ("atr14", "atr_14", "atr")))
+            volume_ratio = decimal(get_attr(result, ("volume_ratio",)))
 
             if (
                 close is not None
@@ -588,359 +547,93 @@ def make_technical_snapshot(
                     rsi=rsi,
                     atr=atr,
                     volume_ratio=volume_ratio,
-                    ema9=decimal(
-                        get_attr(
-                            result,
-                            ("ema9", "EMA9", "EMA_9"),
-                        )
-                    ),
-                    ema21=decimal(
-                        get_attr(
-                            result,
-                            ("ema21", "EMA21", "EMA_21"),
-                        )
-                    ),
-                    ema50=decimal(
-                        get_attr(
-                            result,
-                            ("ema50", "EMA50", "EMA_50"),
-                        )
-                    ),
-                    ema200=decimal(
-                        get_attr(
-                            result,
-                            ("ema200", "EMA200", "EMA_200"),
-                        )
-                    ),
-                    macd=decimal(
-                        get_attr(
-                            result,
-                            ("macd_line", "MACD", "macd"),
-                        )
-                    ),
-                    macd_signal=decimal(
-                        get_attr(
-                            result,
-                            (
-                                "macd_signal",
-                                "MACD_SIGNAL",
-                                "signal",
-                            ),
-                        )
-                    ),
-                    is_uptrend=bool(
-                        get_attr(
-                            result,
-                            ("is_uptrend",),
-                            False,
-                        )
-                    ),
-                    is_above_ema21=bool(
-                        get_attr(
-                            result,
-                            ("is_above_ema21",),
-                            False,
-                        )
-                    ),
-                    is_pullback=bool(
-                        get_attr(
-                            result,
-                            ("is_pullback",),
-                            False,
-                        )
-                    ),
-                    is_breakout=bool(
-                        get_attr(
-                            result,
-                            ("breakout",),
-                            False,
-                        )
-                    ),
-                    is_bullish_candle=bool(
-                        get_attr(
-                            result,
-                            ("is_bullish_candle",),
-                            False,
-                        )
-                    ),
-                    resistance_48=decimal(
-                        get_attr(
-                            result,
-                            ("resistance_48",),
-                        )
-                    ),
-                    resistance_96=decimal(
-                        get_attr(
-                            result,
-                            ("resistance_96",),
-                        )
-                    ),
-                    swing_low=decimal(
-                        get_attr(
-                            result,
-                            ("swing_low",),
-                        )
-                    ),
-                    recent_return_3=decimal(
-                        get_attr(
-                            result,
-                            ("recent_return_3",),
-                        )
-                    ),
-                    recent_return_12=decimal(
-                        get_attr(
-                            result,
-                            ("recent_return_12",),
-                        )
-                    ),
-                    source=str(
-                        df.attrs.get(
-                            "source",
-                            "unknown",
-                        )
-                    ),
+                    ema9=decimal(get_attr(result, ("ema9", "EMA9", "EMA_9"))),
+                    ema21=decimal(get_attr(result, ("ema21", "EMA21", "EMA_21"))),
+                    ema50=decimal(get_attr(result, ("ema50", "EMA50", "EMA_50"))),
+                    ema200=decimal(get_attr(result, ("ema200", "EMA200", "EMA_200"))),
+                    macd=decimal(get_attr(result, ("macd_line", "MACD", "macd"))),
+                    macd_signal=decimal(get_attr(result, ("macd_signal", "MACD_SIGNAL", "signal"))),
+                    is_uptrend=bool(get_attr(result, ("is_uptrend",), False)),
+                    is_above_ema21=bool(get_attr(result, ("is_above_ema21",), False)),
+                    is_pullback=bool(get_attr(result, ("is_pullback",), False)),
+                    is_breakout=bool(get_attr(result, ("breakout",), False)),
+                    is_bullish_candle=bool(get_attr(result, ("is_bullish_candle",), False)),
+                    resistance_48=decimal(get_attr(result, ("resistance_48",))),
+                    resistance_96=decimal(get_attr(result, ("resistance_96",))),
+                    swing_low=decimal(get_attr(result, ("swing_low",))),
+                    recent_return_3=decimal(get_attr(result, ("recent_return_3",))),
+                    recent_return_12=decimal(get_attr(result, ("recent_return_12",))),
+                    source=str(df.attrs.get("source", "unknown")),
                 )
 
     except Exception as exc:
-        LOGGER.debug(
-            "analyze_symbol compatibility path failed: %s",
-            exc,
-        )
+        LOGGER.debug("analyze_symbol compatibility path failed: %s", exc)
 
-    # Fallback: calculate_indicators() + latest closed row.
     try:
 
         calculated = calculate_indicators(df)
 
-        if not isinstance(
-            calculated,
-            pd.DataFrame,
-        ):
+        if not isinstance(calculated, pd.DataFrame):
             return None
 
-        row = latest_closed_row(
-            calculated
-        )
+        row = latest_closed_row(calculated)
 
         if row is None:
             return None
 
-        close = decimal(
-            row.get("close")
-        )
+        close = decimal(row.get("close"))
+        rsi = decimal(row.get("RSI14", row.get("RSI_14")))
+        atr = decimal(row.get("ATR14", row.get("ATR_14")))
+        volume = decimal(row.get("volume"), Decimal("0"))
+        volume_sma = decimal(row.get("VOL_SMA20", row.get("VOL_SMA_20")), Decimal("0"))
 
-        rsi = decimal(
-            row.get("RSI14", row.get("RSI_14"))
-        )
-
-        atr = decimal(
-            row.get("ATR14", row.get("ATR_14"))
-        )
-
-        volume = decimal(
-            row.get("volume"),
-            Decimal("0"),
-        )
-
-        volume_sma = decimal(
-            row.get(
-                "VOL_SMA20",
-                row.get("VOL_SMA_20"),
-            ),
-            Decimal("0"),
-        )
-
-        if (
-            close is None
-            or close <= 0
-            or rsi is None
-            or atr is None
-            or atr <= 0
-        ):
+        if (close is None or close <= 0 or rsi is None or atr is None or atr <= 0):
             return None
 
-        volume_ratio = (
-            volume / volume_sma
-            if volume_sma
-            and volume_sma > 0
-            else Decimal("0")
-        )
+        volume_ratio = (volume / volume_sma if volume_sma and volume_sma > 0 else Decimal("0"))
+        ema9 = decimal(row.get("EMA9", row.get("EMA_9")))
+        ema21 = decimal(row.get("EMA21", row.get("EMA_21")))
+        ema50 = decimal(row.get("EMA50", row.get("EMA_50")))
+        ema200 = decimal(row.get("EMA200", row.get("EMA_200")))
+        macd = decimal(row.get("MACD", row.get("MACD_line")))
+        macd_signal = decimal(row.get("MACD_SIGNAL", row.get("MACD_signal")))
 
-        ema9 = decimal(
-            row.get(
-                "EMA9",
-                row.get("EMA_9"),
-            )
-        )
+        prev_3 = decimal(calculated["close"].iloc[-5] if len(calculated) >= 5 else None)
+        prev_12 = decimal(calculated["close"].iloc[-14] if len(calculated) >= 14 else None)
 
-        ema21 = decimal(
-            row.get(
-                "EMA21",
-                row.get("EMA_21"),
-            )
-        )
+        recent_return_3 = ((close / prev_3 - Decimal("1")) * Decimal("100") if prev_3 and prev_3 > 0 else None)
+        recent_return_12 = ((close / prev_12 - Decimal("1")) * Decimal("100") if prev_12 and prev_12 > 0 else None)
 
-        ema50 = decimal(
-            row.get(
-                "EMA50",
-                row.get("EMA_50"),
-            )
-        )
+        is_uptrend = bool(ema50 and ema200 and close > ema50 and ema50 > ema200)
+        is_above_ema21 = bool(ema21 and close > ema21)
 
-        ema200 = decimal(
-            row.get(
-                "EMA200",
-                row.get("EMA_200"),
-            )
-        )
-
-        macd = decimal(
-            row.get(
-                "MACD",
-                row.get("MACD_line"),
-            )
-        )
-
-        macd_signal = decimal(
-            row.get(
-                "MACD_SIGNAL",
-                row.get("MACD_signal"),
-            )
-        )
-
-        prev_3 = decimal(
-            calculated["close"].iloc[-5]
-            if len(calculated) >= 5
-            else None
-        )
-
-        prev_12 = decimal(
-            calculated["close"].iloc[-14]
-            if len(calculated) >= 14
-            else None
-        )
-
-        recent_return_3 = (
-            (
-                close / prev_3
-                - Decimal("1")
-            )
-            * Decimal("100")
-            if prev_3
-            and prev_3 > 0
-            else None
-        )
-
-        recent_return_12 = (
-            (
-                close / prev_12
-                - Decimal("1")
-            )
-            * Decimal("100")
-            if prev_12
-            and prev_12 > 0
-            else None
-        )
-
-        is_uptrend = bool(
-            ema50
-            and ema200
-            and close > ema50
-            and ema50 > ema200
-        )
-
-        is_above_ema21 = bool(
-            ema21
-            and close > ema21
-        )
-
-        recent_lows = calculated[
-            "low"
-        ].iloc[-6:-1]
-
-        is_pullback = bool(
-            ema21
-            and not recent_lows.empty
-            and Decimal(
-                str(recent_lows.min())
-            ) <= ema21
-            and close > ema21
-        )
+        recent_lows = calculated["low"].iloc[-6:-1]
+        is_pullback = bool(ema21 and not recent_lows.empty and Decimal(str(recent_lows.min())) <= ema21 and close > ema21)
 
         candle = calculated.iloc[-2]
+        candle_open = decimal(candle.get("open"), close)
+        candle_high = decimal(candle.get("high"), close)
+        candle_low = decimal(candle.get("low"), close)
 
-        candle_open = decimal(
-            candle.get("open"),
-            close,
-        )
+        body = abs(close - candle_open)
+        lower_wick = (min(candle_open, close) - candle_low)
 
-        candle_high = decimal(
-            candle.get("high"),
-            close,
-        )
-
-        candle_low = decimal(
-            candle.get("low"),
-            close,
-        )
-
-        body = abs(
-            close - candle_open
-        )
-
-        lower_wick = (
-            min(
-                candle_open,
-                close,
-            )
-            - candle_low
-        )
-
-        bullish_pinbar = bool(
-            body > 0
-            and lower_wick >= body * Decimal("2")
-        )
-
-        bullish_candle = (
-            close > candle_open
-            or bullish_pinbar
-        )
+        bullish_pinbar = bool(body > 0 and lower_wick >= body * Decimal("2"))
+        bullish_candle = (close > candle_open or bullish_pinbar)
 
         resistance_48 = None
         resistance_96 = None
         swing_low = None
 
         if len(calculated) >= 50:
-            resistance_48 = decimal(
-                calculated["high"]
-                .iloc[-50:-2]
-                .max()
-            )
-
+            resistance_48 = decimal(calculated["high"].iloc[-50:-2].max())
         if len(calculated) >= 98:
-            resistance_96 = decimal(
-                calculated["high"]
-                .iloc[-98:-2]
-                .max()
-            )
-
+            resistance_96 = decimal(calculated["high"].iloc[-98:-2].max())
         if len(calculated) >= 26:
-            swing_low = decimal(
-                calculated["low"]
-                .iloc[-26:-2]
-                .min()
-            )
+            swing_low = decimal(calculated["low"].iloc[-26:-2].min())
 
-        previous_close = decimal(
-            calculated["close"].iloc[-3]
-        )
-
-        breakout = bool(
-            resistance_48
-            and previous_close
-            and close > resistance_48
-            and previous_close <= resistance_48
-        )
+        previous_close = decimal(calculated["close"].iloc[-3])
+        breakout = bool(resistance_48 and previous_close and close > resistance_48 and previous_close <= resistance_48)
 
         return TechnicalSnapshot(
             close=close,
@@ -963,21 +656,11 @@ def make_technical_snapshot(
             swing_low=swing_low,
             recent_return_3=recent_return_3,
             recent_return_12=recent_return_12,
-            source=str(
-                df.attrs.get(
-                    "source",
-                    "unknown",
-                )
-            ),
+            source=str(df.attrs.get("source", "unknown")),
         )
 
     except Exception as exc:
-
-        LOGGER.debug(
-            "DataFrame indicator fallback failed: %s",
-            exc,
-        )
-
+        LOGGER.debug("DataFrame indicator fallback failed: %s", exc)
         return None
 
 
@@ -997,7 +680,6 @@ def calculate_score(
     if tech.is_uptrend:
         score += 15
         reasons.append("اتجاه صاعد")
-
     if tech.is_above_ema21:
         score += 10
         reasons.append("فوق EMA21")
@@ -1006,22 +688,15 @@ def calculate_score(
     if Decimal("52") <= tech.rsi <= Decimal("65"):
         score += 15
         reasons.append("RSI صحي")
-
     elif Decimal("48") <= tech.rsi < Decimal("52"):
         score += 9
-
     elif Decimal("65") < tech.rsi <= Decimal("70"):
         score += 7
-
     elif tech.rsi > Decimal("70"):
         score -= 4
 
     # MACD: 10
-    if (
-        tech.macd is not None
-        and tech.macd_signal is not None
-        and tech.macd > tech.macd_signal
-    ):
+    if (tech.macd is not None and tech.macd_signal is not None and tech.macd > tech.macd_signal):
         score += 10
         reasons.append("MACD داعم")
 
@@ -1029,17 +704,13 @@ def calculate_score(
     if tech.volume_ratio >= Decimal("2"):
         score += 15
         reasons.append("حجم قوي")
-
     elif tech.volume_ratio >= Decimal("1.5"):
         score += 12
         reasons.append("حجم مرتفع")
-
     elif tech.volume_ratio >= Decimal("1.15"):
         score += 8
-
     elif tech.volume_ratio >= Decimal("1"):
         score += 5
-
     else:
         score -= 3
 
@@ -1047,250 +718,96 @@ def calculate_score(
     if tech.is_pullback:
         score += 10
         reasons.append("Pullback")
-
     if tech.is_breakout:
         score += 5
         reasons.append("Breakout")
-
     elif tech.is_bullish_candle:
         score += 4
         reasons.append("شمعة إيجابية")
 
     # Local execution: 20
     spread = ticker.spread_percent
-
     if spread is not None:
-
         if spread <= Decimal("0.20"):
             score += 10
             reasons.append("سبريد محلي ممتاز")
-
         elif spread <= Decimal("0.40"):
             score += 8
-
         elif spread <= Decimal("0.60"):
             score += 5
-
         elif spread <= MAX_ALLOWED_SPREAD_PCT:
             score += 2
 
-    if (
-        ticker.quote_volume is not None
-        and ticker.quote_volume >= Decimal("3000000")
-    ):
+    if (ticker.quote_volume is not None and ticker.quote_volume >= Decimal("3000000")):
         score += 10
-
-    elif (
-        ticker.quote_volume is not None
-        and ticker.quote_volume >= Decimal("1500000")
-    ):
+    elif (ticker.quote_volume is not None and ticker.quote_volume >= Decimal("1500000")):
         score += 7
-
-    elif (
-        ticker.quote_volume is not None
-        and ticker.quote_volume >= Decimal("750000")
-    ):
+    elif (ticker.quote_volume is not None and ticker.quote_volume >= Decimal("750000")):
         score += 4
 
-    score = max(
-        0,
-        min(score, 100),
-    )
-
+    score = max(0, min(score, 100))
     return score, reasons
 
 
 # ============================================================
-# LEVELS / EXECUTION
+# LEVELS / EXECUTION (Sniper Mode Applied)
 # ============================================================
 
 def calculate_local_levels(
     tech: TechnicalSnapshot,
     ticker: Ticker,
-) -> Optional[
-    tuple[
-        Decimal,
-        Decimal,
-        Decimal,
-        Decimal,
-        Decimal,
-        Decimal,
-        Decimal,
-    ]
-]:
+) -> Optional[tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]]:
 
-    entry = (
-        ticker.ask
-        if ticker.ask is not None
-        and ticker.ask > 0
-        else ticker.last
-    )
-
+    entry = ticker.ask if ticker.ask is not None and ticker.ask > 0 else ticker.last
     if entry <= 0:
         return None
 
-    atr_pct = (
-        tech.atr / tech.close
-        if tech.close > 0
-        else Decimal("0")
-    )
-
+    atr_pct = tech.atr / tech.close if tech.close > 0 else Decimal("0")
     if atr_pct <= 0:
         return None
 
-    # Risk is local to the actual Paribu entry.
     risk_pct = clamp_decimal(
-        atr_pct * Decimal("1.35"),
-        Decimal("0.012"),
-        Decimal("0.06"),
+        atr_pct * Decimal("2.50"),
+        Decimal("0.025"),
+        Decimal("0.08"),
     )
 
-    # Give the stop room to breathe, but keep it bounded.
-    stop = (
-        entry
-        * (
-            Decimal("1")
-            - risk_pct
-        )
-    )
-
+    stop = entry * (Decimal("1") - risk_pct)
     if stop <= 0 or stop >= entry:
         return None
 
-    # Resistance is used as the primary upside reference.
     resistance_candidates = [
-        value
-        for value in (
-            tech.resistance_48,
-            tech.resistance_96,
-        )
-        if value is not None
-        and value > tech.close
+        value for value in (tech.resistance_48, tech.resistance_96)
+        if value is not None and value > tech.close
     ]
+    resistance = min(resistance_candidates) if resistance_candidates else None
 
-    resistance = (
-        min(resistance_candidates)
-        if resistance_candidates
-        else None
-    )
-
-    # Minimum target required for an economic trade.
-    minimum_tp1 = (
-        entry
-        * (
-            Decimal("1")
-            + (
-                MIN_TP1_PCT
-                / Decimal("100")
-            )
-        )
-    )
-
-    atr_tp1 = (
-        entry
-        * (
-            Decimal("1")
-            + risk_pct * Decimal("1.60")
-        )
-    )
+    minimum_tp1 = entry * (Decimal("1") + (MIN_TP1_PCT / Decimal("100")))
+    
+    atr_tp1 = entry * (Decimal("1") + risk_pct * Decimal("1.50"))
 
     if resistance is not None:
-
-        # We prefer the structural target when it is sufficiently
-        # far away; otherwise ATR supplies a realistic target.
-        resistance_ratio = (
-            resistance / tech.close
-            - Decimal("1")
-        )
-
-        structural_tp1 = (
-            entry
-            * (
-                Decimal("1")
-                + resistance_ratio
-            )
-        )
-
-        tp1 = max(
-            minimum_tp1,
-            min(
-                structural_tp1,
-                atr_tp1 * Decimal("1.35"),
-            ),
-        )
-
-        # A target cannot be below the real Ask.
-        tp1 = max(
-            tp1,
-            minimum_tp1,
-        )
-
+        resistance_ratio = (resistance / tech.close - Decimal("1"))
+        structural_tp1 = entry * (Decimal("1") + resistance_ratio)
+        tp1 = max(minimum_tp1, min(structural_tp1, atr_tp1 * Decimal("1.35")))
+        tp1 = max(tp1, minimum_tp1)
     else:
-        tp1 = max(
-            minimum_tp1,
-            atr_tp1,
-        )
+        tp1 = max(minimum_tp1, atr_tp1)
 
-    # TP2 uses the larger structural objective or a wider
-    # risk multiple, but remains bounded to avoid absurd outputs.
-    atr_tp2 = (
-        entry
-        * (
-            Decimal("1")
-            + risk_pct * Decimal("2.40")
-        )
-    )
-
-    if tech.resistance_96 is not None and (
-        tech.resistance_96 > tech.close
-    ):
-
-        structural_tp2 = (
-            entry
-            * (
-                Decimal("1")
-                + (
-                    tech.resistance_96
-                    / tech.close
-                    - Decimal("1")
-                )
-            )
-        )
-
-        tp2 = max(
-            atr_tp2,
-            structural_tp2,
-        )
-
+    atr_tp2 = entry * (Decimal("1") + risk_pct * Decimal("2.50"))
+    if tech.resistance_96 is not None and (tech.resistance_96 > tech.close):
+        structural_tp2 = entry * (Decimal("1") + (tech.resistance_96 / tech.close - Decimal("1")))
+        tp2 = max(atr_tp2, structural_tp2)
     else:
         tp2 = atr_tp2
 
-    max_tp2 = (
-        entry
-        * Decimal("1.15")
-    )
-
-    tp2 = min(
-        tp2,
-        max_tp2,
-    )
-
-    # Ensure ordering.
+    max_tp2 = entry * Decimal("1.25")
+    tp2 = min(tp2, max_tp2)
+    
     if tp1 >= tp2:
-        tp2 = max(
-            atr_tp2,
-            tp1 * Decimal("1.03"),
-        )
+        tp2 = max(atr_tp2, tp1 * Decimal("1.03"))
 
-    return (
-        entry,
-        stop,
-        tp1,
-        tp2,
-        atr_pct * Decimal("100"),
-        resistance if resistance is not None else Decimal("0"),
-        risk_pct * Decimal("100"),
-    )
+    return (entry, stop, tp1, tp2, atr_pct * Decimal("100"), resistance if resistance is not None else Decimal("0"), risk_pct * Decimal("100"))
 
 
 def evaluate_execution(
@@ -1300,119 +817,43 @@ def evaluate_execution(
     stop: Decimal,
     tp1: Decimal,
     tp2: Decimal,
-) -> tuple[
-    bool,
-    str,
-    Decimal,
-    Decimal,
-    Decimal,
-]:
+) -> tuple[bool, str, Decimal, Decimal, Decimal]:
 
     if ticker.bid is None or ticker.ask is None:
-        return (
-            False,
-            "Paribu Bid/Ask غير متوفر",
-            Decimal("0"),
-            Decimal("0"),
-            Decimal("0"),
-        )
+        return (False, "Paribu Bid/Ask غير متوفر", Decimal("0"), Decimal("0"), Decimal("0"))
 
     spread = ticker.spread_percent
-
     if spread is None:
-        return (
-            False,
-            "Spread غير صالح",
-            Decimal("0"),
-            Decimal("0"),
-            Decimal("0"),
-        )
+        return (False, "Spread غير صالح", Decimal("0"), Decimal("0"), Decimal("0"))
 
     if spread > MAX_ALLOWED_SPREAD_PCT:
-        return (
-            False,
-            f"Spread {spread:.2f}% > الحد",
-            spread,
-            Decimal("0"),
-            Decimal("0"),
-        )
+        return (False, f"Spread {spread:.2f}% > الحد", spread, Decimal("0"), Decimal("0"))
 
-    gross_tp1_pct = (
-        (tp1 - entry)
-        / entry
-        * Decimal("100")
-    )
-
+    gross_tp1_pct = ((tp1 - entry) / entry * Decimal("100"))
     if gross_tp1_pct < MIN_TP1_PCT:
-        return (
-            False,
-            f"TP1 {gross_tp1_pct:.2f}% < الحد الأدنى",
-            spread,
-            gross_tp1_pct,
-            Decimal("0"),
-        )
+        return (False, f"TP1 {gross_tp1_pct:.2f}% < الحد الأدنى", spread, gross_tp1_pct, Decimal("0"))
 
-    # Round-trip fee + slippage allowance.
-    total_cost_pct = (
-        TAKER_FEE_PCT * Decimal("2")
-        + SLIPPAGE_PCT
-    )
-
-    net_tp1_pct = (
-        gross_tp1_pct
-        - total_cost_pct
-    )
+    total_cost_pct = (TAKER_FEE_PCT * Decimal("2") + SLIPPAGE_PCT)
+    net_tp1_pct = (gross_tp1_pct - total_cost_pct)
 
     if net_tp1_pct < MIN_NET_TP1_PCT:
-        return (
-            False,
-            f"صافي TP1 {net_tp1_pct:.2f}% غير كافٍ",
-            spread,
-            gross_tp1_pct,
-            net_tp1_pct,
-        )
+        return (False, f"صافي TP1 {net_tp1_pct:.2f}% غير كافٍ", spread, gross_tp1_pct, net_tp1_pct)
 
-    risk = (
-        entry - stop
-    )
-
-    reward = (
-        tp1 - entry
-    )
+    risk = (entry - stop)
+    reward = (tp1 - entry)
 
     if risk <= 0 or reward <= 0:
-        return (
-            False,
-            "المخاطرة/العائد غير صالح",
-            spread,
-            gross_tp1_pct,
-            net_tp1_pct,
-        )
+        return (False, "المخاطرة/العائد غير صالح", spread, gross_tp1_pct, net_tp1_pct)
 
-    rr = (
-        reward / risk
-    )
-
+    rr = (reward / risk)
     if rr < MIN_RR:
-        return (
-            False,
-            f"R:R {rr:.2f} < {MIN_RR}",
-            spread,
-            gross_tp1_pct,
-            net_tp1_pct,
-        )
+        return (False, f"R:R {rr:.2f} < {MIN_RR}", spread, gross_tp1_pct, net_tp1_pct)
 
-    return (
-        True,
-        "OK",
-        spread,
-        gross_tp1_pct,
-        net_tp1_pct,
-    )
+    return (True, "OK", spread, gross_tp1_pct, net_tp1_pct)
 
 
 # ============================================================
-# OPPORTUNITY BUILD
+# OPPORTUNITY BUILD (Sniper Mode Applied)
 # ============================================================
 
 def build_opportunity(
@@ -1422,63 +863,25 @@ def build_opportunity(
     reasons: list[str],
 ) -> Optional[Opportunity]:
 
-    levels = calculate_local_levels(
-        tech,
-        ticker,
-    )
-
+    levels = calculate_local_levels(tech, ticker)
     if levels is None:
         return None
 
-    (
-        entry,
-        stop,
-        tp1,
-        tp2,
-        atr_pct,
-        resistance,
-        _risk_pct,
-    ) = levels
+    (entry, stop, tp1, tp2, atr_pct, resistance, _risk_pct) = levels
 
-    (
-        ok,
-        reject_reason,
-        spread,
-        tp1_pct,
-        net_tp1_pct,
-    ) = evaluate_execution(
-        tech,
-        ticker,
-        entry,
-        stop,
-        tp1,
-        tp2,
+    (ok, reject_reason, spread, tp1_pct, net_tp1_pct) = evaluate_execution(
+        tech, ticker, entry, stop, tp1, tp2
     )
 
     if not ok:
-        LOGGER.info(
-            "Rejected %s: %s",
-            ticker.symbol,
-            reject_reason,
-        )
+        LOGGER.info("Rejected %s: %s", ticker.symbol, reject_reason)
         return None
 
     risk = entry - stop
     reward = tp1 - entry
+    rr = (reward / risk if risk > 0 else Decimal("0"))
 
-    rr = (
-        reward / risk
-        if risk > 0
-        else Decimal("0")
-    )
-
-    setup = (
-        "BREAKOUT"
-        if tech.is_breakout
-        else "PULLBACK"
-        if tech.is_pullback
-        else "MOMENTUM"
-    )
+    setup = ("BREAKOUT" if tech.is_breakout else "PULLBACK" if tech.is_pullback else "MOMENTUM")
 
     return Opportunity(
         symbol=ticker.symbol,
@@ -1489,44 +892,25 @@ def build_opportunity(
         current_price=ticker.last,
         paribu_bid=ticker.bid,
         paribu_ask=ticker.ask,
-        spread_pct=spread.quantize(
-            Decimal("0.01")
-        ),
+        spread_pct=spread.quantize(Decimal("0.01")),
         entry_price=entry,
         stop_loss=stop,
         tp1=tp1,
         tp2=tp2,
-        rr=rr.quantize(
-            Decimal("0.01")
-        ),
-        tp1_pct=tp1_pct.quantize(
-            Decimal("0.01")
-        ),
-        net_tp1_pct=net_tp1_pct.quantize(
-            Decimal("0.01")
-        ),
-        rsi=tech.rsi.quantize(
-            Decimal("0.1")
-        ),
-        atr_pct=atr_pct.quantize(
-            Decimal("0.01")
-        ),
-        volume_ratio=tech.volume_ratio.quantize(
-            Decimal("0.01")
-        ),
-        resistance=(
-            resistance
-            if resistance > 0
-            else None
-        ),
-        reason=" | ".join(
-            reasons[:8]
-        ),
+        rr=rr.quantize(Decimal("0.01")),
+        tp1_pct=tp1_pct.quantize(Decimal("0.01")),
+        net_tp1_pct=net_tp1_pct.quantize(Decimal("0.01")),
+        rsi=tech.rsi.quantize(Decimal("0.1")),
+        atr_pct=atr_pct.quantize(Decimal("0.01")),
+        volume_ratio=tech.volume_ratio.quantize(Decimal("0.01")),
+        quote_volume=ticker.quote_volume if ticker.quote_volume is not None else Decimal("0"),
+        resistance=(resistance if resistance > 0 else None),
+        reason=" | ".join(reasons[:8]),
     )
 
 
 # ============================================================
-# TELEGRAM FORMATTING
+# TELEGRAM FORMATTING (Sniper Mode Applied)
 # ============================================================
 
 def format_opportunity(
@@ -1534,11 +918,8 @@ def format_opportunity(
     rank: int,
 ) -> str:
 
-    resistance_text = (
-        format_price(opp.resistance)
-        if opp.resistance is not None
-        else "غير محددة"
-    )
+    resistance_text = (format_price(opp.resistance) if opp.resistance is not None else "غير محددة")
+    vol_m = (opp.quote_volume / Decimal("1000000")).quantize(Decimal("0.01"))
 
     return (
         f"🎯 <b>SPOT ENTRY #{rank}</b>\n"
@@ -1547,21 +928,14 @@ def format_opportunity(
         f"💪 <b>القوة:</b> {opp.strength}\n"
         f"📊 <b>Score:</b> {opp.score}/100\n"
         f"🧩 <b>Setup:</b> {opp.setup}\n"
-        f"📡 <b>الشموع:</b> "
-        f"{html.escape(opp.data_source)}\n\n"
+        f"📡 <b>الشموع:</b> {html.escape(opp.data_source)}\n\n"
 
-        f"💵 <b>Paribu Ask:</b> "
-        f"<code>{format_price(opp.paribu_ask)}</code>\n"
-        f"💵 <b>الدخول:</b> "
-        f"<code>{format_price(opp.entry_price)}</code>\n"
-        f"🛑 <b>وقف الخسارة:</b> "
-        f"<code>{format_price(opp.stop_loss)}</code>\n"
-        f"🎯 <b>TP1:</b> "
-        f"<code>{format_price(opp.tp1)}</code>\n"
-        f"🚀 <b>TP2:</b> "
-        f"<code>{format_price(opp.tp2)}</code>\n"
-        f"🧱 <b>المقاومة المرجعية:</b> "
-        f"<code>{resistance_text}</code>\n\n"
+        f"💵 <b>Paribu Ask:</b> <code>{format_price(opp.paribu_ask)}</code>\n"
+        f"💵 <b>الدخول:</b> <code>{format_price(opp.entry_price)}</code>\n"
+        f"🛑 <b>وقف الخسارة:</b> <code>{format_price(opp.stop_loss)}</code>\n"
+        f"🎯 <b>TP1:</b> <code>{format_price(opp.tp1)}</code>\n"
+        f"🚀 <b>TP2:</b> <code>{format_price(opp.tp2)}</code>\n"
+        f"🧱 <b>المقاومة المرجعية:</b> <code>{resistance_text}</code>\n\n"
 
         f"📐 <b>R:R:</b> 1:{opp.rr}\n"
         f"📈 <b>TP1:</b> +{opp.tp1_pct}%\n"
@@ -1571,36 +945,21 @@ def format_opportunity(
         f"📊 <b>RSI:</b> {opp.rsi}\n"
         f"📊 <b>ATR:</b> {opp.atr_pct}%\n"
         f"💧 <b>الحجم:</b> {opp.volume_ratio}x المتوسط\n"
-        f"🧠 <b>السبب:</b> "
-        f"{html.escape(opp.reason)}\n\n"
+        f"🌊 <b>السيولة اليومية:</b> {vol_m} مليون ₺\n"
+        f"🧠 <b>السبب:</b> {html.escape(opp.reason)}\n\n"
 
-        "⚠️ <b>Spot فقط — التنفيذ يدوي، "
-        "ولا يوجد تنفيذ تلقائي.</b>"
+        "⚠️ <b>Spot فقط — التنفيذ يدوي.</b>"
     )
 
 
-def format_no_signal_report(
-    stats: ScanStats,
-) -> str:
-
-    reasons = sorted(
-        (
-            stats.rejection_reasons or {}
-        ).items(),
-        key=lambda item: item[1],
-        reverse=True,
-    )
-
+def format_no_signal_report(stats: ScanStats) -> str:
+    reasons = sorted((stats.rejection_reasons or {}).items(), key=lambda item: item[1], reverse=True)
     reason_text = "لا توجد بيانات كافية"
-
     if reasons:
-        reason_text = "\n".join(
-            f"• {html.escape(reason)}: {count}"
-            for reason, count in reasons[:6]
-        )
+        reason_text = "\n".join(f"• {html.escape(reason)}: {count}" for reason, count in reasons[:6])
 
     return (
-        "🔍 <b>Paribu — التقرير الدوري</b>\n"
+        "🔍 <b>Paribu — التقرير الدوري (وضع القناص)</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
         f"📊 الأزواج: {stats.total_markets}\n"
         f"💧 اجتازت السيولة: {stats.liquidity_pass}\n"
@@ -1608,80 +967,69 @@ def format_no_signal_report(
         f"📏 اجتازت السبريد: {stats.spread_pass}\n"
         f"❌ رفض السبريد: {stats.spread_fail}\n"
         f"🧪 المحاولات الفنية: {stats.technical_attempted}\n"
-        f"🕯️ نجاح الشموع: {stats.candle_success}\n"
-        f"❌ أخطاء الشموع: {stats.candle_fail}\n"
-        f"📐 نجاح المؤشرات: {stats.indicator_success}\n"
-        f"❌ فشل المؤشرات: {stats.indicator_fail}\n"
-        f"⚙️ محاولات التنفيذ: {stats.execution_attempted}\n"
-        f"✅ تنفيذ مقبول: {stats.execution_pass}\n"
-        f"❌ تنفيذ مرفوض: {stats.execution_fail}\n"
         f"⭐ اجتاز Score: {stats.score_pass}\n"
-        f"❌ فشل Score: {stats.score_fail}\n"
-        f"🎯 فشل TP1: {stats.tp1_fail}\n"
-        f"📐 فشل R:R: {stats.rr_fail}\n\n"
+        f"❌ فشل Score: {stats.score_fail}\n\n"
         "🔎 <b>أكثر أسباب الرفض:</b>\n"
         f"{reason_text}\n\n"
-        "💡 <b>لا يتم إجبار النظام على إعطاء صفقة.</b>"
+        "💡 <b>تم تفعيل فلتر الحماية والسيولة الصارم.</b>"
     )
 
 
 # ============================================================
-# MAIN SCAN
+# MAIN SCAN (Sniper Mode Applied)
 # ============================================================
 
 def run_scanner() -> None:
 
-    LOGGER.info(
-        "Starting professional Paribu Spot Scanner..."
-    )
-
+    LOGGER.info("Starting professional Paribu Spot Scanner (Sniper Mode)...")
     stats = ScanStats()
 
     try:
-
         snapshot = get_market_snapshot()
-
     except ParibuDataError as exc:
-
-        LOGGER.exception(
-            "Paribu market snapshot failed."
-        )
-
-        send_telegram_message(
-            "🚨 <b>PARIBU SCANNER ERROR</b>\n\n"
-            f"<code>{html.escape(str(exc))}</code>"
-        )
-
+        LOGGER.exception("Paribu market snapshot failed.")
+        send_telegram_message(f"🚨 <b>PARIBU SCANNER ERROR</b>\n\n<code>{html.escape(str(exc))}</code>")
         return
 
-    stats.total_markets = len(
-        snapshot
-    )
-
+    stats.total_markets = len(snapshot)
     state = load_state()
+
+    # ==========================================================
+    # فلتر حماية رأس المال (Bitcoin Health Check)
+    # ==========================================================
+    btc_is_safe = True
+    try:
+        btc_df = fetch_candles("btc_tl", resolution="15m", limit=100)
+        btc_tech = make_technical_snapshot(btc_df)
+        
+        if btc_tech is not None and btc_tech.ema50 is not None:
+            if btc_tech.close < btc_tech.ema50:
+                btc_is_safe = False
+                LOGGER.info("Safety Filter Activated: BTC is below EMA50. Halting altcoin signals.")
+                
+    except Exception as exc:
+        LOGGER.warning("Could not verify BTC health, proceeding with caution: %s", exc)
+
+    if not btc_is_safe:
+        send_telegram_message(
+            "🛡️ <b>وضع القناص (Sniper Mode) قيد الانتظار</b>\n\n"
+            "البيتكوين (BTC) يتداول في مسار سلبي تحت خط الدعم (EMA50).\n"
+            "تم حجب جميع إشارات الشراء للعملات البديلة مؤقتاً لحماية رأس مالك."
+        )
+        return
+    # ==========================================================
 
     tickers = sorted(
         snapshot.values(),
-        key=lambda item: (
-            item.quote_volume
-            if item.quote_volume is not None
-            else Decimal("0")
-        ),
+        key=lambda item: (item.quote_volume if item.quote_volume is not None else Decimal("0")),
         reverse=True,
     )
 
-    candidates: list[
-        Opportunity
-    ] = []
+    candidates: list[Opportunity] = []
 
     for ticker in tickers:
 
-        if (
-            ticker.quote_volume is None
-            or ticker.quote_volume
-            < MIN_QUOTE_VOLUME_TL
-        ):
-
+        if (ticker.quote_volume is None or ticker.quote_volume < MIN_QUOTE_VOLUME_TL):
             stats.liquidity_fail += 1
             stats.reject("سيولة أقل من الحد")
             continue
@@ -1689,254 +1037,123 @@ def run_scanner() -> None:
         stats.liquidity_pass += 1
 
         if ticker.spread_percent is None:
-
             stats.spread_fail += 1
             stats.reject("Spread غير متوفر")
             continue
 
-        if (
-            ticker.spread_percent
-            > MAX_ALLOWED_SPREAD_PCT
-        ):
-
+        if (ticker.spread_percent > MAX_ALLOWED_SPREAD_PCT):
             stats.spread_fail += 1
-            stats.reject(
-                f"Spread {ticker.spread_percent:.2f}%"
-            )
+            stats.reject(f"Spread {ticker.spread_percent:.2f}%")
             continue
 
         stats.spread_pass += 1
 
-        if (
-            stats.technical_attempted
-            >= MAX_TECHNICAL_MARKETS
-        ):
+        if (stats.technical_attempted >= MAX_TECHNICAL_MARKETS):
             break
 
         stats.technical_attempted += 1
 
         try:
-
-            df = fetch_candles(
-                ticker.symbol,
-                resolution="15m",
-                limit=CANDLE_LIMIT,
-            )
-
+            df = fetch_candles(ticker.symbol, resolution="15m", limit=CANDLE_LIMIT)
             stats.candle_success += 1
-
         except Exception as exc:
-
             stats.candle_fail += 1
             stats.reject("فشل جلب الشموع")
-
-            LOGGER.debug(
-                "%s candle failure: %s",
-                ticker.symbol,
-                exc,
-            )
-
+            LOGGER.debug("%s candle failure: %s", ticker.symbol, exc)
             continue
 
-        tech = make_technical_snapshot(
-            df
-        )
+        tech = make_technical_snapshot(df)
 
         if tech is None:
-
             stats.indicator_fail += 1
             stats.reject("فشل المؤشرات")
             continue
 
         stats.indicator_success += 1
 
-        # RSI hard protection.
         if tech.rsi >= Decimal("75"):
-
             stats.reject("RSI مرتفع")
             continue
 
-        # Avoid already-exhausted short-term moves.
-        if (
-            tech.recent_return_3 is not None
-            and tech.recent_return_3 >= Decimal("4")
-        ):
-
+        if (tech.recent_return_3 is not None and tech.recent_return_3 >= Decimal("4")):
             stats.reject("Anti-FOMO 3 شموع")
             continue
 
-        if (
-            tech.recent_return_12 is not None
-            and tech.recent_return_12 >= Decimal("10")
-        ):
-
+        if (tech.recent_return_12 is not None and tech.recent_return_12 >= Decimal("10")):
             stats.reject("Anti-FOMO 12 شمعة")
             continue
 
-        # Balanced setup gate.
         setup_ok = (
-            (
-                tech.is_uptrend
-                and tech.is_above_ema21
-            )
+            (tech.is_uptrend and tech.is_above_ema21)
             or tech.is_pullback
             or tech.is_breakout
-            or (
-                tech.is_bullish_candle
-                and tech.is_above_ema21
-            )
+            or (tech.is_bullish_candle and tech.is_above_ema21)
         )
 
         if not setup_ok:
-
             stats.setup_fail += 1
             stats.reject("Setup غير واضح")
             continue
 
         stats.setup_pass += 1
 
-        score, reasons = calculate_score(
-            tech,
-            ticker,
-        )
+        score, reasons = calculate_score(tech, ticker)
 
         if score < MIN_SCORE:
-
             stats.score_fail += 1
-            stats.reject(
-                f"Score {score} < {MIN_SCORE}"
-            )
+            stats.reject(f"Score {score} < {MIN_SCORE}")
             continue
 
         stats.score_pass += 1
-
         stats.execution_attempted += 1
 
-        opportunity = build_opportunity(
-            ticker,
-            tech,
-            score,
-            reasons,
-        )
+        opportunity = build_opportunity(ticker, tech, score, reasons)
 
         if opportunity is None:
-
             stats.execution_fail += 1
-            stats.reject(
-                "المستويات/التنفيذ غير اقتصادي"
-            )
+            stats.reject("المستويات/التنفيذ غير اقتصادي")
             continue
 
         stats.execution_pass += 1
 
-        # Cooldown is applied only after the trade is fully
-        # qualified, so weak candidates never block future signals.
-        if not cooldown_allowed(
-            ticker.symbol,
-            state,
-        ):
-
-            stats.reject(
-                "Cooldown"
-            )
+        if not cooldown_allowed(ticker.symbol, state):
+            stats.reject("Cooldown")
             continue
 
-        candidates.append(
-            opportunity
-        )
+        candidates.append(opportunity)
 
-    # Ranking.
     candidates.sort(
-        key=lambda item: (
-            item.score,
-            item.net_tp1_pct,
-            item.rr,
-            item.volume_ratio,
-        ),
+        key=lambda item: (item.score, item.net_tp1_pct, item.rr, item.volume_ratio),
         reverse=True,
     )
 
-    selected = candidates[
-        :max(
-            1,
-            MAX_SIGNALS_PER_RUN,
-        )
-    ]
+    selected = candidates[:max(1, MAX_SIGNALS_PER_RUN)]
 
     if not selected:
-
-        report = format_no_signal_report(
-            stats
-        )
-
-        LOGGER.info(
-            "No executable opportunities."
-        )
-
-        send_telegram_message(
-            report
-        )
-
-        save_state(
-            state
-        )
-
+        report = format_no_signal_report(stats)
+        LOGGER.info("No executable opportunities.")
+        send_telegram_message(report)
+        save_state(state)
         return
 
     header = (
         "🔥 <b>Paribu — أفضل فرص Spot</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
-        f"تم العثور على <b>{len(selected)}</b> "
-        "فرصة قابلة للتنفيذ.\n"
-        "مرتبة حسب القوة والقابلية الاقتصادية."
+        f"تم العثور على <b>{len(selected)}</b> فرصة قابلة للتنفيذ.\n"
+        "مرتبة حسب السيولة، القوة، والقابلية الاقتصادية."
     )
 
-    send_telegram_message(
-        header
-    )
+    send_telegram_message(header)
 
-    for rank, opportunity in enumerate(
-        selected,
-        start=1,
-    ):
+    for rank, opportunity in enumerate(selected, start=1):
+        message = format_opportunity(opportunity, rank)
+        if send_telegram_message(message):
+            state["sent_signals"][opportunity.symbol] = int(time.time())
+            save_state(state)
+            LOGGER.info("Signal sent: %s score=%s", opportunity.symbol, opportunity.score)
 
-        message = format_opportunity(
-            opportunity,
-            rank,
-        )
-
-        if send_telegram_message(
-            message
-        ):
-
-            state[
-                "sent_signals"
-            ][
-                opportunity.symbol
-            ] = int(
-                time.time()
-            )
-
-            save_state(
-                state
-            )
-
-            LOGGER.info(
-                "Signal sent: %s score=%s",
-                opportunity.symbol,
-                opportunity.score,
-            )
-
-    LOGGER.info(
-        "Scan finished. "
-        "Selected=%d candidates=%d",
-        len(selected),
-        len(candidates),
-    )
+    LOGGER.info("Scan finished. Selected=%d candidates=%d", len(selected), len(candidates))
 
 
 if __name__ == "__main__":
     run_scanner()
-
-
-هذا الملف عدله وارسله جاهز
