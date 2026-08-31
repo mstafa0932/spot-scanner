@@ -1,4 +1,4 @@
-from __future__ import annotations
+From __future__ import annotations
 
 """
 scanner.py
@@ -1937,3 +1937,6 @@ def run_scanner() -> None:
 
 if __name__ == "__main__":
     run_scanner()
+
+
+هذا الملف عدله وارسله جاهز
