@@ -1,86 +1,79 @@
 from __future__ import annotations
 
-"""
-market_data.py
-Paribu Spot market scanner data layer.
+"""Paribu-only market data layer.
 
-Design:
-- Paribu remains the source of truth for the executable/current TL price,
-  bid/ask and market liquidity.
-- Candles are fetched primarily from Binance Data API (data-api.binance.vision)
-  to bypass geo-blocks, with KuCoin as a resilient fallback.
-- No trading is performed here.
-- This module does NOT impose trading filters. Filtering belongs to scanner.py.
+All trading decisions are based on Paribu data only:
+- ticker: https://api.paribu.com/market/ticker
+- order book: https://api.paribu.com/orderbook
+- candles: https://web.paribu.com/chart/history
+
+No Binance, KuCoin, Bybit, or other exchange is used by this module.
 """
 
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
-import time
 import logging
+import time
 
 import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger("spot_scanner.market_data")
 
+PARIBU_TICKER_URL = "https://api.paribu.com/market/ticker"
+PARIBU_ORDERBOOK_URL = "https://api.paribu.com/orderbook"
+PARIBU_CHART_HISTORY_URL = "https://web.paribu.com/chart/history"
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
-
-PARIBU_TICKER_URL = "https://www.paribu.com/ticker"
-BINANCE_DATA_BASE = "https://data-api.binance.vision"
-KUCOIN_BASE_URL = "https://api.kucoin.com"
-
-REQUEST_TIMEOUT = 10
+REQUEST_TIMEOUT = 12
+MIN_VALID_CANDLES = 205
+DEFAULT_CANDLE_LIMIT = 250
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/120.0.0.0 Safari/537.36"
+    "Chrome/128.0.0.0 Safari/537.36"
 )
 
-# We need enough history for EMA200 + indicators.
-MIN_VALID_CANDLES = 205
+INTERVALS = {
+    "15m": ("15", 900),
+    "1h": ("60", 3600),
+    "4h": ("240", 14400),
+    "1d": ("1D", 86400),
+}
 
-
-# ---------------------------------------------------------------------------
-# Exceptions
-# ---------------------------------------------------------------------------
 
 class ParibuDataError(Exception):
-    pass
+    """Base exception for Paribu market-data failures."""
 
-class ParibuConfigurationError(ParibuDataError):
-    pass
 
 class ParibuHTTPError(ParibuDataError):
-    pass
+    """HTTP/network/data endpoint failure."""
+
 
 class ParibuSchemaError(ParibuDataError):
-    pass
+    """Unexpected Paribu JSON structure."""
+
 
 class CandleUnavailableError(ParibuDataError):
-    pass
+    """Not enough valid Paribu candles were returned."""
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+class OrderBookUnavailableError(ParibuDataError):
+    """Paribu order book was unavailable or invalid."""
 
-def D(value: Any) -> Optional[Decimal]:
+
+def to_decimal(value: Any) -> Optional[Decimal]:
     if value is None or value == "":
         return None
     try:
         result = Decimal(str(value))
-        if not result.is_finite():
-            return None
-        return result
+        return result if result.is_finite() else None
     except (InvalidOperation, ValueError, TypeError):
         return None
+
 
 def normalize_symbol(symbol: str) -> str:
     return (
@@ -92,35 +85,20 @@ def normalize_symbol(symbol: str) -> str:
         .replace(" ", "")
     )
 
-def base_asset_from_paribu(symbol: str) -> str:
-    normalized = normalize_symbol(symbol)
-    if "_" in normalized:
-        return normalized.split("_", 1)[0]
-    if normalized.endswith("TRY"):
-        return normalized[:-3]
-    if normalized.endswith("TL"):
-        return normalized[:-2]
-    return normalized
 
 def is_tl_pair(symbol: str) -> bool:
     normalized = normalize_symbol(symbol)
-    return (
-        normalized.endswith("_TL")
-        or normalized.endswith("_TRY")
-    )
+    return normalized.endswith("_TL") or normalized.endswith("_TRY")
 
-def first_value(data: dict[str, Any], names: tuple[str, ...]) -> Any:
+
+def _first(data: dict[str, Any], names: tuple[str, ...]) -> Any:
     for name in names:
         if name in data:
             return data[name]
     return None
 
 
-# ---------------------------------------------------------------------------
-# HTTP session
-# ---------------------------------------------------------------------------
-
-def create_session() -> requests.Session:
+def _make_session() -> requests.Session:
     session = requests.Session()
     retry = Retry(
         total=3,
@@ -149,12 +127,11 @@ def create_session() -> requests.Session:
     )
     return session
 
-SESSION = create_session()
 
-def get_json(
-    url: str,
-    params: Optional[dict[str, Any]] = None,
-) -> Any:
+SESSION = _make_session()
+
+
+def get_json(url: str, params: Optional[dict[str, Any]] = None) -> Any:
     try:
         response = SESSION.get(
             url,
@@ -162,27 +139,18 @@ def get_json(
             timeout=REQUEST_TIMEOUT,
         )
     except requests.RequestException as exc:
-        raise ParibuHTTPError(
-            f"Connection failure: {exc}"
-        ) from exc
+        raise ParibuHTTPError(f"GET failed: {url}: {exc}") from exc
 
     if response.status_code != 200:
         raise ParibuHTTPError(
-            f"HTTP {response.status_code}: "
-            f"{response.text[:300]}"
+            f"HTTP {response.status_code} from {url}: {response.text[:300]}"
         )
 
     try:
         return response.json()
     except ValueError as exc:
-        raise ParibuSchemaError(
-            "Server returned invalid JSON."
-        ) from exc
+        raise ParibuSchemaError(f"Invalid JSON from {url}") from exc
 
-
-# ---------------------------------------------------------------------------
-# Paribu ticker
-# ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class Ticker:
@@ -198,78 +166,93 @@ class Ticker:
     def spread_percent(self) -> Optional[Decimal]:
         if self.bid is None or self.ask is None:
             return None
-        if self.bid <= 0 or self.ask <= 0:
+        if self.bid <= 0 or self.ask <= 0 or self.ask < self.bid:
             return None
-        if self.ask < self.bid:
-            return None
-        return (
-            (self.ask - self.bid)
-            / self.bid
-        ) * Decimal("100")
+        return (self.ask - self.bid) / self.bid * Decimal("100")
 
-def extract_ticker_records(
-    payload: Any,
-) -> dict[str, dict[str, Any]]:
-    if not isinstance(payload, dict):
-        raise ParibuSchemaError("Paribu ticker response is not a JSON object.")
-    
-    for container_name in ("data", "result", "tickers", "markets"):
-        container = payload.get(container_name)
-        if isinstance(container, dict):
-            records = {
-                str(key): value
-                for key, value in container.items()
-                if isinstance(value, dict)
-            }
-            if records:
-                return records
-        if isinstance(container, list):
-            records: dict[str, dict[str, Any]] = {}
-            for item in container:
-                if not isinstance(item, dict):
-                    continue
-                symbol = first_value(item, ("symbol", "pair", "market", "market_symbol", "instrument"))
-                if symbol:
-                    records[str(symbol)] = item
-            if records:
-                return records
 
-    direct = {
-        str(key): value
-        for key, value in payload.items()
-        if isinstance(value, dict)
-    }
-    if direct:
-        return direct
+@dataclass(frozen=True)
+class OrderBookSnapshot:
+    symbol: str
+    bids: tuple[tuple[Decimal, Decimal], ...]
+    asks: tuple[tuple[Decimal, Decimal], ...]
+    best_bid: Decimal
+    best_ask: Decimal
+    spread_percent: Decimal
+    bid_notional: Decimal
+    ask_notional: Decimal
+    imbalance_ratio: Decimal
+    timestamp: Optional[str] = None
 
-    raise ParibuSchemaError("Could not find ticker records in Paribu response.")
+
+# ------------------------- ticker -------------------------
+
+
+def _extract_ticker_records(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        return [x for x in payload if isinstance(x, dict)]
+
+    if isinstance(payload, dict):
+        for key in ("data", "result", "tickers", "markets"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                return [x for x in value if isinstance(x, dict)]
+            if isinstance(value, dict):
+                rows = []
+                for key_name, item in value.items():
+                    if isinstance(item, dict):
+                        row = dict(item)
+                        row.setdefault("market", key_name)
+                        rows.append(row)
+                if rows:
+                    return rows
+
+        rows = []
+        for key_name, item in payload.items():
+            if isinstance(item, dict):
+                row = dict(item)
+                row.setdefault("market", key_name)
+                rows.append(row)
+        if rows:
+            return rows
+
+    raise ParibuSchemaError("Could not find Paribu ticker records")
+
 
 def fetch_tickers() -> list[Ticker]:
     payload = get_json(PARIBU_TICKER_URL)
-    records = extract_ticker_records(payload)
-    tickers: list[Ticker] = []
+    records = _extract_ticker_records(payload)
+    result: list[Ticker] = []
 
-    for raw_symbol, raw_data in records.items():
-        symbol = normalize_symbol(raw_symbol)
+    for raw in records:
+        symbol = normalize_symbol(
+            _first(raw, ("market", "symbol", "pair", "market_symbol", "instrument"))
+            or ""
+        )
         if not is_tl_pair(symbol):
             continue
 
-        last = D(first_value(raw_data, ("last", "lastPrice", "last_price", "price", "close")))
+        last = to_decimal(_first(raw, ("last", "lastPrice", "last_price", "price", "close")))
         if last is None or last <= 0:
             continue
 
-        bid = D(first_value(raw_data, ("bid", "bestBid", "best_bid", "highestBid", "highest_bid")))
-        ask = D(first_value(raw_data, ("ask", "bestAsk", "best_ask", "lowestAsk", "lowest_ask")))
-        
-        volume = D(first_value(raw_data, ("volume", "vol", "baseVolume", "base_volume")))
-        quote_volume = D(first_value(raw_data, ("quoteVolume", "quote_volume", "volumeQuote", "turnover")))
-
+        # The current Paribu public ticker model exposes 24h fields, while
+        # bid/ask are obtained from the official order-book endpoint.
+        volume = to_decimal(_first(raw, ("volume", "vol", "baseVolume", "base_volume")))
+        quote_volume = to_decimal(
+            _first(raw, ("pair_volume", "quoteVolume", "quote_volume", "volumeQuote", "turnover", "totalVolume"))
+        )
         if quote_volume is None and volume is not None and volume > 0:
             quote_volume = volume * last
 
-        change_percent = D(first_value(raw_data, ("changePercent", "change_percent", "percentChange", "percent_change", "percentage", "change")))
+        change = to_decimal(
+            _first(raw, ("percentage", "changePercent", "change_percent", "percentChange", "percent_change", "change"))
+        )
 
-        tickers.append(
+        bid = to_decimal(_first(raw, ("bid", "bestBid", "best_bid")))
+        ask = to_decimal(_first(raw, ("ask", "bestAsk", "best_ask")))
+
+        result.append(
             Ticker(
                 symbol=symbol,
                 last=last,
@@ -277,284 +260,294 @@ def fetch_tickers() -> list[Ticker]:
                 ask=ask,
                 volume=volume,
                 quote_volume=quote_volume,
-                change_percent=change_percent,
+                change_percent=change,
             )
         )
 
-    if not tickers:
-        raise ParibuSchemaError("No usable Paribu TL markets found.")
+    if not result:
+        raise ParibuSchemaError("No usable Paribu TL ticker markets found")
 
-    tickers.sort(
-        key=lambda ticker: (
-            ticker.quote_volume
-            if ticker.quote_volume is not None
-            else Decimal("0")
-        ),
-        reverse=True,
-    )
-    return tickers
+    result.sort(key=lambda t: t.quote_volume or Decimal("0"), reverse=True)
+    return result
+
 
 def get_market_snapshot() -> dict[str, Ticker]:
-    tickers = fetch_tickers()
-    return {ticker.symbol: ticker for ticker in tickers}
+    return {ticker.symbol: ticker for ticker in fetch_tickers()}
 
 
-# ---------------------------------------------------------------------------
-# Candle validation and normalization
-# ---------------------------------------------------------------------------
+def get_single_ticker(symbol: str) -> Ticker:
+    normalized = normalize_symbol(symbol)
+    snapshot = get_market_snapshot()
+    ticker = snapshot.get(normalized)
+    if ticker is None:
+        raise ParibuSchemaError(f"Paribu ticker not found: {normalized}")
+    return ticker
 
-KUCOIN_INTERVALS = {
-    "1m": "1min",
-    "3m": "3min",
-    "5m": "5min",
-    "15m": "15min",
-    "30m": "30min",
-    "1h": "1hour",
-    "2h": "2hour",
-    "4h": "4hour",
-    "6h": "6hour",
-    "8h": "8hour",
-    "12h": "12hour",
-    "1d": "1day",
-    "1w": "1week",
-}
 
-def normalize_resolution(resolution: str) -> str:
-    raw = str(resolution).strip().lower()
-    aliases = {
-        "1": "1m", "3": "3m", "5": "5m", "15": "15m", "30": "30m",
-        "60": "1h", "120": "2h", "240": "4h", "360": "6h", "720": "12h",
-        "d": "1d", "day": "1d", "w": "1w", "week": "1w",
-    }
-    return aliases.get(raw, raw)
+# ------------------------- order book -------------------------
 
-def validate_limit(limit: int) -> int:
-    try:
-        value = int(limit)
-    except (TypeError, ValueError):
-        value = 250
-    return max(50, min(value, 1000))
 
-def validate_candles(df: pd.DataFrame) -> pd.DataFrame:
+def _unwrap_orderbook(payload: Any) -> dict[str, Any]:
+    if isinstance(payload, dict):
+        if isinstance(payload.get("payload"), dict):
+            return payload["payload"]
+        if isinstance(payload.get("data"), dict):
+            return payload["data"]
+        if isinstance(payload.get("result"), dict):
+            return payload["result"]
+        if "bids" in payload or "asks" in payload:
+            return payload
+    raise ParibuSchemaError("Unexpected Paribu order-book response")
+
+
+def _parse_book_side(raw_side: Any) -> tuple[tuple[Decimal, Decimal], ...]:
+    if not isinstance(raw_side, list):
+        return tuple()
+
+    rows: list[tuple[Decimal, Decimal]] = []
+    for item in raw_side:
+        price: Optional[Decimal] = None
+        amount: Optional[Decimal] = None
+
+        if isinstance(item, (list, tuple)) and len(item) >= 2:
+            price = to_decimal(item[0])
+            amount = to_decimal(item[1])
+        elif isinstance(item, dict):
+            price = to_decimal(_first(item, ("price", "p")))
+            amount = to_decimal(_first(item, ("amount", "a", "quantity", "q")))
+
+        if price is None or amount is None or price <= 0 or amount <= 0:
+            continue
+        rows.append((price, amount))
+
+    return tuple(rows)
+
+
+def get_order_book(symbol: str, depth: int = 20) -> OrderBookSnapshot:
+    normalized = normalize_symbol(symbol).lower()
+    depth = max(1, min(int(depth), 20))
+    payload = get_json(
+        PARIBU_ORDERBOOK_URL,
+        params={"market": normalized, "depth": depth},
+    )
+    book = _unwrap_orderbook(payload)
+
+    bids = _parse_book_side(book.get("bids"))
+    asks = _parse_book_side(book.get("asks"))
+
+    if not bids or not asks:
+        raise OrderBookUnavailableError(f"Empty Paribu order book for {normalized}")
+
+    bids = tuple(sorted(bids, key=lambda x: x[0], reverse=True)[:depth])
+    asks = tuple(sorted(asks, key=lambda x: x[0])[:depth])
+
+    best_bid = bids[0][0]
+    best_ask = asks[0][0]
+    if best_ask <= 0 or best_bid <= 0 or best_ask < best_bid:
+        raise OrderBookUnavailableError(f"Invalid bid/ask for {normalized}")
+
+    spread = (best_ask - best_bid) / best_bid * Decimal("100")
+    bid_notional = sum((price * amount for price, amount in bids), Decimal("0"))
+    ask_notional = sum((price * amount for price, amount in asks), Decimal("0"))
+    imbalance = (
+        bid_notional / ask_notional
+        if ask_notional > 0
+        else Decimal("0")
+    )
+
+    return OrderBookSnapshot(
+        symbol=normalize_symbol(symbol),
+        bids=bids,
+        asks=asks,
+        best_bid=best_bid,
+        best_ask=best_ask,
+        spread_percent=spread,
+        bid_notional=bid_notional,
+        ask_notional=ask_notional,
+        imbalance_ratio=imbalance,
+        timestamp=str(book.get("timestamp")) if book.get("timestamp") is not None else None,
+    )
+
+
+# ------------------------- candles -------------------------
+
+
+def _interval_config(resolution: str) -> tuple[str, int]:
+    normalized = str(resolution).strip().lower()
+    if normalized not in INTERVALS:
+        raise ValueError(f"Unsupported Paribu interval: {resolution}")
+    return INTERVALS[normalized]
+
+
+def _extract_chart_arrays(payload: Any) -> tuple[list[Any], list[Any], list[Any], list[Any], list[Any], list[Any]]:
+    if not isinstance(payload, dict):
+        raise ParibuSchemaError("Paribu chart response is not an object")
+
+    # Official Paribu chart history model uses o/h/l/c/v/t.
+    source = payload
+    for key in ("data", "result", "payload"):
+        if isinstance(payload.get(key), dict) and any(k in payload[key] for k in ("o", "h", "l", "c", "v", "t")):
+            source = payload[key]
+            break
+
+    opens = source.get("o", [])
+    highs = source.get("h", [])
+    lows = source.get("l", [])
+    closes = source.get("c", [])
+    volumes = source.get("v", [])
+    timestamps = source.get("t", [])
+
+    if not all(isinstance(x, list) for x in (opens, highs, lows, closes, volumes, timestamps)):
+        raise ParibuSchemaError("Paribu chart response is missing candle arrays")
+
+    return opens, highs, lows, closes, volumes, timestamps
+
+
+def _drop_open_candle(df: pd.DataFrame, interval_seconds: int) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    now = int(time.time())
+    last_ts = int(df["timestamp"].iloc[-1])
+    # Paribu timestamps in the official model are epoch seconds.
+    if last_ts + interval_seconds > now + 5:
+        return df.iloc[:-1].copy()
+    return df
+
+
+def validate_candles(df: pd.DataFrame, resolution: str) -> pd.DataFrame:
     required = ("timestamp", "open", "high", "low", "close", "volume")
+    missing = [column for column in required if column not in df.columns]
+    if missing:
+        raise ParibuSchemaError("Missing candle columns: " + ", ".join(missing))
+
+    x = df.copy()
     for column in required:
-        if column not in df.columns:
-            raise ParibuSchemaError(f"Missing candle column: {column}")
+        x[column] = pd.to_numeric(x[column], errors="coerce")
 
-    for column in ("open", "high", "low", "close", "volume"):
-        df[column] = pd.to_numeric(df[column], errors="coerce")
+    x = x.dropna(subset=required).copy()
+    x = x[
+        (x["timestamp"] > 0)
+        & (x["open"] > 0)
+        & (x["high"] > 0)
+        & (x["low"] > 0)
+        & (x["close"] > 0)
+        & (x["volume"] >= 0)
+    ].copy()
+    x = x[
+        (x["high"] >= x[["open", "close"]].max(axis=1))
+        & (x["low"] <= x[["open", "close"]].min(axis=1))
+        & (x["high"] >= x["low"])
+    ].copy()
+    x = x.drop_duplicates(subset=["timestamp"], keep="last")
+    x = x.sort_values("timestamp").reset_index(drop=True)
 
-    df = df.dropna(subset=("open", "high", "low", "close")).copy()
-    df = df[(df["open"] > 0) & (df["high"] > 0) & (df["low"] > 0) & (df["close"] > 0)].copy()
-    df = df[(df["high"] >= df[["open", "close"]].max(axis=1)) & (df["low"] <= df[["open", "close"]].min(axis=1)) & (df["high"] >= df["low"])].copy()
+    _, interval_seconds = _interval_config(resolution)
+    x = _drop_open_candle(x, interval_seconds)
 
-    df = df.drop_duplicates(subset=["timestamp"], keep="last").sort_values("timestamp").reset_index(drop=True)
+    if len(x) < MIN_VALID_CANDLES:
+        raise CandleUnavailableError(
+            f"Only {len(x)} closed Paribu candles for {resolution}; "
+            f"{MIN_VALID_CANDLES} required"
+        )
+
+    x.attrs.update(
+        source="PARIBU",
+        provider="Paribu",
+        resolution=str(resolution).lower(),
+    )
+    return x
+
+
+def fetch_candles(
+    symbol: str,
+    resolution: str = "15m",
+    limit: int = DEFAULT_CANDLE_LIMIT,
+) -> pd.DataFrame:
+    normalized = normalize_symbol(symbol).lower()
+    period, _interval_seconds = _interval_config(resolution)
+    requested_limit = max(MIN_VALID_CANDLES, min(int(limit), 500))
+
+    params = {
+        "symbol": normalized,
+        "period": period,
+        "type": "basic",
+    }
+
+    payload = get_json(PARIBU_CHART_HISTORY_URL, params=params)
+    opens, highs, lows, closes, volumes, timestamps = _extract_chart_arrays(payload)
+
+    length = min(
+        len(opens),
+        len(highs),
+        len(lows),
+        len(closes),
+        len(volumes),
+        len(timestamps),
+    )
+
+    if length <= 0:
+        raise CandleUnavailableError(f"Paribu returned no candles for {normalized}")
+
+    rows: list[dict[str, Any]] = []
+    for i in range(length):
+        timestamp = to_decimal(timestamps[i])
+        opening = to_decimal(opens[i])
+        high = to_decimal(highs[i])
+        low = to_decimal(lows[i])
+        close = to_decimal(closes[i])
+        volume = to_decimal(volumes[i])
+        if None in (timestamp, opening, high, low, close, volume):
+            continue
+        rows.append(
+            {
+                "timestamp": int(timestamp),
+                "open": float(opening),
+                "high": float(high),
+                "low": float(low),
+                "close": float(close),
+                "volume": float(volume),
+            }
+        )
+
+    df = validate_candles(pd.DataFrame(rows), resolution)
+    if len(df) > requested_limit:
+        df = df.tail(requested_limit).reset_index(drop=True)
+        df.attrs.update(source="PARIBU", provider="Paribu", resolution=resolution.lower())
 
     if len(df) < MIN_VALID_CANDLES:
-        raise CandleUnavailableError(f"Only {len(df)} valid candles; {MIN_VALID_CANDLES} required.")
+        raise CandleUnavailableError(
+            f"Paribu returned only {len(df)} usable closed candles for {normalized}"
+        )
 
     return df
 
 
-# ---------------------------------------------------------------------------
-# Candle Providers (Binance Primary + KuCoin Fallback)
-# ---------------------------------------------------------------------------
+def candle_health_check(
+    symbol: str = "BTC_TL",
+    resolution: str = "15m",
+    limit: int = DEFAULT_CANDLE_LIMIT,
+) -> dict[str, Any]:
+    df = fetch_candles(symbol, resolution, limit)
+    return {
+        "symbol": normalize_symbol(symbol),
+        "resolution": resolution,
+        "source": df.attrs.get("source"),
+        "provider": df.attrs.get("provider"),
+        "candles": len(df),
+        "latest_closed_timestamp": int(df["timestamp"].iloc[-1]),
+    }
 
-def _fetch_binance_candles(symbol: str, resolution: str, limit: int) -> pd.DataFrame:
-    base_asset = base_asset_from_paribu(symbol)
-    if not base_asset:
-        raise CandleUnavailableError(f"Could not determine base asset from {symbol}.")
-
-    binance_symbol = f"{base_asset}USDT"
-    interval = normalize_resolution(resolution)
-
-    payload = get_json(
-        f"{BINANCE_DATA_BASE}/api/v3/klines",
-        params={
-            "symbol": binance_symbol,
-            "interval": interval,
-            "limit": validate_limit(limit),
-        },
-    )
-
-    if not isinstance(payload, list):
-        raise CandleUnavailableError(f"Binance returned unexpected data for {symbol}.")
-
-    rows = []
-    for item in payload:
-        rows.append({
-            "timestamp": int(item[0]),
-            "open": float(item[1]),
-            "high": float(item[2]),
-            "low": float(item[3]),
-            "close": float(item[4]),
-            "volume": float(item[5]),
-        })
-
-    df = validate_candles(pd.DataFrame(rows))
-    df.attrs["source"] = "binance"
-    df.attrs["provider_symbol"] = binance_symbol
-    df.attrs["paribu_symbol"] = normalize_symbol(symbol)
-    return df
-
-def _fetch_kucoin_candles(symbol: str, resolution: str, limit: int) -> pd.DataFrame:
-    base_asset = base_asset_from_paribu(symbol)
-    if not base_asset:
-        raise CandleUnavailableError(f"Could not determine base asset from {symbol}.")
-
-    interval = KUCOIN_INTERVALS.get(normalize_resolution(resolution), "15min")
-    provider_symbol = f"{base_asset}-USDT"
-
-    payload = get_json(
-        f"{KUCOIN_BASE_URL}/api/v1/market/candles",
-        params={
-            "symbol": provider_symbol,
-            "type": interval,
-        },
-    )
-
-    if payload.get("code") != "200000":
-        raise CandleUnavailableError(f"KuCoin error: {payload.get('msg')}")
-
-    data = payload.get("data", [])
-    if not isinstance(data, list) or not data:
-        raise CandleUnavailableError(f"KuCoin returned no usable candles for {symbol}.")
-
-    rows = []
-    for row in reversed(data[:validate_limit(limit)]):
-        rows.append({
-            "timestamp": int(row[0]) * 1000,
-            "open": float(row[1]),
-            "close": float(row[2]),
-            "high": float(row[3]),
-            "low": float(row[4]),
-            "volume": float(row[5]),
-        })
-
-    df = validate_candles(pd.DataFrame(rows))
-    df.attrs["source"] = "kucoin"
-    df.attrs["provider_symbol"] = provider_symbol
-    df.attrs["paribu_symbol"] = normalize_symbol(symbol)
-    return df
-
-def fetch_candles(symbol: str, resolution: str, limit: int = 250) -> pd.DataFrame:
-    normalized_symbol = normalize_symbol(symbol)
-    if not normalized_symbol:
-        raise ParibuConfigurationError("Empty symbol.")
-
-    # 1) Primary: Binance Data API
-    try:
-        return _fetch_binance_candles(normalized_symbol, resolution, limit)
-    except Exception as exc:
-        logger.warning(f"Binance fetch failed for {normalized_symbol}: {exc}", exc_info=True)
-
-    # 2) Fallback: KuCoin (with small delay to avoid rate limit)
-    time.sleep(0.2)
-    try:
-        return _fetch_kucoin_candles(normalized_symbol, resolution, limit)
-    except Exception as exc:
-        logger.error(f"KuCoin fetch failed for {normalized_symbol}: {exc}", exc_info=True)
-
-    raise CandleUnavailableError(f"All providers failed for {normalized_symbol}.")
-
-
-# ---------------------------------------------------------------------------
-# Order Book & Liquidity (Paribu)
-# ---------------------------------------------------------------------------
-
-def get_paribu_orderbook(symbol: str) -> Optional[dict[str, Any]]:
-    """
-    Fetch the actual Paribu order book for the given symbol.
-    The endpoint expects the market in the format 'btc-tl'.
-    """
-    base = base_asset_from_paribu(symbol).lower()
-    formatted_symbol = f"{base}-tl"
-    url = "https://v4.paribu.com/market/board"
-    
-    try:
-        payload = get_json(url, params={"market": formatted_symbol})
-        if payload and payload.get("success") and "payload" in payload:
-            return payload["payload"]
-    except Exception as exc:
-        logger.debug(f"Paribu orderbook fetch failed for {symbol}: {exc}")
-    
-    return None
-
-def get_effective_spread(
-    symbol: str, 
-    min_volume_tl: Decimal = Decimal("17000")
-) -> tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
-    """
-    Calculates the effective spread, ask, and bid by traversing the Paribu order book 
-    until the required min_volume_tl is satisfied.
-    Returns: (effective_spread_pct, effective_ask, effective_bid)
-    """
-    orderbook = get_paribu_orderbook(symbol)
-    if not orderbook or "asks" not in orderbook or "bids" not in orderbook:
-        return None, None, None
-
-    asks = orderbook["asks"]
-    bids = orderbook["bids"]
-
-    def calculate_effective_price(order_list: list[Any], target_volume: Decimal) -> Decimal:
-        cumulative_volume_tl = Decimal("0")
-        effective_price = Decimal("0")
-        
-        for item in order_list:
-            if len(item) < 2:
-                continue
-            price = D(item[0])
-            amount = D(item[1])
-            
-            if price is None or amount is None:
-                continue
-                
-            level_value_tl = price * amount
-            cumulative_volume_tl += level_value_tl
-            
-            if cumulative_volume_tl >= target_volume:
-                effective_price = price
-                break
-                
-        return effective_price
-
-    effective_ask = calculate_effective_price(asks, min_volume_tl)
-    effective_bid = calculate_effective_price(bids, min_volume_tl)
-
-    if effective_ask <= Decimal("0") or effective_bid <= Decimal("0"):
-        return None, None, None
-
-    effective_spread_pct = ((effective_ask - effective_bid) / effective_bid) * Decimal("100")
-
-    return effective_spread_pct, effective_ask, effective_bid
-
-
-# ---------------------------------------------------------------------------
-# Diagnostics
-# ---------------------------------------------------------------------------
 
 def health_check() -> dict[str, Any]:
     started = time.time()
     snapshot = get_market_snapshot()
-    elapsed = time.time() - started
+    elapsed = round(time.time() - started, 2)
     return {
         "markets": len(snapshot),
-        "seconds": round(elapsed, 2),
-        "paribu_ticker": True,
-        "candle_providers": ["binance", "kucoin"],
+        "seconds": elapsed,
+        "ticker_source": "PARIBU",
+        "candle_source": "PARIBU",
+        "orderbook_source": "PARIBU",
         "min_valid_candles": MIN_VALID_CANDLES,
-    }
-
-def candle_health_check(symbol: str = "BTC_TL", resolution: str = "15m") -> dict[str, Any]:
-    started = time.time()
-    df = fetch_candles(symbol, resolution, 250)
-    elapsed = time.time() - started
-    return {
-        "paribu_symbol": normalize_symbol(symbol),
-        "resolution": normalize_resolution(resolution),
-        "candles": len(df),
-        "source": df.attrs.get("source"),
-        "provider_symbol": df.attrs.get("provider_symbol"),
-        "seconds": round(elapsed, 2),
-        "latest_timestamp": (int(df["timestamp"].iloc[-1]) if len(df) else None),
     }
