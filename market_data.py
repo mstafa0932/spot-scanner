@@ -38,9 +38,12 @@ USER_AGENT = (
 )
 
 INTERVALS = {
-    "15m": ("900", 900),
-    "1h": ("3600", 3600),
-    "4h": ("14400", 14400),
+    # Paribu chart/history advanced mode uses TradingView-style resolution
+    # values for intraday bars. The server error explicitly requires the
+    # advanced request shape: type + symbol + resolution + from + to.
+    "15m": ("15", 900),
+    "1h": ("60", 3600),
+    "4h": ("240", 14400),
     "1d": ("1D", 86400),
 }
 
@@ -466,55 +469,42 @@ def fetch_candles(
     limit: int = DEFAULT_CANDLE_LIMIT,
 ) -> pd.DataFrame:
     normalized = normalize_symbol(symbol).lower()
-    period, _interval_seconds = _interval_config(resolution)
+    chart_resolution, interval_seconds = _interval_config(resolution)
     requested_limit = max(MIN_VALID_CANDLES, min(int(limit), 500))
 
-    # IMPORTANT: current Paribu chart/history rejects intraday values such as
-    # period=15/60/240 with: "invalid period". Current-compatible intraday
-    # requests use TradingView-style numeric resolution in seconds plus `to`.
-    # We intentionally NEVER send period=15, period=60, or period=240.
-    interval_seconds = _interval_seconds
-    end_ms = int(time.time() * 1000)
+    # Paribu explicitly requires one of these two request shapes:
+    #   advanced -> type, symbol, resolution, from, to
+    #   basic    -> type, symbol, period
+    # Intraday scanner timeframes must use advanced mode. Do not send
+    # period=15/60/240; those values are interpreted as invalid basic periods.
     end_s = int(time.time())
+    from_s = end_s - interval_seconds * max(requested_limit + 50, 250)
 
-    variants: list[dict[str, Any]] = []
-    if resolution.lower() == "1d":
-        variants.append({
+    if str(resolution).strip().lower() == "1d":
+        request_params: dict[str, Any] = {
+            "type": "basic",
             "symbol": normalized,
             "period": "1D",
-            "type": "basic",
-        })
+        }
     else:
-        variants.extend((
-            {
-                "symbol": normalized,
-                "resolution": str(interval_seconds),
-                "to": end_ms,
-            },
-            {
-                "symbol": normalized,
-                "resolution": str(interval_seconds),
-                "to": end_s,
-            },
-        ))
+        request_params = {
+            "type": "advanced",
+            "symbol": normalized,
+            "resolution": chart_resolution,
+            "from": from_s,
+            "to": end_s,
+        }
 
-    last_error: Optional[Exception] = None
-    payload = None
-    for request_params in variants:
-        try:
-            payload = get_json(PARIBU_CHART_HISTORY_URL, params=request_params)
-            break
-        except ParibuDataError as exc:
-            last_error = exc
-            LOGGER.warning(
-                "Paribu chart request failed for %s %s with params=%s: %s",
-                normalized, resolution, request_params, exc,
-            )
-
-    if payload is None:
-        raise CandleUnavailableError(
-            f"Paribu chart unavailable for {normalized} {resolution}: {last_error}"
+    try:
+        payload = get_json(
+            PARIBU_CHART_HISTORY_URL,
+            params=request_params,
         )
+    except ParibuDataError as exc:
+        raise CandleUnavailableError(
+            f"Paribu chart unavailable for {normalized} {resolution}: {exc}"
+        ) from exc
+
     opens, highs, lows, closes, volumes, timestamps = _extract_chart_arrays(payload)
 
     length = min(
@@ -553,11 +543,10 @@ def fetch_candles(
     df = validate_candles(pd.DataFrame(rows), resolution)
     if len(df) > requested_limit:
         df = df.tail(requested_limit).reset_index(drop=True)
-        df.attrs.update(source="PARIBU", provider="Paribu", resolution=resolution.lower())
-
-    if len(df) < MIN_VALID_CANDLES:
-        raise CandleUnavailableError(
-            f"Paribu returned only {len(df)} usable closed candles for {normalized}"
+        df.attrs.update(
+            source="PARIBU",
+            provider="Paribu",
+            resolution=resolution.lower(),
         )
 
     return df
