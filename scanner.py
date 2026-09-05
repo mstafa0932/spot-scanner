@@ -473,9 +473,44 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
         return False, None, f"BTC gate error: {exc}"
 
 
-def setup_gate(tech: IndicatorResult) -> tuple[bool, str]:
-    if tech.rsi14 < Decimal("48") or tech.rsi14 > Decimal("68"):
-        return False, "RSI خارج المنطقة"
+def setup_gate(
+    tech: IndicatorResult,
+    btc_15: Optional[IndicatorResult] = None,
+) -> tuple[bool, str]:
+    """Adaptive setup gate without weakening liquidity/execution controls.
+
+    The setup profile adapts only to the broad BTC regime. It never overrides
+    the later MTF, order-book, spread, execution, score, or final-validation gates.
+    """
+    btc_ema_distance = (
+        pct(btc_15.current_close, btc_15.ema21)
+        if btc_15 is not None and btc_15.current_close > 0 and btc_15.ema21 > 0
+        else Decimal("0")
+    )
+
+    btc_bullish = bool(
+        btc_15 is not None
+        and btc_15.is_uptrend
+        and btc_ema_distance >= Decimal("0")
+        and btc_15.rsi14 >= BTC_CAUTION_RSI
+        and btc_15.recent_return_3 >= Decimal("0")
+    )
+    btc_weak = bool(
+        btc_15 is None
+        or btc_ema_distance <= Decimal("-0.75")
+        or (btc_15.rsi14 < BTC_CAUTION_RSI and btc_15.recent_return_3 < 0)
+    )
+
+    if btc_bullish:
+        rsi_low, rsi_high = Decimal("48"), Decimal("68")
+    elif not btc_weak:
+        # Neutral/cautious BTC: permit healthy recovery setups in the low/mid 40s.
+        rsi_low, rsi_high = Decimal("44"), Decimal("70")
+    else:
+        return False, "BTC ضعيف — Setup محمي"
+
+    if tech.rsi14 < rsi_low or tech.rsi14 > rsi_high:
+        return False, f"RSI خارج النطاق التكيفي {rsi_low:.0f}-{rsi_high:.0f}"
     if tech.recent_return_3 >= MAX_RETURN_3:
         return False, "Anti-FOMO 3 شموع"
     if tech.recent_return_12 >= MAX_RETURN_12:
@@ -487,17 +522,38 @@ def setup_gate(tech: IndicatorResult) -> tuple[bool, str]:
     if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
         return False, "ATR خارج النطاق"
 
-    setup_ok = (
-        (tech.is_uptrend and tech.is_above_ema21 and tech.is_pullback)
-        or tech.breakout
+    # Primary structures.
+    pullback_ok = bool(
+        tech.is_uptrend
+        and tech.is_above_ema21
+        and tech.is_pullback
     )
-    if not setup_ok:
-        return False, "لا يوجد Pullback/Breakout عالي الجودة"
+    breakout_ok = bool(tech.breakout)
 
+    # In a neutral BTC regime, accept a controlled recovery setup when price
+    # has reclaimed EMA21 with a bullish closed candle and adequate volume.
+    recovery_ok = bool(
+        not btc_bullish
+        and tech.is_uptrend
+        and tech.is_above_ema21
+        and tech.is_bullish_candle
+        and tech.volume_ratio >= MIN_VOLUME_RATIO
+        and tech.distance_ema21_pct <= Decimal("1.50")
+        and tech.recent_return_3 < Decimal("2.50")
+    )
+
+    if not (pullback_ok or breakout_ok or recovery_ok):
+        return False, "لا يوجد Pullback/Breakout/Recovery عالي الجودة"
+
+    # MACD confirmation remains mandatory.
     if tech.macd_histogram <= 0 or tech.macd_line <= tech.macd_signal:
         return False, "MACD لا يؤكد الزخم"
 
-    return True, "OK"
+    if breakout_ok:
+        return True, "BREAKOUT — OK"
+    if pullback_ok:
+        return True, "PULLBACK — OK"
+    return True, "RECOVERY — OK"
 
 
 def multi_timeframe_gate(
@@ -660,11 +716,11 @@ def final_validate(
         if tech_15.latest_closed_timestamp < opportunity.close_timestamp_15m:
             return False, None, "15m candle went backwards"
 
-        btc_ok, _btc_final, btc_final_reason = btc_gate()
+        btc_ok, btc_15_final, btc_final_reason = btc_gate()
         if not btc_ok:
             return False, None, f"Final BTC gate failed: {btc_final_reason}"
 
-        setup_ok, setup_reason = setup_gate(tech_15)
+        setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15_final)
         if not setup_ok:
             return False, None, f"Final setup failed: {setup_reason}"
 
@@ -691,7 +747,7 @@ def final_validate(
             symbol=opportunity.symbol,
             score=score_value,
             strength=strength(score_value),
-            setup=("BREAKOUT" if tech_15.breakout else "PULLBACK"),
+            setup=("BREAKOUT" if tech_15.breakout else ("PULLBACK" if tech_15.is_pullback else "RECOVERY")),
             source="PARIBU",
             entry=levels.entry,
             bid=book.best_bid,
@@ -801,8 +857,9 @@ def build_candidate(
     tech_15: IndicatorResult,
     tech_1h: IndicatorResult,
     tech_4h: IndicatorResult,
+    btc_15: Optional[IndicatorResult] = None,
 ) -> tuple[Optional[Opportunity], str]:
-    setup_ok, setup_reason = setup_gate(tech_15)
+    setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
     if not setup_ok:
         return None, setup_reason
 
@@ -828,7 +885,7 @@ def build_candidate(
         symbol=ticker.symbol,
         score=score_value,
         strength=strength(score_value),
-        setup=("BREAKOUT" if tech_15.breakout else "PULLBACK"),
+        setup=("BREAKOUT" if tech_15.breakout else ("PULLBACK" if tech_15.is_pullback else "RECOVERY")),
         source="PARIBU",
         entry=levels.entry,
         bid=book.best_bid,
@@ -958,7 +1015,7 @@ def run_scanner() -> None:
             continue
         stats.indicator_pass += 1
 
-        setup_ok, setup_reason = setup_gate(tech_15)
+        setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
         if not setup_ok:
             stats.setup_fail += 1
             stats.reject(setup_reason)
@@ -978,6 +1035,7 @@ def run_scanner() -> None:
             tech_15,
             tech_1h,
             tech_4h,
+            btc_15=btc_15,
         )
         if opportunity is None:
             if "Score" in rejection:
