@@ -7,10 +7,16 @@ It verifies that the current market-data layer can read BTC_TL candles from
 Paribu for the three intraday timeframes used by the sniper.
 """
 
-import sys
+import time
 import traceback
 
-from market_data import fetch_candles, get_market_snapshot, normalize_symbol
+from market_data import (
+    PARIBU_CHART_HISTORY_URL,
+    fetch_candles,
+    get_market_snapshot,
+    normalize_symbol,
+    SESSION,
+)
 
 
 SYMBOL = "BTC_TL"
@@ -25,13 +31,38 @@ def main() -> int:
 
     try:
         snapshot = get_market_snapshot()
-        btc = next((x for x in snapshot if normalize_symbol(x.symbol) == SYMBOL), None)
+        btc = snapshot.get(SYMBOL)
         if btc is None:
             print("[FAIL] BTC_TL was not found in Paribu ticker data.")
             return 1
 
         print("[PASS] Paribu ticker is reachable.")
         print(f"       BTC_TL last={btc.last} quote_volume_tl={btc.quote_volume_tl}")
+        print()
+
+        # Direct request-shape check. This is intentionally read-only and
+        # proves that GitHub Actions is sending the exact advanced fields that
+        # Paribu's current error message requires.
+        end_s = int(time.time())
+        request_params = {
+            "type": "advanced",
+            "symbol": "btc_tl",
+            "resolution": "15",
+            "from": end_s - 15 * 60 * 250,
+            "to": end_s,
+        }
+        response = SESSION.get(
+            PARIBU_CHART_HISTORY_URL,
+            params=request_params,
+            timeout=12,
+        )
+        print(f"[INFO] chart/history HTTP={response.status_code}")
+        print(f"       request={response.url}")
+        if response.status_code != 200:
+            print(f"       body={response.text[:500]}")
+            print("[FAIL] Paribu rejected the required advanced request shape.")
+            return 1
+        print("[PASS] Paribu accepted the advanced chart request shape.")
         print()
 
         for timeframe in TIMEFRAMES:
