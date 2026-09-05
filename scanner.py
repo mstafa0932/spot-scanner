@@ -927,7 +927,7 @@ def run_scanner() -> None:
 
     stats.total_markets = len(snapshot)
 
-    btc_ok, _btc_tech, btc_reason = btc_gate()
+    btc_ok, btc_15, btc_reason = btc_gate()
     if not btc_ok:
         stats.btc_gate_fail += 1
         stats.reject("BTC gate failed")
