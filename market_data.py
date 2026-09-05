@@ -38,9 +38,9 @@ USER_AGENT = (
 )
 
 INTERVALS = {
-    "15m": ("15", 900),
-    "1h": ("60", 3600),
-    "4h": ("240", 14400),
+    "15m": ("900", 900),
+    "1h": ("3600", 3600),
+    "4h": ("14400", 14400),
     "1d": ("1D", 86400),
 }
 
@@ -123,6 +123,7 @@ def _make_session() -> requests.Session:
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
             "Connection": "keep-alive",
+            "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
         }
     )
     return session
@@ -468,13 +469,52 @@ def fetch_candles(
     period, _interval_seconds = _interval_config(resolution)
     requested_limit = max(MIN_VALID_CANDLES, min(int(limit), 500))
 
-    params = {
-        "symbol": normalized,
-        "period": period,
-        "type": "basic",
-    }
+    # IMPORTANT: current Paribu chart/history rejects intraday values such as
+    # period=15/60/240 with: "invalid period". Current-compatible intraday
+    # requests use TradingView-style numeric resolution in seconds plus `to`.
+    # We intentionally NEVER send period=15, period=60, or period=240.
+    interval_seconds = _interval_seconds
+    end_ms = int(time.time() * 1000)
+    end_s = int(time.time())
 
-    payload = get_json(PARIBU_CHART_HISTORY_URL, params=params)
+    variants: list[dict[str, Any]] = []
+    if resolution.lower() == "1d":
+        variants.append({
+            "symbol": normalized,
+            "period": "1D",
+            "type": "basic",
+        })
+    else:
+        variants.extend((
+            {
+                "symbol": normalized,
+                "resolution": str(interval_seconds),
+                "to": end_ms,
+            },
+            {
+                "symbol": normalized,
+                "resolution": str(interval_seconds),
+                "to": end_s,
+            },
+        ))
+
+    last_error: Optional[Exception] = None
+    payload = None
+    for request_params in variants:
+        try:
+            payload = get_json(PARIBU_CHART_HISTORY_URL, params=request_params)
+            break
+        except ParibuDataError as exc:
+            last_error = exc
+            LOGGER.warning(
+                "Paribu chart request failed for %s %s with params=%s: %s",
+                normalized, resolution, request_params, exc,
+            )
+
+    if payload is None:
+        raise CandleUnavailableError(
+            f"Paribu chart unavailable for {normalized} {resolution}: {last_error}"
+        )
     opens, highs, lows, closes, volumes, timestamps = _extract_chart_arrays(payload)
 
     length = min(
