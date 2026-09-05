@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Single entry point for the Paribu-only scanner."""
+"""Single production entry point for the Paribu Spot Sniper."""
 
 from scanner import run_scanner
 
