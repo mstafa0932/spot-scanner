@@ -111,15 +111,23 @@ class ScanStats:
     execution_fail: int = 0
     final_validation_pass: int = 0
     final_validation_fail: int = 0
+    execution_rejections: dict[str, int] | None = None
     reasons: dict[str, int] | None = None
 
     def __post_init__(self) -> None:
         if self.reasons is None:
             self.reasons = {}
+        if self.execution_rejections is None:
+            self.execution_rejections = {}
 
     def reject(self, reason: str) -> None:
         assert self.reasons is not None
         self.reasons[reason] = self.reasons.get(reason, 0) + 1
+
+    def reject_execution(self, reason: str) -> None:
+        assert self.execution_rejections is not None
+        self.execution_rejections[reason] = self.execution_rejections.get(reason, 0) + 1
+        self.reject(f"Execution: {reason}")
 
 
 @dataclass(frozen=True)
@@ -180,10 +188,10 @@ def dec(value: Any) -> Optional[Decimal]:
 
 def strength(score: int) -> str:
     if score >= 95:
-        return "🔥 A+"
+        return "馃敟 A+"
     if score >= 92:
-        return "🟢 A"
-    return "🟡 A-"
+        return "馃煝 A"
+    return "馃煛 A-"
 
 
 def price_step(price: Decimal) -> Decimal:
@@ -290,18 +298,18 @@ def score_opportunity(
     # Trend alignment: 25
     if tech.is_uptrend:
         score += 15
-        reasons.append("15m اتجاه صاعد")
+        reasons.append("15m 丕鬲噩丕賴 氐丕毓丿")
     if mtf_1h.is_uptrend:
         score += 6
-        reasons.append("1h اتجاه صاعد")
+        reasons.append("1h 丕鬲噩丕賴 氐丕毓丿")
     if mtf_4h.current_close > mtf_4h.ema50:
         score += 4
-        reasons.append("4h فوق EMA50")
+        reasons.append("4h 賮賵賯 EMA50")
 
     # Momentum: 20
     if Decimal("52") <= tech.rsi14 <= Decimal("64"):
         score += 12
-        reasons.append("RSI 15m صحي")
+        reasons.append("RSI 15m 氐丨賷")
     elif Decimal("49") <= tech.rsi14 < Decimal("52"):
         score += 8
     elif Decimal("64") < tech.rsi14 <= Decimal("68"):
@@ -309,47 +317,47 @@ def score_opportunity(
 
     if tech.macd_line > tech.macd_signal and tech.macd_histogram > 0:
         score += 8
-        reasons.append("MACD + Histogram داعمان")
+        reasons.append("MACD + Histogram 丿丕毓賲丕賳")
 
     # Volume: 15
     if tech.volume_ratio >= Decimal("2.0"):
         score += 15
-        reasons.append("حجم قوي")
+        reasons.append("丨噩賲 賯賵賷")
     elif tech.volume_ratio >= Decimal("1.5"):
         score += 12
-        reasons.append("حجم مرتفع")
+        reasons.append("丨噩賲 賲乇鬲賮毓")
     elif tech.volume_ratio >= MIN_VOLUME_RATIO:
         score += 9
-        reasons.append("حجم فوق المتوسط")
+        reasons.append("丨噩賲 賮賵賯 丕賱賲鬲賵爻胤")
 
     # Setup: 15
     if tech.is_pullback:
         score += 10
-        reasons.append("Pullback منضبط")
+        reasons.append("Pullback 賲賳囟亘胤")
     if tech.breakout:
         score += 5
-        reasons.append("Breakout مؤكد بالحجم")
+        reasons.append("Breakout 賲丐賰丿 亘丕賱丨噩賲")
     elif tech.is_bullish_candle:
         score += 3
-        reasons.append("شمعة مغلقة إيجابية")
+        reasons.append("卮賲毓丞 賲睾賱賯丞 廿賷噩丕亘賷丞")
 
     # Execution: 25
     if book.spread_percent <= Decimal("0.20"):
         score += 10
-        reasons.append("Spread Paribu ممتاز")
+        reasons.append("Spread Paribu 賲賲鬲丕夭")
     elif book.spread_percent <= MAX_SPREAD_PCT:
         score += 7
 
     if book.imbalance_ratio >= Decimal("1.30"):
         score += 10
-        reasons.append("دفتر الطلبات يميل للشراء")
+        reasons.append("丿賮鬲乇 丕賱胤賱亘丕鬲 賷賲賷賱 賱賱卮乇丕亍")
     elif book.imbalance_ratio >= MIN_ORDERBOOK_IMBALANCE:
         score += 7
-        reasons.append("دفتر الطلبات مقبول")
+        reasons.append("丿賮鬲乇 丕賱胤賱亘丕鬲 賲賯亘賵賱")
 
     if ticker.quote_volume is not None and ticker.quote_volume >= Decimal("10000000"):
         score += 5
-        reasons.append("سيولة محلية قوية")
+        reasons.append("爻賷賵賱丞 賲丨賱賷丞 賯賵賷丞")
     elif ticker.quote_volume is not None and ticker.quote_volume >= MIN_QUOTE_VOLUME_TL:
         score += 3
 
@@ -385,24 +393,24 @@ def _btc_regime(
         or btc_1h.current_close <= 0
         or btc_1h.ema21 <= 0
     ):
-        return False, "BTC بيانات المؤشر غير صالحة"
+        return False, "BTC 亘賷丕賳丕鬲 丕賱賲丐卮乇 睾賷乇 氐丕賱丨丞"
 
     btc_15_ema_distance = pct(btc_15.current_close, btc_15.ema21)
     btc_1h_ema_distance = pct(btc_1h.current_close, btc_1h.ema21)
 
     # Strong short/medium-term BTC weakness.
     if btc_15.recent_return_3 <= BTC_MAX_3CANDLE_DROP_PCT:
-        return False, f"BTC هبوط قوي خلال 3 شموع: {btc_15.recent_return_3:.2f}%"
+        return False, f"BTC 賴亘賵胤 賯賵賷 禺賱丕賱 3 卮賲賵毓: {btc_15.recent_return_3:.2f}%"
     if btc_15.recent_return_12 <= BTC_MAX_12CANDLE_DROP_PCT:
-        return False, f"BTC هبوط قوي خلال 12 شمعة: {btc_15.recent_return_12:.2f}%"
+        return False, f"BTC 賴亘賵胤 賯賵賷 禺賱丕賱 12 卮賲毓丞: {btc_15.recent_return_12:.2f}%"
     if btc_15.recent_return_48 <= BTC_MAX_48CANDLE_DROP_PCT:
-        return False, f"BTC هبوط قوي خلال 48 شمعة: {btc_15.recent_return_48:.2f}%"
+        return False, f"BTC 賴亘賵胤 賯賵賷 禺賱丕賱 48 卮賲毓丞: {btc_15.recent_return_48:.2f}%"
 
     # Significant breakdown below EMA21.
     if btc_15_ema_distance <= BTC_MAX_15M_EMA21_DISTANCE_BEARISH_PCT:
-        return False, f"BTC 15m تحت EMA21 بقوة: {btc_15_ema_distance:.2f}%"
+        return False, f"BTC 15m 鬲丨鬲 EMA21 亘賯賵丞: {btc_15_ema_distance:.2f}%"
     if btc_1h_ema_distance <= BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT:
-        return False, f"BTC 1h تحت EMA21 بقوة: {btc_1h_ema_distance:.2f}%"
+        return False, f"BTC 1h 鬲丨鬲 EMA21 亘賯賵丞: {btc_1h_ema_distance:.2f}%"
 
     # RSI < 38 blocks only with price weakness confirmation.
     if (
@@ -412,7 +420,7 @@ def _btc_regime(
     ):
         return (
             False,
-            f"BTC ضعف هبوطي مؤكد: RSI={btc_15.rsi14:.1f} | "
+            f"BTC 囟毓賮 賴亘賵胤賷 賲丐賰丿: RSI={btc_15.rsi14:.1f} | "
             f"3C={btc_15.recent_return_3:.2f}%",
         )
 
@@ -423,7 +431,7 @@ def _btc_regime(
         and btc_15.current_close >= btc_15.ema21
         and btc_1h.current_close >= btc_1h.ema21
     ):
-        return True, "BTC bullish — السماح الكامل بالفحص"
+        return True, "BTC bullish 鈥� 丕賱爻賲丕丨 丕賱賰丕賲賱 亘丕賱賮丨氐"
 
     # Neutral / cautious regime. RSI in the low 40s is not a hard stop.
     if (
@@ -433,10 +441,10 @@ def _btc_regime(
         if btc_15.rsi14 < BTC_CAUTION_RSI:
             return (
                 True,
-                f"BTC neutral/cautious — RSI={btc_15.rsi14:.1f} "
-                f"— الفحص مسموح بحذر",
+                f"BTC neutral/cautious 鈥� RSI={btc_15.rsi14:.1f} "
+                f"鈥� 丕賱賮丨氐 賲爻賲賵丨 亘丨匕乇",
             )
-        return True, "BTC neutral/mixed — السماح بالفحص مع حماية"
+        return True, "BTC neutral/mixed 鈥� 丕賱爻賲丕丨 亘丕賱賮丨氐 賲毓 丨賲丕賷丞"
 
     # Mixed but not structurally bearish.
     if (
@@ -444,9 +452,9 @@ def _btc_regime(
         and btc_1h_ema_distance > BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT
         and btc_15.rsi14 >= BTC_HARD_BEAR_RSI
     ):
-        return True, f"BTC mixed but acceptable — RSI={btc_15.rsi14:.1f}"
+        return True, f"BTC mixed but acceptable 鈥� RSI={btc_15.rsi14:.1f}"
 
-    return False, "BTC regime ضعيف أكثر من الحد المسموح للحماية"
+    return False, "BTC regime 囟毓賷賮 兀賰孬乇 賲賳 丕賱丨丿 丕賱賲爻賲賵丨 賱賱丨賲丕賷丞"
 
 
 def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
@@ -463,9 +471,9 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
         source_15 = str(btc_15_df.attrs.get("source", "")).upper()
         source_1h = str(btc_1h_df.attrs.get("source", "")).upper()
         if source_15 != "PARIBU":
-            return False, None, f"BTC 15m مصدر غير موثوق: {source_15}"
+            return False, None, f"BTC 15m 賲氐丿乇 睾賷乇 賲賵孬賵賯: {source_15}"
         if source_1h != "PARIBU":
-            return False, None, f"BTC 1h مصدر غير موثوق: {source_1h}"
+            return False, None, f"BTC 1h 賲氐丿乇 睾賷乇 賲賵孬賵賯: {source_1h}"
 
         allowed, reason = _btc_regime(btc_15, btc_1h)
         return allowed, btc_15, reason
@@ -507,20 +515,20 @@ def setup_gate(
         # Neutral/cautious BTC: permit healthy recovery setups in the low/mid 40s.
         rsi_low, rsi_high = Decimal("44"), Decimal("70")
     else:
-        return False, "BTC ضعيف — Setup محمي"
+        return False, "BTC 囟毓賷賮 鈥� Setup 賲丨賲賷"
 
     if tech.rsi14 < rsi_low or tech.rsi14 > rsi_high:
-        return False, f"RSI خارج النطاق التكيفي {rsi_low:.0f}-{rsi_high:.0f}"
+        return False, f"RSI 禺丕乇噩 丕賱賳胤丕賯 丕賱鬲賰賷賮賷 {rsi_low:.0f}-{rsi_high:.0f}"
     if tech.recent_return_3 >= MAX_RETURN_3:
-        return False, "Anti-FOMO 3 شموع"
+        return False, "Anti-FOMO 3 卮賲賵毓"
     if tech.recent_return_12 >= MAX_RETURN_12:
-        return False, "Anti-FOMO 12 شمعة"
+        return False, "Anti-FOMO 12 卮賲毓丞"
     if tech.recent_return_48 >= MAX_RETURN_48:
-        return False, "Anti-FOMO 48 شمعة"
+        return False, "Anti-FOMO 48 卮賲毓丞"
 
     atr_pct = tech.atr14 / tech.current_close * Decimal("100")
     if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
-        return False, "ATR خارج النطاق"
+        return False, "ATR 禺丕乇噩 丕賱賳胤丕賯"
 
     # Primary structures.
     pullback_ok = bool(
@@ -543,17 +551,17 @@ def setup_gate(
     )
 
     if not (pullback_ok or breakout_ok or recovery_ok):
-        return False, "لا يوجد Pullback/Breakout/Recovery عالي الجودة"
+        return False, "賱丕 賷賵噩丿 Pullback/Breakout/Recovery 毓丕賱賷 丕賱噩賵丿丞"
 
     # MACD confirmation remains mandatory.
     if tech.macd_histogram <= 0 or tech.macd_line <= tech.macd_signal:
-        return False, "MACD لا يؤكد الزخم"
+        return False, "MACD 賱丕 賷丐賰丿 丕賱夭禺賲"
 
     if breakout_ok:
-        return True, "BREAKOUT — OK"
+        return True, "BREAKOUT 鈥� OK"
     if pullback_ok:
-        return True, "PULLBACK — OK"
-    return True, "RECOVERY — OK"
+        return True, "PULLBACK 鈥� OK"
+    return True, "RECOVERY 鈥� OK"
 
 
 def multi_timeframe_gate(
@@ -568,9 +576,9 @@ def multi_timeframe_gate(
     if tech_4h.current_close < tech_4h.ema50:
         return False, "4h below EMA50"
     if tech_1h.distance_ema21_pct > MAX_1H_DISTANCE_FROM_EMA21_PCT:
-        return False, "1h بعيد جدًا عن EMA21"
+        return False, "1h 亘毓賷丿 噩丿賸丕 毓賳 EMA21"
     if (tech_4h.current_close / tech_4h.ema50 - Decimal("1")) * Decimal("100") > MAX_4H_DISTANCE_FROM_EMA50_PCT:
-        return False, "4h ممتد جدًا عن EMA50"
+        return False, "4h 賲賲鬲丿 噩丿賸丕 毓賳 EMA50"
     return True, "OK"
 
 
@@ -580,9 +588,9 @@ def execution_levels(
     book: OrderBookSnapshot,
 ) -> tuple[Optional[TradeLevels], str]:
     if ticker.ask is None or ticker.bid is None:
-        return None, "Paribu Bid/Ask غير متوفر"
+        return None, "Paribu Bid/Ask 睾賷乇 賲鬲賵賮乇"
     if ticker.ask <= 0 or ticker.bid <= 0 or ticker.ask < ticker.bid:
-        return None, "Paribu Bid/Ask غير صالح"
+        return None, "Paribu Bid/Ask 睾賷乇 氐丕賱丨"
     if book.spread_percent > MAX_SPREAD_PCT:
         return None, f"Spread {book.spread_percent:.2f}% > {MAX_SPREAD_PCT}%"
     if book.imbalance_ratio < MIN_ORDERBOOK_IMBALANCE:
@@ -592,7 +600,7 @@ def execution_levels(
     close_15 = tech.current_close
     entry_gap = pct(entry, close_15)
     if entry_gap < Decimal("-0.25") or entry_gap > MAX_ENTRY_GAP_FROM_CLOSED_PCT:
-        return None, f"Entry gap {entry_gap:.2f}% غير مناسب"
+        return None, f"Entry gap {entry_gap:.2f}% 睾賷乇 賲賳丕爻亘"
 
     atr_pct = tech.atr14 / close_15 * Decimal("100")
     risk_pct = max(atr_pct * ATR_STOP_MULTIPLIER, MIN_RISK_PCT)
@@ -607,7 +615,7 @@ def execution_levels(
 
     stop = entry * (Decimal("1") - risk_pct / Decimal("100"))
     if stop <= 0 or stop >= entry:
-        return None, "Stop غير صالح"
+        return None, "Stop 睾賷乇 氐丕賱丨"
 
     resistance: Optional[Decimal] = None
     resistances = [
@@ -619,7 +627,7 @@ def execution_levels(
         resistance = min(resistances)
         resistance_room = pct(resistance, entry)
         if resistance_room < MIN_RESISTANCE_ROOM_PCT:
-            return None, f"المقاومة قريبة جدًا: {resistance_room:.2f}%"
+            return None, f"丕賱賲賯丕賵賲丞 賯乇賷亘丞 噩丿賸丕: {resistance_room:.2f}%"
 
     minimum_tp1 = entry * (Decimal("1") + MIN_TP1_PCT / Decimal("100"))
     atr_tp1 = entry * (
@@ -654,15 +662,15 @@ def execution_levels(
     risk = entry - stop
     reward = tp1 - entry
     if risk <= 0 or reward <= 0:
-        return None, "Risk/Reward غير صالح"
+        return None, "Risk/Reward 睾賷乇 氐丕賱丨"
 
     rr = reward / risk
     if gross_tp1_pct < MIN_TP1_PCT:
-        return None, f"TP1 {gross_tp1_pct:.2f}% أقل من الحد"
+        return None, f"TP1 {gross_tp1_pct:.2f}% 兀賯賱 賲賳 丕賱丨丿"
     if net_tp1_pct < MIN_NET_TP1_PCT:
-        return None, f"صافي TP1 {net_tp1_pct:.2f}% أقل من الحد"
+        return None, f"氐丕賮賷 TP1 {net_tp1_pct:.2f}% 兀賯賱 賲賳 丕賱丨丿"
     if rr < MIN_RR:
-        return None, f"R:R {rr:.2f} أقل من {MIN_RR}"
+        return None, f"R:R {rr:.2f} 兀賯賱 賲賳 {MIN_RR}"
 
     return (
         TradeLevels(
@@ -782,35 +790,35 @@ def final_validate(
 
 
 def format_opportunity(opp: Opportunity, rank: int) -> str:
-    resistance = fmt(opp.resistance) if opp.resistance is not None else "غير محددة"
+    resistance = fmt(opp.resistance) if opp.resistance is not None else "睾賷乇 賲丨丿丿丞"
     liquidity_note = (
-        f"{opp.orderbook_imbalance:.2f}x شراء/بيع"
+        f"{opp.orderbook_imbalance:.2f}x 卮乇丕亍/亘賷毓"
     )
     return (
-        f"🎯 <b>PARIBU SPOT — إشارة مؤكدة #{rank}</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━\n"
-        f"🪙 <b>{html.escape(opp.symbol)}</b>\n"
-        f"🏷️ <b>المصدر:</b> {opp.source} فقط\n"
-        f"💪 <b>الدرجة:</b> {opp.score}/100 — {opp.strength}\n"
-        f"🧩 <b>Setup:</b> {opp.setup}\n\n"
-        f"💵 <b>Paribu Ask:</b> <code>{fmt(opp.ask)}</code>\n"
-        f"💵 <b>الدخول:</b> <code>{fmt(opp.entry)}</code>\n"
-        f"🛑 <b>وقف الخسارة:</b> <code>{fmt(opp.stop)}</code>\n"
-        f"🎯 <b>TP1:</b> <code>{fmt(opp.tp1)}</code> (+{opp.tp1_pct:.2f}%)\n"
-        f"🚀 <b>TP2:</b> <code>{fmt(opp.tp2)}</code>\n"
-        f"🧱 <b>المقاومة:</b> <code>{resistance}</code>\n\n"
-        f"📐 <b>R:R:</b> 1:{opp.rr:.2f}\n"
-        f"💰 <b>صافي TP1 تقديري بعد الرسوم/الانزلاق:</b> +{opp.net_tp1_pct:.2f}%\n"
-        f"📏 <b>Spread Paribu:</b> {opp.spread_pct:.2f}%\n"
-        f"📚 <b>Order Book:</b> {liquidity_note}\n\n"
-        f"📊 <b>RSI 15m:</b> {opp.rsi_15m:.1f}\n"
-        f"📊 <b>ATR 15m:</b> {opp.atr_pct_15m:.2f}%\n"
-        f"💧 <b>Volume:</b> {opp.volume_ratio_15m:.2f}x\n"
-        f"📌 <b>إغلاق 15m المرجعي:</b> <code>{fmt(opp.closed_price_15m)}</code>\n\n"
-        f"✅ <b>اجتاز {opp.validation_passes}/15 بوابة تحقق إلزامية.</b>\n"
-        f"🧠 <b>الأسباب:</b> {html.escape(opp.reason)}\n\n"
-        "⚠️ <b>Spot فقط — التنفيذ يدوي.</b>\n"
-        "⚠️ هذه إشارة منضبطة بالبيانات وليست ضمانًا للربح."
+        f"馃幆 <b>PARIBU SPOT 鈥� 廿卮丕乇丞 賲丐賰丿丞 #{rank}</b>\n"
+        "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n"
+        f"馃獧 <b>{html.escape(opp.symbol)}</b>\n"
+        f"馃彿锔� <b>丕賱賲氐丿乇:</b> {opp.source} 賮賯胤\n"
+        f"馃挭 <b>丕賱丿乇噩丞:</b> {opp.score}/100 鈥� {opp.strength}\n"
+        f"馃З <b>Setup:</b> {opp.setup}\n\n"
+        f"馃挼 <b>Paribu Ask:</b> <code>{fmt(opp.ask)}</code>\n"
+        f"馃挼 <b>丕賱丿禺賵賱:</b> <code>{fmt(opp.entry)}</code>\n"
+        f"馃洃 <b>賵賯賮 丕賱禺爻丕乇丞:</b> <code>{fmt(opp.stop)}</code>\n"
+        f"馃幆 <b>TP1:</b> <code>{fmt(opp.tp1)}</code> (+{opp.tp1_pct:.2f}%)\n"
+        f"馃殌 <b>TP2:</b> <code>{fmt(opp.tp2)}</code>\n"
+        f"馃П <b>丕賱賲賯丕賵賲丞:</b> <code>{resistance}</code>\n\n"
+        f"馃搻 <b>R:R:</b> 1:{opp.rr:.2f}\n"
+        f"馃挵 <b>氐丕賮賷 TP1 鬲賯丿賷乇賷 亘毓丿 丕賱乇爻賵賲/丕賱丕賳夭賱丕賯:</b> +{opp.net_tp1_pct:.2f}%\n"
+        f"馃搹 <b>Spread Paribu:</b> {opp.spread_pct:.2f}%\n"
+        f"馃摎 <b>Order Book:</b> {liquidity_note}\n\n"
+        f"馃搳 <b>RSI 15m:</b> {opp.rsi_15m:.1f}\n"
+        f"馃搳 <b>ATR 15m:</b> {opp.atr_pct_15m:.2f}%\n"
+        f"馃挧 <b>Volume:</b> {opp.volume_ratio_15m:.2f}x\n"
+        f"馃搶 <b>廿睾賱丕賯 15m 丕賱賲乇噩毓賷:</b> <code>{fmt(opp.closed_price_15m)}</code>\n\n"
+        f"鉁� <b>丕噩鬲丕夭 {opp.validation_passes}/15 亘賵丕亘丞 鬲丨賯賯 廿賱夭丕賲賷丞.</b>\n"
+        f"馃 <b>丕賱兀爻亘丕亘:</b> {html.escape(opp.reason)}\n\n"
+        "鈿狅笍 <b>Spot 賮賯胤 鈥� 丕賱鬲賳賮賷匕 賷丿賵賷.</b>\n"
+        "鈿狅笍 賴匕賴 廿卮丕乇丞 賲賳囟亘胤丞 亘丕賱亘賷丕賳丕鬲 賵賱賷爻鬲 囟賲丕賳賸丕 賱賱乇亘丨."
     )
 
 
@@ -821,30 +829,41 @@ def format_report(stats: ScanStats, btc_reason: Optional[str] = None) -> str:
         reverse=True,
     )[:8]
     reason_lines = "\n".join(
-        f"• {html.escape(reason)}: {count}"
+        f"鈥� {html.escape(reason)}: {count}"
         for reason, count in reasons
-    ) or "لا توجد أسباب رفض مسجلة"
+    ) or "賱丕 鬲賵噩丿 兀爻亘丕亘 乇賮囟 賲爻噩賱丞"
 
-    btc_text = html.escape(btc_reason or "غير منفذ")
+    btc_text = html.escape(btc_reason or "睾賷乇 賲賳賮匕")
+    execution_rejections = sorted(
+        (stats.execution_rejections or {}).items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:6]
+    execution_lines = "\n".join(
+        f"鈥� {html.escape(reason)}: {count}"
+        for reason, count in execution_rejections
+    ) or "賱丕 鬲賵噩丿 丨丕賱丕鬲 乇賮囟 Execution"
     return (
-        "🔍 <b>Paribu — فحص Sniper الصارم</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 الأزواج: {stats.total_markets}\n"
-        f"💧 اجتازت السيولة: {stats.liquidity_pass} | رفض: {stats.liquidity_fail}\n"
-        f"📚 اجتازت Order Book: {stats.orderbook_pass} | رفض: {stats.orderbook_fail}\n"
-        f"📏 اجتازت Spread: {stats.spread_pass} | رفض: {stats.spread_fail}\n"
-        f"🧪 محاولات فنية: {stats.technical_attempted}\n"
-        f"🕯️ شموع Paribu ناجحة: {stats.candles_pass} | فاشلة: {stats.candles_fail}\n"
-        f"📐 مؤشرات ناجحة: {stats.indicator_pass} | فاشلة: {stats.indicator_fail}\n"
-        f"₿ <b>BTC Gate:</b> {btc_text}\n"
-        f"🧭 MTF ناجح: {stats.mtf_pass} | فاشل: {stats.mtf_fail}\n"
-        f"🎯 Setup ناجح: {stats.setup_pass} | فاشل: {stats.setup_fail}\n"
-        f"⭐ Score ناجح: {stats.score_pass} | فاشل: {stats.score_fail}\n"
-        f"💰 Execution ناجح: {stats.execution_pass} | فاشل: {stats.execution_fail}\n"
-        f"🔐 Final validation ناجح: {stats.final_validation_pass} | فاشل: {stats.final_validation_fail}\n\n"
-        "🔎 <b>أكثر أسباب الرفض:</b>\n"
+        "馃攳 <b>Paribu 鈥� 賮丨氐 Sniper 丕賱氐丕乇賲</b>\n"
+        "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n"
+        f"馃搳 丕賱兀夭賵丕噩: {stats.total_markets}\n"
+        f"馃挧 丕噩鬲丕夭鬲 丕賱爻賷賵賱丞: {stats.liquidity_pass} | 乇賮囟: {stats.liquidity_fail}\n"
+        f"馃摎 丕噩鬲丕夭鬲 Order Book: {stats.orderbook_pass} | 乇賮囟: {stats.orderbook_fail}\n"
+        f"馃搹 丕噩鬲丕夭鬲 Spread: {stats.spread_pass} | 乇賮囟: {stats.spread_fail}\n"
+        f"馃И 賲丨丕賵賱丕鬲 賮賳賷丞: {stats.technical_attempted}\n"
+        f"馃暞锔� 卮賲賵毓 Paribu 賳丕噩丨丞: {stats.candles_pass} | 賮丕卮賱丞: {stats.candles_fail}\n"
+        f"馃搻 賲丐卮乇丕鬲 賳丕噩丨丞: {stats.indicator_pass} | 賮丕卮賱丞: {stats.indicator_fail}\n"
+        f"鈧� <b>BTC Gate:</b> {btc_text}\n"
+        f"馃Л MTF 賳丕噩丨: {stats.mtf_pass} | 賮丕卮賱: {stats.mtf_fail}\n"
+        f"馃幆 Setup 賳丕噩丨: {stats.setup_pass} | 賮丕卮賱: {stats.setup_fail}\n"
+        f"猸� Score 賳丕噩丨: {stats.score_pass} | 賮丕卮賱: {stats.score_fail}\n"
+        f"馃挵 Execution 賳丕噩丨: {stats.execution_pass} | 賮丕卮賱: {stats.execution_fail}\n"
+        f"馃攼 Final validation 賳丕噩丨: {stats.final_validation_pass} | 賮丕卮賱: {stats.final_validation_fail}\n\n"
+        "馃挵 <b>鬲卮禺賷氐 乇賮囟 Execution:</b>\n"
+        f"{execution_lines}\n\n"
+        "馃攷 <b>兀賰孬乇 兀爻亘丕亘 丕賱乇賮囟:</b>\n"
         f"{reason_lines}\n\n"
-        "🛡️ <b>لا يتم إرسال أي توصية إذا فشل أي شرط إلزامي.</b>"
+        "馃洝锔� <b>賱丕 賷鬲賲 廿乇爻丕賱 兀賷 鬲賵氐賷丞 廿匕丕 賮卮賱 兀賷 卮乇胤 廿賱夭丕賲賷.</b>"
     )
 
 
@@ -857,31 +876,12 @@ def build_candidate(
     tech_15: IndicatorResult,
     tech_1h: IndicatorResult,
     tech_4h: IndicatorResult,
-    btc_15: Optional[IndicatorResult] = None,
-) -> tuple[Optional[Opportunity], str]:
-    setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
-    if not setup_ok:
-        return None, setup_reason
-
-    mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
-    if not mtf_ok:
-        return None, mtf_reason
-
-    levels, level_reason = execution_levels(tech_15, ticker, book)
-    if levels is None:
-        return None, level_reason
-
-    score_value, reasons = score_opportunity(
-        tech_15,
-        ticker,
-        book,
-        tech_1h,
-        tech_4h,
-    )
-    if score_value < MIN_SCORE:
-        return None, f"Score {score_value} < {MIN_SCORE}"
-
-    opportunity = Opportunity(
+    levels: TradeLevels,
+    score_value: int,
+    reasons: list[str],
+) -> Opportunity:
+    """Build an already validated opportunity without re-running any gate."""
+    return Opportunity(
         symbol=ticker.symbol,
         score=score_value,
         strength=strength(score_value),
@@ -907,9 +907,8 @@ def build_candidate(
         close_timestamp_15m=tech_15.latest_closed_timestamp,
         close_timestamp_1h=tech_1h.latest_closed_timestamp,
         close_timestamp_4h=tech_4h.latest_closed_timestamp,
-        validation_passes=14,
+        validation_passes=15,
     )
-    return opportunity, "OK"
 
 
 def run_scanner() -> None:
@@ -920,7 +919,7 @@ def run_scanner() -> None:
         snapshot = get_market_snapshot()
     except ParibuDataError as exc:
         send_telegram(
-            "🚨 <b>PARIBU SCANNER ERROR</b>\n\n"
+            "馃毃 <b>PARIBU SCANNER ERROR</b>\n\n"
             f"<code>{html.escape(str(exc))}</code>"
         )
         return
@@ -932,9 +931,9 @@ def run_scanner() -> None:
         stats.btc_gate_fail += 1
         stats.reject("BTC gate failed")
         send_telegram(
-            "🛡️ <b>Paribu Sniper متوقف مؤقتًا</b>\n\n"
-            f"سبب حماية السوق: {html.escape(btc_reason)}\n\n"
-            "لم يتم إرسال أي توصية لأن شرط BTC الإجباري لم يمر."
+            "馃洝锔� <b>Paribu Sniper 賲鬲賵賯賮 賲丐賯鬲賸丕</b>\n\n"
+            f"爻亘亘 丨賲丕賷丞 丕賱爻賵賯: {html.escape(btc_reason)}\n\n"
+            "賱賲 賷鬲賲 廿乇爻丕賱 兀賷 鬲賵氐賷丞 賱兀賳 卮乇胤 BTC 丕賱廿噩亘丕乇賷 賱賲 賷賲乇."
         )
         return
     stats.btc_gate_pass += 1
@@ -955,7 +954,7 @@ def run_scanner() -> None:
 
         if ticker.quote_volume is None or ticker.quote_volume < MIN_QUOTE_VOLUME_TL:
             stats.liquidity_fail += 1
-            stats.reject("سيولة أقل من الحد")
+            stats.reject("爻賷賵賱丞 兀賯賱 賲賳 丕賱丨丿")
             continue
         stats.liquidity_pass += 1
 
@@ -967,7 +966,7 @@ def run_scanner() -> None:
             book = get_order_book(ticker.symbol, ORDERBOOK_DEPTH)
         except Exception as exc:
             stats.orderbook_fail += 1
-            stats.reject("فشل Order Book Paribu")
+            stats.reject("賮卮賱 Order Book Paribu")
             LOGGER.debug("%s orderbook failure: %s", ticker.symbol, exc)
             continue
 
@@ -979,7 +978,7 @@ def run_scanner() -> None:
         stats.spread_pass += 1
 
         if book.imbalance_ratio < MIN_ORDERBOOK_IMBALANCE:
-            stats.reject("Order Book يميل للبيع")
+            stats.reject("Order Book 賷賲賷賱 賱賱亘賷毓")
             continue
 
         if stats.technical_attempted >= MAX_TECHNICAL_MARKETS:
@@ -992,7 +991,7 @@ def run_scanner() -> None:
             df_4h = fetch_candles(ticker.symbol, "4h", CANDLE_LIMIT)
         except Exception as exc:
             stats.candles_fail += 1
-            stats.reject("فشل شموع Paribu")
+            stats.reject("賮卮賱 卮賲賵毓 Paribu")
             LOGGER.debug("%s candle failure: %s", ticker.symbol, exc)
             continue
 
@@ -1001,7 +1000,7 @@ def run_scanner() -> None:
             for frame in (df_15, df_1h, df_4h)
         ):
             stats.candles_fail += 1
-            stats.reject("مصدر الشموع ليس Paribu")
+            stats.reject("賲氐丿乇 丕賱卮賲賵毓 賱賷爻 Paribu")
             continue
 
         stats.candles_pass += 1
@@ -1011,9 +1010,19 @@ def run_scanner() -> None:
         tech_4h = analyze_symbol(df_4h)
         if tech_15 is None or tech_1h is None or tech_4h is None:
             stats.indicator_fail += 1
-            stats.reject("فشل المؤشرات")
+            stats.reject("賮卮賱 丕賱賲丐卮乇丕鬲")
             continue
         stats.indicator_pass += 1
+
+        # Stage order is deliberate: MTF 鈫� Setup 鈫� Execution 鈫� Score.
+        # Each stage is evaluated exactly once so counters and rejection reasons
+        # describe the real gate that stopped the candidate.
+        mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
+        if not mtf_ok:
+            stats.mtf_fail += 1
+            stats.reject(mtf_reason)
+            continue
+        stats.mtf_pass += 1
 
         setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
         if not setup_ok:
@@ -1022,31 +1031,36 @@ def run_scanner() -> None:
             continue
         stats.setup_pass += 1
 
-        mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
-        if not mtf_ok:
-            stats.mtf_fail += 1
-            stats.reject(mtf_reason)
+        levels, level_reason = execution_levels(tech_15, ticker, book)
+        if levels is None:
+            stats.execution_fail += 1
+            stats.reject_execution(level_reason)
             continue
-        stats.mtf_pass += 1
+        stats.execution_pass += 1
 
-        opportunity, rejection = build_candidate(
+        score_value, score_reasons = score_opportunity(
+            tech_15,
+            ticker,
+            book,
+            tech_1h,
+            tech_4h,
+        )
+        if score_value < MIN_SCORE:
+            stats.score_fail += 1
+            stats.reject(f"Score {score_value} < {MIN_SCORE}")
+            continue
+        stats.score_pass += 1
+
+        opportunity = build_candidate(
             ticker,
             book,
             tech_15,
             tech_1h,
             tech_4h,
-            btc_15=btc_15,
+            levels=levels,
+            score_value=score_value,
+            reasons=score_reasons,
         )
-        if opportunity is None:
-            if "Score" in rejection:
-                stats.score_fail += 1
-            else:
-                stats.execution_fail += 1
-            stats.reject(rejection)
-            continue
-
-        stats.score_pass += 1
-        stats.execution_pass += 1
 
         if not cooldown_allowed(opportunity.symbol, state):
             stats.reject("Cooldown")
@@ -1080,10 +1094,10 @@ def run_scanner() -> None:
         return
 
     header = (
-        "🔥 <b>Paribu — فرص Spot عالية الانضباط</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━\n"
-        f"تم تمرير <b>{len(selected)}</b> فرصة بعد فحص متعدد المراحل وإعادة تحقق نهائية.\n"
-        "📌 جميع بيانات السعر والشموع ودفتر الطلبات من Paribu فقط."
+        "馃敟 <b>Paribu 鈥� 賮乇氐 Spot 毓丕賱賷丞 丕賱丕賳囟亘丕胤</b>\n"
+        "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n"
+        f"鬲賲 鬲賲乇賷乇 <b>{len(selected)}</b> 賮乇氐丞 亘毓丿 賮丨氐 賲鬲毓丿丿 丕賱賲乇丕丨賱 賵廿毓丕丿丞 鬲丨賯賯 賳賴丕卅賷丞.\n"
+        "馃搶 噩賲賷毓 亘賷丕賳丕鬲 丕賱爻毓乇 賵丕賱卮賲賵毓 賵丿賮鬲乇 丕賱胤賱亘丕鬲 賲賳 Paribu 賮賯胤."
     )
     send_telegram(header)
 
