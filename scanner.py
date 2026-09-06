@@ -112,11 +112,19 @@ class ScanStats:
     execution_fail: int = 0
     final_validation_pass: int = 0
     final_validation_fail: int = 0
+    execution_rejections: dict[str, int] | None = None
     reasons: dict[str, int] | None = None
 
     def __post_init__(self) -> None:
+        if self.execution_rejections is None:
+            self.execution_rejections = {}
         if self.reasons is None:
             self.reasons = {}
+
+    def reject_execution(self, reason: str) -> None:
+        assert self.execution_rejections is not None
+        self.execution_rejections[reason] = self.execution_rejections.get(reason, 0) + 1
+        self.reject(f"Execution: {reason}")
 
     def reject(self, reason: str) -> None:
         assert self.reasons is not None
@@ -831,6 +839,15 @@ def format_report(stats: ScanStats, btc_reason: Optional[str] = None) -> str:
     ) or "لا توجد أسباب رفض مسجلة"
 
     btc_text = html.escape(btc_reason or "غير منفذ")
+    execution_rejections = sorted(
+        (stats.execution_rejections or {}).items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:6]
+    execution_lines = "\n".join(
+        f"• {html.escape(reason)}: {count}"
+        for reason, count in execution_rejections
+    ) or "لا توجد حالات رفض Execution"
     return (
         "🔍 <b>Paribu — فحص Sniper الصارم</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
@@ -847,6 +864,8 @@ def format_report(stats: ScanStats, btc_reason: Optional[str] = None) -> str:
         f"⭐ Score ناجح: {stats.score_pass} | فاشل: {stats.score_fail}\n"
         f"💰 Execution ناجح: {stats.execution_pass} | فاشل: {stats.execution_fail}\n"
         f"🔐 Final validation ناجح: {stats.final_validation_pass} | فاشل: {stats.final_validation_fail}\n\n"
+        "💰 <b>تشخيص رفض Execution:</b>\n"
+        f"{execution_lines}\n\n"
         "🔎 <b>أكثر أسباب الرفض:</b>\n"
         f"{reason_lines}\n\n"
         "🛡️ <b>لا يتم إرسال أي توصية إذا فشل أي شرط إلزامي.</b>"
@@ -862,31 +881,12 @@ def build_candidate(
     tech_15: IndicatorResult,
     tech_1h: IndicatorResult,
     tech_4h: IndicatorResult,
-    btc_15: Optional[IndicatorResult] = None,
-) -> tuple[Optional[Opportunity], str]:
-    setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
-    if not setup_ok:
-        return None, setup_reason
-
-    mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
-    if not mtf_ok:
-        return None, mtf_reason
-
-    levels, level_reason = execution_levels(tech_15, ticker, book)
-    if levels is None:
-        return None, level_reason
-
-    score_value, reasons = score_opportunity(
-        tech_15,
-        ticker,
-        book,
-        tech_1h,
-        tech_4h,
-    )
-    if score_value < MIN_SCORE:
-        return None, f"Score {score_value} < {MIN_SCORE}"
-
-    opportunity = Opportunity(
+    levels: TradeLevels,
+    score_value: int,
+    reasons: list[str],
+) -> Opportunity:
+    """Build an already validated opportunity without re-running any gate."""
+    return Opportunity(
         symbol=ticker.symbol,
         score=score_value,
         strength=strength(score_value),
@@ -912,9 +912,8 @@ def build_candidate(
         close_timestamp_15m=tech_15.latest_closed_timestamp,
         close_timestamp_1h=tech_1h.latest_closed_timestamp,
         close_timestamp_4h=tech_4h.latest_closed_timestamp,
-        validation_passes=14,
+        validation_passes=15,
     )
-    return opportunity, "OK"
 
 
 def run_scanner() -> None:
@@ -1020,13 +1019,8 @@ def run_scanner() -> None:
             continue
         stats.indicator_pass += 1
 
-        setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
-        if not setup_ok:
-            stats.setup_fail += 1
-            stats.reject(setup_reason)
-            continue
-        stats.setup_pass += 1
-
+        # Stage order is deliberate: MTF -> Setup -> Execution -> Score.
+        # Each gate is evaluated exactly once so counters describe the real bottleneck.
         mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
         if not mtf_ok:
             stats.mtf_fail += 1
@@ -1034,24 +1028,33 @@ def run_scanner() -> None:
             continue
         stats.mtf_pass += 1
 
-        opportunity, rejection = build_candidate(
-            ticker,
-            book,
-            tech_15,
-            tech_1h,
-            tech_4h,
-            btc_15=btc_15,
-        )
-        if opportunity is None:
-            if "Score" in rejection:
-                stats.score_fail += 1
-            else:
-                stats.execution_fail += 1
-            stats.reject(rejection)
+        setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
+        if not setup_ok:
+            stats.setup_fail += 1
+            stats.reject(setup_reason)
             continue
+        stats.setup_pass += 1
 
-        stats.score_pass += 1
+        levels, level_reason = execution_levels(tech_15, ticker, book)
+        if levels is None:
+            stats.execution_fail += 1
+            stats.reject_execution(level_reason)
+            continue
         stats.execution_pass += 1
+
+        score_value, score_reasons = score_opportunity(
+            tech_15, ticker, book, tech_1h, tech_4h
+        )
+        if score_value < MIN_SCORE:
+            stats.score_fail += 1
+            stats.reject(f"Score {score_value} < {MIN_SCORE}")
+            continue
+        stats.score_pass += 1
+
+        opportunity = build_candidate(
+            ticker, book, tech_15, tech_1h, tech_4h,
+            levels=levels, score_value=score_value, reasons=score_reasons
+        )
 
         if not cooldown_allowed(opportunity.symbol, state):
             stats.reject("Cooldown")
