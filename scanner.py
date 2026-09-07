@@ -588,94 +588,169 @@ def execution_levels(
     ticker: Ticker,
     book: OrderBookSnapshot,
 ) -> tuple[Optional[TradeLevels], str]:
-    # Paribu Order Book is the execution source of truth. The ticker Bid/Ask
-    # can occasionally be absent even when the live book contains valid prices.
+    """
+    Strict Paribu execution gate.
+
+    Resistance is treated as a TP/R:R constraint, not as a blind fixed-distance
+    rejection. This prevents rejecting a setup only because resistance is
+    slightly closer than MIN_RESISTANCE_ROOM_PCT when the actual TP1, net TP1,
+    and R:R requirements can still be satisfied.
+    """
+
+    # Paribu Order Book is the execution source of truth.
     bid = dec(book.best_bid)
     ask = dec(book.best_ask)
+
     if bid is None or ask is None:
         return None, "Paribu Order Book Bid/Ask غير متوفر"
     if bid <= 0 or ask <= 0 or ask < bid:
         return None, "Paribu Order Book Bid/Ask غير صالح"
+
+    # Spread remains a hard gate.
     if book.spread_percent > MAX_SPREAD_PCT:
         return None, f"Spread {book.spread_percent:.2f}% > {MAX_SPREAD_PCT}%"
+
+    # Order-book imbalance remains a hard gate.
     if book.imbalance_ratio < MIN_ORDERBOOK_IMBALANCE:
-        return None, f"OrderBook imbalance {book.imbalance_ratio:.2f} < {MIN_ORDERBOOK_IMBALANCE}"
+        return (
+            None,
+            f"OrderBook imbalance {book.imbalance_ratio:.2f} "
+            f"< {MIN_ORDERBOOK_IMBALANCE}",
+        )
 
     entry = ask
     close_15 = tech.current_close
+    if close_15 <= 0:
+        return None, "15m close غير صالح"
+
+    # Entry gap from the latest closed 15m candle.
     entry_gap = pct(entry, close_15)
     if entry_gap < Decimal("-0.25") or entry_gap > MAX_ENTRY_GAP_FROM_CLOSED_PCT:
         return None, f"Entry gap {entry_gap:.2f}% غير مناسب"
 
+    # ATR / stop / risk.
     atr_pct = tech.atr14 / close_15 * Decimal("100")
-    risk_pct = max(atr_pct * ATR_STOP_MULTIPLIER, MIN_RISK_PCT)
-    risk_pct = min(risk_pct, MAX_RISK_PCT)
+    if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
+        return None, f"ATR {atr_pct:.2f}% خارج النطاق"
 
-    # Respect the actual recent Paribu swing low when it is tighter than the
-    # purely ATR-based stop. We do not move the stop above entry.
+    risk_pct = max(
+        atr_pct * ATR_STOP_MULTIPLIER,
+        MIN_RISK_PCT,
+    )
+
+    # Respect the actual recent swing low without placing the stop above entry.
     if tech.swing_low > 0 and tech.swing_low < close_15:
         swing_distance = pct(close_15, tech.swing_low)
         if swing_distance > 0:
-            risk_pct = min(MAX_RISK_PCT, max(risk_pct, swing_distance))
+            risk_pct = max(risk_pct, swing_distance)
+
+    risk_pct = min(risk_pct, MAX_RISK_PCT)
 
     stop = entry * (Decimal("1") - risk_pct / Decimal("100"))
     if stop <= 0 or stop >= entry:
         return None, "Stop غير صالح"
 
+    # Find the nearest recent structural resistance above the entry.
     resistance: Optional[Decimal] = None
     resistances = [
         value
         for value in (tech.resistance_48, tech.resistance_96)
-        if value is not None and value > close_15
+        if value is not None and value > entry
     ]
     if resistances:
         resistance = min(resistances)
-        resistance_room = pct(resistance, entry)
-        if resistance_room < MIN_RESISTANCE_ROOM_PCT:
-            return None, f"المقاومة قريبة جدًا: {resistance_room:.2f}%"
 
+    # Minimum viable TP1 and ATR-based target.
     minimum_tp1 = entry * (Decimal("1") + MIN_TP1_PCT / Decimal("100"))
-    atr_tp1 = entry * (
-        Decimal("1") + max(MIN_TP1_PCT, risk_pct * Decimal("1.70")) / Decimal("100")
-    )
+    atr_target_pct = max(MIN_TP1_PCT, risk_pct * Decimal("1.70"))
+    atr_tp1 = entry * (Decimal("1") + atr_target_pct / Decimal("100"))
 
+    # Resistance is now a dynamic constraint instead of a blind 2.20% hard gate.
     if resistance is not None:
+        resistance_room_pct = pct(resistance, entry)
+
+        # Place TP1 slightly below the resistance wall.
         structural_tp1 = resistance * (Decimal("1") - Decimal("0.20") / Decimal("100"))
+
+        # No trade is valid if resistance cannot leave the required minimum TP1.
+        if structural_tp1 < minimum_tp1:
+            return (
+                None,
+                f"المقاومة لا تسمح بـ TP1 صالح: {resistance_room_pct:.2f}%",
+            )
+
         tp1 = min(structural_tp1, atr_tp1)
         tp1 = max(tp1, minimum_tp1)
     else:
         tp1 = atr_tp1
 
-    tp2 = entry * (
-        Decimal("1")
-        + max(risk_pct * Decimal("2.50"), MIN_TP1_PCT + Decimal("1.50")) / Decimal("100")
-    )
-    if tech.resistance_96 > close_15:
-        structural_tp2 = entry * (
-            Decimal("1")
-            + ((tech.resistance_96 / close_15) - Decimal("1")) * Decimal("0.98")
-        )
-        tp2 = max(tp2, structural_tp2)
-
-    max_tp2 = entry * Decimal("1.15")
-    tp2 = min(tp2, max_tp2)
-    tp2 = max(tp2, tp1 * Decimal("1.025"))
-
+    # TP1 economics after estimated round-trip fees/slippage.
     gross_tp1_pct = pct(tp1, entry)
-    net_tp1_pct = gross_tp1_pct - (TAKER_FEE_PCT * Decimal("2") + EXPECTED_SLIPPAGE_PCT)
+    net_tp1_pct = gross_tp1_pct - (
+        TAKER_FEE_PCT * Decimal("2") + EXPECTED_SLIPPAGE_PCT
+    )
 
+    if gross_tp1_pct < MIN_TP1_PCT:
+        return None, f"TP1 {gross_tp1_pct:.2f}% أقل من الحد {MIN_TP1_PCT}%"
+    if net_tp1_pct < MIN_NET_TP1_PCT:
+        return (
+            None,
+            f"صافي TP1 {net_tp1_pct:.2f}% أقل من الحد {MIN_NET_TP1_PCT}%",
+        )
+
+    # Risk / reward.
     risk = entry - stop
     reward = tp1 - entry
     if risk <= 0 or reward <= 0:
         return None, "Risk/Reward غير صالح"
 
     rr = reward / risk
-    if gross_tp1_pct < MIN_TP1_PCT:
-        return None, f"TP1 {gross_tp1_pct:.2f}% أقل من الحد"
-    if net_tp1_pct < MIN_NET_TP1_PCT:
-        return None, f"صافي TP1 {net_tp1_pct:.2f}% أقل من الحد"
     if rr < MIN_RR:
         return None, f"R:R {rr:.2f} أقل من {MIN_RR}"
+
+    # Absolute anti-wall protection. The old 2.20% threshold is not used as a
+    # hard gate; extremely close resistance is still rejected.
+    if resistance is not None:
+        resistance_room_pct = pct(resistance, entry)
+        if resistance_room_pct < Decimal("0.35"):
+            return None, f"المقاومة شديدة القرب: {resistance_room_pct:.2f}%"
+
+        if resistance_room_pct < MIN_RESISTANCE_ROOM_PCT:
+            LOGGER.debug(
+                "Tight resistance accepted after TP/RR validation: "
+                "room=%.2f%% tp1=%.2f%% net=%.2f%% rr=%.2f",
+                resistance_room_pct,
+                gross_tp1_pct,
+                net_tp1_pct,
+                rr,
+            )
+
+    # TP2.
+    tp2 = entry * (
+        Decimal("1")
+        + max(
+            risk_pct * Decimal("2.50"),
+            MIN_TP1_PCT + Decimal("1.50"),
+        ) / Decimal("100")
+    )
+
+    if tech.resistance_96 > entry:
+        structural_tp2 = entry * (
+            Decimal("1")
+            + ((tech.resistance_96 / entry) - Decimal("1")) * Decimal("0.98")
+        )
+        tp2 = max(tp2, structural_tp2)
+
+    max_tp2 = entry * Decimal("1.15")
+    tp2 = min(tp2, max_tp2)
+    tp2 = max(tp2, tp1 * Decimal("1.025"))
+    tp2 = min(tp2, max_tp2)
+
+    if tp2 <= tp1:
+        return None, "TP2 غير صالح"
+
+    if not (stop < entry < tp1 <= tp2):
+        return None, "مستويات الصفقة غير متسلسلة"
 
     return (
         TradeLevels(
@@ -975,7 +1050,7 @@ def run_scanner() -> None:
             LOGGER.debug("%s orderbook failure: %s", ticker.symbol, exc)
             continue
 
-        stats.orderbook_pass += 1
+        # The order book only counts as PASS after all hard order-book checks.
         if book.spread_percent > MAX_SPREAD_PCT:
             stats.spread_fail += 1
             stats.reject(f"Spread {book.spread_percent:.2f}%")
@@ -983,8 +1058,10 @@ def run_scanner() -> None:
         stats.spread_pass += 1
 
         if book.imbalance_ratio < MIN_ORDERBOOK_IMBALANCE:
+            stats.orderbook_fail += 1
             stats.reject("Order Book يميل للبيع")
             continue
+        stats.orderbook_pass += 1
 
         if stats.technical_attempted >= MAX_TECHNICAL_MARKETS:
             break
