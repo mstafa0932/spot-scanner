@@ -300,6 +300,15 @@ def score_opportunity(
     if tech.is_uptrend:
         score += 15
         reasons.append("15m اتجاه صاعد")
+    elif (
+        tech.is_above_ema21
+        and tech.ema21 >= tech.ema50
+        and tech.is_above_ema9
+        and tech.macd_histogram > 0
+    ):
+        # Constructive 15m recovery is allowed by the MTF gate below.
+        score += 10
+        reasons.append("15m بنية صعودية/استرداد")
     if mtf_1h.is_uptrend:
         score += 6
         reasons.append("1h اتجاه صاعد")
@@ -531,10 +540,17 @@ def setup_gate(
     if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
         return False, "ATR خارج النطاق"
 
-    # Primary structures.
-    pullback_ok = bool(
-        tech.is_uptrend
+    # Primary structures. Full 15m trend is preferred, but a controlled
+    # constructive recovery is also valid when EMA21 has reclaimed EMA50.
+    constructive_15m = bool(
+        tech.is_above_ema9
         and tech.is_above_ema21
+        and tech.ema21 >= tech.ema50
+        and tech.macd_histogram > 0
+    )
+
+    pullback_ok = bool(
+        constructive_15m
         and tech.is_pullback
     )
     breakout_ok = bool(tech.breakout)
@@ -543,8 +559,7 @@ def setup_gate(
     # has reclaimed EMA21 with a bullish closed candle and adequate volume.
     recovery_ok = bool(
         not btc_bullish
-        and tech.is_uptrend
-        and tech.is_above_ema21
+        and constructive_15m
         and tech.is_bullish_candle
         and tech.volume_ratio >= MIN_VOLUME_RATIO
         and tech.distance_ema21_pct <= Decimal("1.50")
@@ -570,17 +585,35 @@ def multi_timeframe_gate(
     tech_1h: IndicatorResult,
     tech_4h: IndicatorResult,
 ) -> tuple[bool, str]:
-    if not tech_15.is_uptrend:
-        return False, "15m trend failed"
+    # The 1h/4h direction remains hard: we do not buy against the broader trend.
     if not tech_1h.is_uptrend:
         return False, "1h trend failed"
     if tech_4h.current_close < tech_4h.ema50:
         return False, "4h below EMA50"
+
+    # The 1h and 4h extensions remain hard anti-FOMO limits.
     if tech_1h.distance_ema21_pct > MAX_1H_DISTANCE_FROM_EMA21_PCT:
         return False, "1h بعيد جدًا عن EMA21"
     if (tech_4h.current_close / tech_4h.ema50 - Decimal("1")) * Decimal("100") > MAX_4H_DISTANCE_FROM_EMA50_PCT:
         return False, "4h ممتد جدًا عن EMA50"
-    return True, "OK"
+
+    # On 15m, accept either a full uptrend OR a constructive recovery:
+    # price above EMA9/EMA21, EMA21 not below EMA50, and positive MACD histogram.
+    # This fixes the previous bottleneck where a healthy pullback/recovery was
+    # rejected solely because price was not yet above the 15m EMA50.
+    constructive_15m = bool(
+        tech_15.is_above_ema9
+        and tech_15.is_above_ema21
+        and tech_15.ema21 >= tech_15.ema50
+        and tech_15.macd_histogram > 0
+    )
+
+    if tech_15.is_uptrend:
+        return True, "15m full trend + 1h/4h aligned"
+    if constructive_15m:
+        return True, "15m constructive recovery + 1h/4h aligned"
+
+    return False, "15m trend/structure failed"
 
 
 def execution_levels(
@@ -665,22 +698,30 @@ def execution_levels(
     atr_target_pct = max(MIN_TP1_PCT, risk_pct * Decimal("1.70"))
     atr_tp1 = entry * (Decimal("1") + atr_target_pct / Decimal("100"))
 
-    # Resistance is now a dynamic constraint instead of a blind 2.20% hard gate.
+    # Resistance is a target constraint for pullbacks/recoveries, but a confirmed
+    # breakout is allowed to trade through the broken wall. The old logic was
+    # rejecting breakout candidates simply because resistance_96 was close.
     if resistance is not None:
         resistance_room_pct = pct(resistance, entry)
-
-        # Place TP1 slightly below the resistance wall.
         structural_tp1 = resistance * (Decimal("1") - Decimal("0.20") / Decimal("100"))
 
-        # No trade is valid if resistance cannot leave the required minimum TP1.
-        if structural_tp1 < minimum_tp1:
-            return (
-                None,
-                f"المقاومة لا تسمح بـ TP1 صالح: {resistance_room_pct:.2f}%",
-            )
-
-        tp1 = min(structural_tp1, atr_tp1)
-        tp1 = max(tp1, minimum_tp1)
+        if tech.breakout:
+            # Breakout: use the volatility target unless the next resistance is
+            # comfortably above it. A close resistance is not an automatic kill.
+            tp1 = atr_tp1
+            if structural_tp1 >= minimum_tp1:
+                tp1 = min(structural_tp1, atr_tp1)
+                tp1 = max(tp1, minimum_tp1)
+        else:
+            # Pullback/recovery: price is still approaching the wall, so it must
+            # leave enough room for the configured TP1 economics.
+            if structural_tp1 < minimum_tp1:
+                return (
+                    None,
+                    f"المقاومة لا تسمح بـ TP1 صالح: {resistance_room_pct:.2f}%",
+                )
+            tp1 = min(structural_tp1, atr_tp1)
+            tp1 = max(tp1, minimum_tp1)
     else:
         tp1 = atr_tp1
 
@@ -1112,13 +1153,8 @@ def run_scanner() -> None:
             continue
         stats.setup_pass += 1
 
-        levels, level_reason = execution_levels(tech_15, ticker, book)
-        if levels is None:
-            stats.execution_fail += 1
-            stats.reject_execution(level_reason)
-            continue
-        stats.execution_pass += 1
-
+        # Score is evaluated BEFORE execution so diagnostics reveal whether the
+        # strategy lacks quality points or whether execution is the bottleneck.
         score_value, score_reasons = score_opportunity(
             tech_15, ticker, book, tech_1h, tech_4h
         )
@@ -1127,6 +1163,13 @@ def run_scanner() -> None:
             stats.reject(f"Score {score_value} < {MIN_SCORE}")
             continue
         stats.score_pass += 1
+
+        levels, level_reason = execution_levels(tech_15, ticker, book)
+        if levels is None:
+            stats.execution_fail += 1
+            stats.reject_execution(level_reason)
+            continue
+        stats.execution_pass += 1
 
         opportunity = build_candidate(
             ticker, book, tech_15, tech_1h, tech_4h,
