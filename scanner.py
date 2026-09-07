@@ -292,13 +292,22 @@ def score_opportunity(
     book: OrderBookSnapshot,
     mtf_1h: IndicatorResult,
     mtf_4h: IndicatorResult,
-) -> tuple[int, list[str]]:
+) -> tuple[int, list[str], dict[str, int]]:
+    """Return score plus a category-by-category breakdown for diagnostics."""
     score = 0
     reasons: list[str] = []
+    breakdown = {
+        "Trend": 0,
+        "Momentum": 0,
+        "Volume": 0,
+        "Setup": 0,
+        "Execution": 0,
+    }
 
     # Trend alignment: 25
     if tech.is_uptrend:
         score += 15
+        breakdown["Trend"] += 15
         reasons.append("15m اتجاه صاعد")
     elif (
         tech.is_above_ema21
@@ -306,72 +315,99 @@ def score_opportunity(
         and tech.is_above_ema9
         and tech.macd_histogram > 0
     ):
-        # Constructive 15m recovery is allowed by the MTF gate below.
         score += 10
+        breakdown["Trend"] += 10
         reasons.append("15m بنية صعودية/استرداد")
     if mtf_1h.is_uptrend:
         score += 6
+        breakdown["Trend"] += 6
         reasons.append("1h اتجاه صاعد")
     if mtf_4h.current_close > mtf_4h.ema50:
         score += 4
+        breakdown["Trend"] += 4
         reasons.append("4h فوق EMA50")
 
     # Momentum: 20
     if Decimal("52") <= tech.rsi14 <= Decimal("64"):
         score += 12
+        breakdown["Momentum"] += 12
         reasons.append("RSI 15m صحي")
     elif Decimal("49") <= tech.rsi14 < Decimal("52"):
         score += 8
+        breakdown["Momentum"] += 8
     elif Decimal("64") < tech.rsi14 <= Decimal("68"):
         score += 7
+        breakdown["Momentum"] += 7
 
     if tech.macd_line > tech.macd_signal and tech.macd_histogram > 0:
         score += 8
+        breakdown["Momentum"] += 8
         reasons.append("MACD + Histogram داعمان")
 
     # Volume: 15
     if tech.volume_ratio >= Decimal("2.0"):
         score += 15
+        breakdown["Volume"] += 15
         reasons.append("حجم قوي")
     elif tech.volume_ratio >= Decimal("1.5"):
         score += 12
+        breakdown["Volume"] += 12
         reasons.append("حجم مرتفع")
     elif tech.volume_ratio >= MIN_VOLUME_RATIO:
         score += 9
+        breakdown["Volume"] += 9
         reasons.append("حجم فوق المتوسط")
 
     # Setup: 15
     if tech.is_pullback:
         score += 10
+        breakdown["Setup"] += 10
         reasons.append("Pullback منضبط")
     if tech.breakout:
         score += 5
+        breakdown["Setup"] += 5
         reasons.append("Breakout مؤكد بالحجم")
     elif tech.is_bullish_candle:
         score += 3
+        breakdown["Setup"] += 3
         reasons.append("شمعة مغلقة إيجابية")
 
     # Execution: 25
     if book.spread_percent <= Decimal("0.20"):
         score += 10
+        breakdown["Execution"] += 10
         reasons.append("Spread Paribu ممتاز")
     elif book.spread_percent <= MAX_SPREAD_PCT:
         score += 7
+        breakdown["Execution"] += 7
 
     if book.imbalance_ratio >= Decimal("1.30"):
         score += 10
+        breakdown["Execution"] += 10
         reasons.append("دفتر الطلبات يميل للشراء")
     elif book.imbalance_ratio >= MIN_ORDERBOOK_IMBALANCE:
         score += 7
+        breakdown["Execution"] += 7
         reasons.append("دفتر الطلبات مقبول")
 
     if ticker.quote_volume is not None and ticker.quote_volume >= Decimal("10000000"):
         score += 5
+        breakdown["Execution"] += 5
         reasons.append("سيولة محلية قوية")
     elif ticker.quote_volume is not None and ticker.quote_volume >= MIN_QUOTE_VOLUME_TL:
         score += 3
+        breakdown["Execution"] += 3
 
-    return max(0, min(score, 100)), reasons
+    return max(0, min(score, 100)), reasons, breakdown
+
+
+def format_score_diagnostic(score: int, breakdown: dict[str, int]) -> str:
+    parts = []
+    maxima = {"Trend": 25, "Momentum": 20, "Volume": 15, "Setup": 15, "Execution": 25}
+    for name in ("Trend", "Momentum", "Volume", "Setup", "Execution"):
+        value = breakdown.get(name, 0)
+        parts.append(f"{name} {value}/{maxima[name]}")
+    return f"Score {score}/100 | " + " | ".join(parts)
 
 
 # ---------------------------- hard gates ----------------------------
@@ -861,7 +897,7 @@ def final_validate(
         if levels is None:
             return False, None, f"Final execution failed: {level_reason}"
 
-        score_value, reasons = score_opportunity(
+        score_value, reasons, score_breakdown = score_opportunity(
             tech_15,
             ticker,
             book,
@@ -869,7 +905,7 @@ def final_validate(
             tech_4h,
         )
         if score_value < MIN_SCORE:
-            return False, None, f"Final Score {score_value} < {MIN_SCORE}"
+            return False, None, f"Final Score {score_value} < {MIN_SCORE} | {format_score_diagnostic(score_value, score_breakdown)}"
 
         validation_passes = 15
         rebuilt = Opportunity(
@@ -964,6 +1000,16 @@ def format_report(stats: ScanStats, btc_reason: Optional[str] = None) -> str:
         f"• {html.escape(reason)}: {count}"
         for reason, count in execution_rejections
     ) or "لا توجد حالات رفض Execution"
+    score_rejections = [
+        (reason, count)
+        for reason, count in (stats.reasons or {}).items()
+        if reason.startswith("Score ")
+    ]
+    score_rejections.sort(key=lambda item: item[1], reverse=True)
+    score_lines = "\n".join(
+        f"• {html.escape(reason)}: {count}"
+        for reason, count in score_rejections[:5]
+    ) or "لا توجد حالات Score أقل من الحد"
     return (
         "🔍 <b>Paribu — فحص Sniper الصارم</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
@@ -980,6 +1026,8 @@ def format_report(stats: ScanStats, btc_reason: Optional[str] = None) -> str:
         f"⭐ Score ناجح: {stats.score_pass} | فاشل: {stats.score_fail}\n"
         f"💰 Execution ناجح: {stats.execution_pass} | فاشل: {stats.execution_fail}\n"
         f"🔐 Final validation ناجح: {stats.final_validation_pass} | فاشل: {stats.final_validation_fail}\n\n"
+        "⭐ <b>تشخيص Score:</b>\n"
+        f"{score_lines}\n\n"
         "💰 <b>تشخيص رفض Execution:</b>\n"
         f"{execution_lines}\n\n"
         "🔎 <b>أكثر أسباب الرفض:</b>\n"
@@ -1155,12 +1203,12 @@ def run_scanner() -> None:
 
         # Score is evaluated BEFORE execution so diagnostics reveal whether the
         # strategy lacks quality points or whether execution is the bottleneck.
-        score_value, score_reasons = score_opportunity(
+        score_value, score_reasons, score_breakdown = score_opportunity(
             tech_15, ticker, book, tech_1h, tech_4h
         )
         if score_value < MIN_SCORE:
             stats.score_fail += 1
-            stats.reject(f"Score {score_value} < {MIN_SCORE}")
+            stats.reject(format_score_diagnostic(score_value, score_breakdown))
             continue
         stats.score_pass += 1
 
