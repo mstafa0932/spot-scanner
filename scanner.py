@@ -33,6 +33,11 @@ from market_data import (
 )
 from indicator_engine import IndicatorResult, analyze_symbol
 
+# Near-Miss observation layer.
+# هذه الطبقة للتسجيل والدراسة فقط ولا تتجاوز أي Gate.
+from near_miss import record_near_miss, update_near_miss_outcomes
+
+
 LOGGER = logging.getLogger("paribu_sniper")
 if not LOGGER.handlers:
     logging.basicConfig(
@@ -53,13 +58,19 @@ MIN_QUOTE_VOLUME_TL = Decimal(os.getenv("MIN_QUOTE_VOLUME_TL", "5000000"))
 MAX_SPREAD_PCT = Decimal(os.getenv("MAX_ALLOWED_SPREAD_PCT", "0.35"))
 MIN_ORDERBOOK_IMBALANCE = Decimal(os.getenv("MIN_ORDERBOOK_IMBALANCE", "1.08"))
 MIN_VOLUME_RATIO = Decimal(os.getenv("MIN_VOLUME_RATIO", "1.15"))
-MAX_ENTRY_GAP_FROM_CLOSED_PCT = Decimal(os.getenv("MAX_ENTRY_GAP_FROM_CLOSED_PCT", "1.20"))
-MIN_RESISTANCE_ROOM_PCT = Decimal(os.getenv("MIN_RESISTANCE_ROOM_PCT", "2.20"))
+MAX_ENTRY_GAP_FROM_CLOSED_PCT = Decimal(
+    os.getenv("MAX_ENTRY_GAP_FROM_CLOSED_PCT", "1.20")
+)
+MIN_RESISTANCE_ROOM_PCT = Decimal(
+    os.getenv("MIN_RESISTANCE_ROOM_PCT", "2.20")
+)
 MIN_TP1_PCT = Decimal(os.getenv("MIN_TP1_PCT", "2.00"))
 MIN_NET_TP1_PCT = Decimal(os.getenv("MIN_NET_TP1_PCT", "1.40"))
 MIN_RR = Decimal(os.getenv("MIN_RR", "1.80"))
 TAKER_FEE_PCT = Decimal(os.getenv("PARIBU_TAKER_FEE_PCT", "0.28"))
-EXPECTED_SLIPPAGE_PCT = Decimal(os.getenv("EXPECTED_SLIPPAGE_PCT", "0.15"))
+EXPECTED_SLIPPAGE_PCT = Decimal(
+    os.getenv("EXPECTED_SLIPPAGE_PCT", "0.15")
+)
 
 # Hard FOMO limits on 15m candles.
 MAX_RETURN_3 = Decimal("3.00")
@@ -78,13 +89,40 @@ MAX_1H_DISTANCE_FROM_EMA21_PCT = Decimal("4.00")
 MAX_4H_DISTANCE_FROM_EMA50_PCT = Decimal("8.00")
 
 CANDLE_LIMIT = max(205, int(os.getenv("CANDLE_LIMIT", "250")))
-MAX_ORDERBOOK_MARKETS = max(10, int(os.getenv("MAX_ORDERBOOK_MARKETS", "80")))
-MAX_TECHNICAL_MARKETS = max(5, int(os.getenv("MAX_TECHNICAL_MARKETS", "60")))
-ORDERBOOK_DEPTH = max(5, min(int(os.getenv("ORDERBOOK_DEPTH", "20")), 20))
-COOLDOWN_SECONDS = max(0, int(os.getenv("SIGNAL_COOLDOWN_SECONDS", str(4 * 60 * 60))))
+MAX_ORDERBOOK_MARKETS = max(
+    10, int(os.getenv("MAX_ORDERBOOK_MARKETS", "80"))
+)
+MAX_TECHNICAL_MARKETS = max(
+    5, int(os.getenv("MAX_TECHNICAL_MARKETS", "60"))
+)
+ORDERBOOK_DEPTH = max(
+    5,
+    min(int(os.getenv("ORDERBOOK_DEPTH", "20")), 20),
+)
+COOLDOWN_SECONDS = max(
+    0,
+    int(
+        os.getenv(
+            "SIGNAL_COOLDOWN_SECONDS",
+            str(4 * 60 * 60),
+        )
+    ),
+)
+
+# Near-Miss:
+# هذه الدرجة لا تسمح بإرسال BUY.
+# هي فقط تحدد الفرص التي تستحق المتابعة والدراسة.
+NEAR_MISS_MIN_SCORE = max(
+    0,
+    min(
+        100,
+        int(os.getenv("NEAR_MISS_MIN_SCORE", "70")),
+    ),
+)
 
 
 # ---------------------------- data models ----------------------------
+
 
 @dataclass
 class ScanStats:
@@ -123,7 +161,9 @@ class ScanStats:
 
     def reject_execution(self, reason: str) -> None:
         assert self.execution_rejections is not None
-        self.execution_rejections[reason] = self.execution_rejections.get(reason, 0) + 1
+        self.execution_rejections[reason] = (
+            self.execution_rejections.get(reason, 0) + 1
+        )
         self.reject(f"Execution: {reason}")
 
     def reject(self, reason: str) -> None:
@@ -218,13 +258,20 @@ def pct(a: Decimal, b: Decimal) -> Decimal:
 def load_state() -> dict[str, Any]:
     if not STATE_FILE.exists():
         return {"sent_signals": {}}
+
     try:
-        data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        data = json.loads(
+            STATE_FILE.read_text(encoding="utf-8")
+        )
+
         if not isinstance(data, dict):
             return {"sent_signals": {}}
+
         if not isinstance(data.get("sent_signals"), dict):
             data["sent_signals"] = {}
+
         return data
+
     except Exception as exc:
         LOGGER.warning("State load failed: %s", exc)
         return {"sent_signals": {}}
@@ -232,22 +279,40 @@ def load_state() -> dict[str, Any]:
 
 def save_state(state: dict[str, Any]) -> None:
     temporary = STATE_FILE.with_suffix(".tmp")
+
     try:
         temporary.write_text(
-            json.dumps(state, ensure_ascii=False, indent=2),
+            json.dumps(
+                state,
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
         temporary.replace(STATE_FILE)
+
     except Exception as exc:
         LOGGER.error("State save failed: %s", exc)
 
 
-def cooldown_allowed(symbol: str, state: dict[str, Any]) -> bool:
-    raw = state.setdefault("sent_signals", {}).get(symbol)
+def cooldown_allowed(
+    symbol: str,
+    state: dict[str, Any],
+) -> bool:
+
+    raw = state.setdefault(
+        "sent_signals",
+        {},
+    ).get(symbol)
+
     if raw is None:
         return True
+
     try:
-        return time.time() - int(raw) >= COOLDOWN_SECONDS
+        return (
+            time.time() - int(raw)
+            >= COOLDOWN_SECONDS
+        )
     except (TypeError, ValueError):
         return True
 
@@ -255,6 +320,7 @@ def cooldown_allowed(symbol: str, state: dict[str, Any]) -> bool:
 def send_telegram(message: str) -> bool:
     token = os.getenv(TELEGRAM_TOKEN_ENV)
     chat_id = os.getenv(TELEGRAM_CHAT_ENV)
+
     if not token or not chat_id:
         LOGGER.error("Telegram credentials are missing")
         return False
@@ -270,6 +336,7 @@ def send_telegram(message: str) -> bool:
             },
             timeout=15,
         )
+
         if response.status_code != 200:
             LOGGER.error(
                 "Telegram HTTP %s: %s",
@@ -277,9 +344,14 @@ def send_telegram(message: str) -> bool:
                 response.text[:400],
             )
             return False
+
         return True
+
     except requests.RequestException as exc:
-        LOGGER.error("Telegram request failed: %s", exc)
+        LOGGER.error(
+            "Telegram request failed: %s",
+            exc,
+        )
         return False
 
 
@@ -293,9 +365,12 @@ def score_opportunity(
     mtf_1h: IndicatorResult,
     mtf_4h: IndicatorResult,
 ) -> tuple[int, list[str], dict[str, int]]:
+
     """Return score plus a category-by-category breakdown for diagnostics."""
+
     score = 0
     reasons: list[str] = []
+
     breakdown = {
         "Trend": 0,
         "Momentum": 0,
@@ -309,6 +384,7 @@ def score_opportunity(
         score += 15
         breakdown["Trend"] += 15
         reasons.append("15m اتجاه صاعد")
+
     elif (
         tech.is_above_ema21
         and tech.ema21 >= tech.ema50
@@ -318,10 +394,12 @@ def score_opportunity(
         score += 10
         breakdown["Trend"] += 10
         reasons.append("15m بنية صعودية/استرداد")
+
     if mtf_1h.is_uptrend:
         score += 6
         breakdown["Trend"] += 6
         reasons.append("1h اتجاه صاعد")
+
     if mtf_4h.current_close > mtf_4h.ema50:
         score += 4
         breakdown["Trend"] += 4
@@ -332,14 +410,19 @@ def score_opportunity(
         score += 12
         breakdown["Momentum"] += 12
         reasons.append("RSI 15m صحي")
+
     elif Decimal("49") <= tech.rsi14 < Decimal("52"):
         score += 8
         breakdown["Momentum"] += 8
+
     elif Decimal("64") < tech.rsi14 <= Decimal("68"):
         score += 7
         breakdown["Momentum"] += 7
 
-    if tech.macd_line > tech.macd_signal and tech.macd_histogram > 0:
+    if (
+        tech.macd_line > tech.macd_signal
+        and tech.macd_histogram > 0
+    ):
         score += 8
         breakdown["Momentum"] += 8
         reasons.append("MACD + Histogram داعمان")
@@ -349,10 +432,12 @@ def score_opportunity(
         score += 15
         breakdown["Volume"] += 15
         reasons.append("حجم قوي")
+
     elif tech.volume_ratio >= Decimal("1.5"):
         score += 12
         breakdown["Volume"] += 12
         reasons.append("حجم مرتفع")
+
     elif tech.volume_ratio >= MIN_VOLUME_RATIO:
         score += 9
         breakdown["Volume"] += 9
@@ -363,10 +448,12 @@ def score_opportunity(
         score += 10
         breakdown["Setup"] += 10
         reasons.append("Pullback منضبط")
+
     if tech.breakout:
         score += 5
         breakdown["Setup"] += 5
         reasons.append("Breakout مؤكد بالحجم")
+
     elif tech.is_bullish_candle:
         score += 3
         breakdown["Setup"] += 3
@@ -377,6 +464,7 @@ def score_opportunity(
         score += 10
         breakdown["Execution"] += 10
         reasons.append("Spread Paribu ممتاز")
+
     elif book.spread_percent <= MAX_SPREAD_PCT:
         score += 7
         breakdown["Execution"] += 7
@@ -385,29 +473,65 @@ def score_opportunity(
         score += 10
         breakdown["Execution"] += 10
         reasons.append("دفتر الطلبات يميل للشراء")
+
     elif book.imbalance_ratio >= MIN_ORDERBOOK_IMBALANCE:
         score += 7
         breakdown["Execution"] += 7
         reasons.append("دفتر الطلبات مقبول")
 
-    if ticker.quote_volume is not None and ticker.quote_volume >= Decimal("10000000"):
+    if (
+        ticker.quote_volume is not None
+        and ticker.quote_volume >= Decimal("10000000")
+    ):
         score += 5
         breakdown["Execution"] += 5
         reasons.append("سيولة محلية قوية")
-    elif ticker.quote_volume is not None and ticker.quote_volume >= MIN_QUOTE_VOLUME_TL:
+
+    elif (
+        ticker.quote_volume is not None
+        and ticker.quote_volume >= MIN_QUOTE_VOLUME_TL
+    ):
         score += 3
         breakdown["Execution"] += 3
 
-    return max(0, min(score, 100)), reasons, breakdown
+    return (
+        max(0, min(score, 100)),
+        reasons,
+        breakdown,
+    )
 
 
-def format_score_diagnostic(score: int, breakdown: dict[str, int]) -> str:
+def format_score_diagnostic(
+    score: int,
+    breakdown: dict[str, int],
+) -> str:
+
     parts = []
-    maxima = {"Trend": 25, "Momentum": 20, "Volume": 15, "Setup": 15, "Execution": 25}
-    for name in ("Trend", "Momentum", "Volume", "Setup", "Execution"):
+
+    maxima = {
+        "Trend": 25,
+        "Momentum": 20,
+        "Volume": 15,
+        "Setup": 15,
+        "Execution": 25,
+    }
+
+    for name in (
+        "Trend",
+        "Momentum",
+        "Volume",
+        "Setup",
+        "Execution",
+    ):
         value = breakdown.get(name, 0)
-        parts.append(f"{name} {value}/{maxima[name]}")
-    return f"Score {score}/100 | " + " | ".join(parts)
+        parts.append(
+            f"{name} {value}/{maxima[name]}"
+        )
+
+    return (
+        f"Score {score}/100 | "
+        + " | ".join(parts)
+    )
 
 
 # ---------------------------- hard gates ----------------------------
@@ -423,7 +547,6 @@ BTC_MAX_48CANDLE_DROP_PCT = Decimal("-8.00")
 BTC_MAX_15M_EMA21_DISTANCE_BEARISH_PCT = Decimal("-1.00")
 BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT = Decimal("-2.00")
 
-# RSI alone must never stop the scanner.
 BTC_HARD_BEAR_RSI = Decimal("38.00")
 BTC_CAUTION_RSI = Decimal("45.00")
 
@@ -432,7 +555,9 @@ def _btc_regime(
     btc_15: IndicatorResult,
     btc_1h: IndicatorResult,
 ) -> tuple[bool, str]:
+
     """Adaptive BTC gate: block only on confirmed weakness."""
+
     if (
         btc_15.current_close <= 0
         or btc_15.ema21 <= 0
@@ -441,24 +566,57 @@ def _btc_regime(
     ):
         return False, "BTC بيانات المؤشر غير صالحة"
 
-    btc_15_ema_distance = pct(btc_15.current_close, btc_15.ema21)
-    btc_1h_ema_distance = pct(btc_1h.current_close, btc_1h.ema21)
+    btc_15_ema_distance = pct(
+        btc_15.current_close,
+        btc_15.ema21,
+    )
 
-    # Strong short/medium-term BTC weakness.
+    btc_1h_ema_distance = pct(
+        btc_1h.current_close,
+        btc_1h.ema21,
+    )
+
     if btc_15.recent_return_3 <= BTC_MAX_3CANDLE_DROP_PCT:
-        return False, f"BTC هبوط قوي خلال 3 شموع: {btc_15.recent_return_3:.2f}%"
+        return (
+            False,
+            f"BTC هبوط قوي خلال 3 شموع: "
+            f"{btc_15.recent_return_3:.2f}%",
+        )
+
     if btc_15.recent_return_12 <= BTC_MAX_12CANDLE_DROP_PCT:
-        return False, f"BTC هبوط قوي خلال 12 شمعة: {btc_15.recent_return_12:.2f}%"
+        return (
+            False,
+            f"BTC هبوط قوي خلال 12 شمعة: "
+            f"{btc_15.recent_return_12:.2f}%",
+        )
+
     if btc_15.recent_return_48 <= BTC_MAX_48CANDLE_DROP_PCT:
-        return False, f"BTC هبوط قوي خلال 48 شمعة: {btc_15.recent_return_48:.2f}%"
+        return (
+            False,
+            f"BTC هبوط قوي خلال 48 شمعة: "
+            f"{btc_15.recent_return_48:.2f}%",
+        )
 
-    # Significant breakdown below EMA21.
-    if btc_15_ema_distance <= BTC_MAX_15M_EMA21_DISTANCE_BEARISH_PCT:
-        return False, f"BTC 15m تحت EMA21 بقوة: {btc_15_ema_distance:.2f}%"
-    if btc_1h_ema_distance <= BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT:
-        return False, f"BTC 1h تحت EMA21 بقوة: {btc_1h_ema_distance:.2f}%"
+    if (
+        btc_15_ema_distance
+        <= BTC_MAX_15M_EMA21_DISTANCE_BEARISH_PCT
+    ):
+        return (
+            False,
+            f"BTC 15m تحت EMA21 بقوة: "
+            f"{btc_15_ema_distance:.2f}%",
+        )
 
-    # RSI < 38 blocks only with price weakness confirmation.
+    if (
+        btc_1h_ema_distance
+        <= BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT
+    ):
+        return (
+            False,
+            f"BTC 1h تحت EMA21 بقوة: "
+            f"{btc_1h_ema_distance:.2f}%",
+        )
+
     if (
         btc_15.rsi14 < BTC_HARD_BEAR_RSI
         and btc_15.recent_return_3 < Decimal("0")
@@ -466,811 +624,97 @@ def _btc_regime(
     ):
         return (
             False,
-            f"BTC ضعف هبوطي مؤكد: RSI={btc_15.rsi14:.1f} | "
+            f"BTC ضعف هبوطي مؤكد: "
+            f"RSI={btc_15.rsi14:.1f} | "
             f"3C={btc_15.recent_return_3:.2f}%",
         )
 
-    # Full permission in a clean bullish regime.
     if (
         btc_15.is_uptrend
         and btc_1h.is_uptrend
         and btc_15.current_close >= btc_15.ema21
         and btc_1h.current_close >= btc_1h.ema21
     ):
-        return True, "BTC bullish — السماح الكامل بالفحص"
+        return (
+            True,
+            "BTC bullish — السماح الكامل بالفحص",
+        )
 
-    # Neutral / cautious regime. RSI in the low 40s is not a hard stop.
     if (
-        btc_15_ema_distance >= -BTC_15M_EMA_TOLERANCE_PCT
-        and btc_1h_ema_distance >= -BTC_1H_EMA_TOLERANCE_PCT
+        btc_15_ema_distance
+        >= -BTC_15M_EMA_TOLERANCE_PCT
+        and btc_1h_ema_distance
+        >= -BTC_1H_EMA_TOLERANCE_PCT
     ):
         if btc_15.rsi14 < BTC_CAUTION_RSI:
             return (
                 True,
-                f"BTC neutral/cautious — RSI={btc_15.rsi14:.1f} "
+                f"BTC neutral/cautious — "
+                f"RSI={btc_15.rsi14:.1f} "
                 f"— الفحص مسموح بحذر",
             )
-        return True, "BTC neutral/mixed — السماح بالفحص مع حماية"
 
-    # Mixed but not structurally bearish.
+        return (
+            True,
+            "BTC neutral/mixed — السماح بالفحص مع حماية",
+        )
+
     if (
-        btc_15_ema_distance > BTC_MAX_15M_EMA21_DISTANCE_BEARISH_PCT
-        and btc_1h_ema_distance > BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT
+        btc_15_ema_distance
+        > BTC_MAX_15M_EMA21_DISTANCE_BEARISH_PCT
+        and btc_1h_ema_distance
+        > BTC_MAX_1H_EMA21_DISTANCE_BEARISH_PCT
         and btc_15.rsi14 >= BTC_HARD_BEAR_RSI
     ):
-        return True, f"BTC mixed but acceptable — RSI={btc_15.rsi14:.1f}"
+        return (
+            True,
+            f"BTC mixed but acceptable — "
+            f"RSI={btc_15.rsi14:.1f}",
+        )
 
-    return False, "BTC regime ضعيف أكثر من الحد المسموح للحماية"
+    return (
+        False,
+        "BTC regime ضعيف أكثر من الحد المسموح للحماية",
+    )
 
 
-def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
+def btc_gate() -> tuple[
+    bool,
+    Optional[IndicatorResult],
+    str,
+]:
+
     """Read BTC candles from Paribu and apply the adaptive regime gate."""
+
     try:
-        btc_15_df = fetch_candles("BTC_TL", "15m", CANDLE_LIMIT)
-        btc_1h_df = fetch_candles("BTC_TL", "1h", CANDLE_LIMIT)
+        btc_15_df = fetch_candles(
+            "BTC_TL",
+            "15m",
+            CANDLE_LIMIT,
+        )
+
+        btc_1h_df = fetch_candles(
+            "BTC_TL",
+            "1h",
+            CANDLE_LIMIT,
+        )
 
         btc_15 = analyze_symbol(btc_15_df)
         btc_1h = analyze_symbol(btc_1h_df)
+
         if btc_15 is None or btc_1h is None:
-            return False, None, "BTC indicators unavailable"
-
-        source_15 = str(btc_15_df.attrs.get("source", "")).upper()
-        source_1h = str(btc_1h_df.attrs.get("source", "")).upper()
-        if source_15 != "PARIBU":
-            return False, None, f"BTC 15m مصدر غير موثوق: {source_15}"
-        if source_1h != "PARIBU":
-            return False, None, f"BTC 1h مصدر غير موثوق: {source_1h}"
-
-        allowed, reason = _btc_regime(btc_15, btc_1h)
-        return allowed, btc_15, reason
-    except Exception as exc:
-        return False, None, f"BTC gate error: {exc}"
-
-
-def setup_gate(
-    tech: IndicatorResult,
-    btc_15: Optional[IndicatorResult] = None,
-) -> tuple[bool, str]:
-    """Adaptive setup gate without weakening liquidity/execution controls.
-
-    The setup profile adapts only to the broad BTC regime. It never overrides
-    the later MTF, order-book, spread, execution, score, or final-validation gates.
-    """
-    btc_ema_distance = (
-        pct(btc_15.current_close, btc_15.ema21)
-        if btc_15 is not None and btc_15.current_close > 0 and btc_15.ema21 > 0
-        else Decimal("0")
-    )
-
-    btc_bullish = bool(
-        btc_15 is not None
-        and btc_15.is_uptrend
-        and btc_ema_distance >= Decimal("0")
-        and btc_15.rsi14 >= BTC_CAUTION_RSI
-        and btc_15.recent_return_3 >= Decimal("0")
-    )
-    btc_weak = bool(
-        btc_15 is None
-        or btc_ema_distance <= Decimal("-0.75")
-        or (btc_15.rsi14 < BTC_CAUTION_RSI and btc_15.recent_return_3 < 0)
-    )
-
-    if btc_bullish:
-        rsi_low, rsi_high = Decimal("48"), Decimal("68")
-    elif not btc_weak:
-        # Neutral/cautious BTC: permit healthy recovery setups in the low/mid 40s.
-        rsi_low, rsi_high = Decimal("44"), Decimal("70")
-    else:
-        return False, "BTC ضعيف — Setup محمي"
-
-    if tech.rsi14 < rsi_low or tech.rsi14 > rsi_high:
-        return False, f"RSI خارج النطاق التكيفي {rsi_low:.0f}-{rsi_high:.0f}"
-    if tech.recent_return_3 >= MAX_RETURN_3:
-        return False, "Anti-FOMO 3 شموع"
-    if tech.recent_return_12 >= MAX_RETURN_12:
-        return False, "Anti-FOMO 12 شمعة"
-    if tech.recent_return_48 >= MAX_RETURN_48:
-        return False, "Anti-FOMO 48 شمعة"
-
-    atr_pct = tech.atr14 / tech.current_close * Decimal("100")
-    if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
-        return False, "ATR خارج النطاق"
-
-    # Primary structures. Full 15m trend is preferred, but a controlled
-    # constructive recovery is also valid when EMA21 has reclaimed EMA50.
-    constructive_15m = bool(
-        tech.is_above_ema9
-        and tech.is_above_ema21
-        and tech.ema21 >= tech.ema50
-        and tech.macd_histogram > 0
-    )
-
-    pullback_ok = bool(
-        constructive_15m
-        and tech.is_pullback
-    )
-    breakout_ok = bool(tech.breakout)
-
-    # In a neutral BTC regime, accept a controlled recovery setup when price
-    # has reclaimed EMA21 with a bullish closed candle and adequate volume.
-    recovery_ok = bool(
-        not btc_bullish
-        and constructive_15m
-        and tech.is_bullish_candle
-        and tech.volume_ratio >= MIN_VOLUME_RATIO
-        and tech.distance_ema21_pct <= Decimal("1.50")
-        and tech.recent_return_3 < Decimal("2.50")
-    )
-
-    if not (pullback_ok or breakout_ok or recovery_ok):
-        return False, "لا يوجد Pullback/Breakout/Recovery عالي الجودة"
-
-    # MACD confirmation remains mandatory.
-    if tech.macd_histogram <= 0 or tech.macd_line <= tech.macd_signal:
-        return False, "MACD لا يؤكد الزخم"
-
-    if breakout_ok:
-        return True, "BREAKOUT — OK"
-    if pullback_ok:
-        return True, "PULLBACK — OK"
-    return True, "RECOVERY — OK"
-
-
-def multi_timeframe_gate(
-    tech_15: IndicatorResult,
-    tech_1h: IndicatorResult,
-    tech_4h: IndicatorResult,
-) -> tuple[bool, str]:
-    # The 1h/4h direction remains hard: we do not buy against the broader trend.
-    if not tech_1h.is_uptrend:
-        return False, "1h trend failed"
-    if tech_4h.current_close < tech_4h.ema50:
-        return False, "4h below EMA50"
-
-    # The 1h and 4h extensions remain hard anti-FOMO limits.
-    if tech_1h.distance_ema21_pct > MAX_1H_DISTANCE_FROM_EMA21_PCT:
-        return False, "1h بعيد جدًا عن EMA21"
-    if (tech_4h.current_close / tech_4h.ema50 - Decimal("1")) * Decimal("100") > MAX_4H_DISTANCE_FROM_EMA50_PCT:
-        return False, "4h ممتد جدًا عن EMA50"
-
-    # On 15m, accept either a full uptrend OR a constructive recovery:
-    # price above EMA9/EMA21, EMA21 not below EMA50, and positive MACD histogram.
-    # This fixes the previous bottleneck where a healthy pullback/recovery was
-    # rejected solely because price was not yet above the 15m EMA50.
-    constructive_15m = bool(
-        tech_15.is_above_ema9
-        and tech_15.is_above_ema21
-        and tech_15.ema21 >= tech_15.ema50
-        and tech_15.macd_histogram > 0
-    )
-
-    if tech_15.is_uptrend:
-        return True, "15m full trend + 1h/4h aligned"
-    if constructive_15m:
-        return True, "15m constructive recovery + 1h/4h aligned"
-
-    return False, "15m trend/structure failed"
-
-
-def execution_levels(
-    tech: IndicatorResult,
-    ticker: Ticker,
-    book: OrderBookSnapshot,
-) -> tuple[Optional[TradeLevels], str]:
-    """
-    Strict Paribu execution gate.
-
-    Resistance is treated as a TP/R:R constraint, not as a blind fixed-distance
-    rejection. This prevents rejecting a setup only because resistance is
-    slightly closer than MIN_RESISTANCE_ROOM_PCT when the actual TP1, net TP1,
-    and R:R requirements can still be satisfied.
-    """
-
-    # Paribu Order Book is the execution source of truth.
-    bid = dec(book.best_bid)
-    ask = dec(book.best_ask)
-
-    if bid is None or ask is None:
-        return None, "Paribu Order Book Bid/Ask غير متوفر"
-    if bid <= 0 or ask <= 0 or ask < bid:
-        return None, "Paribu Order Book Bid/Ask غير صالح"
-
-    # Spread remains a hard gate.
-    if book.spread_percent > MAX_SPREAD_PCT:
-        return None, f"Spread {book.spread_percent:.2f}% > {MAX_SPREAD_PCT}%"
-
-    # Order-book imbalance remains a hard gate.
-    if book.imbalance_ratio < MIN_ORDERBOOK_IMBALANCE:
-        return (
-            None,
-            f"OrderBook imbalance {book.imbalance_ratio:.2f} "
-            f"< {MIN_ORDERBOOK_IMBALANCE}",
-        )
-
-    entry = ask
-    close_15 = tech.current_close
-    if close_15 <= 0:
-        return None, "15m close غير صالح"
-
-    # Entry gap from the latest closed 15m candle.
-    entry_gap = pct(entry, close_15)
-    if entry_gap < Decimal("-0.25") or entry_gap > MAX_ENTRY_GAP_FROM_CLOSED_PCT:
-        return None, f"Entry gap {entry_gap:.2f}% غير مناسب"
-
-    # ATR / stop / risk.
-    atr_pct = tech.atr14 / close_15 * Decimal("100")
-    if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
-        return None, f"ATR {atr_pct:.2f}% خارج النطاق"
-
-    risk_pct = max(
-        atr_pct * ATR_STOP_MULTIPLIER,
-        MIN_RISK_PCT,
-    )
-
-    # Respect the actual recent swing low without placing the stop above entry.
-    if tech.swing_low > 0 and tech.swing_low < close_15:
-        swing_distance = pct(close_15, tech.swing_low)
-        if swing_distance > 0:
-            risk_pct = max(risk_pct, swing_distance)
-
-    risk_pct = min(risk_pct, MAX_RISK_PCT)
-
-    stop = entry * (Decimal("1") - risk_pct / Decimal("100"))
-    if stop <= 0 or stop >= entry:
-        return None, "Stop غير صالح"
-
-    # Find the nearest recent structural resistance above the entry.
-    resistance: Optional[Decimal] = None
-    resistances = [
-        value
-        for value in (tech.resistance_48, tech.resistance_96)
-        if value is not None and value > entry
-    ]
-    if resistances:
-        resistance = min(resistances)
-
-    # Minimum viable TP1 and ATR-based target.
-    minimum_tp1 = entry * (Decimal("1") + MIN_TP1_PCT / Decimal("100"))
-    atr_target_pct = max(MIN_TP1_PCT, risk_pct * Decimal("1.70"))
-    atr_tp1 = entry * (Decimal("1") + atr_target_pct / Decimal("100"))
-
-    # Resistance is a target constraint for pullbacks/recoveries, but a confirmed
-    # breakout is allowed to trade through the broken wall. The old logic was
-    # rejecting breakout candidates simply because resistance_96 was close.
-    if resistance is not None:
-        resistance_room_pct = pct(resistance, entry)
-        structural_tp1 = resistance * (Decimal("1") - Decimal("0.20") / Decimal("100"))
-
-        if tech.breakout:
-            # Breakout: use the volatility target unless the next resistance is
-            # comfortably above it. A close resistance is not an automatic kill.
-            tp1 = atr_tp1
-            if structural_tp1 >= minimum_tp1:
-                tp1 = min(structural_tp1, atr_tp1)
-                tp1 = max(tp1, minimum_tp1)
-        else:
-            # Pullback/recovery: price is still approaching the wall, so it must
-            # leave enough room for the configured TP1 economics.
-            if structural_tp1 < minimum_tp1:
-                return (
-                    None,
-                    f"المقاومة لا تسمح بـ TP1 صالح: {resistance_room_pct:.2f}%",
-                )
-            tp1 = min(structural_tp1, atr_tp1)
-            tp1 = max(tp1, minimum_tp1)
-    else:
-        tp1 = atr_tp1
-
-    # TP1 economics after estimated round-trip fees/slippage.
-    gross_tp1_pct = pct(tp1, entry)
-    net_tp1_pct = gross_tp1_pct - (
-        TAKER_FEE_PCT * Decimal("2") + EXPECTED_SLIPPAGE_PCT
-    )
-
-    if gross_tp1_pct < MIN_TP1_PCT:
-        return None, f"TP1 {gross_tp1_pct:.2f}% أقل من الحد {MIN_TP1_PCT}%"
-    if net_tp1_pct < MIN_NET_TP1_PCT:
-        return (
-            None,
-            f"صافي TP1 {net_tp1_pct:.2f}% أقل من الحد {MIN_NET_TP1_PCT}%",
-        )
-
-    # Risk / reward.
-    risk = entry - stop
-    reward = tp1 - entry
-    if risk <= 0 or reward <= 0:
-        return None, "Risk/Reward غير صالح"
-
-    rr = reward / risk
-    if rr < MIN_RR:
-        return None, f"R:R {rr:.2f} أقل من {MIN_RR}"
-
-    # Absolute anti-wall protection. The old 2.20% threshold is not used as a
-    # hard gate; extremely close resistance is still rejected.
-    if resistance is not None:
-        resistance_room_pct = pct(resistance, entry)
-        if resistance_room_pct < Decimal("0.35"):
-            return None, f"المقاومة شديدة القرب: {resistance_room_pct:.2f}%"
-
-        if resistance_room_pct < MIN_RESISTANCE_ROOM_PCT:
-            LOGGER.debug(
-                "Tight resistance accepted after TP/RR validation: "
-                "room=%.2f%% tp1=%.2f%% net=%.2f%% rr=%.2f",
-                resistance_room_pct,
-                gross_tp1_pct,
-                net_tp1_pct,
-                rr,
+            return (
+                False,
+                None,
+                "BTC indicators unavailable",
             )
 
-    # TP2.
-    tp2 = entry * (
-        Decimal("1")
-        + max(
-            risk_pct * Decimal("2.50"),
-            MIN_TP1_PCT + Decimal("1.50"),
-        ) / Decimal("100")
-    )
-
-    if tech.resistance_96 > entry:
-        structural_tp2 = entry * (
-            Decimal("1")
-            + ((tech.resistance_96 / entry) - Decimal("1")) * Decimal("0.98")
-        )
-        tp2 = max(tp2, structural_tp2)
-
-    max_tp2 = entry * Decimal("1.15")
-    tp2 = min(tp2, max_tp2)
-    tp2 = max(tp2, tp1 * Decimal("1.025"))
-    tp2 = min(tp2, max_tp2)
-
-    if tp2 <= tp1:
-        return None, "TP2 غير صالح"
-
-    if not (stop < entry < tp1 <= tp2):
-        return None, "مستويات الصفقة غير متسلسلة"
-
-    return (
-        TradeLevels(
-            entry=entry,
-            stop=stop,
-            tp1=tp1,
-            tp2=tp2,
-            rr=rr,
-            tp1_pct=gross_tp1_pct,
-            net_tp1_pct=net_tp1_pct,
-            resistance=resistance,
-            risk_pct=risk_pct,
-        ),
-        "OK",
-    )
-
-
-# ---------------------------- final validator ----------------------------
-
-
-def final_validate(
-    opportunity: Opportunity,
-    original_ticker: Ticker,
-    original_book: OrderBookSnapshot,
-) -> tuple[bool, Optional[Opportunity], str]:
-    """Re-fetch all critical data immediately before Telegram.
-
-    This is the final gate. A stale candidate cannot be sent.
-    """
-    try:
-        snapshot = get_market_snapshot()
-        ticker = snapshot.get(opportunity.symbol)
-        if ticker is None:
-            return False, None, "Final ticker refresh failed"
-
-        book = get_order_book(opportunity.symbol, ORDERBOOK_DEPTH)
-        df_15 = fetch_candles(opportunity.symbol, "15m", CANDLE_LIMIT)
-        df_1h = fetch_candles(opportunity.symbol, "1h", CANDLE_LIMIT)
-        df_4h = fetch_candles(opportunity.symbol, "4h", CANDLE_LIMIT)
-        tech_15 = analyze_symbol(df_15)
-        tech_1h = analyze_symbol(df_1h)
-        tech_4h = analyze_symbol(df_4h)
-
-        if tech_15 is None or tech_1h is None or tech_4h is None:
-            return False, None, "Final indicators unavailable"
-        if tech_15.source != "PARIBU" or tech_1h.source != "PARIBU" or tech_4h.source != "PARIBU":
-            return False, None, "Final source validation failed"
-
-        # Closed-candle timestamps must move forward or stay stable; a wildly
-        # old dataset is never allowed.
-        if tech_15.latest_closed_timestamp < opportunity.close_timestamp_15m:
-            return False, None, "15m candle went backwards"
-
-        btc_ok, btc_15_final, btc_final_reason = btc_gate()
-        if not btc_ok:
-            return False, None, f"Final BTC gate failed: {btc_final_reason}"
-
-        setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15_final)
-        if not setup_ok:
-            return False, None, f"Final setup failed: {setup_reason}"
-
-        mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
-        if not mtf_ok:
-            return False, None, f"Final MTF failed: {mtf_reason}"
-
-        levels, level_reason = execution_levels(tech_15, ticker, book)
-        if levels is None:
-            return False, None, f"Final execution failed: {level_reason}"
-
-        score_value, reasons, score_breakdown = score_opportunity(
-            tech_15,
-            ticker,
-            book,
-            tech_1h,
-            tech_4h,
-        )
-        if score_value < MIN_SCORE:
-            return False, None, f"Final Score {score_value} < {MIN_SCORE} | {format_score_diagnostic(score_value, score_breakdown)}"
-
-        validation_passes = 15
-        rebuilt = Opportunity(
-            symbol=opportunity.symbol,
-            score=score_value,
-            strength=strength(score_value),
-            setup=("BREAKOUT" if tech_15.breakout else ("PULLBACK" if tech_15.is_pullback else "RECOVERY")),
-            source="PARIBU",
-            entry=levels.entry,
-            bid=book.best_bid,
-            ask=book.best_ask,
-            spread_pct=book.spread_percent,
-            orderbook_imbalance=book.imbalance_ratio,
-            closed_price_15m=tech_15.current_close,
-            rsi_15m=tech_15.rsi14,
-            atr_pct_15m=tech_15.atr14 / tech_15.current_close * Decimal("100"),
-            volume_ratio_15m=tech_15.volume_ratio,
-            resistance=levels.resistance,
-            stop=levels.stop,
-            tp1=levels.tp1,
-            tp2=levels.tp2,
-            rr=levels.rr,
-            tp1_pct=levels.tp1_pct,
-            net_tp1_pct=levels.net_tp1_pct,
-            reason=" | ".join(reasons[:10]),
-            close_timestamp_15m=tech_15.latest_closed_timestamp,
-            close_timestamp_1h=tech_1h.latest_closed_timestamp,
-            close_timestamp_4h=tech_4h.latest_closed_timestamp,
-            validation_passes=validation_passes,
-        )
-        return True, rebuilt, "OK"
-
-    except Exception as exc:
-        LOGGER.exception("Final validation error for %s", opportunity.symbol)
-        return False, None, str(exc)
-
-
-# ---------------------------- formatting ----------------------------
-
-
-def format_opportunity(opp: Opportunity, rank: int) -> str:
-    resistance = fmt(opp.resistance) if opp.resistance is not None else "غير محددة"
-    liquidity_note = (
-        f"{opp.orderbook_imbalance:.2f}x شراء/بيع"
-    )
-    return (
-        f"🎯 <b>PARIBU SPOT — إشارة مؤكدة #{rank}</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━\n"
-        f"🪙 <b>{html.escape(opp.symbol)}</b>\n"
-        f"🏷️ <b>المصدر:</b> {opp.source} فقط\n"
-        f"💪 <b>الدرجة:</b> {opp.score}/100 — {opp.strength}\n"
-        f"🧩 <b>Setup:</b> {opp.setup}\n\n"
-        f"💵 <b>Paribu Ask:</b> <code>{fmt(opp.ask)}</code>\n"
-        f"💵 <b>الدخول:</b> <code>{fmt(opp.entry)}</code>\n"
-        f"🛑 <b>وقف الخسارة:</b> <code>{fmt(opp.stop)}</code>\n"
-        f"🎯 <b>TP1:</b> <code>{fmt(opp.tp1)}</code> (+{opp.tp1_pct:.2f}%)\n"
-        f"🚀 <b>TP2:</b> <code>{fmt(opp.tp2)}</code>\n"
-        f"🧱 <b>المقاومة:</b> <code>{resistance}</code>\n\n"
-        f"📐 <b>R:R:</b> 1:{opp.rr:.2f}\n"
-        f"💰 <b>صافي TP1 تقديري بعد الرسوم/الانزلاق:</b> +{opp.net_tp1_pct:.2f}%\n"
-        f"📏 <b>Spread Paribu:</b> {opp.spread_pct:.2f}%\n"
-        f"📚 <b>Order Book:</b> {liquidity_note}\n\n"
-        f"📊 <b>RSI 15m:</b> {opp.rsi_15m:.1f}\n"
-        f"📊 <b>ATR 15m:</b> {opp.atr_pct_15m:.2f}%\n"
-        f"💧 <b>Volume:</b> {opp.volume_ratio_15m:.2f}x\n"
-        f"📌 <b>إغلاق 15m المرجعي:</b> <code>{fmt(opp.closed_price_15m)}</code>\n\n"
-        f"✅ <b>اجتاز {opp.validation_passes}/15 بوابة تحقق إلزامية.</b>\n"
-        f"🧠 <b>الأسباب:</b> {html.escape(opp.reason)}\n\n"
-        "⚠️ <b>Spot فقط — التنفيذ يدوي.</b>\n"
-        "⚠️ هذه إشارة منضبطة بالبيانات وليست ضمانًا للربح."
-    )
-
-
-def format_report(stats: ScanStats, btc_reason: Optional[str] = None) -> str:
-    reasons = sorted(
-        (stats.reasons or {}).items(),
-        key=lambda item: item[1],
-        reverse=True,
-    )[:8]
-    reason_lines = "\n".join(
-        f"• {html.escape(reason)}: {count}"
-        for reason, count in reasons
-    ) or "لا توجد أسباب رفض مسجلة"
-
-    btc_text = html.escape(btc_reason or "غير منفذ")
-    execution_rejections = sorted(
-        (stats.execution_rejections or {}).items(),
-        key=lambda item: item[1],
-        reverse=True,
-    )[:6]
-    execution_lines = "\n".join(
-        f"• {html.escape(reason)}: {count}"
-        for reason, count in execution_rejections
-    ) or "لا توجد حالات رفض Execution"
-    score_rejections = [
-        (reason, count)
-        for reason, count in (stats.reasons or {}).items()
-        if reason.startswith("Score ")
-    ]
-    score_rejections.sort(key=lambda item: item[1], reverse=True)
-    score_lines = "\n".join(
-        f"• {html.escape(reason)}: {count}"
-        for reason, count in score_rejections[:5]
-    ) or "لا توجد حالات Score أقل من الحد"
-    return (
-        "🔍 <b>Paribu — فحص Sniper الصارم</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 الأزواج: {stats.total_markets}\n"
-        f"💧 اجتازت السيولة: {stats.liquidity_pass} | رفض: {stats.liquidity_fail}\n"
-        f"📚 اجتازت Order Book: {stats.orderbook_pass} | رفض: {stats.orderbook_fail}\n"
-        f"📏 اجتازت Spread: {stats.spread_pass} | رفض: {stats.spread_fail}\n"
-        f"🧪 محاولات فنية: {stats.technical_attempted}\n"
-        f"🕯️ شموع Paribu ناجحة: {stats.candles_pass} | فاشلة: {stats.candles_fail}\n"
-        f"📐 مؤشرات ناجحة: {stats.indicator_pass} | فاشلة: {stats.indicator_fail}\n"
-        f"₿ <b>BTC Gate:</b> {btc_text}\n"
-        f"🧭 MTF ناجح: {stats.mtf_pass} | فاشل: {stats.mtf_fail}\n"
-        f"🎯 Setup ناجح: {stats.setup_pass} | فاشل: {stats.setup_fail}\n"
-        f"⭐ Score ناجح: {stats.score_pass} | فاشل: {stats.score_fail}\n"
-        f"💰 Execution ناجح: {stats.execution_pass} | فاشل: {stats.execution_fail}\n"
-        f"🔐 Final validation ناجح: {stats.final_validation_pass} | فاشل: {stats.final_validation_fail}\n\n"
-        "⭐ <b>تشخيص Score:</b>\n"
-        f"{score_lines}\n\n"
-        "💰 <b>تشخيص رفض Execution:</b>\n"
-        f"{execution_lines}\n\n"
-        "🔎 <b>أكثر أسباب الرفض:</b>\n"
-        f"{reason_lines}\n\n"
-        "🛡️ <b>لا يتم إرسال أي توصية إذا فشل أي شرط إلزامي.</b>"
-    )
-
-
-# ---------------------------- scanner ----------------------------
-
-
-def build_candidate(
-    ticker: Ticker,
-    book: OrderBookSnapshot,
-    tech_15: IndicatorResult,
-    tech_1h: IndicatorResult,
-    tech_4h: IndicatorResult,
-    levels: TradeLevels,
-    score_value: int,
-    reasons: list[str],
-) -> Opportunity:
-    """Build an already validated opportunity without re-running any gate."""
-    return Opportunity(
-        symbol=ticker.symbol,
-        score=score_value,
-        strength=strength(score_value),
-        setup=("BREAKOUT" if tech_15.breakout else ("PULLBACK" if tech_15.is_pullback else "RECOVERY")),
-        source="PARIBU",
-        entry=levels.entry,
-        bid=book.best_bid,
-        ask=book.best_ask,
-        spread_pct=book.spread_percent,
-        orderbook_imbalance=book.imbalance_ratio,
-        closed_price_15m=tech_15.current_close,
-        rsi_15m=tech_15.rsi14,
-        atr_pct_15m=tech_15.atr14 / tech_15.current_close * Decimal("100"),
-        volume_ratio_15m=tech_15.volume_ratio,
-        resistance=levels.resistance,
-        stop=levels.stop,
-        tp1=levels.tp1,
-        tp2=levels.tp2,
-        rr=levels.rr,
-        tp1_pct=levels.tp1_pct,
-        net_tp1_pct=levels.net_tp1_pct,
-        reason=" | ".join(reasons[:10]),
-        close_timestamp_15m=tech_15.latest_closed_timestamp,
-        close_timestamp_1h=tech_1h.latest_closed_timestamp,
-        close_timestamp_4h=tech_4h.latest_closed_timestamp,
-        validation_passes=15,
-    )
-
-
-def run_scanner() -> None:
-    stats = ScanStats()
-    state = load_state()
-
-    try:
-        snapshot = get_market_snapshot()
-    except ParibuDataError as exc:
-        send_telegram(
-            "🚨 <b>PARIBU SCANNER ERROR</b>\n\n"
-            f"<code>{html.escape(str(exc))}</code>"
-        )
-        return
-
-    stats.total_markets = len(snapshot)
-
-    btc_ok, btc_15, btc_reason = btc_gate()
-    if not btc_ok:
-        stats.btc_gate_fail += 1
-        stats.reject("BTC gate failed")
-        send_telegram(
-            "🛡️ <b>Paribu Sniper متوقف مؤقتًا</b>\n\n"
-            f"سبب حماية السوق: {html.escape(btc_reason)}\n\n"
-            "لم يتم إرسال أي توصية لأن شرط BTC الإجباري لم يمر."
-        )
-        return
-    stats.btc_gate_pass += 1
-
-    candidates: list[Opportunity] = []
-
-    tickers = sorted(
-        snapshot.values(),
-        key=lambda item: item.quote_volume or Decimal("0"),
-        reverse=True,
-    )
-
-    orderbook_checked = 0
-
-    for ticker in tickers:
-        if ticker.symbol in {"USDT_TL", "USDC_TL", "BTC_TL"}:
-            continue
-
-        if ticker.quote_volume is None or ticker.quote_volume < MIN_QUOTE_VOLUME_TL:
-            stats.liquidity_fail += 1
-            stats.reject("سيولة أقل من الحد")
-            continue
-        stats.liquidity_pass += 1
-
-        if orderbook_checked >= MAX_ORDERBOOK_MARKETS:
-            break
-        orderbook_checked += 1
-
-        try:
-            book = get_order_book(ticker.symbol, ORDERBOOK_DEPTH)
-        except Exception as exc:
-            stats.orderbook_fail += 1
-            stats.reject("فشل Order Book Paribu")
-            LOGGER.debug("%s orderbook failure: %s", ticker.symbol, exc)
-            continue
-
-        # The order book only counts as PASS after all hard order-book checks.
-        if book.spread_percent > MAX_SPREAD_PCT:
-            stats.spread_fail += 1
-            stats.reject(f"Spread {book.spread_percent:.2f}%")
-            continue
-        stats.spread_pass += 1
-
-        if book.imbalance_ratio < MIN_ORDERBOOK_IMBALANCE:
-            stats.orderbook_fail += 1
-            stats.reject("Order Book يميل للبيع")
-            continue
-        stats.orderbook_pass += 1
-
-        if stats.technical_attempted >= MAX_TECHNICAL_MARKETS:
-            break
-        stats.technical_attempted += 1
-
-        try:
-            df_15 = fetch_candles(ticker.symbol, "15m", CANDLE_LIMIT)
-            df_1h = fetch_candles(ticker.symbol, "1h", CANDLE_LIMIT)
-            df_4h = fetch_candles(ticker.symbol, "4h", CANDLE_LIMIT)
-        except Exception as exc:
-            stats.candles_fail += 1
-            stats.reject("فشل شموع Paribu")
-            LOGGER.debug("%s candle failure: %s", ticker.symbol, exc)
-            continue
-
-        if not all(
-            frame.attrs.get("source") == "PARIBU"
-            for frame in (df_15, df_1h, df_4h)
-        ):
-            stats.candles_fail += 1
-            stats.reject("مصدر الشموع ليس Paribu")
-            continue
-
-        stats.candles_pass += 1
-
-        tech_15 = analyze_symbol(df_15)
-        tech_1h = analyze_symbol(df_1h)
-        tech_4h = analyze_symbol(df_4h)
-        if tech_15 is None or tech_1h is None or tech_4h is None:
-            stats.indicator_fail += 1
-            stats.reject("فشل المؤشرات")
-            continue
-        stats.indicator_pass += 1
-
-        # Stage order is deliberate: MTF -> Setup -> Execution -> Score.
-        # Each gate is evaluated exactly once so counters describe the real bottleneck.
-        mtf_ok, mtf_reason = multi_timeframe_gate(tech_15, tech_1h, tech_4h)
-        if not mtf_ok:
-            stats.mtf_fail += 1
-            stats.reject(mtf_reason)
-            continue
-        stats.mtf_pass += 1
-
-        setup_ok, setup_reason = setup_gate(tech_15, btc_15=btc_15)
-        if not setup_ok:
-            stats.setup_fail += 1
-            stats.reject(setup_reason)
-            continue
-        stats.setup_pass += 1
-
-        # Score is evaluated BEFORE execution so diagnostics reveal whether the
-        # strategy lacks quality points or whether execution is the bottleneck.
-        score_value, score_reasons, score_breakdown = score_opportunity(
-            tech_15, ticker, book, tech_1h, tech_4h
-        )
-        if score_value < MIN_SCORE:
-            stats.score_fail += 1
-            stats.reject(format_score_diagnostic(score_value, score_breakdown))
-            continue
-        stats.score_pass += 1
-
-        levels, level_reason = execution_levels(tech_15, ticker, book)
-        if levels is None:
-            stats.execution_fail += 1
-            stats.reject_execution(level_reason)
-            continue
-        stats.execution_pass += 1
-
-        opportunity = build_candidate(
-            ticker, book, tech_15, tech_1h, tech_4h,
-            levels=levels, score_value=score_value, reasons=score_reasons
-        )
-
-        if not cooldown_allowed(opportunity.symbol, state):
-            stats.reject("Cooldown")
-            continue
-
-        # Final revalidation is deliberately done before Telegram, not after.
-        ok, validated, reason = final_validate(opportunity, ticker, book)
-        if not ok or validated is None:
-            stats.final_validation_fail += 1
-            stats.reject(f"Final validation: {reason}")
-            continue
-
-        stats.final_validation_pass += 1
-        candidates.append(validated)
-
-    candidates.sort(
-        key=lambda item: (
-            item.score,
-            item.net_tp1_pct,
-            item.rr,
-            item.orderbook_imbalance,
-        ),
-        reverse=True,
-    )
-
-    selected = candidates[:MAX_SIGNALS_PER_RUN]
-
-    if not selected:
-        send_telegram(format_report(stats, btc_reason))
-        save_state(state)
-        return
-
-    header = (
-        "🔥 <b>Paribu — فرص Spot عالية الانضباط</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━\n"
-        f"تم تمرير <b>{len(selected)}</b> فرصة بعد فحص متعدد المراحل وإعادة تحقق نهائية.\n"
-        "📌 جميع بيانات السعر والشموع ودفتر الطلبات من Paribu فقط."
-    )
-    send_telegram(header)
-
-    for rank, opportunity in enumerate(selected, start=1):
-        message = format_opportunity(opportunity, rank)
-        if send_telegram(message):
-            state["sent_signals"][opportunity.symbol] = int(time.time())
-            save_state(state)
-
-    LOGGER.info("Run complete: selected=%d", len(selected))
-
-
-if __name__ == "__main__":
-    run_scanner()
+        source_15 = str(
+            btc_15_df.attrs.get("source", "")
+        ).upper()
+
+        source_1h = str(
+            btc_1h_df.attrs.get("source", "")
+        ).upper()
+
+        if source_15 != "PARIB
