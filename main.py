@@ -15,24 +15,20 @@ if __name__ == "__main__":
     run_scanner()
     print("✅ MAIN: scanner finished", flush=True)
 
-    ai_test = os.getenv("RUN_AI_MANAGER_TEST", "false").lower() == "true"
-    print(f"🤖 MAIN: AI Manager test enabled = {ai_test}", flush=True)
+    print("🤖 MAIN: forcing AI Manager test...", flush=True)
 
-    if ai_test:
-        print("🤖 MAIN: calling AI Manager...", flush=True)
+    try:
+        answer = ask_manager(
+            "أنت الآن مدير تداول ذكي. "
+            "أعطني اختبار اتصال قصير يؤكد أنك تعمل."
+        )
 
-        try:
-            answer = ask_manager(
-                "أنت الآن مدير تداول ذكي. "
-                "أعطني اختبار اتصال قصير يؤكد أنك تعمل."
-            )
+        print("✅ MAIN: AI Manager returned successfully", flush=True)
+        print("🤖 AI Manager:", flush=True)
+        print(answer, flush=True)
 
-            print("✅ MAIN: AI Manager returned successfully", flush=True)
-            print("🤖 AI Manager:", flush=True)
-            print(answer, flush=True)
-
-        except Exception as e:
-            print(f"❌ MAIN: AI Manager error: {type(e).__name__}: {e}", flush=True)
-            raise
+    except Exception as e:
+        print(f"❌ MAIN: AI Manager error: {type(e).__name__}: {e}", flush=True)
+        raise
 
     print("🏁 MAIN: finished", flush=True)
