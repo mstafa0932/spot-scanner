@@ -27,5 +27,5 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          RUN_AI_MANAGER_TEST: ${{ vars.RUN_AI_MANAGER_TEST }}
+          RUN_AI_MANAGER_TEST: ${{ vars.RUN_AI_MANAGER_TEST || 'true' }}
         run: python main.py
