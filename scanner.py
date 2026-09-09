@@ -1677,7 +1677,7 @@ def build_candidate(
             if tech_15.breakout
             else (
                 "PULLBACK"
-                if tech_15.is_pullbar
+                if tech_15.is_pullback
                 else "RECOVERY"
             )
         ),
