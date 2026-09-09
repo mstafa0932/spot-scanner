@@ -1,34 +1,61 @@
 from __future__ import annotations
 
-"""Single production entry point for the Paribu Spot Sniper + AI Manager."""
+"""Production entry point for Paribu Scanner + optional AI Manager."""
 
 import os
 
 from scanner import run_scanner
-from ai_manager import ask_manager
+
+
+def main() -> None:
+    print("🚀 MAIN: started")
+
+    # ---------------- Scanner ----------------
+    print("🔎 MAIN: starting scanner...")
+
+    run_scanner()
+
+    print("✅ MAIN: scanner finished")
+
+    # ---------------- AI Manager ----------------
+    # AI failure must NEVER stop the scanner.
+    run_ai_test = (
+        os.getenv("RUN_AI_MANAGER_TEST", "false")
+        .strip()
+        .lower()
+        == "true"
+    )
+
+    if not run_ai_test:
+        print("ℹ️ MAIN: AI Manager test disabled")
+        return
+
+    print("🧠 MAIN: starting AI Manager test...")
+
+    try:
+        from ai_manager import ask_manager
+
+        answer = ask_manager(
+            "أنت المدير الذكي للنظام. "
+            "أكد باختصار أنك تعمل وأنك لن تنفذ "
+            "أي قرار مالي أو تداول تلقائياً."
+        )
+
+        print("🤖 AI Manager:")
+        print(answer)
+
+    except Exception as exc:
+        # مهم:
+        # عطل OpenAI أو نفاد الرصيد لا يجب أن يعطل Scanner.
+        print(
+            "⚠️ MAIN: AI Manager unavailable, "
+            "but Scanner remains operational."
+        )
+        print(
+            f"⚠️ AI Manager error: "
+            f"{type(exc).__name__}: {exc}"
+        )
 
 
 if __name__ == "__main__":
-    print("🚀 MAIN: started", flush=True)
-
-    print("🔎 MAIN: starting scanner...", flush=True)
-    run_scanner()
-    print("✅ MAIN: scanner finished", flush=True)
-
-    print("🤖 MAIN: forcing AI Manager test...", flush=True)
-
-    try:
-        answer = ask_manager(
-            "أنت الآن مدير تداول ذكي. "
-            "أعطني اختبار اتصال قصير يؤكد أنك تعمل."
-        )
-
-        print("✅ MAIN: AI Manager returned successfully", flush=True)
-        print("🤖 AI Manager:", flush=True)
-        print(answer, flush=True)
-
-    except Exception as e:
-        print(f"❌ MAIN: AI Manager error: {type(e).__name__}: {e}", flush=True)
-        raise
-
-    print("🏁 MAIN: finished", flush=True)
+    main()
