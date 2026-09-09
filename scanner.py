@@ -717,4 +717,1538 @@ def btc_gate() -> tuple[
             btc_1h_df.attrs.get("source", "")
         ).upper()
 
-        if source_15 != "PARIB
+        if source_15 != "PARIBU":
+            return (
+                False,
+                None,
+                f"BTC 15m مصدر غير موثوق: {source_15}",
+            )
+
+        if source_1h != "PARIBU":
+            return (
+                False,
+                None,
+                f"BTC 1h مصدر غير موثوق: {source_1h}",
+            )
+
+        allowed, reason = _btc_regime(
+            btc_15,
+            btc_1h,
+        )
+
+        return allowed, btc_15, reason
+
+    except Exception as exc:
+        return (
+            False,
+            None,
+            f"BTC gate error: {exc}",
+        )
+
+
+def setup_gate(
+    tech: IndicatorResult,
+    btc_15: Optional[IndicatorResult] = None,
+) -> tuple[bool, str]:
+
+    """Adaptive setup gate without weakening liquidity/execution controls."""
+
+    btc_ema_distance = (
+        pct(
+            btc_15.current_close,
+            btc_15.ema21,
+        )
+        if (
+            btc_15 is not None
+            and btc_15.current_close > 0
+            and btc_15.ema21 > 0
+        )
+        else Decimal("0")
+    )
+
+    btc_bullish = bool(
+        btc_15 is not None
+        and btc_15.is_uptrend
+        and btc_ema_distance >= Decimal("0")
+        and btc_15.rsi14 >= BTC_CAUTION_RSI
+        and btc_15.recent_return_3 >= Decimal("0")
+    )
+
+    btc_weak = bool(
+        btc_15 is None
+        or btc_ema_distance <= Decimal("-0.75")
+        or (
+            btc_15.rsi14 < BTC_CAUTION_RSI
+            and btc_15.recent_return_3 < 0
+        )
+    )
+
+    if btc_bullish:
+        rsi_low = Decimal("48")
+        rsi_high = Decimal("68")
+
+    elif not btc_weak:
+        rsi_low = Decimal("44")
+        rsi_high = Decimal("70")
+
+    else:
+        return (
+            False,
+            "BTC ضعيف — Setup محمي",
+        )
+
+    if (
+        tech.rsi14 < rsi_low
+        or tech.rsi14 > rsi_high
+    ):
+        return (
+            False,
+            f"RSI خارج النطاق التكيفي "
+            f"{rsi_low:.0f}-{rsi_high:.0f}",
+        )
+
+    if tech.recent_return_3 >= MAX_RETURN_3:
+        return False, "Anti-FOMO 3 شموع"
+
+    if tech.recent_return_12 >= MAX_RETURN_12:
+        return False, "Anti-FOMO 12 شمعة"
+
+    if tech.recent_return_48 >= MAX_RETURN_48:
+        return False, "Anti-FOMO 48 شمعة"
+
+    atr_pct = (
+        tech.atr14
+        / tech.current_close
+        * Decimal("100")
+    )
+
+    if (
+        atr_pct < MIN_ATR_PCT
+        or atr_pct > MAX_ATR_PCT
+    ):
+        return False, "ATR خارج النطاق"
+
+    constructive_15m = bool(
+        tech.is_above_ema9
+        and tech.is_above_ema21
+        and tech.ema21 >= tech.ema50
+        and tech.macd_histogram > 0
+    )
+
+    pullback_ok = bool(
+        constructive_15m
+        and tech.is_pullback
+    )
+
+    breakout_ok = bool(
+        tech.breakout
+    )
+
+    recovery_ok = bool(
+        not btc_bullish
+        and constructive_15m
+        and tech.is_bullish_candle
+        and tech.volume_ratio >= MIN_VOLUME_RATIO
+        and tech.distance_ema21_pct <= Decimal("1.50")
+        and tech.recent_return_3 < Decimal("2.50")
+    )
+
+    if not (
+        pullback_ok
+        or breakout_ok
+        or recovery_ok
+    ):
+        return (
+            False,
+            "لا يوجد Pullback/Breakout/Recovery عالي الجودة",
+        )
+
+    if (
+        tech.macd_histogram <= 0
+        or tech.macd_line <= tech.macd_signal
+    ):
+        return (
+            False,
+            "MACD لا يؤكد الزخم",
+        )
+
+    if breakout_ok:
+        return True, "BREAKOUT — OK"
+
+    if pullback_ok:
+        return True, "PULLBACK — OK"
+
+    return True, "RECOVERY — OK"
+
+
+def multi_timeframe_gate(
+    tech_15: IndicatorResult,
+    tech_1h: IndicatorResult,
+    tech_4h: IndicatorResult,
+) -> tuple[bool, str]:
+
+    if not tech_1h.is_uptrend:
+        return False, "1h trend failed"
+
+    if tech_4h.current_close < tech_4h.ema50:
+        return False, "4h below EMA50"
+
+    if (
+        tech_1h.distance_ema21_pct
+        > MAX_1H_DISTANCE_FROM_EMA21_PCT
+    ):
+        return (
+            False,
+            "1h بعيد جدًا عن EMA21",
+        )
+
+    distance_4h = (
+        (
+            tech_4h.current_close
+            / tech_4h.ema50
+        )
+        - Decimal("1")
+    ) * Decimal("100")
+
+    if (
+        distance_4h
+        > MAX_4H_DISTANCE_FROM_EMA50_PCT
+    ):
+        return (
+            False,
+            "4h ممتد جدًا عن EMA50",
+        )
+
+    constructive_15m = bool(
+        tech_15.is_above_ema9
+        and tech_15.is_above_ema21
+        and tech_15.ema21 >= tech_15.ema50
+        and tech_15.macd_histogram > 0
+    )
+
+    if tech_15.is_uptrend:
+        return (
+            True,
+            "15m full trend + 1h/4h aligned",
+        )
+
+    if constructive_15m:
+        return (
+            True,
+            "15m constructive recovery + 1h/4h aligned",
+        )
+
+    return (
+        False,
+        "15m trend/structure failed",
+    )
+
+
+def execution_levels(
+    tech: IndicatorResult,
+    ticker: Ticker,
+    book: OrderBookSnapshot,
+) -> tuple[Optional[TradeLevels], str]:
+
+    bid = dec(book.best_bid)
+    ask = dec(book.best_ask)
+
+    if bid is None or ask is None:
+        return (
+            None,
+            "Paribu Order Book Bid/Ask غير متوفر",
+        )
+
+    if bid <= 0 or ask <= 0 or ask < bid:
+        return (
+            None,
+            "Paribu Order Book Bid/Ask غير صالح",
+        )
+
+    if book.spread_percent > MAX_SPREAD_PCT:
+        return (
+            None,
+            f"Spread {book.spread_percent:.2f}% "
+            f"> {MAX_SPREAD_PCT}%",
+        )
+
+    if (
+        book.imbalance_ratio
+        < MIN_ORDERBOOK_IMBALANCE
+    ):
+        return (
+            None,
+            f"OrderBook imbalance "
+            f"{book.imbalance_ratio:.2f} "
+            f"< {MIN_ORDERBOOK_IMBALANCE}",
+        )
+
+    entry = ask
+    close_15 = tech.current_close
+
+    if close_15 <= 0:
+        return (
+            None,
+            "15m close غير صالح",
+        )
+
+    entry_gap = pct(
+        entry,
+        close_15,
+    )
+
+    if (
+        entry_gap < Decimal("-0.25")
+        or entry_gap
+        > MAX_ENTRY_GAP_FROM_CLOSED_PCT
+    ):
+        return (
+            None,
+            f"Entry gap {entry_gap:.2f}% غير مناسب",
+        )
+
+    atr_pct = (
+        tech.atr14
+        / close_15
+        * Decimal("100")
+    )
+
+    if (
+        atr_pct < MIN_ATR_PCT
+        or atr_pct > MAX_ATR_PCT
+    ):
+        return (
+            None,
+            f"ATR {atr_pct:.2f}% خارج النطاق",
+        )
+
+    risk_pct = max(
+        atr_pct * ATR_STOP_MULTIPLIER,
+        MIN_RISK_PCT,
+    )
+
+    if (
+        tech.swing_low > 0
+        and tech.swing_low < close_15
+    ):
+        swing_distance = pct(
+            close_15,
+            tech.swing_low,
+        )
+
+        if swing_distance > 0:
+            risk_pct = max(
+                risk_pct,
+                swing_distance,
+            )
+
+    risk_pct = min(
+        risk_pct,
+        MAX_RISK_PCT,
+    )
+
+    stop = entry * (
+        Decimal("1")
+        - risk_pct / Decimal("100")
+    )
+
+    if stop <= 0 or stop >= entry:
+        return (
+            None,
+            "Stop غير صالح",
+        )
+
+    resistance: Optional[Decimal] = None
+
+    resistances = [
+        value
+        for value in (
+            tech.resistance_48,
+            tech.resistance_96,
+        )
+        if (
+            value is not None
+            and value > entry
+        )
+    ]
+
+    if resistances:
+        resistance = min(resistances)
+
+    minimum_tp1 = entry * (
+        Decimal("1")
+        + MIN_TP1_PCT / Decimal("100")
+    )
+
+    atr_target_pct = max(
+        MIN_TP1_PCT,
+        risk_pct * Decimal("1.70"),
+    )
+
+    atr_tp1 = entry * (
+        Decimal("1")
+        + atr_target_pct / Decimal("100")
+    )
+
+    if resistance is not None:
+
+        resistance_room_pct = pct(
+            resistance,
+            entry,
+        )
+
+        structural_tp1 = resistance * (
+            Decimal("1")
+            - Decimal("0.20") / Decimal("100")
+        )
+
+        if tech.breakout:
+
+            tp1 = atr_tp1
+
+            if structural_tp1 >= minimum_tp1:
+                tp1 = min(
+                    structural_tp1,
+                    atr_tp1,
+                )
+                tp1 = max(
+                    tp1,
+                    minimum_tp1,
+                )
+
+        else:
+
+            if structural_tp1 < minimum_tp1:
+                return (
+                    None,
+                    f"المقاومة لا تسمح بـ TP1 صالح: "
+                    f"{resistance_room_pct:.2f}%",
+                )
+
+            tp1 = min(
+                structural_tp1,
+                atr_tp1,
+            )
+
+            tp1 = max(
+                tp1,
+                minimum_tp1,
+            )
+
+    else:
+        tp1 = atr_tp1
+
+    gross_tp1_pct = pct(
+        tp1,
+        entry,
+    )
+
+    net_tp1_pct = gross_tp1_pct - (
+        TAKER_FEE_PCT * Decimal("2")
+        + EXPECTED_SLIPPAGE_PCT
+    )
+
+    if gross_tp1_pct < MIN_TP1_PCT:
+        return (
+            None,
+            f"TP1 {gross_tp1_pct:.2f}% "
+            f"أقل من الحد {MIN_TP1_PCT}%",
+        )
+
+    if net_tp1_pct < MIN_NET_TP1_PCT:
+        return (
+            None,
+            f"صافي TP1 {net_tp1_pct:.2f}% "
+            f"أقل من الحد {MIN_NET_TP1_PCT}%",
+        )
+
+    risk = entry - stop
+    reward = tp1 - entry
+
+    if risk <= 0 or reward <= 0:
+        return (
+            None,
+            "Risk/Reward غير صالح",
+        )
+
+    rr = reward / risk
+
+    if rr < MIN_RR:
+        return (
+            None,
+            f"R:R {rr:.2f} أقل من {MIN_RR}",
+        )
+
+    if resistance is not None:
+
+        resistance_room_pct = pct(
+            resistance,
+            entry,
+        )
+
+        if (
+            resistance_room_pct
+            < Decimal("0.35")
+        ):
+            return (
+                None,
+                f"المقاومة شديدة القرب: "
+                f"{resistance_room_pct:.2f}%",
+            )
+
+        if (
+            resistance_room_pct
+            < MIN_RESISTANCE_ROOM_PCT
+        ):
+            LOGGER.debug(
+                "Tight resistance accepted after "
+                "TP/RR validation: "
+                "room=%.2f%% tp1=%.2f%% "
+                "net=%.2f%% rr=%.2f",
+                resistance_room_pct,
+                gross_tp1_pct,
+                net_tp1_pct,
+                rr,
+            )
+
+    tp2 = entry * (
+        Decimal("1")
+        + max(
+            risk_pct * Decimal("2.50"),
+            MIN_TP1_PCT + Decimal("1.50"),
+        )
+        / Decimal("100")
+    )
+
+    if tech.resistance_96 > entry:
+
+        structural_tp2 = entry * (
+            Decimal("1")
+            + (
+                (
+                    tech.resistance_96
+                    / entry
+                )
+                - Decimal("1")
+            )
+            * Decimal("0.98")
+        )
+
+        tp2 = max(
+            tp2,
+            structural_tp2,
+        )
+
+    max_tp2 = entry * Decimal("1.15")
+
+    tp2 = min(
+        tp2,
+        max_tp2,
+    )
+
+    tp2 = max(
+        tp2,
+        tp1 * Decimal("1.025"),
+    )
+
+    tp2 = min(
+        tp2,
+        max_tp2,
+    )
+
+    if tp2 <= tp1:
+        return (
+            None,
+            "TP2 غير صالح",
+        )
+
+    if not (
+        stop
+        < entry
+        < tp1
+        <= tp2
+    ):
+        return (
+            None,
+            "مستويات الصفقة غير متسلسلة",
+        )
+
+    return (
+        TradeLevels(
+            entry=entry,
+            stop=stop,
+            tp1=tp1,
+            tp2=tp2,
+            rr=rr,
+            tp1_pct=gross_tp1_pct,
+            net_tp1_pct=net_tp1_pct,
+            resistance=resistance,
+            risk_pct=risk_pct,
+        ),
+        "OK",
+    )
+
+
+# ---------------------------- final validator ----------------------------
+
+
+def final_validate(
+    opportunity: Opportunity,
+    original_ticker: Ticker,
+    original_book: OrderBookSnapshot,
+) -> tuple[
+    bool,
+    Optional[Opportunity],
+    str,
+]:
+
+    """Re-fetch all critical data immediately before Telegram."""
+
+    try:
+        snapshot = get_market_snapshot()
+
+        ticker = snapshot.get(
+            opportunity.symbol
+        )
+
+        if ticker is None:
+            return (
+                False,
+                None,
+                "Final ticker refresh failed",
+            )
+
+        book = get_order_book(
+            opportunity.symbol,
+            ORDERBOOK_DEPTH,
+        )
+
+        df_15 = fetch_candles(
+            opportunity.symbol,
+            "15m",
+            CANDLE_LIMIT,
+        )
+
+        df_1h = fetch_candles(
+            opportunity.symbol,
+            "1h",
+            CANDLE_LIMIT,
+        )
+
+        df_4h = fetch_candles(
+            opportunity.symbol,
+            "4h",
+            CANDLE_LIMIT,
+        )
+
+        tech_15 = analyze_symbol(df_15)
+        tech_1h = analyze_symbol(df_1h)
+        tech_4h = analyze_symbol(df_4h)
+
+        if (
+            tech_15 is None
+            or tech_1h is None
+            or tech_4h is None
+        ):
+            return (
+                False,
+                None,
+                "Final indicators unavailable",
+            )
+
+        if (
+            tech_15.source != "PARIBU"
+            or tech_1h.source != "PARIBU"
+            or tech_4h.source != "PARIBU"
+        ):
+            return (
+                False,
+                None,
+                "Final source validation failed",
+            )
+
+        if (
+            tech_15.latest_closed_timestamp
+            < opportunity.close_timestamp_15m
+        ):
+            return (
+                False,
+                None,
+                "15m candle went backwards",
+            )
+
+        (
+            btc_ok,
+            btc_15_final,
+            btc_final_reason,
+        ) = btc_gate()
+
+        if not btc_ok:
+            return (
+                False,
+                None,
+                f"Final BTC gate failed: "
+                f"{btc_final_reason}",
+            )
+
+        setup_ok, setup_reason = setup_gate(
+            tech_15,
+            btc_15=btc_15_final,
+        )
+
+        if not setup_ok:
+            return (
+                False,
+                None,
+                f"Final setup failed: "
+                f"{setup_reason}",
+            )
+
+        mtf_ok, mtf_reason = multi_timeframe_gate(
+            tech_15,
+            tech_1h,
+            tech_4h,
+        )
+
+        if not mtf_ok:
+            return (
+                False,
+                None,
+                f"Final MTF failed: "
+                f"{mtf_reason}",
+            )
+
+        levels, level_reason = execution_levels(
+            tech_15,
+            ticker,
+            book,
+        )
+
+        if levels is None:
+            return (
+                False,
+                None,
+                f"Final execution failed: "
+                f"{level_reason}",
+            )
+
+        (
+            score_value,
+            reasons,
+            score_breakdown,
+        ) = score_opportunity(
+            tech_15,
+            ticker,
+            book,
+            tech_1h,
+            tech_4h,
+        )
+
+        if score_value < MIN_SCORE:
+            return (
+                False,
+                None,
+                f"Final Score {score_value} "
+                f"< {MIN_SCORE} | "
+                f"{format_score_diagnostic(score_value, score_breakdown)}",
+            )
+
+        validation_passes = 15
+
+        rebuilt = Opportunity(
+            symbol=opportunity.symbol,
+            score=score_value,
+            strength=strength(score_value),
+            setup=(
+                "BREAKOUT"
+                if tech_15.breakout
+                else (
+                    "PULLBACK"
+                    if tech_15.is_pullback
+                    else "RECOVERY"
+                )
+            ),
+            source="PARIBU",
+            entry=levels.entry,
+            bid=book.best_bid,
+            ask=book.best_ask,
+            spread_pct=book.spread_percent,
+            orderbook_imbalance=book.imbalance_ratio,
+            closed_price_15m=tech_15.current_close,
+            rsi_15m=tech_15.rsi14,
+            atr_pct_15m=(
+                tech_15.atr14
+                / tech_15.current_close
+                * Decimal("100")
+            ),
+            volume_ratio_15m=tech_15.volume_ratio,
+            resistance=levels.resistance,
+            stop=levels.stop,
+            tp1=levels.tp1,
+            tp2=levels.tp2,
+            rr=levels.rr,
+            tp1_pct=levels.tp1_pct,
+            net_tp1_pct=levels.net_tp1_pct,
+            reason=" | ".join(reasons[:10]),
+            close_timestamp_15m=(
+                tech_15.latest_closed_timestamp
+            ),
+            close_timestamp_1h=(
+                tech_1h.latest_closed_timestamp
+            ),
+            close_timestamp_4h=(
+                tech_4h.latest_closed_timestamp
+            ),
+            validation_passes=validation_passes,
+        )
+
+        return True, rebuilt, "OK"
+
+    except Exception as exc:
+
+        LOGGER.exception(
+            "Final validation error for %s",
+            opportunity.symbol,
+        )
+
+        return False, None, str(exc)
+
+
+# ---------------------------- formatting ----------------------------
+
+
+def format_opportunity(
+    opp: Opportunity,
+    rank: int,
+) -> str:
+
+    resistance = (
+        fmt(opp.resistance)
+        if opp.resistance is not None
+        else "غير محددة"
+    )
+
+    liquidity_note = (
+        f"{opp.orderbook_imbalance:.2f}x شراء/بيع"
+    )
+
+    return (
+        f"🎯 <b>PARIBU SPOT — إشارة مؤكدة #{rank}</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        f"🪙 <b>{html.escape(opp.symbol)}</b>\n"
+        f"🏷️ <b>المصدر:</b> {opp.source} فقط\n"
+        f"💪 <b>الدرجة:</b> {opp.score}/100 — {opp.strength}\n"
+        f"🧩 <b>Setup:</b> {opp.setup}\n\n"
+        f"💵 <b>Paribu Ask:</b> <code>{fmt(opp.ask)}</code>\n"
+        f"💵 <b>الدخول:</b> <code>{fmt(opp.entry)}</code>\n"
+        f"🛑 <b>وقف الخسارة:</b> <code>{fmt(opp.stop)}</code>\n"
+        f"🎯 <b>TP1:</b> <code>{fmt(opp.tp1)}</code> "
+        f"(+{opp.tp1_pct:.2f}%)\n"
+        f"🚀 <b>TP2:</b> <code>{fmt(opp.tp2)}</code>\n"
+        f"🧱 <b>المقاومة:</b> <code>{resistance}</code>\n\n"
+        f"📐 <b>R:R:</b> 1:{opp.rr:.2f}\n"
+        f"💰 <b>صافي TP1 تقديري بعد الرسوم/الانزلاق:</b> "
+        f"+{opp.net_tp1_pct:.2f}%\n"
+        f"📏 <b>Spread Paribu:</b> {opp.spread_pct:.2f}%\n"
+        f"📚 <b>Order Book:</b> {liquidity_note}\n\n"
+        f"📊 <b>RSI 15m:</b> {opp.rsi_15m:.1f}\n"
+        f"📊 <b>ATR 15m:</b> {opp.atr_pct_15m:.2f}%\n"
+        f"💧 <b>Volume:</b> {opp.volume_ratio_15m:.2f}x\n"
+        f"📌 <b>إغلاق 15m المرجعي:</b> "
+        f"<code>{fmt(opp.closed_price_15m)}</code>\n\n"
+        f"✅ <b>اجتاز {opp.validation_passes}/15 "
+        f"بوابة تحقق إلزامية.</b>\n"
+        f"🧠 <b>الأسباب:</b> "
+        f"{html.escape(opp.reason)}\n\n"
+        "⚠️ <b>Spot فقط — التنفيذ يدوي.</b>\n"
+        "⚠️ هذه إشارة منضبطة بالبيانات وليست ضمانًا للربح."
+    )
+
+
+def format_report(
+    stats: ScanStats,
+    btc_reason: Optional[str] = None,
+) -> str:
+
+    reasons = sorted(
+        (stats.reasons or {}).items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:8]
+
+    reason_lines = "\n".join(
+        f"• {html.escape(reason)}: {count}"
+        for reason, count in reasons
+    ) or "لا توجد أسباب رفض مسجلة"
+
+    btc_text = html.escape(
+        btc_reason or "غير منفذ"
+    )
+
+    execution_rejections = sorted(
+        (stats.execution_rejections or {}).items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:6]
+
+    execution_lines = "\n".join(
+        f"• {html.escape(reason)}: {count}"
+        for reason, count in execution_rejections
+    ) or "لا توجد حالات رفض Execution"
+
+    score_rejections = [
+        (reason, count)
+        for reason, count
+        in (stats.reasons or {}).items()
+        if reason.startswith("Score ")
+    ]
+
+    score_rejections.sort(
+        key=lambda item: item[1],
+        reverse=True,
+    )
+
+    score_lines = "\n".join(
+        f"• {html.escape(reason)}: {count}"
+        for reason, count
+        in score_rejections[:5]
+    ) or "لا توجد حالات Score أقل من الحد"
+
+    return (
+        "🔍 <b>Paribu — فحص Sniper الصارم</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        f"📊 الأزواج: {stats.total_markets}\n"
+        f"💧 اجتازت السيولة: {stats.liquidity_pass} "
+        f"| رفض: {stats.liquidity_fail}\n"
+        f"📚 اجتازت Order Book: {stats.orderbook_pass} "
+        f"| رفض: {stats.orderbook_fail}\n"
+        f"📏 اجتازت Spread: {stats.spread_pass} "
+        f"| رفض: {stats.spread_fail}\n"
+        f"🧪 محاولات فنية: {stats.technical_attempted}\n"
+        f"🕯️ شموع Paribu ناجحة: {stats.candles_pass} "
+        f"| فاشلة: {stats.candles_fail}\n"
+        f"📐 مؤشرات ناجحة: {stats.indicator_pass} "
+        f"| فاشلة: {stats.indicator_fail}\n"
+        f"₿ <b>BTC Gate:</b> {btc_text}\n"
+        f"🧭 MTF ناجح: {stats.mtf_pass} "
+        f"| فاشل: {stats.mtf_fail}\n"
+        f"🎯 Setup ناجح: {stats.setup_pass} "
+        f"| فاشل: {stats.setup_fail}\n"
+        f"⭐ Score ناجح: {stats.score_pass} "
+        f"| فاشل: {stats.score_fail}\n"
+        f"💰 Execution ناجح: {stats.execution_pass} "
+        f"| فاشل: {stats.execution_fail}\n"
+        f"🔐 Final validation ناجح: "
+        f"{stats.final_validation_pass} "
+        f"| فاشل: {stats.final_validation_fail}\n\n"
+        "⭐ <b>تشخيص Score:</b>\n"
+        f"{score_lines}\n\n"
+        "💰 <b>تشخيص رفض Execution:</b>\n"
+        f"{execution_lines}\n\n"
+        "🔎 <b>أكثر أسباب الرفض:</b>\n"
+        f"{reason_lines}\n\n"
+        "🛡️ <b>لا يتم إرسال أي توصية إذا "
+        "فشل أي شرط إلزامي.</b>"
+    )
+
+
+# ---------------------------- scanner ----------------------------
+
+
+def build_candidate(
+    ticker: Ticker,
+    book: OrderBookSnapshot,
+    tech_15: IndicatorResult,
+    tech_1h: IndicatorResult,
+    tech_4h: IndicatorResult,
+    levels: TradeLevels,
+    score_value: int,
+    reasons: list[str],
+) -> Opportunity:
+
+    """Build an already validated opportunity without re-running any gate."""
+
+    return Opportunity(
+        symbol=ticker.symbol,
+        score=score_value,
+        strength=strength(score_value),
+        setup=(
+            "BREAKOUT"
+            if tech_15.breakout
+            else (
+                "PULLBACK"
+                if tech_15.is_pullbar
+                else "RECOVERY"
+            )
+        ),
+        source="PARIBU",
+        entry=levels.entry,
+        bid=book.best_bid,
+        ask=book.best_ask,
+        spread_pct=book.spread_percent,
+        orderbook_imbalance=book.imbalance_ratio,
+        closed_price_15m=tech_15.current_close,
+        rsi_15m=tech_15.rsi14,
+        atr_pct_15m=(
+            tech_15.atr14
+            / tech_15.current_close
+            * Decimal("100")
+        ),
+        volume_ratio_15m=tech_15.volume_ratio,
+        resistance=levels.resistance,
+        stop=levels.stop,
+        tp1=levels.tp1,
+        tp2=levels.tp2,
+        rr=levels.rr,
+        tp1_pct=levels.tp1_pct,
+        net_tp1_pct=levels.net_tp1_pct,
+        reason=" | ".join(reasons[:10]),
+        close_timestamp_15m=(
+            tech_15.latest_closed_timestamp
+        ),
+        close_timestamp_1h=(
+            tech_1h.latest_closed_timestamp
+        ),
+        close_timestamp_4h=(
+            tech_4h.latest_closed_timestamp
+        ),
+        validation_passes=15,
+    )
+
+
+def run_scanner() -> None:
+
+    stats = ScanStats()
+    state = load_state()
+
+    try:
+        snapshot = get_market_snapshot()
+
+    except ParibuDataError as exc:
+
+        send_telegram(
+            "🚨 <b>PARIBU SCANNER ERROR</b>\n\n"
+            f"<code>{html.escape(str(exc))}</code>"
+        )
+        return
+
+    # ---------------------------------------------
+    # Near-Miss متابعة النتائج القديمة
+    # ---------------------------------------------
+
+    near_miss_tracking = (
+        update_near_miss_outcomes(state)
+    )
+
+    LOGGER.info(
+        "Near-Miss tracking: "
+        "checked=%d updated=%d errors=%d",
+        near_miss_tracking["checked"],
+        near_miss_tracking["updated"],
+        near_miss_tracking["errors"],
+    )
+
+    # نحفظ نتائج المتابعة فورًا حتى لا تضيع
+    # إذا أوقف BTC Gate الدورة لاحقًا.
+    save_state(state)
+
+    stats.total_markets = len(snapshot)
+
+    btc_ok, btc_15, btc_reason = btc_gate()
+
+    if not btc_ok:
+
+        stats.btc_gate_fail += 1
+        stats.reject("BTC gate failed")
+
+        send_telegram(
+            "🛡️ <b>Paribu Sniper متوقف مؤقتًا</b>\n\n"
+            f"سبب حماية السوق: "
+            f"{html.escape(btc_reason)}\n\n"
+            "لم يتم إرسال أي توصية لأن "
+            "شرط BTC الإجباري لم يمر."
+        )
+
+        save_state(state)
+        return
+
+    stats.btc_gate_pass += 1
+
+    candidates: list[Opportunity] = []
+
+    tickers = sorted(
+        snapshot.values(),
+        key=lambda item: (
+            item.quote_volume
+            or Decimal("0")
+        ),
+        reverse=True,
+    )
+
+    orderbook_checked = 0
+
+    for ticker in tickers:
+
+        if ticker.symbol in {
+            "USDT_TL",
+            "USDC_TL",
+            "BTC_TL",
+        }:
+            continue
+
+        if (
+            ticker.quote_volume is None
+            or ticker.quote_volume
+            < MIN_QUOTE_VOLUME_TL
+        ):
+            stats.liquidity_fail += 1
+            stats.reject("سيولة أقل من الحد")
+            continue
+
+        stats.liquidity_pass += 1
+
+        if (
+            orderbook_checked
+            >= MAX_ORDERBOOK_MARKETS
+        ):
+            break
+
+        orderbook_checked += 1
+
+        try:
+            book = get_order_book(
+                ticker.symbol,
+                ORDERBOOK_DEPTH,
+            )
+
+        except Exception as exc:
+
+            stats.orderbook_fail += 1
+            stats.reject(
+                "فشل Order Book Paribu"
+            )
+
+            LOGGER.debug(
+                "%s orderbook failure: %s",
+                ticker.symbol,
+                exc,
+            )
+
+            continue
+
+        if (
+            book.spread_percent
+            > MAX_SPREAD_PCT
+        ):
+            stats.spread_fail += 1
+
+            stats.reject(
+                f"Spread "
+                f"{book.spread_percent:.2f}%"
+            )
+
+            continue
+
+        stats.spread_pass += 1
+
+        if (
+            book.imbalance_ratio
+            < MIN_ORDERBOOK_IMBALANCE
+        ):
+            stats.orderbook_fail += 1
+
+            stats.reject(
+                "Order Book يميل للبيع"
+            )
+
+            continue
+
+        stats.orderbook_pass += 1
+
+        if (
+            stats.technical_attempted
+            >= MAX_TECHNICAL_MARKETS
+        ):
+            break
+
+        stats.technical_attempted += 1
+
+        try:
+            df_15 = fetch_candles(
+                ticker.symbol,
+                "15m",
+                CANDLE_LIMIT,
+            )
+
+            df_1h = fetch_candles(
+                ticker.symbol,
+                "1h",
+                CANDLE_LIMIT,
+            )
+
+            df_4h = fetch_candles(
+                ticker.symbol,
+                "4h",
+                CANDLE_LIMIT,
+            )
+
+        except Exception as exc:
+
+            stats.candles_fail += 1
+            stats.reject(
+                "فشل شموع Paribu"
+            )
+
+            LOGGER.debug(
+                "%s candle failure: %s",
+                ticker.symbol,
+                exc,
+            )
+
+            continue
+
+        if not all(
+            frame.attrs.get("source")
+            == "PARIBU"
+            for frame in (
+                df_15,
+                df_1h,
+                df_4h,
+            )
+        ):
+            stats.candles_fail += 1
+            stats.reject(
+                "مصدر الشموع ليس Paribu"
+            )
+            continue
+
+        stats.candles_pass += 1
+
+        tech_15 = analyze_symbol(df_15)
+        tech_1h = analyze_symbol(df_1h)
+        tech_4h = analyze_symbol(df_4h)
+
+        if (
+            tech_15 is None
+            or tech_1h is None
+            or tech_4h is None
+        ):
+            stats.indicator_fail += 1
+            stats.reject(
+                "فشل المؤشرات"
+            )
+            continue
+
+        stats.indicator_pass += 1
+
+        # -------------------------------------------------
+        # MTF
+        # -------------------------------------------------
+
+        mtf_ok, mtf_reason = (
+            multi_timeframe_gate(
+                tech_15,
+                tech_1h,
+                tech_4h,
+            )
+        )
+
+        if not mtf_ok:
+
+            stats.mtf_fail += 1
+            stats.reject(mtf_reason)
+
+            (
+                diagnostic_score,
+                _,
+                _,
+            ) = score_opportunity(
+                tech_15,
+                ticker,
+                book,
+                tech_1h,
+                tech_4h,
+            )
+
+            if (
+                diagnostic_score
+                >= NEAR_MISS_MIN_SCORE
+            ):
+                record_near_miss(
+                    state,
+                    symbol=ticker.symbol,
+                    gate="MTF",
+                    reason=mtf_reason,
+                    reference_price=book.best_ask,
+                    score=diagnostic_score,
+                    spread_pct=book.spread_percent,
+                    imbalance=book.imbalance_ratio,
+                    rsi_15m=tech_15.rsi14,
+                    volume_ratio_15m=tech_15.volume_ratio,
+                )
+
+            continue
+
+        stats.mtf_pass += 1
+
+        # -------------------------------------------------
+        # SETUP
+        # -------------------------------------------------
+
+        setup_ok, setup_reason = setup_gate(
+            tech_15,
+            btc_15=btc_15,
+        )
+
+        if not setup_ok:
+
+            stats.setup_fail += 1
+            stats.reject(setup_reason)
+
+            (
+                diagnostic_score,
+                _,
+                _,
+            ) = score_opportunity(
+                tech_15,
+                ticker,
+                book,
+                tech_1h,
+                tech_4h,
+            )
+
+            if (
+                diagnostic_score
+                >= NEAR_MISS_MIN_SCORE
+            ):
+                record_near_miss(
+                    state,
+                    symbol=ticker.symbol,
+                    gate="SETUP",
+                    reason=setup_reason,
+                    reference_price=book.best_ask,
+                    score=diagnostic_score,
+                    spread_pct=book.spread_percent,
+                    imbalance=book.imbalance_ratio,
+                    rsi_15m=tech_15.rsi14,
+                    volume_ratio_15m=tech_15.volume_ratio,
+                )
+
+            continue
+
+        stats.setup_pass += 1
+
+        # -------------------------------------------------
+        # SCORE
+        # -------------------------------------------------
+
+        (
+            score_value,
+            score_reasons,
+            score_breakdown,
+        ) = score_opportunity(
+            tech_15,
+            ticker,
+            book,
+            tech_1h,
+            tech_4h,
+        )
+
+        if score_value < MIN_SCORE:
+
+            stats.score_fail += 1
+
+            diagnostic = (
+                format_score_diagnostic(
+                    score_value,
+                    score_breakdown,
+                )
+            )
+
+            stats.reject(diagnostic)
+
+            if (
+                score_value
+                >= NEAR_MISS_MIN_SCORE
+            ):
+                record_near_miss(
+                    state,
+                    symbol=ticker.symbol,
+                    gate="SCORE",
+                    reason=diagnostic,
+                    reference_price=book.best_ask,
+                    score=score_value,
+                    spread_pct=book.spread_percent,
+                    imbalance=book.imbalance_ratio,
+                    rsi_15m=tech_15.rsi14,
+                    volume_ratio_15m=tech_15.volume_ratio,
+                )
+
+            continue
+
+        stats.score_pass += 1
+
+        # -------------------------------------------------
+        # EXECUTION
+        # -------------------------------------------------
+
+        levels, level_reason = execution_levels(
+            tech_15,
+            ticker,
+            book,
+        )
+
+        if levels is None:
+
+            stats.execution_fail += 1
+            stats.reject_execution(
+                level_reason
+            )
+
+            # هذه فرصة ذات Score ناجح لكنها
+            # توقفت عند التنفيذ، ولذلك تستحق الدراسة.
+            record_near_miss(
+                state,
+                symbol=ticker.symbol,
+                gate="EXECUTION",
+                reason=level_reason,
+                reference_price=book.best_ask,
+                score=score_value,
+                spread_pct=book.spread_percent,
+                imbalance=book.imbalance_ratio,
+                rsi_15m=tech_15.rsi14,
+                volume_ratio_15m=tech_15.volume_ratio,
+            )
+
+            continue
+
+        stats.execution_pass += 1
+
+        opportunity = build_candidate(
+            ticker,
+            book,
+            tech_15,
+            tech_1h,
+            tech_4h,
+            levels=levels,
+            score_value=score_value,
+            reasons=score_reasons,
+        )
+
+        if not cooldown_allowed(
+            opportunity.symbol,
+            state,
+        ):
+            stats.reject("Cooldown")
+            continue
+
+        ok, validated, reason = (
+            final_validate(
+                opportunity,
+                ticker,
+                book,
+            )
+        )
+
+        if not ok or validated is None:
+
+            stats.final_validation_fail += 1
+
+            stats.reject(
+                f"Final validation: "
+                f"{reason}"
+            )
+
+            # حتى الفشل النهائي مهم للدراسة:
+            # كانت الفرصة قد اجتازت جميع المراحل السابقة.
+            record_near_miss(
+                state,
+                symbol=ticker.symbol,
+                gate="FINAL_VALIDATION",
+                reason=reason,
+                reference_price=opportunity.entry,
+                score=opportunity.score,
+                spread_pct=opportunity.spread_pct,
+                imbalance=opportunity.orderbook_imbalance,
+                rsi_15m=opportunity.rsi_15m,
+                volume_ratio_15m=opportunity.volume_ratio_15m,
+            )
+
+            continue
+
+        stats.final_validation_pass += 1
+        candidates.append(validated)
+
+    candidates.sort(
+        key=lambda item: (
+            item.score,
+            item.net_tp1_pct,
+            item.rr,
+            item.orderbook_imbalance,
+        ),
+        reverse=True,
+    )
+
+    selected = candidates[
+        :MAX_SIGNALS_PER_RUN
+    ]
+
+    # حفظ Near-Miss حتى إن لم توجد أي توصية.
+    save_state(state)
+
+    if not selected:
+
+        send_telegram(
+            format_report(
+                stats,
+                btc_reason,
+            )
+        )
+
+        save_state(state)
+        return
+
+    header = (
+        "🔥 <b>Paribu — فرص Spot عالية الانضباط</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        f"تم تمرير <b>{len(selected)}</b> "
+        "فرصة بعد فحص متعدد المراحل "
+        "وإعادة تحقق نهائية.\n"
+        "📌 جميع بيانات السعر والشموع "
+        "ودفتر الطلبات من Paribu فقط."
+    )
+
+    send_telegram(header)
+
+    for rank, opportunity in enumerate(
+        selected,
+        start=1,
+    ):
+
+        message = format_opportunity(
+            opportunity,
+            rank,
+        )
+
+        if send_telegram(message):
+
+            state[
+                "sent_signals"
+            ][opportunity.symbol] = int(
+                time.time()
+            )
+
+            save_state(state)
+
+    # نحفظ أيضًا Near-Miss حتى لو حدث
+    # فشل في إرسال إحدى رسائل Telegram.
+    save_state(state)
+
+    LOGGER.info(
+        "Run complete: selected=%d",
+        len(selected),
+    )
+
+
+if __name__ == "__main__":
+    run_scanner()
