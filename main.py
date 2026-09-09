@@ -9,15 +9,30 @@ from ai_manager import ask_manager
 
 
 if __name__ == "__main__":
-    # 1. تشغيل الـScanner كما هو
-    run_scanner()
+    print("🚀 MAIN: started", flush=True)
 
-    # 2. اختبار المدير الذكي فقط إذا كان مفعلاً
-    if os.getenv("RUN_AI_MANAGER_TEST", "false").lower() == "true":
-        answer = ask_manager(
-            "أنت الآن تعمل كمدير أعمال ذكي. "
-            "أعطني رسالة اختبار قصيرة تؤكد أنك تعمل، "
-            "واذكر أنك لن تنفذ أي قرار مالي تلقائياً."
-        )
-        print("\n🤖 AI Manager:")
-        print(answer)
+    print("🔎 MAIN: starting scanner...", flush=True)
+    run_scanner()
+    print("✅ MAIN: scanner finished", flush=True)
+
+    ai_test = os.getenv("RUN_AI_MANAGER_TEST", "false").lower() == "true"
+    print(f"🤖 MAIN: AI Manager test enabled = {ai_test}", flush=True)
+
+    if ai_test:
+        print("🤖 MAIN: calling AI Manager...", flush=True)
+
+        try:
+            answer = ask_manager(
+                "أنت الآن مدير تداول ذكي. "
+                "أعطني اختبار اتصال قصير يؤكد أنك تعمل."
+            )
+
+            print("✅ MAIN: AI Manager returned successfully", flush=True)
+            print("🤖 AI Manager:", flush=True)
+            print(answer, flush=True)
+
+        except Exception as e:
+            print(f"❌ MAIN: AI Manager error: {type(e).__name__}: {e}", flush=True)
+            raise
+
+    print("🏁 MAIN: finished", flush=True)
