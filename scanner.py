@@ -749,6 +749,7 @@ def btc_gate() -> tuple[
 def setup_gate(
     tech: IndicatorResult,
     btc_15: Optional[IndicatorResult] = None,
+    diagnostic_only: bool = False,
 ) -> tuple[bool, str]:
 
     """Adaptive setup gate without weakening liquidity/execution controls."""
@@ -788,6 +789,12 @@ def setup_gate(
         rsi_high = Decimal("68")
 
     elif not btc_weak:
+        rsi_low = Decimal("44")
+        rsi_high = Decimal("70")
+
+    elif diagnostic_only:
+        # في الوضع التشخيصي نستمر بفحص جودة العملة نفسها،
+        # لكن هذا لا يسمح بإرسال BUY عندما BTC Gate محظور.
         rsi_low = Decimal("44")
         rsi_high = Decimal("70")
 
@@ -1756,23 +1763,17 @@ def run_scanner() -> None:
 
     btc_ok, btc_15, btc_reason = btc_gate()
 
-    if not btc_ok:
-
+    if btc_ok:
+        stats.btc_gate_pass += 1
+    else:
         stats.btc_gate_fail += 1
         stats.reject("BTC gate failed")
 
-        send_telegram(
-            "🛡️ <b>Paribu Sniper متوقف مؤقتًا</b>\n\n"
-            f"سبب حماية السوق: "
-            f"{html.escape(btc_reason)}\n\n"
-            "لم يتم إرسال أي توصية لأن "
-            "شرط BTC الإجباري لم يمر."
+        LOGGER.info(
+            "BTC Gate blocked BUY only; "
+            "diagnostic scan will continue: %s",
+            btc_reason,
         )
-
-        save_state(state)
-        return
-
-    stats.btc_gate_pass += 1
 
     candidates: list[Opportunity] = []
 
@@ -1998,6 +1999,7 @@ def run_scanner() -> None:
         setup_ok, setup_reason = setup_gate(
             tech_15,
             btc_15=btc_15,
+            diagnostic_only=not btc_ok,
         )
 
         if not setup_ok:
@@ -2135,6 +2137,27 @@ def run_scanner() -> None:
             reasons=score_reasons,
         )
 
+        # إذا BTC Gate محظور:
+        # نمنع BUY نهائيًا، لكن نسجل الفرصة التي اجتازت
+        # MTF + Setup + Score + Execution كـ Near-Miss.
+        if not btc_ok:
+            record_near_miss(
+                state,
+                symbol=ticker.symbol,
+                gate="BTC_GATE",
+                reason=(
+                    "BUY blocked by BTC Gate: "
+                    f"{btc_reason}"
+                ),
+                reference_price=opportunity.entry,
+                score=opportunity.score,
+                spread_pct=opportunity.spread_pct,
+                imbalance=opportunity.orderbook_imbalance,
+                rsi_15m=opportunity.rsi_15m,
+                volume_ratio_15m=opportunity.volume_ratio_15m,
+            )
+            continue
+
         if not cooldown_allowed(
             opportunity.symbol,
             state,
@@ -2198,12 +2221,21 @@ def run_scanner() -> None:
 
     if not selected:
 
-        send_telegram(
-            format_report(
-                stats,
-                btc_reason,
-            )
+        report = format_report(
+            stats,
+            btc_reason,
         )
+
+        if not btc_ok:
+            report = (
+                "🛡️ <b>حماية BTC فعالة — BUY معطل فقط</b>\n"
+                f"السبب: {html.escape(btc_reason)}\n"
+                "🔎 استمر الفحص التشخيصي للعملات، "
+                "وتم تسجيل Near-Miss عند وجود فرص قريبة.\n\n"
+                + report
+            )
+
+        send_telegram(report)
 
         save_state(state)
         return
