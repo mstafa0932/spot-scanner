@@ -1,16 +1,26 @@
-name: Paribu Spot Sniper
+name: Paribu Momentum Watcher
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '*/30 * * * *'
 
+permissions:
+  contents: write
+
+concurrency:
+  group: paribu-momentum-watcher
+  cancel-in-progress: false
+
 jobs:
   scan:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,5 +37,28 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          RUN_AI_MANAGER_TEST: ${{ vars.RUN_AI_MANAGER_TEST || 'true' }}
+          RUN_AI_MANAGER_TEST: ${{ vars.RUN_AI_MANAGER_TEST || 'false' }}
         run: python main.py
+
+      - name: Persist scanner state
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f scanner_state.json ]; then
+            echo "scanner_state.json was not created; nothing to persist."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add scanner_state.json
+
+          if git diff --cached --quiet; then
+            echo "No scanner state changes."
+            exit 0
+          fi
+
+          git commit -m "Update scanner state [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
