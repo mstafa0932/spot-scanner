@@ -95,7 +95,7 @@
     "SKL_TL": {
       "symbol": "SKL_TL",
       "first_seen": 1789142551,
-      "last_seen": 1789180484,
+      "last_seen": 1789187703,
       "confirmations": 1,
       "max_score": 77,
       "history": [
@@ -131,10 +131,21 @@
           "rsi": "64.05449745352642",
           "recent_return_3": "0.668151447661469933184855200",
           "setup": "PULLBACK"
+        },
+        {
+          "time": 1789187703,
+          "price": "0.1816",
+          "score": 76,
+          "imbalance": "1.264419363188316660753102365",
+          "volume_ratio": "1.6124222546230453",
+          "spread_pct": "0.2207505518763796909492273731",
+          "rsi": "62.54949288731887",
+          "recent_return_3": "0.055218111540585311982330200",
+          "setup": "RECOVERY"
         }
       ],
-      "last_score": 73,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | 15m constructive | 15m MACD positive | price momentum without chase | 1h not weak | 1h momentum stable | controlled pullback"
+      "last_score": 76,
+      "last_reason": "very strong TL liquidity | buy-side order book | volume expansion >=1.5x | 15m constructive | 15m MACD positive | healthy RSI | 1h not weak | 1h momentum stable"
     },
     "ALT_TL": {
       "symbol": "ALT_TL",
@@ -234,28 +245,6 @@
       ],
       "last_score": 68,
       "last_reason": "very strong TL liquidity | strong buy-side order book | 15m constructive | 15m MACD positive | healthy RSI | price momentum without chase | 1h not weak | 1h momentum stable"
-    },
-    "COMP_TL": {
-      "symbol": "COMP_TL",
-      "first_seen": 1789158902,
-      "last_seen": 1789158902,
-      "confirmations": 1,
-      "max_score": 69,
-      "history": [
-        {
-          "time": 1789158902,
-          "price": "988.46",
-          "score": 69,
-          "imbalance": "0.8759403898379387648254757901",
-          "volume_ratio": "1.0909852820777153",
-          "spread_pct": "0.1936039734428057371648674674",
-          "rsi": "50.775833493357894",
-          "recent_return_3": "-0.3423516223831308510315993600",
-          "setup": "WATCHING"
-        }
-      ],
-      "last_score": 69,
-      "last_reason": "very strong TL liquidity | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50 | 1h momentum stable | controlled pullback"
     },
     "PLUME_TL": {
       "symbol": "PLUME_TL",
@@ -458,8 +447,8 @@
     "ETHFI_TL": {
       "symbol": "ETHFI_TL",
       "first_seen": 1789184128,
-      "last_seen": 1789185723,
-      "confirmations": 2,
+      "last_seen": 1789187703,
+      "confirmations": 3,
       "max_score": 92,
       "history": [
         {
@@ -483,10 +472,21 @@
           "rsi": "66.57196049748697",
           "recent_return_3": "1.998824221046443268665490900",
           "setup": "RECOVERY"
+        },
+        {
+          "time": 1789187703,
+          "price": "34.44",
+          "score": 87,
+          "imbalance": "1.706475248592683785940496189",
+          "volume_ratio": "2.0174592886182348",
+          "spread_pct": "0.2328288707799767171129220023",
+          "rsi": "58.01673614015538",
+          "recent_return_3": "-1.005747126436781609195402300",
+          "setup": "PULLBACK"
         }
       ],
-      "last_score": 92,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | price momentum without chase | 1h uptrend | 4h above EMA50"
+      "last_score": 87,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50"
     },
     "PENDLE_TL": {
       "symbol": "PENDLE_TL",
@@ -509,9 +509,49 @@
       ],
       "last_score": 87,
       "last_reason": "strong TL liquidity | buy-side order book | volume expansion >=1.5x | 15m constructive | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend"
+    },
+    "FET_TL": {
+      "symbol": "FET_TL",
+      "first_seen": 1789187703,
+      "last_seen": 1789187703,
+      "confirmations": 1,
+      "max_score": 68,
+      "history": [
+        {
+          "time": 1789187703,
+          "price": "8.168",
+          "score": 68,
+          "imbalance": "1.146245511523779665512795221",
+          "volume_ratio": "1.4248214784377868",
+          "spread_pct": "0.1225790634959548909046334886",
+          "rsi": "54.64051931202885",
+          "recent_return_3": "0.221048753530639813336608100",
+          "setup": "RECOVERY"
+        }
+      ],
+      "last_score": 68,
+      "last_reason": "strong TL liquidity | 15m constructive | 15m MACD positive | healthy RSI | price momentum without chase | 1h not weak | 4h above EMA50 | bullish recovery"
     }
   },
   "near_misses": [
+    {
+      "id": "SKL_TL:TRIGGER:1789187747",
+      "symbol": "SKL_TL",
+      "gate": "TRIGGER",
+      "reason": "score 76 < 80",
+      "observed_at": 1789187747,
+      "reference_price": "0.1816",
+      "score": 76,
+      "spread_pct": "0.2207505518763796909492273731",
+      "imbalance": "1.264419363188316660753102365",
+      "rsi_15m": "62.54949288731887",
+      "volume_ratio_15m": "1.6124222546230453",
+      "last_price": "0.1816",
+      "last_checked_at": 1789187747,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
     {
       "id": "ETHFI_TL:TRIGGER:1789184169",
       "symbol": "ETHFI_TL",
@@ -524,10 +564,10 @@
       "imbalance": "0.9863591608563201707357772301",
       "rsi_15m": "63.894781024554646",
       "volume_ratio_15m": "1.3773136763926088",
-      "last_price": "34.98",
-      "last_checked_at": 1789185723,
+      "last_price": "34.46",
+      "last_checked_at": 1789187703,
       "max_gain_pct": "0.865051903114186851211072700",
-      "max_drawdown_pct": "0",
+      "max_drawdown_pct": "-0.6343713956170703575547866200",
       "outcomes": {
         "15m": {
           "checked_at": 1789185723,
@@ -538,6 +578,11 @@
           "checked_at": 1789185723,
           "price": "34.98",
           "change_pct": "0.865051903114186851211072700"
+        },
+        "60m": {
+          "checked_at": 1789187703,
+          "price": "34.46",
+          "change_pct": "-0.6343713956170703575547866200"
         }
       }
     },
@@ -553,8 +598,8 @@
       "imbalance": "1.417674114231001857778242896",
       "rsi_15m": "67.19706883355111",
       "volume_ratio_15m": "1.5486175607129762",
-      "last_price": "0.01876",
-      "last_checked_at": 1789185723,
+      "last_price": "0.01881",
+      "last_checked_at": 1789187703,
       "max_gain_pct": "1.018220793140407288317256200",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -587,8 +632,8 @@
       "imbalance": "1.878010311068684046748347268",
       "rsi_15m": "69.64107983969654",
       "volume_ratio_15m": "2.6464852958051246",
-      "last_price": "5.19",
-      "last_checked_at": 1789185723,
+      "last_price": "5.16",
+      "last_checked_at": 1789187703,
       "max_gain_pct": "1.142857142857142857142857100",
       "max_drawdown_pct": "-2.095238095238095238095238100",
       "outcomes": {
@@ -621,9 +666,9 @@
       "imbalance": "1.726295465278715464623360538",
       "rsi_15m": "63.21762437731938",
       "volume_ratio_15m": "1.300484663363287",
-      "last_price": "0.7393",
-      "last_checked_at": 1789185723,
-      "max_gain_pct": "8.132221734678952757057188800",
+      "last_price": "0.742",
+      "last_checked_at": 1789187703,
+      "max_gain_pct": "8.527131782945736434108527100",
       "max_drawdown_pct": "0",
       "outcomes": {
         "30m": {
@@ -655,9 +700,9 @@
       "imbalance": "1.522224593568396218600126481",
       "rsi_15m": "64.99236198131644",
       "volume_ratio_15m": "1.0534147653398342",
-      "last_price": "0.3069",
-      "last_checked_at": 1789185723,
-      "max_gain_pct": "0.425253516519463526333006200",
+      "last_price": "0.3086",
+      "last_checked_at": 1789187703,
+      "max_gain_pct": "0.948642459928034020281321600",
       "max_drawdown_pct": "-0.2944062806673209028459273800",
       "outcomes": {
         "15m": {
@@ -679,6 +724,11 @@
           "checked_at": 1789180484,
           "price": "0.3069",
           "change_pct": "0.392541707556427870461236500"
+        },
+        "240m": {
+          "checked_at": 1789187703,
+          "price": "0.3086",
+          "change_pct": "0.948642459928034020281321600"
         }
       }
     },
