@@ -117,7 +117,7 @@
     "CHZ_TL": {
       "symbol": "CHZ_TL",
       "first_seen": 1789284875,
-      "last_seen": 1789284875,
+      "last_seen": 1789304524,
       "confirmations": 1,
       "max_score": 88,
       "history": [
@@ -131,17 +131,28 @@
           "rsi": "61.223433328925246",
           "recent_return_3": "-0.3168480506956881113100978100",
           "setup": "RECOVERY"
+        },
+        {
+          "time": 1789304524,
+          "price": "0.7328",
+          "score": 81,
+          "imbalance": "1.085405789612105968503412699",
+          "volume_ratio": "1.3082287834056423",
+          "spread_pct": "0.1092896174863387978142076503",
+          "rsi": "67.26127406772112",
+          "recent_return_3": "0.979310344827586206896551700",
+          "setup": "BREAKOUT"
         }
       ],
-      "last_score": 88,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50"
+      "last_score": 81,
+      "last_reason": "very strong TL liquidity | 15m uptrend | 15m MACD positive | price momentum without chase | 1h uptrend | 4h above EMA50 | 1h momentum stable | breakout"
     },
     "ANKR_TL": {
       "symbol": "ANKR_TL",
       "first_seen": 1789300942,
-      "last_seen": 1789300942,
-      "confirmations": 1,
-      "max_score": 69,
+      "last_seen": 1789304524,
+      "confirmations": 2,
+      "max_score": 87,
       "history": [
         {
           "time": 1789300942,
@@ -153,13 +164,82 @@
           "rsi": "68.71900133318714",
           "recent_return_3": "3.049613108784706417842512500",
           "setup": "WATCHING"
+        },
+        {
+          "time": 1789304524,
+          "price": "0.227",
+          "score": 87,
+          "imbalance": "1.083183913170545589915323058",
+          "volume_ratio": "1.6694770911743702",
+          "spread_pct": "0.1765225066195939982347749338",
+          "rsi": "57.89716499024332",
+          "recent_return_3": "0.263273365511189118034225500",
+          "setup": "PULLBACK"
         }
       ],
-      "last_score": 69,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | 15m uptrend | 15m MACD positive | 1h uptrend | 4h above EMA50 | 1h momentum stable | bullish recovery"
+      "last_score": 87,
+      "last_reason": "very strong TL liquidity | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend | 4h above EMA50"
+    },
+    "ALT_TL": {
+      "symbol": "ALT_TL",
+      "first_seen": 1789304524,
+      "last_seen": 1789304524,
+      "confirmations": 1,
+      "max_score": 68,
+      "history": [
+        {
+          "time": 1789304524,
+          "price": "0.3143",
+          "score": 68,
+          "imbalance": "0.8801923004927538743281389336",
+          "volume_ratio": "1.0728046980893677",
+          "spread_pct": "0.2871729419272495213784301213",
+          "rsi": "51.51596116363754",
+          "recent_return_3": "0.672645739910313901345291500",
+          "setup": "WATCHING"
+        }
+      ],
+      "last_score": 68,
+      "last_reason": "very strong TL liquidity | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend | 4h above EMA50 | controlled pullback"
     }
   },
   "near_misses": [
+    {
+      "id": "ANKR_TL:TRIGGER:1789304550",
+      "symbol": "ANKR_TL",
+      "gate": "TRIGGER",
+      "reason": "buy flow not strong enough: 1.08",
+      "observed_at": 1789304550,
+      "reference_price": "0.227",
+      "score": 87,
+      "spread_pct": "0.1765225066195939982347749338",
+      "imbalance": "1.083183913170545589915323058",
+      "rsi_15m": "57.89716499024332",
+      "volume_ratio_15m": "1.6694770911743702",
+      "last_price": "0.227",
+      "last_checked_at": 1789304550,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
+      "id": "CHZ_TL:TRIGGER:1789304550",
+      "symbol": "CHZ_TL",
+      "gate": "TRIGGER",
+      "reason": "buy flow not strong enough: 1.09",
+      "observed_at": 1789304550,
+      "reference_price": "0.7328",
+      "score": 81,
+      "spread_pct": "0.1092896174863387978142076503",
+      "imbalance": "1.085405789612105968503412699",
+      "rsi_15m": "67.26127406772112",
+      "volume_ratio_15m": "1.3082287834056423",
+      "last_price": "0.7328",
+      "last_checked_at": 1789304550,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
     {
       "id": "CHZ_TL:TRIGGER:1789284900",
       "symbol": "CHZ_TL",
