@@ -151,8 +151,8 @@
     "ALT_TL": {
       "symbol": "ALT_TL",
       "first_seen": 1789304524,
-      "last_seen": 1789326115,
-      "confirmations": 2,
+      "last_seen": 1789331698,
+      "confirmations": 1,
       "max_score": 81,
       "history": [
         {
@@ -187,10 +187,21 @@
           "rsi": "52.10752117584643",
           "recent_return_3": "-0.1895734597156398104265402800",
           "setup": "PULLBACK"
+        },
+        {
+          "time": 1789331698,
+          "price": "0.3169",
+          "score": 77,
+          "imbalance": "1.151444936878675641637870296",
+          "volume_ratio": "1.1028887640119083",
+          "spread_pct": "0.1896933291179260196016440089",
+          "rsi": "54.479823125181426",
+          "recent_return_3": "0.412567438908283084735004800",
+          "setup": "PULLBACK"
         }
       ],
       "last_score": 77,
-      "last_reason": "very strong TL liquidity | buy-side order book | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50 | controlled pullback"
+      "last_reason": "very strong TL liquidity | buy-side order book | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend | 4h above EMA50"
     },
     "RAD_TL": {
       "symbol": "RAD_TL",
@@ -411,9 +422,89 @@
       ],
       "last_score": 81,
       "last_reason": "strong TL liquidity | buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h not weak"
+    },
+    "FET_TL": {
+      "symbol": "FET_TL",
+      "first_seen": 1789331698,
+      "last_seen": 1789331698,
+      "confirmations": 1,
+      "max_score": 73,
+      "history": [
+        {
+          "time": 1789331698,
+          "price": "8.378",
+          "score": 73,
+          "imbalance": "0.8960623858000275869649017224",
+          "volume_ratio": "1.4706332466619392",
+          "spread_pct": "0.1314688657822397514043265209",
+          "rsi": "64.25150158034677",
+          "recent_return_3": "1.049710424710424710424710400",
+          "setup": "PULLBACK"
+        }
+      ],
+      "last_score": 73,
+      "last_reason": "strong TL liquidity | 15m uptrend | 15m MACD positive | price momentum without chase | 1h uptrend | 4h above EMA50 | 1h momentum stable | controlled pullback"
+    },
+    "T_TL": {
+      "symbol": "T_TL",
+      "first_seen": 1789331698,
+      "last_seen": 1789331698,
+      "confirmations": 1,
+      "max_score": 85,
+      "history": [
+        {
+          "time": 1789331698,
+          "price": "0.2147",
+          "score": 85,
+          "imbalance": "1.419586381989027824907868415",
+          "volume_ratio": "6.085262448478222",
+          "spread_pct": "0.2334267040149393090569561158",
+          "rsi": "54.673484671609344",
+          "recent_return_3": "0.093457943925233644859813100",
+          "setup": "WATCHING"
+        }
+      ],
+      "last_score": 85,
+      "last_reason": "strong TL liquidity | strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50"
     }
   },
   "near_misses": [
+    {
+      "id": "T_TL:TRIGGER:1789331728",
+      "symbol": "T_TL",
+      "gate": "TRIGGER",
+      "reason": "setup not ready",
+      "observed_at": 1789331728,
+      "reference_price": "0.2147",
+      "score": 85,
+      "spread_pct": "0.2334267040149393090569561158",
+      "imbalance": "1.419586381989027824907868415",
+      "rsi_15m": "54.673484671609344",
+      "volume_ratio_15m": "6.085262448478222",
+      "last_price": "0.2147",
+      "last_checked_at": 1789331728,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
+      "id": "ALT_TL:TRIGGER:1789331728",
+      "symbol": "ALT_TL",
+      "gate": "TRIGGER",
+      "reason": "score 77 < 80",
+      "observed_at": 1789331728,
+      "reference_price": "0.3169",
+      "score": 77,
+      "spread_pct": "0.1896933291179260196016440089",
+      "imbalance": "1.151444936878675641637870296",
+      "rsi_15m": "54.479823125181426",
+      "volume_ratio_15m": "1.1028887640119083",
+      "last_price": "0.3169",
+      "last_checked_at": 1789331728,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
     {
       "id": "SKL_TL:TRIGGER:1789329773",
       "symbol": "SKL_TL",
@@ -426,11 +517,17 @@
       "imbalance": "1.336156471650867249746581251",
       "rsi_15m": "55.7060928147245",
       "volume_ratio_15m": "1.5229118544217268",
-      "last_price": "0.184",
-      "last_checked_at": 1789329773,
-      "max_gain_pct": "0",
+      "last_price": "0.1843",
+      "last_checked_at": 1789331698,
+      "max_gain_pct": "0.163043478260869565217391300",
       "max_drawdown_pct": "0",
-      "outcomes": {}
+      "outcomes": {
+        "30m": {
+          "checked_at": 1789331698,
+          "price": "0.1843",
+          "change_pct": "0.163043478260869565217391300"
+        }
+      }
     },
     {
       "id": "RAD_TL:TRIGGER:1789327978",
@@ -444,8 +541,8 @@
       "imbalance": "2.650127718299534698842292148",
       "rsi_15m": "51.70358438228992",
       "volume_ratio_15m": "3.6874171154911757",
-      "last_price": "11.58",
-      "last_checked_at": 1789329747,
+      "last_price": "11.68",
+      "last_checked_at": 1789331698,
       "max_gain_pct": "0",
       "max_drawdown_pct": "-1.110162254483347566182749790",
       "outcomes": {
@@ -453,6 +550,11 @@
           "checked_at": 1789329747,
           "price": "11.58",
           "change_pct": "-1.110162254483347566182749790"
+        },
+        "60m": {
+          "checked_at": 1789331698,
+          "price": "11.68",
+          "change_pct": "-0.2561912894961571306575576400"
         }
       }
     },
@@ -468,8 +570,8 @@
       "imbalance": "1.212745010520975989029175398",
       "rsi_15m": "52.525509586251",
       "volume_ratio_15m": "5.5613638710197275",
-      "last_price": "0.00016534",
-      "last_checked_at": 1789329747,
+      "last_price": "0.00016603",
+      "last_checked_at": 1789331698,
       "max_gain_pct": "0",
       "max_drawdown_pct": "-0.4695400915001203948952564400",
       "outcomes": {
@@ -487,6 +589,11 @@
           "checked_at": 1789327939,
           "price": "0.0001654",
           "change_pct": "-0.4334216229231880568263905600"
+        },
+        "120m": {
+          "checked_at": 1789331698,
+          "price": "0.00016603",
+          "change_pct": "-0.0541777028653985071032988200"
         }
       }
     },
@@ -502,8 +609,8 @@
       "imbalance": "1.151652418434995816954540446",
       "rsi_15m": "57.88958465389145",
       "volume_ratio_15m": "1.4982385831897904",
-      "last_price": "0.316",
-      "last_checked_at": 1789329747,
+      "last_price": "0.3169",
+      "last_checked_at": 1789331698,
       "max_gain_pct": "0",
       "max_drawdown_pct": "-0.4415011037527593818984547500",
       "outcomes": {
