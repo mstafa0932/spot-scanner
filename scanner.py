@@ -158,6 +158,8 @@ class TriggeredOpportunity:
     spread_pct: Decimal
     imbalance: Decimal
     avg_imbalance: Decimal
+    bid_wall_share: Decimal
+    ask_wall_share: Decimal
     volume_ratio: Decimal
     rsi: Decimal
     confirmations: int
@@ -627,6 +629,8 @@ def _update_watchlist(
         "imbalance": str(candidate.book.imbalance_ratio),
         "volume_ratio": str(candidate.tech_15.volume_ratio),
         "spread_pct": str(candidate.book.spread_percent),
+        "bid_wall": str(candidate.book.largest_bid_wall_share),
+        "ask_wall": str(candidate.book.largest_ask_wall_share),
         "rsi": str(candidate.tech_15.rsi14),
         "recent_return_3": str(candidate.tech_15.recent_return_3),
         "setup": candidate.setup,
@@ -690,6 +694,15 @@ def trigger_check(
         return False, (
             f"buy flow not strong enough: {candidate.book.imbalance_ratio:.2f}"
         ), Decimal("0"), 0
+
+    # A dominant nearby sell wall can absorb a short scalp. This is only an
+    # order-book proxy, not proof of a whale, so it blocks only extreme cases.
+    if (
+        candidate.book.largest_ask_wall_share >= Decimal("0.45")
+        and candidate.book.largest_ask_wall_share
+        > candidate.book.largest_bid_wall_share * Decimal("1.80")
+    ):
+        return False, "dominant sell wall near price", Decimal("0"), 0
 
     if candidate.tech_15.volume_ratio < MIN_ALERT_VOLUME_RATIO:
         return False, (
@@ -826,6 +839,8 @@ def build_opportunity(
         spread_pct=candidate.book.spread_percent,
         imbalance=candidate.book.imbalance_ratio,
         avg_imbalance=avg_imbalance,
+        bid_wall_share=candidate.book.largest_bid_wall_share,
+        ask_wall_share=candidate.book.largest_ask_wall_share,
         volume_ratio=candidate.tech_15.volume_ratio,
         rsi=candidate.tech_15.rsi14,
         confirmations=confirmations,
@@ -855,6 +870,8 @@ def format_opportunity(opp: TriggeredOpportunity) -> str:
         f"• Volume Ratio: {opp.volume_ratio:.2f}x\n"
         f"• Order Book الآن: {opp.imbalance:.2f}x\n"
         f"• متوسط Order Book أثناء المراقبة: {opp.avg_imbalance:.2f}x\n"
+        f"• أكبر جدار شراء: {opp.bid_wall_share * 100:.1f}% من العمق\n"
+        f"• أكبر جدار بيع: {opp.ask_wall_share * 100:.1f}% من العمق\n"
         f"• Spread: {opp.spread_pct:.2f}%\n"
         f"• RSI 15m: {opp.rsi:.1f}\n"
         f"• حركة آخر 3 شموع: {opp.recent_return_3:+.2f}%\n\n"

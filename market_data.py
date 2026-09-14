@@ -186,6 +186,10 @@ class OrderBookSnapshot:
     bid_notional: Decimal
     ask_notional: Decimal
     imbalance_ratio: Decimal
+    top3_bid_share: Decimal
+    top3_ask_share: Decimal
+    largest_bid_wall_share: Decimal
+    largest_ask_wall_share: Decimal
     timestamp: Optional[str] = None
 
 
@@ -358,6 +362,14 @@ def get_order_book(symbol: str, depth: int = 20) -> OrderBookSnapshot:
         if ask_notional > 0
         else Decimal("0")
     )
+    top3_bid = sum((price * amount for price, amount in bids[:3]), Decimal("0"))
+    top3_ask = sum((price * amount for price, amount in asks[:3]), Decimal("0"))
+    top3_bid_share = top3_bid / bid_notional if bid_notional > 0 else Decimal("0")
+    top3_ask_share = top3_ask / ask_notional if ask_notional > 0 else Decimal("0")
+    largest_bid = max((price * amount for price, amount in bids), default=Decimal("0"))
+    largest_ask = max((price * amount for price, amount in asks), default=Decimal("0"))
+    largest_bid_share = largest_bid / bid_notional if bid_notional > 0 else Decimal("0")
+    largest_ask_share = largest_ask / ask_notional if ask_notional > 0 else Decimal("0")
 
     return OrderBookSnapshot(
         symbol=normalize_symbol(symbol),
@@ -369,6 +381,10 @@ def get_order_book(symbol: str, depth: int = 20) -> OrderBookSnapshot:
         bid_notional=bid_notional,
         ask_notional=ask_notional,
         imbalance_ratio=imbalance,
+        top3_bid_share=top3_bid_share,
+        top3_ask_share=top3_ask_share,
+        largest_bid_wall_share=largest_bid_share,
+        largest_ask_wall_share=largest_ask_share,
         timestamp=str(book.get("timestamp")) if book.get("timestamp") is not None else None,
     )
 
