@@ -37,6 +37,7 @@ from market_data import (
 )
 from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
+from signal_tracker import register_signal, update_active_signals
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -85,12 +86,14 @@ WATCH_HISTORY_LIMIT = max(3, int(os.getenv("WATCH_HISTORY_LIMIT", "8")))
 # No spam: at most one strong alert in this global cooldown window.
 GLOBAL_ALERT_COOLDOWN_SECONDS = max(
     60 * 60,
-    int(os.getenv("GLOBAL_ALERT_COOLDOWN_SECONDS", str(18 * 60 * 60))),
+    int(os.getenv("GLOBAL_ALERT_COOLDOWN_SECONDS", str(3 * 60 * 60))),
 )
 SYMBOL_ALERT_COOLDOWN_SECONDS = max(
     60 * 60,
-    int(os.getenv("SYMBOL_ALERT_COOLDOWN_SECONDS", str(24 * 60 * 60))),
+    int(os.getenv("SYMBOL_ALERT_COOLDOWN_SECONDS", str(12 * 60 * 60))),
 )
+MAX_DAILY_ALERTS = max(1, min(3, int(os.getenv("MAX_DAILY_ALERTS", "3"))))
+RISK_BUDGET_PCT = Decimal(os.getenv("RISK_BUDGET_PCT", "2.00"))
 
 # Anti-FOMO
 MAX_RETURN_3 = Decimal(os.getenv("MAX_RETURN_3", "3.20"))
@@ -205,6 +208,8 @@ def _empty_state() -> dict[str, Any]:
         "sent_signals": {},
         "watchlist": {},
         "near_misses": [],
+        "active_signals": [],
+        "daily_alerts": [],
         "last_alert_at": 0,
     }
 
@@ -227,6 +232,10 @@ def load_state() -> dict[str, Any]:
             state["watchlist"] = raw["watchlist"]
         if isinstance(raw.get("near_misses"), list):
             state["near_misses"] = raw["near_misses"]
+        if isinstance(raw.get("active_signals"), list):
+            state["active_signals"] = raw["active_signals"]
+        if isinstance(raw.get("daily_alerts"), list):
+            state["daily_alerts"] = raw["daily_alerts"]
 
         try:
             state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
@@ -749,7 +758,16 @@ def _global_alert_allowed(state: dict[str, Any], now: int) -> bool:
         last_alert = int(state.get("last_alert_at", 0) or 0)
     except (TypeError, ValueError):
         last_alert = 0
-    return now - last_alert >= GLOBAL_ALERT_COOLDOWN_SECONDS
+    recent: list[int] = []
+    for value in state.get("daily_alerts", []):
+        try:
+            stamp = int(value)
+        except (TypeError, ValueError):
+            continue
+        if 0 <= now - stamp < 24 * 60 * 60:
+            recent.append(stamp)
+    state["daily_alerts"] = recent
+    return len(recent) < MAX_DAILY_ALERTS and now - last_alert >= GLOBAL_ALERT_COOLDOWN_SECONDS
 
 
 def _symbol_alert_allowed(state: dict[str, Any], symbol: str, now: int) -> bool:
@@ -828,6 +846,8 @@ def format_opportunity(opp: TriggeredOpportunity) -> str:
         f"💵 <b>دخول تقريبي:</b> <code>{fmt(opp.entry)}</code>\n"
         f"🛑 <b>وقف خسارة:</b> <code>{fmt(opp.stop)}</code> "
         f"(-{opp.risk_pct:.2f}%)\n"
+        f"🧮 <b>حد مخاطرة الحساب:</b> {RISK_BUDGET_PCT:.2f}% كحد أقصى\n"
+        f"📐 <b>حجم المركز:</b> (رأس المال × {RISK_BUDGET_PCT:.2f}%) ÷ {opp.risk_pct:.2f}%\n"
         f"🎯 <b>هدف 1:</b> <code>{fmt(opp.tp1)}</code> (+{TP1_PCT:.2f}%)\n"
         f"🚀 <b>هدف 2:</b> <code>{fmt(opp.tp2)}</code> (+{TP2_PCT:.2f}%)\n\n"
         "💧 <b>السيولة والزخم:</b>\n"
@@ -845,6 +865,23 @@ def format_opportunity(opp: TriggeredOpportunity) -> str:
     )
 
 
+def format_signal_event(payload: dict[str, Any]) -> str:
+    signal, event = payload["signal"], payload["event"]
+    labels = {
+        "TP1": "✅ تحقق الهدف الأول — راجع جني جزء من الربح وحرّك الوقف",
+        "TP2": "🏁 تحقق الهدف الثاني — راجع إغلاق الباقي",
+        "STOP": "🛑 تحقق حد الإلغاء/وقف الخسارة — لا تبقَ في الصفقة",
+        "EXPIRED": "⌛ انتهت صلاحية الإشارة دون حسم — ألغِها",
+    }
+    kind = str(event.get("kind", ""))
+    return (
+        f"<b>{labels.get(kind, kind)}</b>\n"
+        f"🪙 <b>{html.escape(str(signal.get('symbol', '')))}</b>\n"
+        f"السعر المرصود: <code>{html.escape(str(event.get('price', '')))}</code>\n"
+        "التنفيذ يدوي، وتحقق من سعر Paribu الفعلي قبل أي إجراء."
+    )
+
+
 # ---------------------------------------------------------------------------
 # Scanner
 # ---------------------------------------------------------------------------
@@ -854,6 +891,9 @@ def run_scanner() -> None:
     now = int(time.time())
     state = load_state()
     _prune_watchlist(state, now)
+
+    for event in update_active_signals(state, now):
+        send_telegram(format_signal_event(event))
 
     # Follow previous near-misses first; persistence is handled by workflow.
     near_result = update_near_miss_outcomes(state)
@@ -1007,8 +1047,14 @@ def run_scanner() -> None:
         if send_telegram(format_opportunity(opp)):
             sent = True
             state["last_alert_at"] = now
+            state.setdefault("daily_alerts", []).append(now)
             sent_signals = state.setdefault("sent_signals", {})
             sent_signals[candidate.symbol] = now
+            register_signal(
+                state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
+                tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
+                setup=opp.setup, now=now,
+            )
             LOGGER.info(
                 "ALERT sent: %s score=%d confirmations=%d volume=%.2fx imbalance=%.2f",
                 candidate.symbol,
