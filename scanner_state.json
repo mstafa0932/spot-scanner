@@ -521,9 +521,9 @@
     "ETH_TL": {
       "symbol": "ETH_TL",
       "first_seen": 1789407636,
-      "last_seen": 1789410088,
-      "confirmations": 2,
-      "max_score": 84,
+      "last_seen": 1789421649,
+      "confirmations": 1,
+      "max_score": 90,
       "history": [
         {
           "time": 1789407636,
@@ -550,10 +550,23 @@
           "rsi": "61.63646891458956",
           "recent_return_3": "0.032542019883174148619404800",
           "setup": "WATCHING"
+        },
+        {
+          "time": 1789421649,
+          "price": "123994",
+          "score": 90,
+          "imbalance": "1.629724966211953381727940323",
+          "volume_ratio": "1.5199274433340522",
+          "spread_pct": "0.02823514226478109697561290427",
+          "bid_wall": "0.2602002657047190722806614415",
+          "ask_wall": "0.1661392347237008262511518182",
+          "rsi": "55.32881455770885",
+          "recent_return_3": "-1.244198912619504390119643700",
+          "setup": "WATCHING"
         }
       ],
-      "last_score": 73,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50 | 1h momentum stable"
+      "last_score": 90,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50"
     },
     "ETHFI_TL": {
       "symbol": "ETHFI_TL",
@@ -824,9 +837,69 @@
       ],
       "last_score": 80,
       "last_reason": "strong TL liquidity | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h not weak | 4h above EMA50"
+    },
+    "ANKR_TL": {
+      "symbol": "ANKR_TL",
+      "first_seen": 1789421649,
+      "last_seen": 1789421649,
+      "confirmations": 1,
+      "max_score": 78,
+      "history": [
+        {
+          "time": 1789421649,
+          "price": "0.2313",
+          "score": 78,
+          "imbalance": "1.225123728821867625178919308",
+          "volume_ratio": "1.3657812468853001",
+          "spread_pct": "0.3035559410234171725932350390",
+          "bid_wall": "0.5359333786859242074367612848",
+          "ask_wall": "0.2192450030595661408877568440",
+          "rsi": "53.91513141049294",
+          "recent_return_3": "0.260416666666666666666666700",
+          "setup": "PULLBACK"
+        }
+      ],
+      "last_score": 78,
+      "last_reason": "very strong TL liquidity | buy-side order book | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend | 4h above EMA50"
     }
   },
   "near_misses": [
+    {
+      "id": "ETH_TL:TRIGGER:1789421683",
+      "symbol": "ETH_TL",
+      "gate": "TRIGGER",
+      "reason": "setup not ready",
+      "observed_at": 1789421683,
+      "reference_price": "123994",
+      "score": 90,
+      "spread_pct": "0.02823514226478109697561290427",
+      "imbalance": "1.629724966211953381727940323",
+      "rsi_15m": "55.32881455770885",
+      "volume_ratio_15m": "1.5199274433340522",
+      "last_price": "123994",
+      "last_checked_at": 1789421683,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
+      "id": "ANKR_TL:TRIGGER:1789421683",
+      "symbol": "ANKR_TL",
+      "gate": "TRIGGER",
+      "reason": "score 78 < 80",
+      "observed_at": 1789421683,
+      "reference_price": "0.2313",
+      "score": 78,
+      "spread_pct": "0.3035559410234171725932350390",
+      "imbalance": "1.225123728821867625178919308",
+      "rsi_15m": "53.91513141049294",
+      "volume_ratio_15m": "1.3657812468853001",
+      "last_price": "0.2313",
+      "last_checked_at": 1789421683,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
     {
       "id": "PEPE_TL:TRIGGER:1789418431",
       "symbol": "PEPE_TL",
@@ -839,10 +912,10 @@
       "imbalance": "1.156236703489915673235655820",
       "rsi_15m": "71.98911091372418",
       "volume_ratio_15m": "1.7305766139032015",
-      "last_price": "0.00017062",
-      "last_checked_at": 1789420608,
+      "last_price": "0.00017054",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-1.540769807836574528247446480",
+      "max_drawdown_pct": "-1.586935195337295862427145250",
       "outcomes": {
         "15m": {
           "checked_at": 1789419407,
@@ -853,6 +926,11 @@
           "checked_at": 1789420608,
           "price": "0.00017062",
           "change_pct": "-1.540769807836574528247446480"
+        },
+        "60m": {
+          "checked_at": 1789421649,
+          "price": "0.00017054",
+          "change_pct": "-1.586935195337295862427145250"
         }
       }
     },
@@ -868,10 +946,10 @@
       "imbalance": "0.9393301833709973083297073890",
       "rsi_15m": "63.218769891766954",
       "volume_ratio_15m": "3.5968663473330476",
-      "last_price": "0.00120683",
-      "last_checked_at": 1789420608,
+      "last_price": "0.00120377",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-1.451086068920463824922423650",
+      "max_drawdown_pct": "-1.700963579944471664216887150",
       "outcomes": {
         "15m": {
           "checked_at": 1789419407,
@@ -882,6 +960,11 @@
           "checked_at": 1789420608,
           "price": "0.00120683",
           "change_pct": "-1.451086068920463824922423650"
+        },
+        "60m": {
+          "checked_at": 1789421649,
+          "price": "0.00120377",
+          "change_pct": "-1.700963579944471664216887150"
         }
       }
     },
@@ -897,10 +980,10 @@
       "imbalance": "1.184712608689956380477853936",
       "rsi_15m": "54.9916141496476",
       "volume_ratio_15m": "1.4834299708108303",
-      "last_price": "0.1827",
-      "last_checked_at": 1789420608,
+      "last_price": "0.1824",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-0.5984766050054406964091403700",
+      "max_drawdown_pct": "-0.7616974972796517954298150200",
       "outcomes": {
         "15m": {
           "checked_at": 1789418399,
@@ -931,8 +1014,8 @@
       "imbalance": "1.481567289205350518618110782",
       "rsi_15m": "69.59811674282294",
       "volume_ratio_15m": "7.339548635231528",
-      "last_price": "372.16",
-      "last_checked_at": 1789420608,
+      "last_price": "370.73",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "1.990683061589296354477005600",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -965,8 +1048,8 @@
       "imbalance": "3.605745813341835382891123275",
       "rsi_15m": "57.50268872795988",
       "volume_ratio_15m": "1.9896295279906695",
-      "last_price": "0.7578",
-      "last_checked_at": 1789420608,
+      "last_price": "0.7726",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "0",
       "max_drawdown_pct": "-5.652390438247011952191235060",
       "outcomes": {
@@ -984,6 +1067,11 @@
           "checked_at": 1789418399,
           "price": "0.7632",
           "change_pct": "-4.980079681274900398406374500"
+        },
+        "120m": {
+          "checked_at": 1789421649,
+          "price": "0.7726",
+          "change_pct": "-3.809760956175298804780876490"
         }
       }
     },
@@ -999,10 +1087,10 @@
       "imbalance": "1.629353444941508217303165746",
       "rsi_15m": "62.682883665258835",
       "volume_ratio_15m": "2.707064386008042",
-      "last_price": "98.53",
-      "last_checked_at": 1789420608,
+      "last_price": "98.46",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-1.272545090180360721442885770",
+      "max_drawdown_pct": "-1.342685370741482965931863730",
       "outcomes": {
         "15m": {
           "checked_at": 1789412421,
@@ -1038,9 +1126,9 @@
       "imbalance": "1.031593501009769115469731748",
       "rsi_15m": "53.54946860585292",
       "volume_ratio_15m": "1.314119057284335",
-      "last_price": "0.00001614",
-      "last_checked_at": 1789420608,
-      "max_gain_pct": "0",
+      "last_price": "0.00001621",
+      "last_checked_at": 1789421649,
+      "max_gain_pct": "0.061728395061728395061728400",
       "max_drawdown_pct": "-0.3703703703703703703703703700",
       "outcomes": {
         "15m": {
@@ -1077,8 +1165,8 @@
       "imbalance": "2.582313759382272063710464495",
       "rsi_15m": "63.591332010339315",
       "volume_ratio_15m": "1.15559485069295",
-      "last_price": "123963",
-      "last_checked_at": 1789420608,
+      "last_price": "123994",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "2.539899903816370779739489100",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -1101,6 +1189,11 @@
           "checked_at": 1789414840,
           "price": "123314",
           "change_pct": "0.515152997179700363541513800"
+        },
+        "240m": {
+          "checked_at": 1789421649,
+          "price": "123994",
+          "change_pct": "1.069431538448998223048205900"
         }
       }
     },
@@ -1116,8 +1209,8 @@
       "imbalance": "1.147093102660279780669882095",
       "rsi_15m": "70.92464973753835",
       "volume_ratio_15m": "2.273211848953616",
-      "last_price": "70.565",
-      "last_checked_at": 1789420608,
+      "last_price": "70.044",
+      "last_checked_at": 1789421649,
       "max_gain_pct": "4.190718078965596859847610300",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -1140,6 +1233,11 @@
           "checked_at": 1789414840,
           "price": "70.78",
           "change_pct": "2.141537751096744400831216800"
+        },
+        "240m": {
+          "checked_at": 1789421649,
+          "price": "70.044",
+          "change_pct": "1.079427383975987069960748100"
         }
       }
     },
