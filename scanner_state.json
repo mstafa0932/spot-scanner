@@ -448,7 +448,7 @@
     "RAD_TL": {
       "symbol": "RAD_TL",
       "first_seen": 1789365763,
-      "last_seen": 1789365763,
+      "last_seen": 1789378632,
       "confirmations": 1,
       "max_score": 81,
       "history": [
@@ -462,10 +462,21 @@
           "rsi": "52.683534507535775",
           "recent_return_3": "-0.0868055555555555555555555600",
           "setup": "WATCHING"
+        },
+        {
+          "time": 1789378632,
+          "price": "11.41",
+          "score": 76,
+          "imbalance": "3.674634600358544393268531769",
+          "volume_ratio": "1.8007857389678061",
+          "spread_pct": "0.08771929824561403508771929825",
+          "rsi": "51.33024449301236",
+          "recent_return_3": "0.087183958151700087183958200",
+          "setup": "WATCHING"
         }
       ],
-      "last_score": 81,
-      "last_reason": "strong TL liquidity | strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50"
+      "last_score": 76,
+      "last_reason": "strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50 | controlled pullback"
     },
     "BTTC_TL": {
       "symbol": "BTTC_TL",
@@ -525,8 +536,8 @@
     "FIL_TL": {
       "symbol": "FIL_TL",
       "first_seen": 1789369433,
-      "last_seen": 1789371422,
-      "confirmations": 2,
+      "last_seen": 1789378632,
+      "confirmations": 1,
       "max_score": 86,
       "history": [
         {
@@ -550,10 +561,21 @@
           "rsi": "60.408804565726015",
           "recent_return_3": "0.869385220451252328710411900",
           "setup": "WATCHING"
+        },
+        {
+          "time": 1789378632,
+          "price": "48.44",
+          "score": 84,
+          "imbalance": "1.808851136573437441267034658",
+          "volume_ratio": "3.033246924161342",
+          "spread_pct": "0.08264462809917355371900826446",
+          "rsi": "54.856398726112715",
+          "recent_return_3": "-0.9769997964583757378383879500",
+          "setup": "WATCHING"
         }
       ],
-      "last_score": 81,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend"
+      "last_score": 84,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50"
     },
     "FET_TL": {
       "symbol": "FET_TL",
@@ -613,6 +635,42 @@
   },
   "near_misses": [
     {
+      "id": "FIL_TL:TRIGGER:1789378659",
+      "symbol": "FIL_TL",
+      "gate": "TRIGGER",
+      "reason": "setup not ready",
+      "observed_at": 1789378659,
+      "reference_price": "48.44",
+      "score": 84,
+      "spread_pct": "0.08264462809917355371900826446",
+      "imbalance": "1.808851136573437441267034658",
+      "rsi_15m": "54.856398726112715",
+      "volume_ratio_15m": "3.033246924161342",
+      "last_price": "48.44",
+      "last_checked_at": 1789378659,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
+      "id": "RAD_TL:TRIGGER:1789378659",
+      "symbol": "RAD_TL",
+      "gate": "TRIGGER",
+      "reason": "score 76 < 80",
+      "observed_at": 1789378659,
+      "reference_price": "11.41",
+      "score": 76,
+      "spread_pct": "0.08771929824561403508771929825",
+      "imbalance": "3.674634600358544393268531769",
+      "rsi_15m": "51.33024449301236",
+      "volume_ratio_15m": "1.8007857389678061",
+      "last_price": "11.41",
+      "last_checked_at": 1789378659,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
       "id": "ATM_TL:TRIGGER:1789376638",
       "symbol": "ATM_TL",
       "gate": "TRIGGER",
@@ -624,11 +682,17 @@
       "imbalance": "1.570684433157626509572547748",
       "rsi_15m": "60.73444031046994",
       "volume_ratio_15m": "1.0918823530672883",
-      "last_price": "56.44",
-      "last_checked_at": 1789376638,
+      "last_price": "56.15",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.5138199858256555634301913500",
+      "outcomes": {
+        "30m": {
+          "checked_at": 1789378632,
+          "price": "56.15",
+          "change_pct": "-0.5138199858256555634301913500"
+        }
+      }
     },
     {
       "id": "FET_TL:TRIGGER:1789371450",
@@ -642,10 +706,10 @@
       "imbalance": "2.020220727122403816361380357",
       "rsi_15m": "56.406321994537166",
       "volume_ratio_15m": "1.6299653028202634",
-      "last_price": "8.208",
-      "last_checked_at": 1789376612,
+      "last_price": "8.196",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-1.215549404260440486219761700",
+      "max_drawdown_pct": "-1.359971115657720543988446260",
       "outcomes": {
         "15m": {
           "checked_at": 1789372945,
@@ -661,6 +725,11 @@
           "checked_at": 1789375063,
           "price": "8.232",
           "change_pct": "-0.9267059814658803706823925900"
+        },
+        "120m": {
+          "checked_at": 1789378632,
+          "price": "8.196",
+          "change_pct": "-1.359971115657720543988446260"
         }
       }
     },
@@ -676,8 +745,8 @@
       "imbalance": "3.690641216945319918632509965",
       "rsi_15m": "58.37599283709108",
       "volume_ratio_15m": "1.84452310867721",
-      "last_price": "49.23",
-      "last_checked_at": 1789376612,
+      "last_price": "48.45",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "1.859120016525511258004544500",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -710,10 +779,10 @@
       "imbalance": "1.874128494980903117241630518",
       "rsi_15m": "54.96642905137349",
       "volume_ratio_15m": "1.5728330879074672",
-      "last_price": "0.7185",
-      "last_checked_at": 1789376612,
+      "last_price": "0.7127",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-0.7735875120873048763641386900",
+      "max_drawdown_pct": "-1.547175024174609752728277390",
       "outcomes": {
         "30m": {
           "checked_at": 1789371422,
@@ -744,10 +813,10 @@
       "imbalance": "3.176343691338457939820040934",
       "rsi_15m": "52.6741113226459",
       "volume_ratio_15m": "1.0643377476388491",
-      "last_price": "0.00001613",
-      "last_checked_at": 1789376612,
+      "last_price": "0.00001603",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0.309597523219814241486068100",
-      "max_drawdown_pct": "-0.3095975232198142414860681100",
+      "max_drawdown_pct": "-0.7430340557275541795665634700",
       "outcomes": {
         "15m": {
           "checked_at": 1789369433,
@@ -783,10 +852,10 @@
       "imbalance": "1.177103059438653821119124342",
       "rsi_15m": "64.30632124521564",
       "volume_ratio_15m": "1.3761491439534161",
-      "last_price": "0.1838",
-      "last_checked_at": 1789376612,
+      "last_price": "0.1825",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-0.8094981111710739341608202900",
+      "max_drawdown_pct": "-1.511063140852671343766864540",
       "outcomes": {
         "15m": {
           "checked_at": 1789369433,
@@ -822,10 +891,10 @@
       "imbalance": "6.842744807989002439631148057",
       "rsi_15m": "57.415113020638735",
       "volume_ratio_15m": "1.413446371064102",
-      "last_price": "41.51",
-      "last_checked_at": 1789376612,
+      "last_price": "41.33",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "-0.6462422211584490186692197200",
+      "max_drawdown_pct": "-1.077070368597415031115366200",
       "outcomes": {
         "15m": {
           "checked_at": 1789369433,
@@ -861,8 +930,8 @@
       "imbalance": "1.332830852685943568237127362",
       "rsi_15m": "53.883091042204676",
       "volume_ratio_15m": "1.1417380116572575",
-      "last_price": "0.2255",
-      "last_checked_at": 1789376612,
+      "last_price": "0.2247",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0.399644760213143872113676700",
       "max_drawdown_pct": "-0.3108348134991119005328596800",
       "outcomes": {
@@ -900,8 +969,8 @@
       "imbalance": "1.922222035815698271760398570",
       "rsi_15m": "58.167374788486676",
       "volume_ratio_15m": "1.2511218151107493",
-      "last_price": "122372",
-      "last_checked_at": 1789376612,
+      "last_price": "122419",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0.156040652266265808306918100",
       "max_drawdown_pct": "-0.1437861507793862945655370700",
       "outcomes": {
@@ -939,10 +1008,10 @@
       "imbalance": "1.806407965964716873164091004",
       "rsi_15m": "52.683534507535775",
       "volume_ratio_15m": "2.8073601359423357",
-      "last_price": "11.48",
-      "last_checked_at": 1789376612,
+      "last_price": "11.41",
+      "last_checked_at": 1789378632,
       "max_gain_pct": "0.087108013937282229965156800",
-      "max_drawdown_pct": "-0.0871080139372822299651567900",
+      "max_drawdown_pct": "-0.6097560975609756097560975600",
       "outcomes": {
         "30m": {
           "checked_at": 1789368173,
