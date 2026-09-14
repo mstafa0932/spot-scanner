@@ -52,9 +52,9 @@
     "CHZ_TL": {
       "symbol": "CHZ_TL",
       "first_seen": 1789344213,
-      "last_seen": 1789351359,
+      "last_seen": 1789369433,
       "confirmations": 1,
-      "max_score": 80,
+      "max_score": 86,
       "history": [
         {
           "time": 1789344213,
@@ -77,10 +77,21 @@
           "rsi": "63.54074743692071",
           "recent_return_3": "2.006129841181387573140150500",
           "setup": "WATCHING"
+        },
+        {
+          "time": 1789369433,
+          "price": "0.7239",
+          "score": 86,
+          "imbalance": "1.874128494980903117241630518",
+          "volume_ratio": "1.5728330879074672",
+          "spread_pct": "0.1244813278008298755186721992",
+          "rsi": "54.96642905137349",
+          "recent_return_3": "0.597637248088950660180681000",
+          "setup": "WATCHING"
         }
       ],
-      "last_score": 80,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend | 4h above EMA50"
+      "last_score": 86,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend"
     },
     "ANKR_TL": {
       "symbol": "ANKR_TL",
@@ -444,9 +455,67 @@
       ],
       "last_score": 77,
       "last_reason": "very strong TL liquidity | strong buy-side order book | 15m constructive | 15m MACD positive | healthy RSI | price momentum without chase | 1h not weak | 1h momentum stable"
+    },
+    "FIL_TL": {
+      "symbol": "FIL_TL",
+      "first_seen": 1789369433,
+      "last_seen": 1789369433,
+      "confirmations": 1,
+      "max_score": 86,
+      "history": [
+        {
+          "time": 1789369433,
+          "price": "48.41",
+          "score": 86,
+          "imbalance": "3.690641216945319918632509965",
+          "volume_ratio": "1.84452310867721",
+          "spread_pct": "0.1655286571487688806124560315",
+          "rsi": "58.37599283709108",
+          "recent_return_3": "1.085594989561586638830897700",
+          "setup": "PULLBACK"
+        }
+      ],
+      "last_score": 86,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend"
     }
   },
   "near_misses": [
+    {
+      "id": "FIL_TL:TRIGGER:1789369468",
+      "symbol": "FIL_TL",
+      "gate": "TRIGGER",
+      "reason": "watching: confirmations 1/2",
+      "observed_at": 1789369468,
+      "reference_price": "48.41",
+      "score": 86,
+      "spread_pct": "0.1655286571487688806124560315",
+      "imbalance": "3.690641216945319918632509965",
+      "rsi_15m": "58.37599283709108",
+      "volume_ratio_15m": "1.84452310867721",
+      "last_price": "48.41",
+      "last_checked_at": 1789369468,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
+      "id": "CHZ_TL:TRIGGER:1789369468",
+      "symbol": "CHZ_TL",
+      "gate": "TRIGGER",
+      "reason": "setup not ready",
+      "observed_at": 1789369468,
+      "reference_price": "0.7239",
+      "score": 86,
+      "spread_pct": "0.1244813278008298755186721992",
+      "imbalance": "1.874128494980903117241630518",
+      "rsi_15m": "54.96642905137349",
+      "volume_ratio_15m": "1.5728330879074672",
+      "last_price": "0.7239",
+      "last_checked_at": 1789369468,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
     {
       "id": "BTTC_TL:TRIGGER:1789368207",
       "symbol": "BTTC_TL",
@@ -459,11 +528,22 @@
       "imbalance": "3.176343691338457939820040934",
       "rsi_15m": "52.6741113226459",
       "volume_ratio_15m": "1.0643377476388491",
-      "last_price": "0.00001615",
-      "last_checked_at": 1789368207,
+      "last_price": "0.0000161",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.3095975232198142414860681100",
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789369433,
+          "price": "0.0000161",
+          "change_pct": "-0.3095975232198142414860681100"
+        },
+        "30m": {
+          "checked_at": 1789369433,
+          "price": "0.0000161",
+          "change_pct": "-0.3095975232198142414860681100"
+        }
+      }
     },
     {
       "id": "SKL_TL:TRIGGER:1789368207",
@@ -477,11 +557,22 @@
       "imbalance": "1.177103059438653821119124342",
       "rsi_15m": "64.30632124521564",
       "volume_ratio_15m": "1.3761491439534161",
-      "last_price": "0.1853",
-      "last_checked_at": 1789368207,
+      "last_price": "0.1848",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.2698327037236913113869401000",
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789369433,
+          "price": "0.1848",
+          "change_pct": "-0.2698327037236913113869401000"
+        },
+        "30m": {
+          "checked_at": 1789369433,
+          "price": "0.1848",
+          "change_pct": "-0.2698327037236913113869401000"
+        }
+      }
     },
     {
       "id": "ASR_TL:TRIGGER:1789368207",
@@ -495,11 +586,22 @@
       "imbalance": "6.842744807989002439631148057",
       "rsi_15m": "57.415113020638735",
       "volume_ratio_15m": "1.413446371064102",
-      "last_price": "41.78",
-      "last_checked_at": 1789368207,
+      "last_price": "41.71",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.1675442795595978937290569700",
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789369433,
+          "price": "41.71",
+          "change_pct": "-0.1675442795595978937290569700"
+        },
+        "30m": {
+          "checked_at": 1789369433,
+          "price": "41.71",
+          "change_pct": "-0.1675442795595978937290569700"
+        }
+      }
     },
     {
       "id": "ANKR_TL:TRIGGER:1789368207",
@@ -513,11 +615,22 @@
       "imbalance": "1.332830852685943568237127362",
       "rsi_15m": "53.883091042204676",
       "volume_ratio_15m": "1.1417380116572575",
-      "last_price": "0.2252",
-      "last_checked_at": 1789368207,
+      "last_price": "0.2245",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.3108348134991119005328596800",
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789369433,
+          "price": "0.2245",
+          "change_pct": "-0.3108348134991119005328596800"
+        },
+        "30m": {
+          "checked_at": 1789369433,
+          "price": "0.2245",
+          "change_pct": "-0.3108348134991119005328596800"
+        }
+      }
     },
     {
       "id": "ETH_TL:TRIGGER:1789368207",
@@ -531,11 +644,22 @@
       "imbalance": "1.922222035815698271760398570",
       "rsi_15m": "58.167374788486676",
       "volume_ratio_15m": "1.2511218151107493",
-      "last_price": "122404",
-      "last_checked_at": 1789368207,
+      "last_price": "122228",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.1437861507793862945655370700",
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789369433,
+          "price": "122228",
+          "change_pct": "-0.1437861507793862945655370700"
+        },
+        "30m": {
+          "checked_at": 1789369433,
+          "price": "122228",
+          "change_pct": "-0.1437861507793862945655370700"
+        }
+      }
     },
     {
       "id": "RAD_TL:TRIGGER:1789365799",
@@ -549,8 +673,8 @@
       "imbalance": "1.806407965964716873164091004",
       "rsi_15m": "52.683534507535775",
       "volume_ratio_15m": "2.8073601359423357",
-      "last_price": "11.49",
-      "last_checked_at": 1789368173,
+      "last_price": "11.48",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0.087108013937282229965156800",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -558,6 +682,11 @@
           "checked_at": 1789368173,
           "price": "11.49",
           "change_pct": "0.087108013937282229965156800"
+        },
+        "60m": {
+          "checked_at": 1789369433,
+          "price": "11.48",
+          "change_pct": "0"
         }
       }
     },
@@ -573,8 +702,8 @@
       "imbalance": "1.484977100068701247270598870",
       "rsi_15m": "56.07886254673487",
       "volume_ratio_15m": "1.1389743083322807",
-      "last_price": "171.8",
-      "last_checked_at": 1789368173,
+      "last_price": "171.75",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "1.029109085563069685386651000",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -587,6 +716,11 @@
           "checked_at": 1789365763,
           "price": "171.51",
           "change_pct": "0.858571008526903851808291700"
+        },
+        "120m": {
+          "checked_at": 1789369433,
+          "price": "171.75",
+          "change_pct": "0.999705968832696265804175200"
         }
       }
     },
@@ -602,8 +736,8 @@
       "imbalance": "1.235729684303617334580619936",
       "rsi_15m": "50.94995687359875",
       "volume_ratio_15m": "2.276407738851338",
-      "last_price": "0.185",
-      "last_checked_at": 1789368173,
+      "last_price": "0.1848",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "1.202843083652268999453253100",
       "max_drawdown_pct": "-0.3280481137233460907599781300",
       "outcomes": {
@@ -641,8 +775,8 @@
       "imbalance": "1.248865153061182247911320744",
       "rsi_15m": "60.10037589574538",
       "volume_ratio_15m": "1.123038231846228",
-      "last_price": "122412",
-      "last_checked_at": 1789368173,
+      "last_price": "122228",
+      "last_checked_at": 1789369433,
       "max_gain_pct": "0.220233660545426262659341900",
       "max_drawdown_pct": "-0.1473682486921067928575522100",
       "outcomes": {
@@ -680,9 +814,9 @@
       "imbalance": "2.954687331457881993092239279",
       "rsi_15m": "51.8168814998019",
       "volume_ratio_15m": "3.3328652399378114",
-      "last_price": "17.33",
-      "last_checked_at": 1789368173,
-      "max_gain_pct": "0.873108265424912689173457500",
+      "last_price": "17.35",
+      "last_checked_at": 1789369433,
+      "max_gain_pct": "0.989522700814901047729918500",
       "max_drawdown_pct": "0",
       "outcomes": {
         "30m": {
