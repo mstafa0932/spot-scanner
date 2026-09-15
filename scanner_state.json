@@ -9,9 +9,9 @@
     "UNI_TL": {
       "symbol": "UNI_TL",
       "first_seen": 1789450310,
-      "last_seen": 1789478302,
+      "last_seen": 1789495843,
       "confirmations": 1,
-      "max_score": 83,
+      "max_score": 87,
       "history": [
         {
           "time": 1789450310,
@@ -38,10 +38,23 @@
           "rsi": "53.21072557752604",
           "recent_return_3": "-0.8847943081273374076438930900",
           "setup": "WATCHING"
+        },
+        {
+          "time": 1789495843,
+          "price": "316.46",
+          "score": 87,
+          "imbalance": "2.203446817365992279732289392",
+          "volume_ratio": "1.5623888020063192",
+          "spread_pct": "0.1614179458775122645988289286",
+          "bid_wall": "0.2534707137571675671737803049",
+          "ask_wall": "0.3532178084606636912391150239",
+          "rsi": "54.635279701449676",
+          "recent_return_3": "2.044818827765810371989840200",
+          "setup": "WATCHING"
         }
       ],
-      "last_score": 80,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50 | 1h momentum stable"
+      "last_score": 87,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | healthy RSI | price momentum without chase | 1h uptrend"
     },
     "XRP_TL": {
       "symbol": "XRP_TL",
@@ -325,6 +338,24 @@
   },
   "near_misses": [
     {
+      "id": "UNI_TL:TRIGGER:1789495875",
+      "symbol": "UNI_TL",
+      "gate": "TRIGGER",
+      "reason": "setup not ready",
+      "observed_at": 1789495875,
+      "reference_price": "316.46",
+      "score": 87,
+      "spread_pct": "0.1614179458775122645988289286",
+      "imbalance": "2.203446817365992279732289392",
+      "rsi_15m": "54.635279701449676",
+      "volume_ratio_15m": "1.5623888020063192",
+      "last_price": "316.46",
+      "last_checked_at": 1789495875,
+      "max_gain_pct": "0",
+      "max_drawdown_pct": "0",
+      "outcomes": {}
+    },
+    {
       "id": "AVAX_TL:TRIGGER:1789494487",
       "symbol": "AVAX_TL",
       "gate": "TRIGGER",
@@ -336,11 +367,22 @@
       "imbalance": "1.247639330359979991605493748",
       "rsi_15m": "52.54470427362147",
       "volume_ratio_15m": "4.152047699498486",
-      "last_price": "365.44",
-      "last_checked_at": 1789494487,
+      "last_price": "363.93",
+      "last_checked_at": 1789495843,
       "max_gain_pct": "0",
-      "max_drawdown_pct": "0",
-      "outcomes": {}
+      "max_drawdown_pct": "-0.4132005253940455341506129600",
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789495843,
+          "price": "363.93",
+          "change_pct": "-0.4132005253940455341506129600"
+        },
+        "30m": {
+          "checked_at": 1789495843,
+          "price": "363.93",
+          "change_pct": "-0.4132005253940455341506129600"
+        }
+      }
     },
     {
       "id": "ENA_TL:TRIGGER:1789493548",
@@ -354,15 +396,20 @@
       "imbalance": "1.808155390893441457960012573",
       "rsi_15m": "57.938781589973885",
       "volume_ratio_15m": "4.378002681598134",
-      "last_price": "7.09",
-      "last_checked_at": 1789494456,
+      "last_price": "7.02",
+      "last_checked_at": 1789495843,
       "max_gain_pct": "0.141242937853107344632768400",
-      "max_drawdown_pct": "0",
+      "max_drawdown_pct": "-0.8474576271186440677966101700",
       "outcomes": {
         "15m": {
           "checked_at": 1789494456,
           "price": "7.09",
           "change_pct": "0.141242937853107344632768400"
+        },
+        "30m": {
+          "checked_at": 1789495843,
+          "price": "7.02",
+          "change_pct": "-0.8474576271186440677966101700"
         }
       }
     },
@@ -378,8 +425,8 @@
       "imbalance": "1.493233286323537866942770947",
       "rsi_15m": "68.35758280366082",
       "volume_ratio_15m": "2.2689634491327677",
-      "last_price": "7.37",
-      "last_checked_at": 1789494456,
+      "last_price": "7.25",
+      "last_checked_at": 1789495843,
       "max_gain_pct": "3.448275862068965517241379300",
       "max_drawdown_pct": "0",
       "outcomes": {
@@ -397,6 +444,11 @@
           "checked_at": 1789492591,
           "price": "7.33",
           "change_pct": "1.103448275862068965517241400"
+        },
+        "120m": {
+          "checked_at": 1789495843,
+          "price": "7.25",
+          "change_pct": "0"
         }
       }
     },
