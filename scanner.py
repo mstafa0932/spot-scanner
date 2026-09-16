@@ -15,7 +15,7 @@ signals for days. It also avoids chasing pumps: strong anti-FOMO and BTC hard
 risk checks remain in place.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -39,6 +39,7 @@ from market_data import (
 from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
 from signal_tracker import register_signal, update_active_signals, deliver_pending_events
+from execution_research import evaluate_depth
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -143,6 +144,7 @@ class Candidate:
     tech_4h: IndicatorResult
     setup: str
     reasons: list[str]
+    candle_at: int = 0
 
 
 @dataclass(frozen=True)
@@ -631,19 +633,9 @@ def _update_watchlist(
         history = []
         item["history"] = history
 
-    # Consecutive means observations are reasonably close, not necessarily every run.
-    try:
-        previous_seen = int(item.get("last_seen", 0))
-    except (TypeError, ValueError):
-        previous_seen = 0
-
-    if previous_seen and now - previous_seen <= 90 * 60:
-        confirmations = int(item.get("confirmations", 0) or 0) + 1
-    else:
-        confirmations = 1
-
     observation = {
         "time": now,
+        "candle_at": candidate.candle_at,
         "price": str(current_price),
         "score": candidate.score,
         "imbalance": str(candidate.book.imbalance_ratio),
@@ -656,10 +648,13 @@ def _update_watchlist(
         "setup": candidate.setup,
     }
 
+    # Legacy observations have no candle identity and cannot prove confirmation.
+    history = [o for o in history if isinstance(o, dict)
+               and o.get("candle_at") and o.get("candle_at") != candidate.candle_at]
     history.append(observation)
     item["history"] = history[-WATCH_HISTORY_LIMIT:]
     item["last_seen"] = now
-    item["confirmations"] = confirmations
+    item["confirmations"] = len(_recent_observations(item, now))
     item["max_score"] = max(int(item.get("max_score", 0) or 0), candidate.score)
     item["last_score"] = candidate.score
     item["last_reason"] = " | ".join(candidate.reasons[:8])
@@ -673,13 +668,16 @@ def _recent_observations(item: dict[str, Any], now: int) -> list[dict[str, Any]]
         return []
 
     recent: list[dict[str, Any]] = []
+    seen = set()
     for obs in history:
         try:
             ts = int(obs.get("time", 0))
+            candle_at = int(obs.get("candle_at", 0))
         except (AttributeError, TypeError, ValueError):
             continue
-        if 0 <= now - ts <= 120 * 60:
+        if candle_at > 0 and candle_at not in seen and 0 <= now - ts <= 120 * 60:
             recent.append(obs)
+            seen.add(candle_at)
     return recent
 
 
@@ -1076,6 +1074,7 @@ def run_scanner() -> None:
             tech_4h=tech_4h,
             setup=setup,
             reasons=reasons + [f"discovery: {discovery_reason}"],
+            candle_at=int(df_15["timestamp"].iloc[-1]),
         )
 
         discovered.append(candidate)
@@ -1130,11 +1129,27 @@ def run_scanner() -> None:
             note(candidate.symbol, "cooldown", "symbol_cooldown")
             continue
 
+        # Re-read the book immediately before pricing a notification. A scan can
+        # take minutes; its earlier book must not masquerade as an executable quote.
+        try:
+            candidate = replace(candidate, book=get_order_book(candidate.symbol))
+        except ParibuDataError:
+            note(candidate.symbol, "execution", "fresh_book_unavailable")
+            continue
+        ready, trigger_reason, avg_imbalance, confirmations = trigger_check(
+            candidate, item, btc_ok, btc_reason, int(time.time())
+        )
+        if not ready:
+            note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason)
+            continue
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
             note(candidate.symbol, "risk", "opportunity_unavailable")
             continue
 
+        depth_scenario = evaluate_depth(candidate.book)
+        state["execution_research"] = {"symbol": candidate.symbol, "observed_at": int(time.time()),
+                                       **depth_scenario}
         if send_telegram(format_opportunity(opp)):
             note(candidate.symbol, "notification", "entry_alert_sent")
             sent = True
@@ -1150,7 +1165,8 @@ def run_scanner() -> None:
                           "imbalance": str(opp.imbalance), "volume_ratio": str(opp.volume_ratio),
                           "quote_volume_tl": str(opp.quote_volume),
                           "bid_wall_share": str(opp.bid_wall_share),
-                          "ask_wall_share": str(opp.ask_wall_share)},
+                          "ask_wall_share": str(opp.ask_wall_share),
+                          "execution_research": depth_scenario},
             )
             LOGGER.info(
                 "ALERT sent: %s score=%d confirmations=%d volume=%.2fx imbalance=%.2f",

@@ -428,11 +428,8 @@ def _drop_open_candle(df: pd.DataFrame, interval_seconds: int) -> pd.DataFrame:
         return df
 
     now = int(time.time())
-    last_ts = int(df["timestamp"].iloc[-1])
-    # Paribu timestamps in the official model are epoch seconds.
-    if last_ts + interval_seconds > now + 5:
-        return df.iloc[:-1].copy()
-    return df
+    # Exclude every unfinished/future bar, not just the final row.
+    return df[df["timestamp"] + interval_seconds <= now].copy()
 
 
 def validate_candles(df: pd.DataFrame, resolution: str) -> pd.DataFrame:
@@ -444,6 +441,8 @@ def validate_candles(df: pd.DataFrame, resolution: str) -> pd.DataFrame:
     x = df.copy()
     for column in required:
         x[column] = pd.to_numeric(x[column], errors="coerce")
+    if x[list(required)].isin([float("inf"), float("-inf")]).any().any():
+        raise ParibuSchemaError("Non-finite candle values")
 
     x = x.dropna(subset=required).copy()
     x = x[
@@ -470,6 +469,13 @@ def validate_candles(df: pd.DataFrame, resolution: str) -> pd.DataFrame:
             f"Only {len(x)} closed Paribu candles for {resolution}; "
             f"{MIN_VALID_CANDLES} required"
         )
+
+    if not x["timestamp"].diff().iloc[1:].eq(interval_seconds).all():
+        raise CandleUnavailableError(f"Gaps or irregular candle spacing for {resolution}")
+    # Allow one normal interval plus a minute of publication delay.
+    age = int(time.time()) - (int(x["timestamp"].iloc[-1]) + interval_seconds)
+    if age > interval_seconds + 60:
+        raise CandleUnavailableError(f"Stale candles for {resolution}: close age={age}s")
 
     x.attrs.update(
         source="PARIBU",
@@ -522,6 +528,9 @@ def fetch_candles(
         ) from exc
 
     opens, highs, lows, closes, volumes, timestamps = _extract_chart_arrays(payload)
+
+    if len({len(a) for a in (opens, highs, lows, closes, volumes, timestamps)}) != 1:
+        raise ParibuSchemaError("Candle arrays have inconsistent lengths")
 
     length = min(
         len(opens),
