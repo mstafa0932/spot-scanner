@@ -238,6 +238,11 @@ def load_state() -> dict[str, Any]:
             state["active_signals"] = raw["active_signals"]
         if isinstance(raw.get("daily_alerts"), list):
             state["daily_alerts"] = raw["daily_alerts"]
+        # Research state is isolated from trading signal/watchlist state.
+        if isinstance(raw.get("accumulation_radar"), dict):
+            state["accumulation_radar"] = raw["accumulation_radar"]
+        if isinstance(raw.get("scan_diagnostics"), list):
+            state["scan_diagnostics"] = raw["scan_diagnostics"][-12:]
 
         try:
             state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
@@ -907,6 +912,24 @@ def format_signal_event(payload: dict[str, Any]) -> str:
 def run_scanner() -> None:
     now = int(time.time())
     state = load_state()
+    diagnostics = {"started_at": now, "status": "running", "symbols": {}}
+    observations = []
+
+    def note(symbol, stage, reason, **metrics):
+        diagnostics["symbols"][symbol] = {"stage": stage, "reason": reason, **metrics}
+        LOGGER.info("Scan decision | %s | %s | %s", symbol, stage, reason)
+
+    def finish_diagnostics(status):
+        diagnostics["status"] = status
+        diagnostics["finished_at"] = int(time.time())
+        history = state.setdefault("scan_diagnostics", [])
+        if history and isinstance(history[-1], dict):
+            previous_started = history[-1].get("started_at")
+            if isinstance(previous_started, (int, float)):
+                diagnostics["seconds_since_previous_run"] = now - previous_started
+        history.append(diagnostics)
+        state["scan_diagnostics"] = history[-12:]
+
     _prune_watchlist(state, now)
 
     for event in update_active_signals(state, now):
@@ -925,10 +948,12 @@ def run_scanner() -> None:
         snapshot = get_market_snapshot()
     except ParibuDataError as exc:
         LOGGER.error("Paribu snapshot failed: %s", exc)
+        finish_diagnostics("snapshot_failed")
         save_state(state)
         return
 
     btc_ok, _btc_15, btc_reason = btc_gate()
+    diagnostics.update(btc_ok=btc_ok, btc_reason=btc_reason)
 
     tickers = sorted(
         snapshot.values(),
@@ -940,11 +965,17 @@ def run_scanner() -> None:
     orderbook_checked = 0
     technical_checked = 0
 
+    # Pre-fill so symbols beyond capacity are not confused with rejected setups.
+    for ticker in tickers:
+        diagnostics["symbols"][ticker.symbol] = {"stage": "coverage", "reason": "not_evaluated_capacity"}
+
     for ticker in tickers:
         if ticker.symbol in {"USDT_TL", "USDC_TL", "BTC_TL"}:
+            note(ticker.symbol, "universe", "excluded_base_asset")
             continue
 
         if ticker.quote_volume is None or ticker.quote_volume < MIN_QUOTE_VOLUME_TL:
+            note(ticker.symbol, "universe", "quote_volume_below_minimum", quote_volume=str(ticker.quote_volume))
             continue
 
         if orderbook_checked >= MAX_ORDERBOOK_MARKETS:
@@ -953,13 +984,16 @@ def run_scanner() -> None:
 
         try:
             book = get_order_book(ticker.symbol, ORDERBOOK_DEPTH)
-        except Exception:
+        except Exception as exc:
+            note(ticker.symbol, "data", "orderbook_error:" + type(exc).__name__)
             continue
 
         # Cheap rejection before candle calls.
         if book.spread_percent > MAX_SPREAD_PCT:
+            note(ticker.symbol, "book", "spread_too_high", spread_pct=str(book.spread_percent))
             continue
         if book.imbalance_ratio < MIN_WATCH_IMBALANCE:
+            note(ticker.symbol, "book", "imbalance_too_low", imbalance=str(book.imbalance_ratio))
             continue
 
         if technical_checked >= MAX_TECHNICAL_MARKETS:
@@ -970,19 +1004,26 @@ def run_scanner() -> None:
             df_15 = fetch_candles(ticker.symbol, "15m", CANDLE_LIMIT)
             df_1h = fetch_candles(ticker.symbol, "1h", CANDLE_LIMIT)
             df_4h = fetch_candles(ticker.symbol, "4h", CANDLE_LIMIT)
-        except Exception:
+        except Exception as exc:
+            note(ticker.symbol, "data", "candle_error:" + type(exc).__name__)
             continue
 
         if not all(
             str(frame.attrs.get("source", "")).upper() == "PARIBU"
             for frame in (df_15, df_1h, df_4h)
         ):
+            note(ticker.symbol, "data", "non_paribu_candles")
             continue
+
+        # Collect existing data only. Evaluate AFTER the normal alert path, with
+        # no extra requests or interference with entry thresholds/cooldowns.
+        observations.append((ticker.symbol, df_15, book))
 
         tech_15 = analyze_symbol(df_15)
         tech_1h = analyze_symbol(df_1h)
         tech_4h = analyze_symbol(df_4h)
         if tech_15 is None or tech_1h is None or tech_4h is None:
+            note(ticker.symbol, "data", "indicators_unavailable")
             continue
 
         score, reasons = score_candidate(ticker, book, tech_15, tech_1h, tech_4h)
@@ -990,7 +1031,12 @@ def run_scanner() -> None:
             ticker, book, tech_15, tech_1h, tech_4h, score
         )
         if not ok:
+            note(ticker.symbol, "discovery", discovery_reason, score=score,
+                 rsi=str(tech_15.rsi14), return_3=str(tech_15.recent_return_3),
+                 volume_ratio=str(tech_15.volume_ratio))
             continue
+
+        note(ticker.symbol, "discovery", "passed_pending_trigger", score=score)
 
         setup_ok, setup = setup_type(tech_15)
         if not setup_ok:
@@ -1034,6 +1080,7 @@ def run_scanner() -> None:
         )
 
         if not ready:
+            note(candidate.symbol, "trigger", trigger_reason, score=candidate.score)
             # Keep evidence on good-but-not-ready candidates without Telegram spam.
             if candidate.score >= NEAR_MISS_MIN_SCORE:
                 record_near_miss(
@@ -1051,17 +1098,21 @@ def run_scanner() -> None:
             continue
 
         if not _global_alert_allowed(state, now):
+            note(candidate.symbol, "cooldown", "global_limit_or_cooldown")
             LOGGER.info("Strong candidate %s ready, global alert cooldown active", candidate.symbol)
             continue
 
         if not _symbol_alert_allowed(state, candidate.symbol, now):
+            note(candidate.symbol, "cooldown", "symbol_cooldown")
             continue
 
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
+            note(candidate.symbol, "risk", "opportunity_unavailable")
             continue
 
         if send_telegram(format_opportunity(opp)):
+            note(candidate.symbol, "notification", "entry_alert_sent")
             sent = True
             state["last_alert_at"] = now
             state.setdefault("daily_alerts", []).append(now)
@@ -1081,6 +1132,25 @@ def run_scanner() -> None:
                 candidate.book.imbalance_ratio,
             )
             break
+        else:
+            note(candidate.symbol, "notification", "telegram_failed")
+
+    if os.getenv("SHADOW_RADAR_ENABLED", "true").lower() == "true":
+        try:
+            from accumulation_radar import advance
+            state["accumulation_radar"] = advance(
+                state.get("accumulation_radar"), observations, snapshot, now, btc_ok, btc_reason
+            )
+            diagnostics["radar_status"] = "shadow_only"
+        except Exception as exc:
+            # Radar failures must never prevent persistence of actual signals.
+            diagnostics["radar_status"] = "error:" + type(exc).__name__
+            LOGGER.warning("Shadow radar failed: %s", type(exc).__name__)
+    else:
+        diagnostics["radar_status"] = "disabled"
+    diagnostics.update(markets=len(snapshot), orderbooks_checked=orderbook_checked,
+                       technical_checked=technical_checked, discovered=len(discovered), alert_sent=sent)
+    finish_diagnostics("completed")
 
     # No Telegram empty reports. GitHub log is enough.
     LOGGER.info(
