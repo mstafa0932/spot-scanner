@@ -16,6 +16,7 @@ risk checks remain in place.
 """
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Optional
@@ -37,7 +38,7 @@ from market_data import (
 )
 from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
-from signal_tracker import register_signal, update_active_signals
+from signal_tracker import register_signal, update_active_signals, deliver_pending_events
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -224,7 +225,12 @@ def load_state() -> dict[str, Any]:
     try:
         raw = json.loads(STATE_FILE.read_text(encoding="utf-8"))
         if not isinstance(raw, dict):
-            return _empty_state()
+            raise ValueError("Scanner state must be an object")
+        for key, expected in (("sent_signals", dict), ("watchlist", dict),
+                              ("near_misses", list), ("active_signals", list),
+                              ("daily_alerts", list)):
+            if key in raw and not isinstance(raw[key], expected):
+                raise ValueError("Invalid state field: " + key)
 
         state = _empty_state()
 
@@ -244,16 +250,15 @@ def load_state() -> dict[str, Any]:
         if isinstance(raw.get("scan_diagnostics"), list):
             state["scan_diagnostics"] = raw["scan_diagnostics"][-12:]
 
-        try:
-            state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
-        except (TypeError, ValueError):
-            state["last_alert_at"] = 0
+        state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
+        if state["last_alert_at"] < 0:
+            raise ValueError("Invalid last alert time")
 
         return state
 
     except Exception as exc:
-        LOGGER.warning("State load failed: %s", exc)
-        return _empty_state()
+        LOGGER.error("State load failed; refusing to reset alert history: %s", type(exc).__name__)
+        raise RuntimeError("Scanner state unreadable; original file preserved") from exc
 
 
 def save_state(state: dict[str, Any]) -> None:
@@ -266,6 +271,7 @@ def save_state(state: dict[str, Any]) -> None:
         temporary.replace(STATE_FILE)
     except Exception as exc:
         LOGGER.error("State save failed: %s", exc)
+        raise RuntimeError("Scanner state could not be persisted") from exc
 
 
 def send_telegram(message: str) -> bool:
@@ -896,11 +902,17 @@ def format_signal_event(payload: dict[str, Any]) -> str:
         "EXPIRED": "⌛ انتهت صلاحية الإشارة دون حسم — ألغِها",
     }
     kind = str(event.get("kind", ""))
+    price_label = "سعر الإشارة المرجعي" if kind == "EXPIRED" else "المستوى المرصود"
+    event_id = f"{signal.get('id', '')}:{kind}:{event.get('at', '')}"
+    observed_time = datetime.fromtimestamp(int(event["at"]), tz=timezone.utc).isoformat()
     return (
         f"<b>{labels.get(kind, kind)}</b>\n"
         f"🪙 <b>{html.escape(str(signal.get('symbol', '')))}</b>\n"
-        f"السعر المرصود: <code>{html.escape(str(event.get('price', '')))}</code>\n"
-        "التنفيذ يدوي، وتحقق من سعر Paribu الفعلي قبل أي إجراء."
+        f"{price_label}: <code>{html.escape(str(event.get('price', '')))}</code>\n"
+        f"وقت الرصد/الانتهاء (UTC): {observed_time}\n"
+        "متابعة سعرية افتراضية، وليست إثبات تنفيذ صفقة أو ربح بعد الرسوم.\n"
+        f"معرّف الحدث: <code>{html.escape(event_id)}</code>\n"
+        "قد يكون الإشعار متأخرًا؛ تحقق من سعر Paribu الفعلي. التنفيذ يدوي."
     )
 
 
@@ -932,8 +944,11 @@ def run_scanner() -> None:
 
     _prune_watchlist(state, now)
 
-    for event in update_active_signals(state, now):
-        send_telegram(format_signal_event(event))
+    new_events = update_active_signals(state, now)
+    if new_events:
+        save_state(state)  # Keep pending observations before attempting delivery.
+    if deliver_pending_events(state, send_telegram, format_signal_event):
+        save_state(state)
 
     # Follow previous near-misses first; persistence is handled by workflow.
     near_result = update_near_miss_outcomes(state)
@@ -950,7 +965,7 @@ def run_scanner() -> None:
         LOGGER.error("Paribu snapshot failed: %s", exc)
         finish_diagnostics("snapshot_failed")
         save_state(state)
-        return
+        raise RuntimeError("Paribu snapshot unavailable; scan incomplete") from exc
 
     btc_ok, _btc_15, btc_reason = btc_gate()
     diagnostics.update(btc_ok=btc_ok, btc_reason=btc_reason)
@@ -1122,6 +1137,11 @@ def run_scanner() -> None:
                 state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
                 tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
                 setup=opp.setup, now=now,
+                evidence={"btc_reason": btc_reason, "spread_pct": str(opp.spread_pct),
+                          "imbalance": str(opp.imbalance), "volume_ratio": str(opp.volume_ratio),
+                          "quote_volume_tl": str(opp.quote_volume),
+                          "bid_wall_share": str(opp.bid_wall_share),
+                          "ask_wall_share": str(opp.ask_wall_share)},
             )
             LOGGER.info(
                 "ALERT sent: %s score=%d confirmations=%d volume=%.2fx imbalance=%.2f",
@@ -1151,6 +1171,13 @@ def run_scanner() -> None:
     diagnostics.update(markets=len(snapshot), orderbooks_checked=orderbook_checked,
                        technical_checked=technical_checked, discovered=len(discovered), alert_sent=sent)
     finish_diagnostics("completed")
+
+    try:
+        from research_report import build_report
+        state["research_summary"] = build_report(state, now=int(time.time()))
+    except Exception as exc:
+        state.pop("research_summary", None)
+        LOGGER.warning("Research report unavailable: %s", type(exc).__name__)
 
     # No Telegram empty reports. GitHub log is enough.
     LOGGER.info(
