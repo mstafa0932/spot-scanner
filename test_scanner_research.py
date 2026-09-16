@@ -90,3 +90,28 @@ def test_capacity_visible_and_history_bounded(monkeypatch, tmp_path):
     state = scanner.load_state()
     assert len(state["scan_diagnostics"]) == 12
     assert state["scan_diagnostics"][-1]["symbols"]["SYN_TL"]["reason"] == "not_evaluated_capacity"
+
+
+@pytest.mark.parametrize("unavailable", [False, True])
+def test_pre_alert_refresh_blocks_deteriorated_or_missing_book(monkeypatch, tmp_path, unavailable):
+    _, book, _ = prepare(monkeypatch, tmp_path)
+    monkeypatch.setattr(scanner, "discovery_ok", lambda *a: (True, "OK"))
+    monkeypatch.setattr(scanner, "setup_type", lambda *a: (True, "BREAKOUT"))
+    monkeypatch.setattr(scanner, "_update_watchlist", lambda state, c, now: state["watchlist"].update({c.symbol: {}}))
+    monkeypatch.setattr(scanner, "_global_alert_allowed", lambda *a: True)
+    monkeypatch.setattr(scanner, "_symbol_alert_allowed", lambda *a: True)
+    answers = iter([(True, "OK", D(2), 2), (False, "spread widened", D(2), 2)])
+    monkeypatch.setattr(scanner, "trigger_check", lambda *a: next(answers))
+    calls = []
+    def refresh(*a):
+        calls.append(a)
+        if unavailable and len(calls) == 2:
+            raise scanner.ParibuDataError("unavailable")
+        return book
+    monkeypatch.setattr(scanner, "get_order_book", refresh)
+    scanner.run_scanner()
+    assert len(calls) == 2
+    state = scanner.load_state()
+    assert not state["scan_diagnostics"][-1]["alert_sent"]
+    reason = state["scan_diagnostics"][-1]["symbols"]["SYN_TL"]["reason"]
+    assert reason.startswith("fresh_book_unavailable" if unavailable else "fresh_book_rejected")
