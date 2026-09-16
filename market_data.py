@@ -15,6 +15,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
 import logging
 import time
+from candle_backfill import repair
 
 import pandas as pd
 import requests
@@ -133,11 +134,15 @@ def _make_session() -> requests.Session:
 
 
 SESSION = _make_session()
+# Four backfill attempts must not secretly multiply into transport retries.
+BACKFILL_SESSION = _make_session()
+BACKFILL_SESSION.mount("https://", HTTPAdapter(max_retries=0))
+BACKFILL_SESSION.mount("http://", HTTPAdapter(max_retries=0))
 
 
-def get_json(url: str, params: Optional[dict[str, Any]] = None) -> Any:
+def get_json(url: str, params: Optional[dict[str, Any]] = None, *, _session=None) -> Any:
     try:
-        response = SESSION.get(
+        response = (_session or SESSION).get(
             url,
             params=params,
             timeout=REQUEST_TIMEOUT,
@@ -432,7 +437,7 @@ def _drop_open_candle(df: pd.DataFrame, interval_seconds: int) -> pd.DataFrame:
     return df[df["timestamp"] + interval_seconds <= now].copy()
 
 
-def validate_candles(df: pd.DataFrame, resolution: str) -> pd.DataFrame:
+def validate_candles(df: pd.DataFrame, resolution: str, *, require_history: bool = True) -> pd.DataFrame:
     required = ("timestamp", "open", "high", "low", "close", "volume")
     missing = [column for column in required if column not in df.columns]
     if missing:
@@ -458,11 +463,20 @@ def validate_candles(df: pd.DataFrame, resolution: str) -> pd.DataFrame:
         & (x["low"] <= x[["open", "close"]].min(axis=1))
         & (x["high"] >= x["low"])
     ].copy()
+    _, interval_seconds = _interval_config(resolution)
+    if not x["timestamp"].mod(interval_seconds).eq(0).all():
+        raise ParibuSchemaError("Candle timestamps are not aligned to the UTC interval grid")
+    duplicates = x[x.duplicated("timestamp", keep=False)]
+    if not duplicates.empty and duplicates.groupby("timestamp")[["open", "high", "low", "close", "volume"]].nunique().gt(1).any().any():
+        raise ParibuSchemaError("Conflicting duplicate candles")
     x = x.drop_duplicates(subset=["timestamp"], keep="last")
     x = x.sort_values("timestamp").reset_index(drop=True)
 
     _, interval_seconds = _interval_config(resolution)
     x = _drop_open_candle(x, interval_seconds)
+
+    if not require_history:
+        return x
 
     if len(x) < MIN_VALID_CANDLES:
         raise CandleUnavailableError(
@@ -527,45 +541,23 @@ def fetch_candles(
             f"Paribu chart unavailable for {normalized} {resolution}: {exc}"
         ) from exc
 
-    opens, highs, lows, closes, volumes, timestamps = _extract_chart_arrays(payload)
+    raw = _parse_candle_payload(payload)
+    prepared = validate_candles(raw, resolution, require_history=False)
+    if str(resolution).strip().lower() != "1d":
+        def request_range(start, end):
+            recovered_payload = get_json(PARIBU_CHART_HISTORY_URL, _session=BACKFILL_SESSION, params={
+                "type": "advanced", "symbol": normalized, "resolution": chart_resolution,
+                "from": start, "to": end,
+            })
+            return validate_candles(_parse_candle_payload(recovered_payload),
+                                    resolution, require_history=False)
+        try:
+            prepared = repair(prepared, interval_seconds, end_s, request_range,
+                              normalized + ":" + resolution)
+        except ValueError as exc:
+            raise CandleUnavailableError(str(exc)) from exc
 
-    if len({len(a) for a in (opens, highs, lows, closes, volumes, timestamps)}) != 1:
-        raise ParibuSchemaError("Candle arrays have inconsistent lengths")
-
-    length = min(
-        len(opens),
-        len(highs),
-        len(lows),
-        len(closes),
-        len(volumes),
-        len(timestamps),
-    )
-
-    if length <= 0:
-        raise CandleUnavailableError(f"Paribu returned no candles for {normalized}")
-
-    rows: list[dict[str, Any]] = []
-    for i in range(length):
-        timestamp = to_decimal(timestamps[i])
-        opening = to_decimal(opens[i])
-        high = to_decimal(highs[i])
-        low = to_decimal(lows[i])
-        close = to_decimal(closes[i])
-        volume = to_decimal(volumes[i])
-        if None in (timestamp, opening, high, low, close, volume):
-            continue
-        rows.append(
-            {
-                "timestamp": int(timestamp),
-                "open": float(opening),
-                "high": float(high),
-                "low": float(low),
-                "close": float(close),
-                "volume": float(volume),
-            }
-        )
-
-    df = validate_candles(pd.DataFrame(rows), resolution)
+    df = validate_candles(prepared, resolution)
     if len(df) > requested_limit:
         df = df.tail(requested_limit).reset_index(drop=True)
         df.attrs.update(
@@ -605,3 +597,47 @@ def health_check() -> dict[str, Any]:
         "orderbook_source": "PARIBU",
         "min_valid_candles": MIN_VALID_CANDLES,
     }
+
+
+def _parse_candle_payload(payload):
+    opens, highs, lows, closes, volumes, timestamps = _extract_chart_arrays(payload)
+
+    if len({len(a) for a in (opens, highs, lows, closes, volumes, timestamps)}) != 1:
+        raise ParibuSchemaError("Candle arrays have inconsistent lengths")
+
+    length = min(
+        len(opens),
+        len(highs),
+        len(lows),
+        len(closes),
+        len(volumes),
+        len(timestamps),
+    )
+
+    if length <= 0:
+        raise CandleUnavailableError("Paribu returned no candles")
+
+    rows: list[dict[str, Any]] = []
+    for i in range(length):
+        timestamp = to_decimal(timestamps[i])
+        opening = to_decimal(opens[i])
+        high = to_decimal(highs[i])
+        low = to_decimal(lows[i])
+        close = to_decimal(closes[i])
+        volume = to_decimal(volumes[i])
+        if None in (timestamp, opening, high, low, close, volume):
+            continue
+        if timestamp != timestamp.to_integral_value():
+            raise ParibuSchemaError("Fractional candle timestamp")
+        rows.append(
+            {
+                "timestamp": int(timestamp),
+                "open": float(opening),
+                "high": float(high),
+                "low": float(low),
+                "close": float(close),
+                "volume": float(volume),
+            }
+        )
+
+    return pd.DataFrame(rows, columns=["timestamp", "open", "high", "low", "close", "volume"])
