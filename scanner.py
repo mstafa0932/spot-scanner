@@ -294,11 +294,20 @@ def send_telegram(message: str) -> bool:
             timeout=15,
         )
         if response.status_code != 200:
-            LOGGER.error("Telegram HTTP %s: %s", response.status_code, response.text[:400])
+            LOGGER.error("Telegram HTTP %s", response.status_code)
+            return False
+        try:
+            payload = response.json()
+        except ValueError:
+            LOGGER.error("Telegram returned invalid JSON")
+            return False
+        if not isinstance(payload, dict) or payload.get("ok") is not True:
+            LOGGER.error("Telegram did not confirm delivery")
             return False
         return True
     except requests.RequestException as exc:
-        LOGGER.error("Telegram request failed: %s", exc)
+        # Request exceptions can include the bot token in their URL.
+        LOGGER.error("Telegram request failed: %s", type(exc).__name__)
         return False
 
 
