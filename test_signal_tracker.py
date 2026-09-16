@@ -15,7 +15,7 @@ def test_ambiguous_candle_is_stop_first(monkeypatch):
     state, frame = _state(97, 103)
     monkeypatch.setattr(signal_tracker, "fetch_candles", lambda *a, **k: frame)
     monkeypatch.setattr(signal_tracker, "get_order_book", lambda *a, **k: None)
-    events = signal_tracker.update_active_signals(state, now=2000)
+    events = signal_tracker.update_active_signals(state, now=3000)
     assert [x["event"]["kind"] for x in events] == ["STOP"]
 
 
@@ -23,5 +23,5 @@ def test_tp1_then_tp2_are_recorded(monkeypatch):
     state, frame = _state(99, 103)
     monkeypatch.setattr(signal_tracker, "fetch_candles", lambda *a, **k: frame)
     monkeypatch.setattr(signal_tracker, "get_order_book", lambda *a, **k: None)
-    events = signal_tracker.update_active_signals(state, now=2000)
+    events = signal_tracker.update_active_signals(state, now=3000)
     assert [x["event"]["kind"] for x in events] == ["TP1", "TP2"]

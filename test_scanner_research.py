@@ -53,7 +53,9 @@ def test_entry_path_survives_research_modes(monkeypatch, tmp_path, disabled, bro
     monkeypatch.setattr(scanner, "_global_alert_allowed", lambda *a: True)
     monkeypatch.setattr(scanner, "_symbol_alert_allowed", lambda *a: True)
     opportunity = NS(symbol="SYN_TL", entry=D("100"), stop=D("98.5"),
-                     tp1=D("101.5"), tp2=D("102.3"), score=85, setup="BREAKOUT")
+                     tp1=D("101.5"), tp2=D("102.3"), score=85, setup="BREAKOUT",
+                     spread_pct=D("0.1"), imbalance=D("2"), volume_ratio=D("2"),
+                     quote_volume=D("10000000"), bid_wall_share=D("0.2"), ask_wall_share=D("0.2"))
     monkeypatch.setattr(scanner, "build_opportunity", lambda *a: opportunity)
     monkeypatch.setattr(scanner, "format_opportunity", lambda *a: "original-entry")
     messages = []
@@ -76,7 +78,8 @@ def test_data_error_and_snapshot_error_visible(monkeypatch, tmp_path):
     assert scanner.load_state()["scan_diagnostics"][-1]["symbols"]["SYN_TL"]["reason"] == "orderbook_error:ValueError"
     def bad_snapshot(): raise scanner.ParibuDataError("no data")
     monkeypatch.setattr(scanner, "get_market_snapshot", bad_snapshot)
-    scanner.run_scanner()
+    with pytest.raises(RuntimeError, match="scan incomplete"):
+        scanner.run_scanner()
     assert scanner.load_state()["scan_diagnostics"][-1]["status"] == "snapshot_failed"
 
 

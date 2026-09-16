@@ -30,26 +30,28 @@ def _signals(state: dict[str, Any]) -> list[dict[str, Any]]:
 
 def register_signal(state: dict[str, Any], *, symbol: str, entry: Any, stop: Any,
                     tp1: Any, tp2: Any, score: int, setup: str,
-                    now: Optional[int] = None) -> None:
-    opened_at = int(now or time.time())
+                    now: Optional[int] = None, evidence: Optional[dict] = None) -> None:
+    opened_at = int(time.time() if now is None else now)
     _signals(state).append({
         "id": f"{symbol}:{opened_at}", "symbol": symbol,
         "opened_at": opened_at, "entry": str(entry), "stop": str(stop),
         "tp1": str(tp1), "tp2": str(tp2), "score": score, "setup": setup,
         "risk_budget_pct": str(RISK_BUDGET_PCT), "status": "OPEN",
         "tp1_notified": False, "events": [],
+        "tracking_mode": "paper_price_observation", "fill_confirmed": False,
+        "evidence": evidence or {},
     })
 
 
 def _event(signal: dict[str, Any], kind: str, price: Decimal, at: int) -> dict[str, Any]:
-    event = {"kind": kind, "price": str(price), "at": int(at)}
+    event = {"kind": kind, "price": str(price), "at": int(at), "delivered": False}
     signal.setdefault("events", []).append(event)
     return {"signal": signal, "event": event}
 
 
 def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> list[dict[str, Any]]:
     """Emit newly observed events; ambiguous candles are counted as STOP first."""
-    checked_at = int(now or time.time())
+    checked_at = int(time.time() if now is None else now)
     emitted: list[dict[str, Any]] = []
     for signal in _signals(state):
         if signal.get("status") not in {"OPEN", "TP1"}:
@@ -59,18 +61,35 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
         if any(x is None for x in (entry, stop, tp1, tp2)):
             signal["status"] = "INVALID"
             continue
+        if not (0 < stop < entry < tp1 < tp2):
+            signal["status"] = "INVALID"
+            continue
         opened_at = int(signal.get("opened_at", 0) or 0)
+        expires_at = opened_at + MAX_SIGNAL_AGE_SECONDS
+        if checked_at < opened_at:
+            continue
         try:
             candles = fetch_candles(str(signal["symbol"]), "15m", 250)
-            future = candles[candles["timestamp"] > opened_at].sort_values("timestamp")
+            # A candle timestamp is its OPEN time. Use only complete bars wholly
+            # after entry and ending within the observation lifetime. A partial
+            # entry/expiry candle cannot tell us which side of the boundary hit.
+            future = candles[
+                (candles["timestamp"] >= opened_at)
+                & (candles["timestamp"] + 900 <= min(checked_at, expires_at))
+            ].sort_values("timestamp").drop_duplicates("timestamp")
+            future = future[future["timestamp"] > signal.get("last_processed_candle", -1)]
+            signal["tracking_data_error"] = None
         except Exception:
             future = None
+            signal["tracking_data_error"] = "candles_unavailable"
 
         if future is not None:
             for row in future.itertuples(index=False):
-                low, high, candle_at = _d(row.low), _d(row.high), int(row.timestamp)
-                if low is None or high is None:
+                low, high = _d(row.low), _d(row.high)
+                candle_at = int(row.timestamp) + 900
+                if low is None or high is None or low <= 0 or high < low:
                     continue
+                signal["last_processed_candle"] = int(row.timestamp)
                 if low <= stop:  # conservative when stop and target share a candle
                     signal["status"] = "STOP"
                     emitted.append(_event(signal, "STOP", stop, candle_at))
@@ -87,12 +106,12 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
                     signal["status"] = "TP1"
                     emitted.append(_event(signal, "TP1", tp1, candle_at))
 
-        if signal.get("status") in {"OPEN", "TP1"}:
+        if signal.get("status") in {"OPEN", "TP1"} and checked_at <= expires_at:
             try:
                 bid = _d(get_order_book(str(signal["symbol"]), 5).best_bid)
             except Exception:
                 bid = None
-            if bid is not None and bid <= stop:
+            if bid is not None and bid > 0 and bid <= stop:
                 signal["status"] = "STOP"
                 emitted.append(_event(signal, "STOP", bid, checked_at))
             elif bid is not None and bid >= tp2:
@@ -108,8 +127,35 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
 
         if signal.get("status") in {"OPEN", "TP1"} and checked_at - opened_at >= MAX_SIGNAL_AGE_SECONDS:
             signal["status"] = "EXPIRED"
-            emitted.append(_event(signal, "EXPIRED", entry, checked_at))
+            payload = _event(signal, "EXPIRED", entry, expires_at)
+            payload["event"]["price_basis"] = "entry_reference_not_current_price"
+            emitted.append(payload)
 
     state["active_signals"] = [s for s in _signals(state)
                                if checked_at - int(s.get("opened_at", 0) or 0) <= 14 * 86400]
     return emitted
+
+
+def deliver_pending_events(state: dict[str, Any], sender, formatter) -> int:
+    """Retry explicit pending events; legacy events are not sent again.
+
+    Delivery is at-least-once: a crash after send but before state persistence
+    can duplicate a message. Event IDs make duplicates identifiable. Failed
+    delivery never rolls back a price observation or marks it as delivered.
+    """
+    delivered = 0
+    for signal in _signals(state):
+        for event in signal.get("events", []):
+            if event.get("delivered") is not False:
+                continue
+            payload = {"signal": signal, "event": event}
+            try:
+                success = sender(formatter(payload))
+            except Exception:
+                success = False
+            if not success:
+                # Preserve chronology; do not deliver TP2 ahead of pending TP1.
+                break
+            event["delivered"] = True
+            delivered += 1
+    return delivered
