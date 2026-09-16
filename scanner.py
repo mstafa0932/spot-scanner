@@ -40,6 +40,7 @@ from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
 from signal_tracker import register_signal, update_active_signals, deliver_pending_events
 from execution_research import evaluate_depth
+from candle_backfill import bind_history
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -931,6 +932,7 @@ def format_signal_event(payload: dict[str, Any]) -> str:
 def run_scanner() -> None:
     now = int(time.time())
     state = load_state()
+    bind_history(state)
     diagnostics = {"started_at": now, "status": "running", "symbols": {}}
     observations = []
 
