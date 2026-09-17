@@ -33,7 +33,17 @@ def spans(missing, interval):
     return groups
 
 
-def repair(frame, interval, now, request_range, label):
+def recent_contiguous(frame, interval):
+    """Return only the newest uninterrupted suffix; never manufactures a row."""
+    ordered = frame.sort_values("timestamp").reset_index(drop=True)
+    if ordered.empty:
+        return ordered
+    diffs = ordered["timestamp"].diff()
+    breaks = diffs[diffs.ne(interval)].index.tolist()
+    return ordered.iloc[breaks[-1]:].reset_index(drop=True) if breaks else ordered
+
+
+def repair(frame, interval, now, request_range, label, minimum_contiguous=205):
     """No interpolation, cross-exchange data, overwrite, or timestamp rounding."""
     report = {"market": label, "requests": 0, "errors": [], "recovered": 0}
     if frame.empty:
@@ -63,6 +73,22 @@ def repair(frame, interval, now, request_range, label):
                   continuing_count=len(continuing), new_count=len(newly_observed),
                   gaps_before_utc=[[utc(a), utc(b)] for a, b in spans(missing, interval)])
     LOGGER.info("CANDLE_BACKFILL_START %s", json.dumps(report))
+    suffix = recent_contiguous(frame, interval)
+    report["recent_contiguous_before"] = len(suffix)
+    # The strategy only needs a recent, closed, uninterrupted calculation
+    # window. Older unavailable archive rows stay recorded but cannot block
+    # forever once a fresh minimum window exists.
+    historical_only = bool(missing) and max(missing) < int(suffix.timestamp.iloc[0])
+    if len(suffix) >= minimum_contiguous and historical_only:
+        report.update(missing_after=len(missing), recovered=0,
+                      gaps_after_utc=report["gaps_before_utc"],
+                      recent_contiguous_after=len(suffix),
+                      status="accepted_recent_window")
+        _history[label] = {"observed_at": now, "missing_timestamps": sorted(missing),
+                           "report": report}
+        LOGGER.info("CANDLE_BACKFILL_RESULT %s", json.dumps(report))
+        suffix.attrs["backfill"] = report
+        return suffix
     for attempt in range(1, MAX_REQUESTS + 1):
         if not missing:
             break
@@ -85,15 +111,20 @@ def repair(frame, interval, now, request_range, label):
             detail.update(result="error", error=error)
         detail["missing_after"] = len(missing)
         LOGGER.info("CANDLE_BACKFILL_ATTEMPT %s", json.dumps(detail))
+    suffix = recent_contiguous(frame, interval)
+    historical_only = bool(missing) and max(missing) < int(suffix.timestamp.iloc[0])
+    status = ("complete" if not missing else
+              "accepted_recent_window" if len(suffix) >= minimum_contiguous and historical_only else
+              "unresolved")
     report.update(missing_after=len(missing), recovered=report["missing_before"]-len(missing),
                   gaps_after_utc=[[utc(a), utc(b)] for a, b in spans(missing, interval)],
-                  status="unresolved" if missing else "complete")
+                  recent_contiguous_after=len(suffix), status=status)
     _history[label] = {"observed_at": now, "missing_timestamps": sorted(missing),
                        "report": report}
     LOGGER.log(logging.WARNING if missing else logging.INFO,
                "CANDLE_BACKFILL_RESULT %s", json.dumps(report))
-    if missing:
+    if status == "unresolved":
         raise ValueError("Unresolved Paribu candles: " + json.dumps(report))
-    frame = frame.sort_values("timestamp").reset_index(drop=True)
+    frame = suffix if status == "accepted_recent_window" else frame.sort_values("timestamp").reset_index(drop=True)
     frame.attrs["backfill"] = report
     return frame

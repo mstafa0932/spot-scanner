@@ -553,7 +553,8 @@ def fetch_candles(
                                     resolution, require_history=False)
         try:
             prepared = repair(prepared, interval_seconds, end_s, request_range,
-                              normalized + ":" + resolution)
+                              normalized + ":" + resolution,
+                              minimum_contiguous=MIN_VALID_CANDLES)
         except ValueError as exc:
             raise CandleUnavailableError(str(exc)) from exc
 
