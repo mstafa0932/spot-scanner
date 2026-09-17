@@ -144,3 +144,31 @@ def test_persisted_history_distinguishes_continuing_new_and_mixed():
 
 def test_backfill_transport_does_not_retry_internally():
     assert md.BACKFILL_SESSION.get_adapter("https://web.paribu.com").max_retries.total == 0
+
+
+def test_old_gap_is_recorded_but_recent_205_window_is_accepted():
+    full = frame()
+    calls = []
+    result = repair(full.drop(20), 900, NOW,
+                    lambda *a: calls.append(a) or full.iloc[:0], "BTC")
+    report = result.attrs["backfill"]
+    assert calls == []
+    assert len(result) == 229
+    assert report["status"] == "accepted_recent_window"
+    assert report["missing_after"] == 1
+    assert result.timestamp.diff().iloc[1:].eq(900).all()
+
+
+def test_gap_inside_recent_205_window_still_blocks():
+    full = frame()
+    with pytest.raises(ValueError, match="Unresolved"):
+        repair(full.drop(100), 900, NOW, lambda *a: full.iloc[:0], "BTC")
+
+
+def test_partial_recovery_can_create_safe_recent_window():
+    full = frame()
+    broken = full.drop([20, 100])
+    result = repair(broken, 900, NOW, lambda *a: full.iloc[[100]], "BTC")
+    assert result.attrs["backfill"]["status"] == "accepted_recent_window"
+    assert result.attrs["backfill"]["missing_after"] == 1
+    assert len(result) == 229

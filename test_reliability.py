@@ -117,6 +117,25 @@ def test_pending_events_survive_state_roundtrip(tmp_path, monkeypatch):
     assert loaded["active_signals"][0]["events"][0]["delivered"] is False
 
 
+def test_candle_gap_history_survives_state_roundtrip(tmp_path, monkeypatch):
+    state = scanner._empty_state()
+    state["candle_gap_history"] = {
+        "btc_tl:15m": {"observed_at": 123, "missing_timestamps": [900],
+                        "report": {"classification": "first_observation"}}
+    }
+    monkeypatch.setattr(scanner, "STATE_FILE", tmp_path / "state.json")
+    scanner.save_state(state)
+    assert scanner.load_state()["candle_gap_history"] == state["candle_gap_history"]
+
+
+def test_invalid_candle_gap_history_refuses_state_reset(tmp_path, monkeypatch):
+    path = tmp_path / "state.json"
+    path.write_text('{"candle_gap_history": []}')
+    monkeypatch.setattr(scanner, "STATE_FILE", path)
+    with pytest.raises(RuntimeError, match="preserved"):
+        scanner.load_state()
+
+
 def test_indicator_prefix_does_not_use_future_candles():
     import math
     from indicator_engine import calculate_indicators

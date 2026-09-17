@@ -217,6 +217,7 @@ def _empty_state() -> dict[str, Any]:
         "active_signals": [],
         "daily_alerts": [],
         "last_alert_at": 0,
+        "candle_gap_history": {},
     }
 
 
@@ -231,7 +232,7 @@ def load_state() -> dict[str, Any]:
             raise ValueError("Scanner state must be an object")
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
                               ("near_misses", list), ("active_signals", list),
-                              ("daily_alerts", list)):
+                              ("daily_alerts", list), ("candle_gap_history", dict)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -247,6 +248,8 @@ def load_state() -> dict[str, Any]:
             state["active_signals"] = raw["active_signals"]
         if isinstance(raw.get("daily_alerts"), list):
             state["daily_alerts"] = raw["daily_alerts"]
+        if isinstance(raw.get("candle_gap_history"), dict):
+            state["candle_gap_history"] = raw["candle_gap_history"]
         # Research state is isolated from trading signal/watchlist state.
         if isinstance(raw.get("accumulation_radar"), dict):
             state["accumulation_radar"] = raw["accumulation_radar"]
