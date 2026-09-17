@@ -49,8 +49,8 @@
     "XAUT_TL": {
       "symbol": "XAUT_TL",
       "first_seen": 1789616476,
-      "last_seen": 1789647814,
-      "confirmations": 1,
+      "last_seen": 1789651395,
+      "confirmations": 2,
       "max_score": 85,
       "history": [
         {
@@ -122,10 +122,24 @@
           "rsi": "70.6598681829232",
           "recent_return_3": "0.610890406070842353165068900",
           "setup": "PULLBACK"
+        },
+        {
+          "time": 1789651395,
+          "candle_at": 1789650000,
+          "price": "212378",
+          "score": 74,
+          "imbalance": "1.809757790057964296135110699",
+          "volume_ratio": "1.2500832410170528",
+          "spread_pct": "0.2180109099832008909190433946",
+          "bid_wall": "0.4744297759302833248027887144",
+          "ask_wall": "0.8501267979708266111245416747",
+          "rsi": "65.29838600153987",
+          "recent_return_3": "-0.2729617288831159051975678200",
+          "setup": "PULLBACK"
         }
       ],
-      "last_score": 85,
-      "last_reason": "very strong TL liquidity | strong buy-side order book | volume expansion >=1.5x | 15m uptrend | 15m MACD positive | price momentum without chase | 1h not weak | 4h above EMA50"
+      "last_score": 74,
+      "last_reason": "very strong TL liquidity | strong buy-side order book | 15m uptrend | 15m MACD positive | 1h not weak | 4h above EMA50 | 1h momentum stable | controlled pullback"
     },
     "H_TL": {
       "symbol": "H_TL",
@@ -297,11 +311,22 @@
       "imbalance": "1.068986722279477831866718482",
       "rsi_15m": "62.15235292874172",
       "volume_ratio_15m": "1.6155067976647377",
-      "last_price": "0.1925",
-      "last_checked_at": 1789650093,
-      "max_gain_pct": "0",
+      "last_price": "0.1934",
+      "last_checked_at": 1789651396,
+      "max_gain_pct": "0.467532467532467532467532500",
       "max_drawdown_pct": "0",
-      "outcomes": {}
+      "outcomes": {
+        "15m": {
+          "checked_at": 1789651396,
+          "price": "0.1934",
+          "change_pct": "0.467532467532467532467532500"
+        },
+        "30m": {
+          "checked_at": 1789651396,
+          "price": "0.1934",
+          "change_pct": "0.467532467532467532467532500"
+        }
+      }
     },
     {
       "id": "XAUT_TL:TRIGGER:1789647851",
@@ -315,8 +340,8 @@
       "imbalance": "1.850036760921973163561575684",
       "rsi_15m": "70.6598681829232",
       "volume_ratio_15m": "1.5635591847315382",
-      "last_price": "212507",
-      "last_checked_at": 1789650061,
+      "last_price": "212402",
+      "last_checked_at": 1789651396,
       "max_gain_pct": "0.021180258116745582739501700",
       "max_drawdown_pct": "-0.2560457870113243780064199700",
       "outcomes": {
@@ -329,6 +354,11 @@
           "checked_at": 1789649104,
           "price": "211918",
           "change_pct": "-0.2560457870113243780064199700"
+        },
+        "60m": {
+          "checked_at": 1789651396,
+          "price": "212402",
+          "change_pct": "-0.0282403441556607769860022000"
         }
       }
     },
@@ -344,8 +374,8 @@
       "imbalance": "1.281756687353784849228501194",
       "rsi_15m": "67.69740670552625",
       "volume_ratio_15m": "1.6108733244574212",
-      "last_price": "0.00024633",
-      "last_checked_at": 1789650061,
+      "last_price": "0.00024613",
+      "last_checked_at": 1789651396,
       "max_gain_pct": "0.509019831412631836136335900",
       "max_drawdown_pct": "-0.6271124323003624221199657900",
       "outcomes": {
@@ -5742,9 +5772,17 @@
       "score": 82,
       "setup": "PULLBACK",
       "risk_budget_pct": "2.00",
-      "status": "OPEN",
+      "status": "EXPIRED",
       "tp1_notified": false,
-      "events": [],
+      "events": [
+        {
+          "kind": "EXPIRED",
+          "price": "209753",
+          "at": 1789650153,
+          "delivered": true,
+          "price_basis": "entry_reference_not_current_price"
+        }
+      ],
       "tracking_mode": "paper_price_observation",
       "fill_confirmed": false,
       "evidence": {
@@ -5779,7 +5817,7 @@
   "last_alert_at": 1789628553,
   "candle_gap_history": {
     "btc_tl:15m": {
-      "observed_at": 1789650062,
+      "observed_at": 1789651396,
       "missing_timestamps": [
         1789439400
       ],
@@ -5789,8 +5827,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 1,
         "classification": "continuing",
@@ -5802,7 +5840,7 @@
             "2026-09-15T02:30:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 233,
+        "recent_contiguous_before": 234,
         "missing_after": 1,
         "gaps_after_utc": [
           [
@@ -5810,12 +5848,12 @@
             "2026-09-15T02:30:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 233,
+        "recent_contiguous_after": 234,
         "status": "accepted_recent_window"
       }
     },
     "xrp_tl:15m": {
-      "observed_at": 1789650063,
+      "observed_at": 1789651397,
       "missing_timestamps": [],
       "report": {
         "market": "xrp_tl:15m",
@@ -5823,8 +5861,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -5839,7 +5877,7 @@
       }
     },
     "xrp_tl:1h": {
-      "observed_at": 1789650063,
+      "observed_at": 1789651397,
       "missing_timestamps": [],
       "report": {
         "market": "xrp_tl:1h",
@@ -5863,7 +5901,7 @@
       }
     },
     "xrp_tl:4h": {
-      "observed_at": 1789650063,
+      "observed_at": 1789651398,
       "missing_timestamps": [],
       "report": {
         "market": "xrp_tl:4h",
@@ -5887,7 +5925,7 @@
       }
     },
     "tlm_tl:15m": {
-      "observed_at": 1789650068,
+      "observed_at": 1789651402,
       "missing_timestamps": [
         1789398000,
         1789419600,
@@ -5900,8 +5938,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 4,
         "classification": "continuing",
@@ -5925,7 +5963,7 @@
             "2026-09-16T05:45:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 124,
+        "recent_contiguous_before": 125,
         "missing_after": 4,
         "gaps_after_utc": [
           [
@@ -5945,7 +5983,7 @@
             "2026-09-16T05:45:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 124,
+        "recent_contiguous_after": 125,
         "status": "unresolved"
       }
     },
@@ -6022,7 +6060,7 @@
       }
     },
     "trx_tl:15m": {
-      "observed_at": 1789650066,
+      "observed_at": 1789651399,
       "missing_timestamps": [
         1789609500
       ],
@@ -6032,8 +6070,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 1,
         "classification": "continuing",
@@ -6045,7 +6083,7 @@
             "2026-09-17T01:45:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 44,
+        "recent_contiguous_before": 45,
         "missing_after": 1,
         "gaps_after_utc": [
           [
@@ -6053,7 +6091,7 @@
             "2026-09-17T01:45:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 44,
+        "recent_contiguous_after": 45,
         "status": "unresolved"
       }
     },
@@ -6466,7 +6504,7 @@
       }
     },
     "ethfi_tl:15m": {
-      "observed_at": 1789650071,
+      "observed_at": 1789651404,
       "missing_timestamps": [
         1789433100,
         1789511400,
@@ -6481,8 +6519,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 6,
         "classification": "continuing",
@@ -6514,7 +6552,7 @@
             "2026-09-16T06:15:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 122,
+        "recent_contiguous_before": 123,
         "missing_after": 6,
         "gaps_after_utc": [
           [
@@ -6542,12 +6580,12 @@
             "2026-09-16T06:15:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 122,
+        "recent_contiguous_after": 123,
         "status": "unresolved"
       }
     },
     "apt_tl:15m": {
-      "observed_at": 1789643868,
+      "observed_at": 1789651406,
       "missing_timestamps": [
         1789384500,
         1789406100,
@@ -6573,13 +6611,13 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T08:45:00+00:00",
-          "2026-09-17T11:00:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 17,
-        "classification": "mixed",
-        "continuing_count": 15,
-        "new_count": 2,
+        "classification": "continuing",
+        "continuing_count": 17,
+        "new_count": 0,
         "gaps_before_utc": [
           [
             "2026-09-14T11:15:00+00:00",
@@ -6642,7 +6680,7 @@
             "2026-09-17T11:00:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 29,
+        "recent_contiguous_before": 8,
         "missing_after": 17,
         "gaps_after_utc": [
           [
@@ -6706,12 +6744,12 @@
             "2026-09-17T11:00:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 29,
+        "recent_contiguous_after": 8,
         "status": "unresolved"
       }
     },
     "shib_tl:15m": {
-      "observed_at": 1789650072,
+      "observed_at": 1789651405,
       "missing_timestamps": [
         1789423200,
         1789425900,
@@ -6726,8 +6764,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 6,
         "classification": "continuing",
@@ -6755,7 +6793,7 @@
             "2026-09-15T03:15:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 230,
+        "recent_contiguous_before": 231,
         "missing_after": 6,
         "gaps_after_utc": [
           [
@@ -6779,7 +6817,7 @@
             "2026-09-15T03:15:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 230,
+        "recent_contiguous_after": 231,
         "status": "accepted_recent_window"
       }
     },
@@ -7288,7 +7326,7 @@
       }
     },
     "ankr_tl:15m": {
-      "observed_at": 1789650078,
+      "observed_at": 1789651409,
       "missing_timestamps": [
         1789527600,
         1789530300,
@@ -7304,8 +7342,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 7,
         "classification": "continuing",
@@ -7341,7 +7379,7 @@
             "2026-09-17T10:30:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 9,
+        "recent_contiguous_before": 10,
         "missing_after": 7,
         "gaps_after_utc": [
           [
@@ -7373,7 +7411,7 @@
             "2026-09-17T10:30:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 9,
+        "recent_contiguous_after": 10,
         "status": "unresolved"
       }
     },
@@ -7869,7 +7907,7 @@
       }
     },
     "xaut_tl:15m": {
-      "observed_at": 1789650080,
+      "observed_at": 1789651411,
       "missing_timestamps": [],
       "report": {
         "market": "xaut_tl:15m",
@@ -7877,8 +7915,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -7893,7 +7931,7 @@
       }
     },
     "xaut_tl:1h": {
-      "observed_at": 1789650080,
+      "observed_at": 1789651411,
       "missing_timestamps": [],
       "report": {
         "market": "xaut_tl:1h",
@@ -7917,7 +7955,7 @@
       }
     },
     "xaut_tl:4h": {
-      "observed_at": 1789650080,
+      "observed_at": 1789651411,
       "missing_timestamps": [],
       "report": {
         "market": "xaut_tl:4h",
@@ -7941,7 +7979,7 @@
       }
     },
     "uni_tl:15m": {
-      "observed_at": 1789650076,
+      "observed_at": 1789651408,
       "missing_timestamps": [
         1789387200,
         1789399800,
@@ -7977,8 +8015,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 27,
         "classification": "continuing",
@@ -8078,7 +8116,7 @@
             "2026-09-17T10:30:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 9,
+        "recent_contiguous_before": 10,
         "missing_after": 27,
         "gaps_after_utc": [
           [
@@ -8174,7 +8212,7 @@
             "2026-09-17T10:30:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 9,
+        "recent_contiguous_after": 10,
         "status": "unresolved"
       }
     },
@@ -8675,9 +8713,8 @@
       }
     },
     "audio_tl:15m": {
-      "observed_at": 1789650082,
+      "observed_at": 1789651413,
       "missing_timestamps": [
-        1789380900,
         1789382700,
         1789383600,
         1789384500,
@@ -8758,19 +8795,15 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:30:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
-        "missing_before": 74,
+        "missing_before": 73,
         "classification": "continuing",
-        "continuing_count": 74,
+        "continuing_count": 73,
         "new_count": 0,
         "gaps_before_utc": [
           [
-            "2026-09-14T10:15:00+00:00",
-            "2026-09-14T10:15:00+00:00"
-          ],
-          [
             "2026-09-14T10:45:00+00:00",
             "2026-09-14T11:15:00+00:00"
           ],
@@ -8907,14 +8940,10 @@
             "2026-09-17T09:30:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 13,
-        "missing_after": 74,
+        "recent_contiguous_before": 14,
+        "missing_after": 73,
         "gaps_after_utc": [
           [
-            "2026-09-14T10:15:00+00:00",
-            "2026-09-14T10:15:00+00:00"
-          ],
-          [
             "2026-09-14T10:45:00+00:00",
             "2026-09-14T11:15:00+00:00"
           ],
@@ -9051,7 +9080,7 @@
             "2026-09-17T09:30:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 13,
+        "recent_contiguous_after": 14,
         "status": "unresolved"
       }
     },
@@ -9140,7 +9169,7 @@
       }
     },
     "rvn_tl:15m": {
-      "observed_at": 1789650084,
+      "observed_at": 1789651415,
       "missing_timestamps": [
         1789427700,
         1789431300,
@@ -9157,8 +9186,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 8,
         "classification": "continuing",
@@ -9190,7 +9219,7 @@
             "2026-09-16T02:15:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 138,
+        "recent_contiguous_before": 139,
         "missing_after": 8,
         "gaps_after_utc": [
           [
@@ -9218,7 +9247,7 @@
             "2026-09-16T02:15:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 138,
+        "recent_contiguous_after": 139,
         "status": "unresolved"
       }
     },
@@ -9340,7 +9369,7 @@
       }
     },
     "sol_tl:15m": {
-      "observed_at": 1789650090,
+      "observed_at": 1789651421,
       "missing_timestamps": [
         1789427700,
         1789435800,
@@ -9368,8 +9397,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 19,
         "classification": "continuing",
@@ -9441,7 +9470,7 @@
             "2026-09-17T02:00:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 43,
+        "recent_contiguous_before": 44,
         "missing_after": 19,
         "gaps_after_utc": [
           [
@@ -9509,7 +9538,7 @@
             "2026-09-17T02:00:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 43,
+        "recent_contiguous_after": 44,
         "status": "unresolved"
       }
     },
@@ -9982,7 +10011,7 @@
       }
     },
     "eth_tl:15m": {
-      "observed_at": 1789650064,
+      "observed_at": 1789651398,
       "missing_timestamps": [],
       "report": {
         "market": "eth_tl:15m",
@@ -9990,8 +10019,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -10006,7 +10035,7 @@
       }
     },
     "eth_tl:1h": {
-      "observed_at": 1789650064,
+      "observed_at": 1789651398,
       "missing_timestamps": [],
       "report": {
         "market": "eth_tl:1h",
@@ -10030,7 +10059,7 @@
       }
     },
     "eth_tl:4h": {
-      "observed_at": 1789650064,
+      "observed_at": 1789651398,
       "missing_timestamps": [],
       "report": {
         "market": "eth_tl:4h",
@@ -10395,7 +10424,7 @@
       }
     },
     "storj_tl:15m": {
-      "observed_at": 1789650069,
+      "observed_at": 1789651403,
       "missing_timestamps": [],
       "report": {
         "market": "storj_tl:15m",
@@ -10403,8 +10432,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -10419,7 +10448,7 @@
       }
     },
     "storj_tl:1h": {
-      "observed_at": 1789650069,
+      "observed_at": 1789651403,
       "missing_timestamps": [],
       "report": {
         "market": "storj_tl:1h",
@@ -10443,7 +10472,7 @@
       }
     },
     "storj_tl:4h": {
-      "observed_at": 1789650069,
+      "observed_at": 1789651403,
       "missing_timestamps": [],
       "report": {
         "market": "storj_tl:4h",
@@ -10467,7 +10496,7 @@
       }
     },
     "t_tl:15m": {
-      "observed_at": 1789650088,
+      "observed_at": 1789651418,
       "missing_timestamps": [
         1789599600,
         1789602300,
@@ -10482,8 +10511,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T10:00:00+00:00",
-          "2026-09-17T12:45:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 6,
         "classification": "continuing",
@@ -10515,7 +10544,7 @@
             "2026-09-17T12:15:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 2,
+        "recent_contiguous_before": 3,
         "missing_after": 6,
         "gaps_after_utc": [
           [
@@ -10543,12 +10572,12 @@
             "2026-09-17T12:15:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 2,
+        "recent_contiguous_after": 3,
         "status": "unresolved"
       }
     },
     "axs_tl:15m": {
-      "observed_at": 1789649142,
+      "observed_at": 1789651420,
       "missing_timestamps": [
         1789396200,
         1789428600,
@@ -10563,8 +10592,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T09:45:00+00:00",
-          "2026-09-17T12:30:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 6,
         "classification": "continuing",
@@ -10592,7 +10621,7 @@
             "2026-09-17T02:45:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 39,
+        "recent_contiguous_before": 41,
         "missing_after": 6,
         "gaps_after_utc": [
           [
@@ -10616,12 +10645,12 @@
             "2026-09-17T02:45:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 39,
+        "recent_contiguous_after": 41,
         "status": "unresolved"
       }
     },
     "mina_tl:15m": {
-      "observed_at": 1789647844,
+      "observed_at": 1789651417,
       "missing_timestamps": [
         1789425000,
         1789431300,
@@ -10652,8 +10681,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T09:15:00+00:00",
-          "2026-09-17T12:00:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 22,
         "classification": "continuing",
@@ -10729,7 +10758,7 @@
             "2026-09-17T03:15:00+00:00"
           ]
         ],
-        "recent_contiguous_before": 35,
+        "recent_contiguous_before": 39,
         "missing_after": 22,
         "gaps_after_utc": [
           [
@@ -10801,7 +10830,7 @@
             "2026-09-17T03:15:00+00:00"
           ]
         ],
-        "recent_contiguous_after": 35,
+        "recent_contiguous_after": 39,
         "status": "unresolved"
       }
     },
@@ -10978,7 +11007,7 @@
       }
     },
     "h_tl:15m": {
-      "observed_at": 1789630950,
+      "observed_at": 1789651414,
       "missing_timestamps": [],
       "report": {
         "market": "h_tl:15m",
@@ -10986,8 +11015,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-14T04:30:00+00:00",
-          "2026-09-17T07:15:00+00:00"
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -11002,7 +11031,7 @@
       }
     },
     "h_tl:1h": {
-      "observed_at": 1789630950,
+      "observed_at": 1789651415,
       "missing_timestamps": [],
       "report": {
         "market": "h_tl:1h",
@@ -11010,8 +11039,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-09-04T19:00:00+00:00",
-          "2026-09-17T06:00:00+00:00"
+          "2026-09-05T01:00:00+00:00",
+          "2026-09-17T12:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -11026,7 +11055,7 @@
       }
     },
     "h_tl:4h": {
-      "observed_at": 1789630950,
+      "observed_at": 1789651415,
       "missing_timestamps": [],
       "report": {
         "market": "h_tl:4h",
@@ -11034,8 +11063,8 @@
         "errors": [],
         "recovered": 0,
         "window_utc": [
-          "2026-07-29T04:00:00+00:00",
-          "2026-09-17T00:00:00+00:00"
+          "2026-07-29T12:00:00+00:00",
+          "2026-09-17T08:00:00+00:00"
         ],
         "missing_before": 0,
         "classification": "clear",
@@ -11370,7 +11399,7 @@
       }
     },
     "btc_tl:1h": {
-      "observed_at": 1789650062,
+      "observed_at": 1789651397,
       "missing_timestamps": [],
       "report": {
         "market": "btc_tl:1h",
@@ -11663,7 +11692,7 @@
       }
     },
     "shib_tl:1h": {
-      "observed_at": 1789650072,
+      "observed_at": 1789651405,
       "missing_timestamps": [],
       "report": {
         "market": "shib_tl:1h",
@@ -11687,7 +11716,7 @@
       }
     },
     "shib_tl:4h": {
-      "observed_at": 1789650072,
+      "observed_at": 1789651405,
       "missing_timestamps": [],
       "report": {
         "market": "shib_tl:4h",
@@ -13324,12 +13353,313 @@
         "recent_contiguous_after": 196,
         "status": "unresolved"
       }
+    },
+    "nmr_tl:15m": {
+      "observed_at": 1789651401,
+      "missing_timestamps": [],
+      "report": {
+        "market": "nmr_tl:15m",
+        "requests": 0,
+        "errors": [],
+        "recovered": 0,
+        "window_utc": [
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
+        ],
+        "missing_before": 0,
+        "classification": "first_observation",
+        "continuing_count": 0,
+        "new_count": 0,
+        "gaps_before_utc": [],
+        "recent_contiguous_before": 300,
+        "missing_after": 0,
+        "gaps_after_utc": [],
+        "recent_contiguous_after": 300,
+        "status": "complete"
+      }
+    },
+    "nmr_tl:1h": {
+      "observed_at": 1789651401,
+      "missing_timestamps": [],
+      "report": {
+        "market": "nmr_tl:1h",
+        "requests": 0,
+        "errors": [],
+        "recovered": 0,
+        "window_utc": [
+          "2026-09-05T01:00:00+00:00",
+          "2026-09-17T12:00:00+00:00"
+        ],
+        "missing_before": 0,
+        "classification": "first_observation",
+        "continuing_count": 0,
+        "new_count": 0,
+        "gaps_before_utc": [],
+        "recent_contiguous_before": 300,
+        "missing_after": 0,
+        "gaps_after_utc": [],
+        "recent_contiguous_after": 300,
+        "status": "complete"
+      }
+    },
+    "nmr_tl:4h": {
+      "observed_at": 1789651401,
+      "missing_timestamps": [],
+      "report": {
+        "market": "nmr_tl:4h",
+        "requests": 0,
+        "errors": [],
+        "recovered": 0,
+        "window_utc": [
+          "2026-07-29T12:00:00+00:00",
+          "2026-09-17T08:00:00+00:00"
+        ],
+        "missing_before": 0,
+        "classification": "first_observation",
+        "continuing_count": 0,
+        "new_count": 0,
+        "gaps_before_utc": [],
+        "recent_contiguous_before": 300,
+        "missing_after": 0,
+        "gaps_after_utc": [],
+        "recent_contiguous_after": 300,
+        "status": "complete"
+      }
+    },
+    "asm_tl:15m": {
+      "observed_at": 1789651423,
+      "missing_timestamps": [
+        1789444800,
+        1789452000,
+        1789456500,
+        1789460100,
+        1789461000,
+        1789461900,
+        1789462800,
+        1789463700,
+        1789465500,
+        1789466400,
+        1789467300,
+        1789468200,
+        1789469100,
+        1789472700,
+        1789473600,
+        1789474500,
+        1789475400,
+        1789477200,
+        1789478100,
+        1789479000,
+        1789479900,
+        1789486200,
+        1789487100,
+        1789488000,
+        1789488900,
+        1789489800,
+        1789518600,
+        1789519500,
+        1789520400,
+        1789521300,
+        1789526700,
+        1789532100,
+        1789540200,
+        1789542000,
+        1789542900,
+        1789543800,
+        1789544700,
+        1789560000,
+        1789560900,
+        1789561800,
+        1789562700,
+        1789563600,
+        1789564500,
+        1789607700,
+        1789609500,
+        1789631100,
+        1789644600,
+        1789648200,
+        1789649100,
+        1789650000
+      ],
+      "report": {
+        "market": "asm_tl:15m",
+        "requests": 4,
+        "errors": [],
+        "recovered": 0,
+        "window_utc": [
+          "2026-09-14T10:15:00+00:00",
+          "2026-09-17T13:00:00+00:00"
+        ],
+        "missing_before": 50,
+        "classification": "first_observation",
+        "continuing_count": 0,
+        "new_count": 50,
+        "gaps_before_utc": [
+          [
+            "2026-09-15T04:00:00+00:00",
+            "2026-09-15T04:00:00+00:00"
+          ],
+          [
+            "2026-09-15T06:00:00+00:00",
+            "2026-09-15T06:00:00+00:00"
+          ],
+          [
+            "2026-09-15T07:15:00+00:00",
+            "2026-09-15T07:15:00+00:00"
+          ],
+          [
+            "2026-09-15T08:15:00+00:00",
+            "2026-09-15T09:15:00+00:00"
+          ],
+          [
+            "2026-09-15T09:45:00+00:00",
+            "2026-09-15T10:45:00+00:00"
+          ],
+          [
+            "2026-09-15T11:45:00+00:00",
+            "2026-09-15T12:30:00+00:00"
+          ],
+          [
+            "2026-09-15T13:00:00+00:00",
+            "2026-09-15T13:45:00+00:00"
+          ],
+          [
+            "2026-09-15T15:30:00+00:00",
+            "2026-09-15T16:30:00+00:00"
+          ],
+          [
+            "2026-09-16T00:30:00+00:00",
+            "2026-09-16T01:15:00+00:00"
+          ],
+          [
+            "2026-09-16T02:45:00+00:00",
+            "2026-09-16T02:45:00+00:00"
+          ],
+          [
+            "2026-09-16T04:15:00+00:00",
+            "2026-09-16T04:15:00+00:00"
+          ],
+          [
+            "2026-09-16T06:30:00+00:00",
+            "2026-09-16T06:30:00+00:00"
+          ],
+          [
+            "2026-09-16T07:00:00+00:00",
+            "2026-09-16T07:45:00+00:00"
+          ],
+          [
+            "2026-09-16T12:00:00+00:00",
+            "2026-09-16T13:15:00+00:00"
+          ],
+          [
+            "2026-09-17T01:15:00+00:00",
+            "2026-09-17T01:15:00+00:00"
+          ],
+          [
+            "2026-09-17T01:45:00+00:00",
+            "2026-09-17T01:45:00+00:00"
+          ],
+          [
+            "2026-09-17T07:45:00+00:00",
+            "2026-09-17T07:45:00+00:00"
+          ],
+          [
+            "2026-09-17T11:30:00+00:00",
+            "2026-09-17T11:30:00+00:00"
+          ],
+          [
+            "2026-09-17T12:30:00+00:00",
+            "2026-09-17T13:00:00+00:00"
+          ]
+        ],
+        "recent_contiguous_before": 3,
+        "missing_after": 50,
+        "gaps_after_utc": [
+          [
+            "2026-09-15T04:00:00+00:00",
+            "2026-09-15T04:00:00+00:00"
+          ],
+          [
+            "2026-09-15T06:00:00+00:00",
+            "2026-09-15T06:00:00+00:00"
+          ],
+          [
+            "2026-09-15T07:15:00+00:00",
+            "2026-09-15T07:15:00+00:00"
+          ],
+          [
+            "2026-09-15T08:15:00+00:00",
+            "2026-09-15T09:15:00+00:00"
+          ],
+          [
+            "2026-09-15T09:45:00+00:00",
+            "2026-09-15T10:45:00+00:00"
+          ],
+          [
+            "2026-09-15T11:45:00+00:00",
+            "2026-09-15T12:30:00+00:00"
+          ],
+          [
+            "2026-09-15T13:00:00+00:00",
+            "2026-09-15T13:45:00+00:00"
+          ],
+          [
+            "2026-09-15T15:30:00+00:00",
+            "2026-09-15T16:30:00+00:00"
+          ],
+          [
+            "2026-09-16T00:30:00+00:00",
+            "2026-09-16T01:15:00+00:00"
+          ],
+          [
+            "2026-09-16T02:45:00+00:00",
+            "2026-09-16T02:45:00+00:00"
+          ],
+          [
+            "2026-09-16T04:15:00+00:00",
+            "2026-09-16T04:15:00+00:00"
+          ],
+          [
+            "2026-09-16T06:30:00+00:00",
+            "2026-09-16T06:30:00+00:00"
+          ],
+          [
+            "2026-09-16T07:00:00+00:00",
+            "2026-09-16T07:45:00+00:00"
+          ],
+          [
+            "2026-09-16T12:00:00+00:00",
+            "2026-09-16T13:15:00+00:00"
+          ],
+          [
+            "2026-09-17T01:15:00+00:00",
+            "2026-09-17T01:15:00+00:00"
+          ],
+          [
+            "2026-09-17T01:45:00+00:00",
+            "2026-09-17T01:45:00+00:00"
+          ],
+          [
+            "2026-09-17T07:45:00+00:00",
+            "2026-09-17T07:45:00+00:00"
+          ],
+          [
+            "2026-09-17T11:30:00+00:00",
+            "2026-09-17T11:30:00+00:00"
+          ],
+          [
+            "2026-09-17T12:30:00+00:00",
+            "2026-09-17T13:00:00+00:00"
+          ]
+        ],
+        "recent_contiguous_after": 3,
+        "status": "unresolved"
+      }
     }
   },
   "accumulation_radar": {
     "version": 1,
     "mode": "shadow_only",
-    "updated_at": 1789650060,
+    "updated_at": 1789651395,
     "watches": {},
     "events": [
       {
@@ -13440,1062 +13770,21 @@
         },
         "sampled_max_return_pct": 2.679566059401184,
         "sampled_min_return_pct": -0.5192891052117399,
-        "last_sample_at": 1789650060,
-        "last_sample_price": 119681.0
+        "last_sample_at": 1789651395,
+        "last_sample_price": 119361.0
       }
     ],
     "decisions": {
-      "SYN_TL": "weak_book",
-      "XRP_TL": "no_volume_expansion",
-      "ETH_TL": "no_volume_expansion",
-      "PUMP_TL": "weak_book",
+      "XRP_TL": "no_compression_or_weak_close",
+      "ETH_TL": "weak_book",
+      "NMR_TL": "weak_book",
       "STORJ_TL": "no_compression_or_weak_close",
       "SHIB_TL": "weak_book",
-      "OXT_TL": "no_compression_or_weak_close",
       "XAUT_TL": "no_volume_expansion",
-      "ASR_TL": "no_compression_or_weak_close"
+      "H_TL": "no_volume_expansion"
     }
   },
   "scan_diagnostics": [
-    {
-      "started_at": 1789636735,
-      "status": "completed",
-      "symbols": {
-        "SYN_TL": {
-          "stage": "discovery",
-          "reason": "anti-FOMO: 3C already +3.53%",
-          "score": 78,
-          "rsi": "53.915020173885225",
-          "return_3": "3.525264394829612220916568700",
-          "volume_ratio": "1.631670036136666"
-        },
-        "USDT_TL": {
-          "stage": "universe",
-          "reason": "excluded_base_asset"
-        },
-        "XRP_TL": {
-          "stage": "discovery",
-          "reason": "4h clearly weak",
-          "score": 69,
-          "rsi": "61.35552179198868",
-          "return_3": "0.464469651489778508009731700",
-          "volume_ratio": "0.8013566768567022"
-        },
-        "HNT_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "score": 50,
-          "rsi": "48.70026893796912",
-          "return_3": "0.516573396470081790787774400",
-          "volume_ratio": "0.32297298723084633"
-        },
-        "ETH_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "score": 62,
-          "rsi": "61.428718577964695",
-          "return_3": "0.410437069125356077334097500",
-          "volume_ratio": "0.7983841079635565"
-        },
-        "BTC_TL": {
-          "stage": "universe",
-          "reason": "excluded_base_asset"
-        },
-        "ARB_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "PUMP_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.3276228859818723200271068112"
-        },
-        "BAT_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.6491673722833756703358735535"
-        },
-        "TRUMP_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "score": 49,
-          "rsi": "56.427056521186444",
-          "return_3": "0.052675937631689844079224600",
-          "volume_ratio": "0.9017180558060331"
-        },
-        "TLM_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.3962749361390224081495136429"
-        },
-        "RENDER_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.6128924615862823756578625618"
-        },
-        "TRX_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "NMR_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2552080593510067625755801928"
-        },
-        "COMP_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.6443584107006931388481577934"
-        },
-        "CHZ_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.5023110534265630538884459152"
-        },
-        "STORJ_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.6561679790026246719160104987"
-        },
-        "ADA_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.7514153371075656201749871333"
-        },
-        "BTTC_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "SPK_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.6273016481555410446091755496"
-        },
-        "GAL_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2508193700263056456552084777"
-        },
-        "SAUBER_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "ETHFI_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "PEPE_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "SHIB_TL": {
-          "stage": "discovery",
-          "reason": "volume not expanding",
-          "score": 65,
-          "rsi": "67.11759232900575",
-          "return_3": "0.240796669659619622887927500",
-          "volume_ratio": "0.39542364807842434"
-        },
-        "APT_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "ALT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2277324782210835595735021568"
-        },
-        "PENDLE_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "ALIGN_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.403098509207833966676410406"
-        },
-        "ATM_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.5590128098550077863547223775"
-        },
-        "OXT_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.553398058252427184466019417"
-        },
-        "HYPE_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.3085654100013187357078508853"
-        },
-        "KITE_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.08218859222886969543271845097"
-        },
-        "BONK_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.3575705490624178703600463614"
-        },
-        "ENA_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.3628482871839832906702465508"
-        },
-        "ANKR_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "CITY_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2950907658595304074769312005"
-        },
-        "LINK_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "SAHARA_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "UNI_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "H_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.5137614678899082568807339450"
-        },
-        "RE_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.4537020848283490957120011905"
-        },
-        "ZRO_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.7707381395988296162896092722"
-        },
-        "SEVILLA_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.694915254237288135593220339"
-        },
-        "ASR_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "score": 61,
-          "rsi": "59.21720805208274",
-          "return_3": "0.324918770307423144213946500",
-          "volume_ratio": "0.852863786580321"
-        },
-        "XAUT_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "score": 48,
-          "rsi": "55.23667152060641",
-          "return_3": "-0.0128632682229633158646974700",
-          "volume_ratio": "0.5688700281202255"
-        },
-        "RAY_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.6130698112017578618126059997"
-        },
-        "PLUME_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2413903028204515241887258915"
-        },
-        "NEAR_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.5143277002204261572373254960"
-        },
-        "SKL_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2342540752466413901859218810"
-        },
-        "VANRY_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.8222737842117507508356160947"
-        },
-        "ZIL_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.4816606798667009147921483877"
-        },
-        "AUDIO_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "STG_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.8430190550184722768130673572"
-        },
-        "AKT_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.015847216578626574563185697"
-        },
-        "ENS_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.5661250204411240175710641834"
-        },
-        "MORPHO_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "score": 63,
-          "rsi": "59.04556167533224",
-          "return_3": "0.498800959232613908872901700",
-          "volume_ratio": "1.0688290153163416"
-        },
-        "ACM_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.2500"
-        },
-        "WAVES_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.3012578150785874279397287557"
-        },
-        "RVN_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.5313194381146905634743649255"
-        },
-        "NEO_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.7030441860710357106401249088"
-        },
-        "MANA_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.4224162207828780625176006759"
-        },
-        "PENGU_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "T_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "XCN_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "AVL_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.030927835051546391752577320"
-        },
-        "ONT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2338792709336169205898736945"
-        },
-        "LDO_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.7619961108060476644614951858"
-        },
-        "MINA_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.978021978021978021978021978"
-        },
-        "FLR_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.2921140093608522510701442761"
-        },
-        "AVAX_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "SOL_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "ALGO_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "ODOS_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.5305039787798408488063660477"
-        },
-        "AXS_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError"
-        },
-        "XTZ_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.4946413849958779884583676834"
-        },
-        "GRAM_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "imbalance": "0.4235727906728267710298006096"
-        },
-        "LRC_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.4651162790697674418604651163"
-        },
-        "TNSR_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.204819277108433734939759036"
-        },
-        "ASM_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.9584664536741214057507987220"
-        },
-        "PEPPER_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "1.978021978021978021978021978"
-        },
-        "PSG_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "spread_pct": "0.5006827492034592626308602640"
-        },
-        "DYM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "REEF_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "DOGE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "JTO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "COW_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BAL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "FLOKI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "FET_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ILV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "0G_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "EIGEN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "OGFAN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BJK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ZKC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "WLD_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "DASH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "HOT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ZK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "JUV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SAFA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "THETA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SYRUP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "FIL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SUI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "OMG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "FF_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SEI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "VVV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "FB_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "LIT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "KAITO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "CRV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "GOAT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SFA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ATH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "XPL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BELG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "TIA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "XAI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "VET_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AERO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "RAD_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "LPT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ZORA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SENT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "XLM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "NAP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AFC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AIXBT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "DRIFT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ENJ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ONDO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "STX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BCH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MON_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BERA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "CTSI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BAR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "INJ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BEAM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ALICE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MEME_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "LINEA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SNX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "TRA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BIO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "EFC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "OGN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "GRASS_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MIOTA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MNT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "GALA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "USDC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "OP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BLUR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "W_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "DOT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SPAIN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "RLC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "TURBO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ARG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "GRT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ASTON_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "NST_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "API3_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "IO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MET_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "GOZ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AVNT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "GLM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "QNT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "TAO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "JASMY_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "PNUT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "APE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "POR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ITA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AXL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MOVE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "POL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "INTER_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BENFICA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "S_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ORCA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ATOM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SAM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "WLFI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "LTC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "JUP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SAND_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "CFG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MEGA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MASK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ARKM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MAGIC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ALLO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ATLAS_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "IMX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "CEEK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SUPER_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SPURS_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "STRK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "LAYER_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ICP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ZETA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AAVE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "CLV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "PDA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "1INCH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ME_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "WAL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "VIRTUAL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ZRX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SPELL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "WIF_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "A_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "RED_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "SKY_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "RACA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "BAND_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "UMA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ANIME_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "DYDX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "ASTER_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "2Z_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "VCF_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "AEVO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "MANTA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "PYTH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "JOE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "TRYC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        },
-        "TON_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity"
-        }
-      },
-      "btc_ok": true,
-      "btc_reason": "BTC neutral/acceptable | RSI=60.9",
-      "radar_status": "shadow_only",
-      "markets": 234,
-      "orderbooks_checked": 80,
-      "technical_checked": 29,
-      "discovered": 0,
-      "alert_sent": false,
-      "finished_at": 1789636776,
-      "seconds_since_previous_run": 1326
-    },
     {
       "started_at": 1789638061,
       "status": "completed",
@@ -25870,11 +25159,1048 @@
       "alert_sent": false,
       "finished_at": 1789650093,
       "seconds_since_previous_run": 957
+    },
+    {
+      "started_at": 1789651395,
+      "status": "completed",
+      "symbols": {
+        "SYN_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.6102712303049732906450803306"
+        },
+        "USDT_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset"
+        },
+        "XRP_TL": {
+          "stage": "discovery",
+          "reason": "4h clearly weak",
+          "score": 59,
+          "rsi": "51.595909986635604",
+          "return_3": "-0.7863408521303258145363408500",
+          "volume_ratio": "0.7974455617858054"
+        },
+        "HNT_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.6787330316742081447963800905"
+        },
+        "ETH_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "score": 67,
+          "rsi": "58.700161769049075",
+          "return_3": "-0.5388568239928707659762303300",
+          "volume_ratio": "0.8996855937947134"
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset"
+        },
+        "PUMP_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.6649439497891173115977349972"
+        },
+        "BAT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.4086035779563324310817173968"
+        },
+        "TRUMP_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.3521748633583646691296899502"
+        },
+        "ARB_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.4347600305718902030401643719"
+        },
+        "TRX_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "RENDER_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.5644867771635571939798902178"
+        },
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "score": 56,
+          "rsi": "52.904935796972",
+          "return_3": "-0.2493420141293808006649120400",
+          "volume_ratio": "0.8092037583512113"
+        },
+        "COMP_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.2855810628972016534680671289"
+        },
+        "CHZ_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.6017825153417929066659357852"
+        },
+        "ADA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.3707898772359317372804869110"
+        },
+        "TLM_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "STORJ_TL": {
+          "stage": "discovery",
+          "reason": "4h clearly weak",
+          "score": 43,
+          "rsi": "45.12452307638677",
+          "return_3": "-0.6565988181221273801707156900",
+          "volume_ratio": "1.2583183939802007"
+        },
+        "BTTC_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.763553233180927498367080340"
+        },
+        "GAL_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.2370639025541684799688091945"
+        },
+        "ETHFI_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "SPK_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.4810381474437856583510459783"
+        },
+        "SAUBER_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.9380863039399624765478424015"
+        },
+        "SHIB_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "score": 59,
+          "rsi": "59.22795325833708",
+          "return_3": "-0.3362774491532290738189773900",
+          "volume_ratio": "0.4482950990188891"
+        },
+        "PEPE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.2076736858445095444589951091"
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.1582642608484069420450073228"
+        },
+        "APT_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "PENDLE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.7317017177177201101734365326"
+        },
+        "KITE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.3289700231819939958911247606"
+        },
+        "ATM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.6706265568116497413297566584"
+        },
+        "OXT_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.188118811881188118811881188"
+        },
+        "BONK_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.8319766954043603194370945558"
+        },
+        "SEVILLA_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.255230125523012552301255230"
+        },
+        "RE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.5610876038468287397095773877"
+        },
+        "CITY_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.2434783857239240670060947134"
+        },
+        "LINK_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.4056546718285403034795609661"
+        },
+        "SAHARA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.4601843371159308568889071540"
+        },
+        "HYPE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.2006409244598405173434130804"
+        },
+        "UNI_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "ANKR_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "ENA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.5259931691545161522076483346"
+        },
+        "ALIGN_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.5686920083807243340317270278"
+        },
+        "ZRO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.7522042773562353465455794178"
+        },
+        "0G_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.2784394757586462507415916683"
+        },
+        "PLUME_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.4581901489117983963344788087"
+        },
+        "NEAR_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.846715328467153284671532847"
+        },
+        "XAUT_TL": {
+          "stage": "trigger",
+          "reason": "score 74 < 80",
+          "score": 74
+        },
+        "ASR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.7216425166338788611393514765"
+        },
+        "RAY_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "2.196255103477403913839222864"
+        },
+        "VANRY_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.6920415224913494809688581315"
+        },
+        "SKL_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.1563194546726426087742540865"
+        },
+        "AUDIO_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "AKT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.3841266457298245592150518402"
+        },
+        "STG_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.8423384974356839410043347177"
+        },
+        "ENS_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.6376181876329548312091675246"
+        },
+        "H_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "score": 73,
+          "rsi": "50.9566128405247",
+          "return_3": "0.255754475703324808184143200",
+          "volume_ratio": "0.5206920456779126"
+        },
+        "ACM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.7042253521126760563380281690"
+        },
+        "RVN_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "MORPHO_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.7099683392497361604144680035"
+        },
+        "WAVES_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.045856798069187449718423170"
+        },
+        "NEO_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.4496578690127077223851417400"
+        },
+        "MINA_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "MANA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.5062158850061977396996473764"
+        },
+        "XCN_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.7326007326007326007326007326"
+        },
+        "LDO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.5754200804559499161898207158"
+        },
+        "PENGU_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.8879977083930105986823259811"
+        },
+        "T_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "AVL_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.712328767123287671232876712"
+        },
+        "ONT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.1593721941536531542538063751"
+        },
+        "AVAX_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.1567876071487736383624058117"
+        },
+        "FLR_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.4588659455916093084234677155"
+        },
+        "TNSR_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.6024096385542168674698795181"
+        },
+        "JTO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.4902230225505484011929887858"
+        },
+        "AXS_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "ODOS_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.5376344086021505376344086022"
+        },
+        "ALGO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.3338357820213033835989495714"
+        },
+        "SOL_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "GRAM_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.8433021816943411140748792132"
+        },
+        "PSG_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "imbalance": "0.1250429629692132607938400716"
+        },
+        "XTZ_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "0.7518796992481203007518796992"
+        },
+        "ASM_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError"
+        },
+        "REEF_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "spread_pct": "1.265822784810126582278481013"
+        },
+        "EIGEN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "FLOKI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "LRC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "FET_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ZIL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BJK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ILV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "THETA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "COW_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BAL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "DASH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "DOGE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "OGFAN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "WLD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SEI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BELG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ZKC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ZK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SUI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "HOT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "PEPPER_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "CRV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "LIT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SAFA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ONDO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "JUV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ZORA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "OMG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "FIL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AERO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SYRUP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "FB_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "XPL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "TIA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "GOAT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "FF_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "STX_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "RAD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "XAI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SFA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "KAITO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "LPT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "VET_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "VVV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "XLM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AIXBT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ENJ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BEAM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "DRIFT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BCH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BAR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "GALA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AFC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "NAP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "CTSI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BERA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SENT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SNX_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MEME_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ALICE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AVNT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "TRA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MIOTA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "INJ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BIO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MNT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "GRASS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "OP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "OGN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BLUR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "TURBO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MON_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "W_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MET_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SPAIN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "RLC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ASTON_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "IO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "TAO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "GOZ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "DOT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "CFG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "NST_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "GRT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "API3_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ARG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "LINEA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "JASMY_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "APE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "PNUT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MOVE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "QNT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "GLM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "POR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ITA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BENFICA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "INTER_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ATOM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "S_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SPURS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ORCA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "CLV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AXL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "CEEK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "JUP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MEGA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ALLO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SUPER_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SKY_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "USDC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "EFC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "LTC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SAM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MAGIC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ATLAS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ARKM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "STRK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "POL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ICP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AAVE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "IMX_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "LAYER_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "UMA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ZETA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ZRX_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "A_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "DYDX_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "1INCH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "WAL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "RED_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "SPELL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "WIF_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "WLFI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ANIME_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "BAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "PDA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "RACA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ASTER_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "JOE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "ME_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "VIRTUAL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MANTA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "MASK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "2Z_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "PYTH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "AEVO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "VCF_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "TRYC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        },
+        "TON_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity"
+        }
+      },
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=54.9",
+      "radar_status": "shadow_only",
+      "markets": 234,
+      "orderbooks_checked": 80,
+      "technical_checked": 20,
+      "discovered": 1,
+      "alert_sent": false,
+      "finished_at": 1789651423,
+      "seconds_since_previous_run": 1335
     }
   ],
   "research_summary": {
     "version": 1,
-    "generated_at": 1789650093,
+    "generated_at": 1789651423,
     "mode": "research_only",
     "profitability_proven": false,
     "automatic_promotion_allowed": false,
@@ -25885,25 +26211,22 @@
     "coverage": {
       "snapshot_markets": 234,
       "orderbooks_checked": 80,
-      "technical_checked": 22,
+      "technical_checked": 20,
       "unexamined_capacity": 152
     },
     "rejection_reasons": {
-      "15m momentum not constructive": 3,
+      "imbalance_too_low": 36,
       "excluded_base_asset": 2,
       "4h clearly weak": 2,
-      "spread_too_high": 27,
-      "volume not expanding": 1,
-      "score 79 < 80": 1,
-      "imbalance_too_low": 31,
+      "spread_too_high": 24,
+      "volume not expanding": 4,
       "candle_error:CandleUnavailableError": 13,
-      "score 67 < 80": 1,
-      "RSI outside watch range": 1,
+      "score 74 < 80": 1,
       "not_evaluated_capacity": 152
     },
     "paper_signal_status_counts": {
       "TP2": 1,
-      "OPEN": 1
+      "EXPIRED": 1
     },
     "pending_lifecycle_notifications": 0,
     "radar_events_retained": 2,
