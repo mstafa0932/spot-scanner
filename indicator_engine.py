@@ -37,6 +37,8 @@ class IndicatorResult:
     is_pullback: bool
     is_bullish_candle: bool
     breakout: bool
+    mean_touch: bool
+    vwap20: Decimal
     valid: bool
     source: str = "unknown"
     latest_closed_timestamp: int = 0
@@ -97,6 +99,11 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
     x["VOL_SMA20"] = x["volume"].rolling(20, min_periods=20).mean()
     x["VOLUME_RATIO"] = x["volume"] / x["VOL_SMA20"]
+
+    typical = (x["high"] + x["low"] + x["close"]) / 3
+    pv20 = (typical * x["volume"]).rolling(20, min_periods=20).sum()
+    vol20 = x["volume"].rolling(20, min_periods=20).sum()
+    x["VWAP20"] = pv20 / vol20.replace(0, pd.NA)
     return x
 
 
@@ -121,6 +128,7 @@ def analyze_symbol(df: pd.DataFrame) -> Optional[IndicatorResult]:
         "macd_hist": _d(row.get("MACD_HIST")),
         "atr": _d(row.get("ATR14")),
         "volume_ratio": _d(row.get("VOLUME_RATIO")),
+        "vwap20": _d(row.get("VWAP20")),
     }
 
     if any(value is None for value in fields.values()):
@@ -137,6 +145,7 @@ def analyze_symbol(df: pd.DataFrame) -> Optional[IndicatorResult]:
     macd_hist = fields["macd_hist"]
     atr = fields["atr"]
     volume_ratio = fields["volume_ratio"]
+    vwap20 = fields["vwap20"]
 
     if close <= 0 or atr <= 0 or ema21 <= 0 or ema50 <= 0 or ema200 <= 0:
         return None
@@ -165,11 +174,31 @@ def analyze_symbol(df: pd.DataFrame) -> Optional[IndicatorResult]:
 
     recent_slice = x.iloc[max(0, len(x) - 6) : len(x)]
     recent_low = _d(recent_slice["low"].min()) if not recent_slice.empty else None
+
+    # Dynamic-mean interaction: at least one of the six most recent closed bars
+    # touched EMA9, EMA21, or rolling VWAP20 within a 0.15% tolerance, and the
+    # current close reclaimed the fast means.  This is intentionally stricter
+    # than a generic "near EMA" flag to reduce momentum-chasing pullbacks.
+    tolerance = Decimal("0.0015")
+    mean_touch = False
+    for recent in recent_slice.itertuples(index=False):
+        low_i = _d(getattr(recent, "low", None))
+        ema9_i = _d(getattr(recent, "EMA9", None))
+        ema21_i = _d(getattr(recent, "EMA21", None))
+        vwap_i = _d(getattr(recent, "VWAP20", None))
+        if low_i is None:
+            continue
+        refs = [v for v in (ema9_i, ema21_i, vwap_i) if v is not None and v > 0]
+        if any(low_i <= ref * (Decimal("1") + tolerance) for ref in refs):
+            mean_touch = True
+            break
+
     pullback = bool(
         recent_low is not None
-        and recent_low <= ema21
+        and recent_low <= ema21 * (Decimal("1") + tolerance)
         and above_ema21
         and abs(distance_ema21_pct) <= Decimal("2.0")
+        and mean_touch
     )
 
     opening = _d(row.get("open"))
@@ -229,6 +258,8 @@ def analyze_symbol(df: pd.DataFrame) -> Optional[IndicatorResult]:
         is_pullback=pullback,
         is_bullish_candle=bullish_candle,
         breakout=breakout,
+        mean_touch=mean_touch,
+        vwap20=vwap20,
         valid=True,
         source=source,
         latest_closed_timestamp=latest_timestamp,
