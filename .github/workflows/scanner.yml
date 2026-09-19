@@ -4,12 +4,15 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '7,17,27,37,47,57 * * * *'
+  push:
+    branches-ignore:
+      - main
 
 permissions:
   contents: write
 
 concurrency:
-  group: paribu-momentum-watcher
+  group: paribu-momentum-watcher-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -36,7 +39,9 @@ jobs:
         run: python -m pytest -q
 
       - name: Run scanner
+        if: github.event_name != 'push'
         env:
+          SHADOW_MODE: 'true'
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -44,7 +49,7 @@ jobs:
         run: python main.py
 
       - name: Persist scanner state
-        if: always()
+        if: ${{ always() && github.event_name != 'push' }}
         shell: bash
         run: |
           if [ ! -f scanner_state.json ]; then

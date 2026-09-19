@@ -40,7 +40,8 @@ from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
 from signal_tracker import register_signal, update_active_signals, deliver_pending_events
 from execution_research import evaluate_depth
-from candle_backfill import bind_history
+from candle_backfill import bind_history, recent_authentic
+from risk_engine import build_risk_plan
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -58,6 +59,7 @@ if not LOGGER.handlers:
 STATE_FILE = Path(os.getenv("SCANNER_STATE_FILE", "scanner_state.json"))
 TELEGRAM_TOKEN_ENV = "TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
+SHADOW_MODE = os.getenv("SHADOW_MODE", "false").strip().lower() == "true"
 
 # Universe / execution quality
 MIN_QUOTE_VOLUME_TL = Decimal(os.getenv("MIN_QUOTE_VOLUME_TL", "5000000"))
@@ -218,6 +220,9 @@ def _empty_state() -> dict[str, Any]:
         "daily_alerts": [],
         "last_alert_at": 0,
         "candle_gap_history": {},
+        "shadow_sent_signals": {},
+        "shadow_daily_alerts": [],
+        "shadow_last_alert_at": 0,
     }
 
 
@@ -232,7 +237,8 @@ def load_state() -> dict[str, Any]:
             raise ValueError("Scanner state must be an object")
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
                               ("near_misses", list), ("active_signals", list),
-                              ("daily_alerts", list), ("candle_gap_history", dict)):
+                              ("daily_alerts", list), ("candle_gap_history", dict),
+                              ("shadow_sent_signals", dict), ("shadow_daily_alerts", list)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -250,6 +256,10 @@ def load_state() -> dict[str, Any]:
             state["daily_alerts"] = raw["daily_alerts"]
         if isinstance(raw.get("candle_gap_history"), dict):
             state["candle_gap_history"] = raw["candle_gap_history"]
+        if isinstance(raw.get("shadow_sent_signals"), dict):
+            state["shadow_sent_signals"] = raw["shadow_sent_signals"]
+        if isinstance(raw.get("shadow_daily_alerts"), list):
+            state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
         # Research state is isolated from trading signal/watchlist state.
         if isinstance(raw.get("accumulation_radar"), dict):
             state["accumulation_radar"] = raw["accumulation_radar"]
@@ -257,7 +267,8 @@ def load_state() -> dict[str, Any]:
             state["scan_diagnostics"] = raw["scan_diagnostics"][-12:]
 
         state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
-        if state["last_alert_at"] < 0:
+        state["shadow_last_alert_at"] = int(raw.get("shadow_last_alert_at", 0) or 0)
+        if state["last_alert_at"] < 0 or state["shadow_last_alert_at"] < 0:
             raise ValueError("Invalid last alert time")
 
         return state
@@ -327,6 +338,9 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
     try:
         df_15 = fetch_candles("BTC_TL", "15m", CANDLE_LIMIT)
         df_1h = fetch_candles("BTC_TL", "1h", CANDLE_LIMIT)
+        if not recent_authentic(df_15, 16, 900):
+            return False, None, "BTC recent 4h candle integrity failed"
+
         tech_15 = analyze_symbol(df_15)
         tech_1h = analyze_symbol(df_1h)
 
@@ -396,7 +410,12 @@ def setup_type(tech: IndicatorResult) -> tuple[bool, str]:
     if tech.breakout and tech.volume_ratio >= Decimal("1.20"):
         return True, "BREAKOUT"
 
-    if tech.is_pullback and constructive:
+    if (
+        tech.is_pullback
+        and constructive
+        and tech.rsi14 <= Decimal("60")
+        and bool(getattr(tech, "mean_touch", False))
+    ):
         return True, "PULLBACK"
 
     recovery = bool(
@@ -734,6 +753,12 @@ def trigger_check(
     if not (ALERT_RSI_LOW <= candidate.tech_15.rsi14 <= ALERT_RSI_HIGH):
         return False, f"RSI {candidate.tech_15.rsi14:.1f} outside alert range", Decimal("0"), 0
 
+    if candidate.setup == "PULLBACK":
+        if candidate.tech_15.rsi14 > Decimal("60"):
+            return False, "pullback RSI above 60", Decimal("0"), 0
+        if not bool(getattr(candidate.tech_15, "mean_touch", False)):
+            return False, "pullback lacks EMA/VWAP interaction", Decimal("0"), 0
+
     fomo_ok, fomo_reason = anti_fomo_ok(candidate.tech_15)
     if not fomo_ok:
         return False, f"anti-FOMO: {fomo_reason}", Decimal("0"), 0
@@ -788,25 +813,31 @@ def trigger_check(
 # ---------------------------------------------------------------------------
 
 
-def _global_alert_allowed(state: dict[str, Any], now: int) -> bool:
+def _global_alert_allowed(
+    state: dict[str, Any], now: int, shadow: bool = False
+) -> bool:
+    last_key = "shadow_last_alert_at" if shadow else "last_alert_at"
+    daily_key = "shadow_daily_alerts" if shadow else "daily_alerts"
     try:
-        last_alert = int(state.get("last_alert_at", 0) or 0)
+        last_alert = int(state.get(last_key, 0) or 0)
     except (TypeError, ValueError):
         last_alert = 0
     recent: list[int] = []
-    for value in state.get("daily_alerts", []):
+    for value in state.get(daily_key, []):
         try:
             stamp = int(value)
         except (TypeError, ValueError):
             continue
         if 0 <= now - stamp < 24 * 60 * 60:
             recent.append(stamp)
-    state["daily_alerts"] = recent
+    state[daily_key] = recent
     return len(recent) < MAX_DAILY_ALERTS and now - last_alert >= GLOBAL_ALERT_COOLDOWN_SECONDS
 
 
-def _symbol_alert_allowed(state: dict[str, Any], symbol: str, now: int) -> bool:
-    sent = state.get("sent_signals")
+def _symbol_alert_allowed(
+    state: dict[str, Any], symbol: str, now: int, shadow: bool = False
+) -> bool:
+    sent = state.get("shadow_sent_signals" if shadow else "sent_signals")
     if not isinstance(sent, dict):
         return True
     try:
@@ -822,41 +853,37 @@ def build_opportunity(
     confirmations: int,
     btc_reason: str,
 ) -> Optional[TriggeredOpportunity]:
-    entry = dec(candidate.book.best_ask)
     quote_volume = candidate.ticker.quote_volume or Decimal("0")
-    if entry is None or entry <= 0:
+    plan = build_risk_plan(
+        book=candidate.book,
+        tech=candidate.tech_15,
+        setup=candidate.setup,
+        atr_multiplier=Decimal(os.getenv("ATR_STOP_MULTIPLIER_V2", "1.75")),
+        max_risk_pct=Decimal(os.getenv("MAX_STOP_PCT_V2", "4.00")),
+        min_rr=Decimal(os.getenv("MIN_REWARD_RISK", "1.50")),
+        tp1_pct=TP1_PCT,
+        tp2_pct=TP2_PCT,
+    )
+    if plan is None:
         return None
 
-    atr_pct = candidate.tech_15.atr14 / candidate.tech_15.current_close * Decimal("100")
-    if atr_pct <= 0:
-        return None
-
-    risk_pct = max(MIN_STOP_PCT, atr_pct * ATR_STOP_MULTIPLIER)
-    risk_pct = min(risk_pct, MAX_STOP_PCT)
-
-    # If swing low is nearby, prefer it, but never widen beyond MAX_STOP_PCT.
-    swing_low = dec(candidate.tech_15.swing_low)
-    if swing_low is not None and Decimal("0") < swing_low < entry:
-        swing_risk = pct(entry, swing_low)
-        if MIN_STOP_PCT <= swing_risk <= MAX_STOP_PCT:
-            risk_pct = swing_risk
-
-    stop = entry * (Decimal("1") - risk_pct / Decimal("100"))
-    tp1 = entry * (Decimal("1") + TP1_PCT / Decimal("100"))
-    tp2 = entry * (Decimal("1") + TP2_PCT / Decimal("100"))
-
-    if not (stop < entry < tp1 < tp2):
-        return None
+    reasons = list(candidate.reasons)
+    reasons.append(f"limit-entry reference; TP1 R/R={plan.reward_risk_tp1:.2f}")
+    if plan.target_adjusted_for_wall and plan.sell_wall_price is not None:
+        reasons.append(
+            f"TP1 adjusted before sell wall {plan.sell_wall_price} "
+            f"(share {plan.sell_wall_share * 100:.1f}%)"
+        )
 
     return TriggeredOpportunity(
         symbol=candidate.symbol,
         score=candidate.score,
         setup=candidate.setup,
-        entry=entry,
-        stop=stop,
-        tp1=tp1,
-        tp2=tp2,
-        risk_pct=risk_pct,
+        entry=plan.entry,
+        stop=plan.stop,
+        tp1=plan.tp1,
+        tp2=plan.tp2,
+        risk_pct=plan.risk_pct,
         quote_volume=quote_volume,
         spread_pct=candidate.book.spread_percent,
         imbalance=candidate.book.imbalance_ratio,
@@ -868,9 +895,8 @@ def build_opportunity(
         confirmations=confirmations,
         recent_return_3=candidate.tech_15.recent_return_3,
         btc_reason=btc_reason,
-        reasons=candidate.reasons,
+        reasons=reasons,
     )
-
 
 def format_opportunity(opp: TriggeredOpportunity) -> str:
     return (
@@ -880,13 +906,13 @@ def format_opportunity(opp: TriggeredOpportunity) -> str:
         f"⭐ <b>الدرجة:</b> {opp.score}/100\n"
         f"🧩 <b>الحالة:</b> {html.escape(opp.setup)}\n"
         f"👀 <b>تمت مراقبتها عبر:</b> {opp.confirmations} فحص/فحوص\n\n"
-        f"💵 <b>دخول تقريبي:</b> <code>{fmt(opp.entry)}</code>\n"
+        f"💵 <b>دخول LIMIT مرجعي:</b> <code>{fmt(opp.entry)}</code>\n"
         f"🛑 <b>وقف خسارة:</b> <code>{fmt(opp.stop)}</code> "
         f"(-{opp.risk_pct:.2f}%)\n"
         f"🧮 <b>حد مخاطرة الحساب:</b> {RISK_BUDGET_PCT:.2f}% كحد أقصى\n"
         f"📐 <b>حجم المركز:</b> (رأس المال × {RISK_BUDGET_PCT:.2f}%) ÷ {opp.risk_pct:.2f}%\n"
-        f"🎯 <b>هدف 1:</b> <code>{fmt(opp.tp1)}</code> (+{TP1_PCT:.2f}%)\n"
-        f"🚀 <b>هدف 2:</b> <code>{fmt(opp.tp2)}</code> (+{TP2_PCT:.2f}%)\n\n"
+        f"🎯 <b>هدف 1:</b> <code>{fmt(opp.tp1)}</code> (+{pct(opp.tp1, opp.entry):.2f}%)\n"
+        f"🚀 <b>هدف 2:</b> <code>{fmt(opp.tp2)}</code> (+{pct(opp.tp2, opp.entry):.2f}%)\n\n"
         "💧 <b>السيولة والزخم:</b>\n"
         f"• حجم تداول TL: {opp.quote_volume:,.0f}\n"
         f"• Volume Ratio: {opp.volume_ratio:.2f}x\n"
@@ -911,6 +937,7 @@ def format_signal_event(payload: dict[str, Any]) -> str:
         "TP2": "🏁 تحقق الهدف الثاني — راجع إغلاق الباقي",
         "STOP": "🛑 تحقق حد الإلغاء/وقف الخسارة — لا تبقَ في الصفقة",
         "EXPIRED": "⌛ انتهت صلاحية الإشارة دون حسم — ألغِها",
+        "ENTRY_EXPIRED": "⌛ انتهت صلاحية أمر LIMIT الافتراضي دون تنفيذ",
     }
     kind = str(event.get("kind", ""))
     price_label = "سعر الإشارة المرجعي" if kind == "EXPIRED" else "المستوى المرصود"
@@ -936,7 +963,8 @@ def run_scanner() -> None:
     now = int(time.time())
     state = load_state()
     bind_history(state)
-    diagnostics = {"started_at": now, "status": "running", "symbols": {}}
+    shadow_mode = SHADOW_MODE
+    diagnostics = {"started_at": now, "status": "running", "symbols": {}, "shadow_mode": shadow_mode}
     observations = []
 
     def note(symbol, stage, reason, **metrics):
@@ -959,8 +987,11 @@ def run_scanner() -> None:
     new_events = update_active_signals(state, now)
     if new_events:
         save_state(state)  # Keep pending observations before attempting delivery.
-    if deliver_pending_events(state, send_telegram, format_signal_event):
-        save_state(state)
+    if not shadow_mode:
+        if deliver_pending_events(state, send_telegram, format_signal_event):
+            save_state(state)
+    elif new_events:
+        diagnostics["shadow_pending_events"] = len(new_events)
 
     # Follow previous near-misses first; persistence is handled by workflow.
     near_result = update_near_miss_outcomes(state)
@@ -1040,6 +1071,18 @@ def run_scanner() -> None:
             for frame in (df_15, df_1h, df_4h)
         ):
             note(ticker.symbol, "data", "non_paribu_candles")
+            continue
+
+        # Historical synthetic rows may warm long indicators, but entries may
+        # not be based on synthetic recent observations.
+        if not recent_authentic(df_15, 4, 900):
+            note(ticker.symbol, "data", "recent_15m_integrity_failed")
+            continue
+        if not recent_authentic(df_1h, 2, 3600):
+            note(ticker.symbol, "data", "recent_1h_integrity_failed")
+            continue
+        if not recent_authentic(df_4h, 1, 14400):
+            note(ticker.symbol, "data", "recent_4h_integrity_failed")
             continue
 
         # Collect existing data only. Evaluate AFTER the normal alert path, with
@@ -1125,12 +1168,12 @@ def run_scanner() -> None:
                 )
             continue
 
-        if not _global_alert_allowed(state, now):
+        if not _global_alert_allowed(state, now, shadow_mode):
             note(candidate.symbol, "cooldown", "global_limit_or_cooldown")
             LOGGER.info("Strong candidate %s ready, global alert cooldown active", candidate.symbol)
             continue
 
-        if not _symbol_alert_allowed(state, candidate.symbol, now):
+        if not _symbol_alert_allowed(state, candidate.symbol, now, shadow_mode):
             note(candidate.symbol, "cooldown", "symbol_cooldown")
             continue
 
@@ -1155,23 +1198,46 @@ def run_scanner() -> None:
         depth_scenario = evaluate_depth(candidate.book)
         state["execution_research"] = {"symbol": candidate.symbol, "observed_at": int(time.time()),
                                        **depth_scenario}
+        evidence = {
+            "btc_reason": btc_reason,
+            "spread_pct": str(opp.spread_pct),
+            "imbalance": str(opp.imbalance),
+            "volume_ratio": str(opp.volume_ratio),
+            "quote_volume_tl": str(opp.quote_volume),
+            "bid_wall_share": str(opp.bid_wall_share),
+            "ask_wall_share": str(opp.ask_wall_share),
+            "execution_research": depth_scenario,
+            "shadow_mode": shadow_mode,
+        }
+
+        if shadow_mode:
+            note(candidate.symbol, "shadow", "paper_signal_recorded")
+            sent = True
+            state["shadow_last_alert_at"] = now
+            state.setdefault("shadow_daily_alerts", []).append(now)
+            state.setdefault("shadow_sent_signals", {})[candidate.symbol] = now
+            register_signal(
+                state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
+                tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
+                setup=opp.setup, now=now, evidence=evidence,
+            )
+            LOGGER.info(
+                "SHADOW signal: %s score=%d confirmations=%d entry=%s stop=%s tp1=%s",
+                candidate.symbol, candidate.score, confirmations,
+                opp.entry, opp.stop, opp.tp1,
+            )
+            break
+
         if send_telegram(format_opportunity(opp)):
             note(candidate.symbol, "notification", "entry_alert_sent")
             sent = True
             state["last_alert_at"] = now
             state.setdefault("daily_alerts", []).append(now)
-            sent_signals = state.setdefault("sent_signals", {})
-            sent_signals[candidate.symbol] = now
+            state.setdefault("sent_signals", {})[candidate.symbol] = now
             register_signal(
                 state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
                 tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
-                setup=opp.setup, now=now,
-                evidence={"btc_reason": btc_reason, "spread_pct": str(opp.spread_pct),
-                          "imbalance": str(opp.imbalance), "volume_ratio": str(opp.volume_ratio),
-                          "quote_volume_tl": str(opp.quote_volume),
-                          "bid_wall_share": str(opp.bid_wall_share),
-                          "ask_wall_share": str(opp.ask_wall_share),
-                          "execution_research": depth_scenario},
+                setup=opp.setup, now=now, evidence=evidence,
             )
             LOGGER.info(
                 "ALERT sent: %s score=%d confirmations=%d volume=%.2fx imbalance=%.2f",
@@ -1211,11 +1277,12 @@ def run_scanner() -> None:
 
     # No Telegram empty reports. GitHub log is enough.
     LOGGER.info(
-        "Run complete | markets=%d | discovered=%d | watchlist=%d | btc_ok=%s | alert_sent=%s",
+        "Run complete | markets=%d | discovered=%d | watchlist=%d | btc_ok=%s | shadow=%s | signal=%s",
         len(snapshot),
         len(discovered),
         len(_watchlist(state)),
         btc_ok,
+        shadow_mode,
         sent,
     )
 
