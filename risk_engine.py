@@ -101,7 +101,16 @@ def _sell_wall_before_target(book, entry: Decimal, target: Decimal):
     credible = []
     for price, _amount, notional in levels:
         share = notional / total_ask
-        if share >= D("0.30") or (med > 0 and notional >= med * D("3")):
+        # A single large level should be exceptional relative to nearby ask
+        # depth; a sparse book where every level is ~1/3 of visible depth is
+        # not automatically a wall.
+        share_wall = (
+            share >= D("0.30")
+            and med > 0
+            and notional >= med * D("1.75")
+        )
+        robust_outlier = med > 0 and notional >= med * D("3")
+        if share_wall or robust_outlier:
             credible.append((price, share))
 
     if not credible:
