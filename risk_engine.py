@@ -147,8 +147,17 @@ def build_risk_plan(
     if risk_pct <= 0 or risk_pct > max_risk_pct:
         return None
 
-    raw_tp1 = entry * (D("1") + tp1_pct / D("100"))
-    tp2 = entry * (D("1") + tp2_pct / D("100"))
+    # Targets scale with the actual stop distance. Fixed percentage targets
+    # are retained only as floors so wider ATR/structure stops do not destroy
+    # reward/risk.
+    raw_tp1 = max(
+        entry * (D("1") + tp1_pct / D("100")),
+        entry + risk * min_rr,
+    )
+    tp2 = max(
+        entry * (D("1") + tp2_pct / D("100")),
+        entry + risk * D("2.00"),
+    )
     tp1 = raw_tp1
     adjusted = False
     wall_price, wall_share = _sell_wall_before_target(book, entry, raw_tp1)
