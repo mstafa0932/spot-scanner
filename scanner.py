@@ -1168,12 +1168,12 @@ def run_scanner() -> None:
                 )
             continue
 
-        if not _global_alert_allowed(state, now, shadow=shadow_mode):
+        if not _global_alert_allowed(state, now, shadow_mode):
             note(candidate.symbol, "cooldown", "global_limit_or_cooldown")
             LOGGER.info("Strong candidate %s ready, global alert cooldown active", candidate.symbol)
             continue
 
-        if not _symbol_alert_allowed(state, candidate.symbol, now, shadow=shadow_mode):
+        if not _symbol_alert_allowed(state, candidate.symbol, now, shadow_mode):
             note(candidate.symbol, "cooldown", "symbol_cooldown")
             continue
 
