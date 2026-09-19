@@ -122,7 +122,7 @@ def test_gap_limit_and_trailing_gap():
 def test_btc_gate_blocks_recent_synthetic_candle(monkeypatch):
     import scanner
     full = frame()
-    repaired = repair(full.drop(249), 900, NOW, lambda *a: full.iloc[:0], "BTC")
+    repaired = repair(full.drop(248), 900, NOW, lambda *a: full.iloc[:0], "BTC")
     repaired.attrs["source"] = "PARIBU"
     monkeypatch.setattr(scanner, "fetch_candles", lambda *a: repaired)
     ok, _, reason = scanner.btc_gate()
