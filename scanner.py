@@ -911,8 +911,8 @@ def format_opportunity(opp: TriggeredOpportunity) -> str:
         f"(-{opp.risk_pct:.2f}%)\n"
         f"🧮 <b>حد مخاطرة الحساب:</b> {RISK_BUDGET_PCT:.2f}% كحد أقصى\n"
         f"📐 <b>حجم المركز:</b> (رأس المال × {RISK_BUDGET_PCT:.2f}%) ÷ {opp.risk_pct:.2f}%\n"
-        f"🎯 <b>هدف 1:</b> <code>{fmt(opp.tp1)}</code> (+{TP1_PCT:.2f}%)\n"
-        f"🚀 <b>هدف 2:</b> <code>{fmt(opp.tp2)}</code> (+{TP2_PCT:.2f}%)\n\n"
+        f"🎯 <b>هدف 1:</b> <code>{fmt(opp.tp1)}</code> (+{pct(opp.tp1, opp.entry):.2f}%)\n"
+        f"🚀 <b>هدف 2:</b> <code>{fmt(opp.tp2)}</code> (+{pct(opp.tp2, opp.entry):.2f}%)\n\n"
         "💧 <b>السيولة والزخم:</b>\n"
         f"• حجم تداول TL: {opp.quote_volume:,.0f}\n"
         f"• Volume Ratio: {opp.volume_ratio:.2f}x\n"
@@ -937,6 +937,7 @@ def format_signal_event(payload: dict[str, Any]) -> str:
         "TP2": "🏁 تحقق الهدف الثاني — راجع إغلاق الباقي",
         "STOP": "🛑 تحقق حد الإلغاء/وقف الخسارة — لا تبقَ في الصفقة",
         "EXPIRED": "⌛ انتهت صلاحية الإشارة دون حسم — ألغِها",
+        "ENTRY_EXPIRED": "⌛ انتهت صلاحية أمر LIMIT الافتراضي دون تنفيذ",
     }
     kind = str(event.get("kind", ""))
     price_label = "سعر الإشارة المرجعي" if kind == "EXPIRED" else "المستوى المرصود"
@@ -1069,6 +1070,18 @@ def run_scanner() -> None:
             for frame in (df_15, df_1h, df_4h)
         ):
             note(ticker.symbol, "data", "non_paribu_candles")
+            continue
+
+        # Historical synthetic rows may warm long indicators, but entries may
+        # not be based on synthetic recent observations.
+        if not recent_authentic(df_15, 4, 900):
+            note(ticker.symbol, "data", "recent_15m_integrity_failed")
+            continue
+        if not recent_authentic(df_1h, 2, 3600):
+            note(ticker.symbol, "data", "recent_1h_integrity_failed")
+            continue
+        if not recent_authentic(df_4h, 1, 14400):
+            note(ticker.symbol, "data", "recent_4h_integrity_failed")
             continue
 
         # Collect existing data only. Evaluate AFTER the normal alert path, with
