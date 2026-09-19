@@ -40,7 +40,8 @@ from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
 from signal_tracker import register_signal, update_active_signals, deliver_pending_events
 from execution_research import evaluate_depth
-from candle_backfill import bind_history
+from candle_backfill import bind_history, recent_authentic
+from risk_engine import build_risk_plan
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -58,6 +59,7 @@ if not LOGGER.handlers:
 STATE_FILE = Path(os.getenv("SCANNER_STATE_FILE", "scanner_state.json"))
 TELEGRAM_TOKEN_ENV = "TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
+SHADOW_MODE = os.getenv("SHADOW_MODE", "false").strip().lower() == "true"
 
 # Universe / execution quality
 MIN_QUOTE_VOLUME_TL = Decimal(os.getenv("MIN_QUOTE_VOLUME_TL", "5000000"))
@@ -218,6 +220,9 @@ def _empty_state() -> dict[str, Any]:
         "daily_alerts": [],
         "last_alert_at": 0,
         "candle_gap_history": {},
+        "shadow_sent_signals": {},
+        "shadow_daily_alerts": [],
+        "shadow_last_alert_at": 0,
     }
 
 
@@ -232,7 +237,8 @@ def load_state() -> dict[str, Any]:
             raise ValueError("Scanner state must be an object")
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
                               ("near_misses", list), ("active_signals", list),
-                              ("daily_alerts", list), ("candle_gap_history", dict)):
+                              ("daily_alerts", list), ("candle_gap_history", dict),
+                              ("shadow_sent_signals", dict), ("shadow_daily_alerts", list)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -250,6 +256,10 @@ def load_state() -> dict[str, Any]:
             state["daily_alerts"] = raw["daily_alerts"]
         if isinstance(raw.get("candle_gap_history"), dict):
             state["candle_gap_history"] = raw["candle_gap_history"]
+        if isinstance(raw.get("shadow_sent_signals"), dict):
+            state["shadow_sent_signals"] = raw["shadow_sent_signals"]
+        if isinstance(raw.get("shadow_daily_alerts"), list):
+            state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
         # Research state is isolated from trading signal/watchlist state.
         if isinstance(raw.get("accumulation_radar"), dict):
             state["accumulation_radar"] = raw["accumulation_radar"]
@@ -257,7 +267,8 @@ def load_state() -> dict[str, Any]:
             state["scan_diagnostics"] = raw["scan_diagnostics"][-12:]
 
         state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
-        if state["last_alert_at"] < 0:
+        state["shadow_last_alert_at"] = int(raw.get("shadow_last_alert_at", 0) or 0)
+        if state["last_alert_at"] < 0 or state["shadow_last_alert_at"] < 0:
             raise ValueError("Invalid last alert time")
 
         return state
@@ -327,6 +338,9 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
     try:
         df_15 = fetch_candles("BTC_TL", "15m", CANDLE_LIMIT)
         df_1h = fetch_candles("BTC_TL", "1h", CANDLE_LIMIT)
+        if not recent_authentic(df_15, 16, 900):
+            return False, None, "BTC recent 4h candle integrity failed"
+
         tech_15 = analyze_symbol(df_15)
         tech_1h = analyze_symbol(df_1h)
 
@@ -396,7 +410,12 @@ def setup_type(tech: IndicatorResult) -> tuple[bool, str]:
     if tech.breakout and tech.volume_ratio >= Decimal("1.20"):
         return True, "BREAKOUT"
 
-    if tech.is_pullback and constructive:
+    if (
+        tech.is_pullback
+        and constructive
+        and tech.rsi14 <= Decimal("60")
+        and bool(getattr(tech, "mean_touch", False))
+    ):
         return True, "PULLBACK"
 
     recovery = bool(
@@ -733,6 +752,12 @@ def trigger_check(
 
     if not (ALERT_RSI_LOW <= candidate.tech_15.rsi14 <= ALERT_RSI_HIGH):
         return False, f"RSI {candidate.tech_15.rsi14:.1f} outside alert range", Decimal("0"), 0
+
+    if candidate.setup == "PULLBACK":
+        if candidate.tech_15.rsi14 > Decimal("60"):
+            return False, "pullback RSI above 60", Decimal("0"), 0
+        if not bool(getattr(candidate.tech_15, "mean_touch", False)):
+            return False, "pullback lacks EMA/VWAP interaction", Decimal("0"), 0
 
     fomo_ok, fomo_reason = anti_fomo_ok(candidate.tech_15)
     if not fomo_ok:
