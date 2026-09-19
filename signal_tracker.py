@@ -61,7 +61,7 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
     checked_at = int(time.time() if now is None else now)
     emitted: list[dict[str, Any]] = []
     for signal in _signals(state):
-        if signal.get("status") not in {"OPEN", "TP1"}:
+        if signal.get("status") not in {"PENDING_ENTRY", "OPEN", "TP1"}:
             continue
         entry, stop, tp1, tp2 = map(_d, (signal.get("entry"), signal.get("stop"),
                                          signal.get("tp1"), signal.get("tp2")))
