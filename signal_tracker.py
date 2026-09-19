@@ -9,7 +9,8 @@ import time
 from market_data import fetch_candles, get_order_book
 from risk_engine import breakeven_trigger_price, protected_breakeven_stop
 
-MAX_SIGNAL_AGE_SECONDS = 6 * 60 * 60\nSHADOW_ENTRY_TTL_SECONDS = 90 * 60
+MAX_SIGNAL_AGE_SECONDS = 6 * 60 * 60
+SHADOW_ENTRY_TTL_SECONDS = 90 * 60
 RISK_BUDGET_PCT = Decimal("2.00")
 
 
