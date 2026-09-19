@@ -52,16 +52,16 @@ def test_sell_wall_front_run_or_reject_on_bad_rr():
     wall_book = book(asks=(
         (D("100.1"), D("5")),
         (D("101.0"), D("10")),
-        (D("103.0"), D("200")),
+        (D("101.2"), D("200")),
     ))
     plan = build_risk_plan(
-        book=wall_book, tech=tech(atr14=D("0.4"), swing_low=D("99.2")),
+        book=wall_book, tech=tech(atr14=D("0.4"), swing_low=None),
         setup="BREAKOUT", atr_multiplier=D("1.5"), max_risk_pct=D("4")
     )
     assert plan is not None
     assert plan.target_adjusted_for_wall
-    assert plan.sell_wall_price == D("103.0")
-    assert plan.tp1 < D("103.0")
+    assert plan.sell_wall_price == D("101.2")
+    assert plan.tp1 < D("101.2")
     assert plan.reward_risk_tp1 >= D("1.5")
 
     close_wall = book(asks=(
