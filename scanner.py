@@ -963,7 +963,8 @@ def run_scanner() -> None:
     now = int(time.time())
     state = load_state()
     bind_history(state)
-    shadow_mode = SHADOW_MODE\n    diagnostics = {"started_at": now, "status": "running", "symbols": {}, "shadow_mode": shadow_mode}
+    shadow_mode = SHADOW_MODE
+    diagnostics = {"started_at": now, "status": "running", "symbols": {}, "shadow_mode": shadow_mode}
     observations = []
 
     def note(symbol, stage, reason, **metrics):
