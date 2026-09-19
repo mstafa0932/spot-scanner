@@ -7,6 +7,7 @@ from typing import Any, Optional
 import time
 
 from market_data import fetch_candles, get_order_book
+from risk_engine import breakeven_trigger_price, protected_breakeven_stop
 
 MAX_SIGNAL_AGE_SECONDS = 6 * 60 * 60
 RISK_BUDGET_PCT = Decimal("2.00")
@@ -40,6 +41,8 @@ def register_signal(state: dict[str, Any], *, symbol: str, entry: Any, stop: Any
         "tp1_notified": False, "events": [],
         "tracking_mode": "paper_price_observation", "fill_confirmed": False,
         "evidence": evidence or {},
+        "breakeven_armed": False,
+        "breakeven_stop": None,
     })
 
 
@@ -90,10 +93,13 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
                 if low is None or high is None or low <= 0 or high < low:
                     continue
                 signal["last_processed_candle"] = int(row.timestamp)
-                if low <= stop:  # conservative when stop and target share a candle
+
+                active_stop = _d(signal.get("breakeven_stop")) or stop
+                if low <= active_stop:  # conservative if stop and upside trigger share a candle
                     signal["status"] = "STOP"
-                    emitted.append(_event(signal, "STOP", stop, candle_at))
+                    emitted.append(_event(signal, "STOP", active_stop, candle_at))
                     break
+
                 if high >= tp2:
                     if not signal.get("tp1_notified"):
                         signal["tp1_notified"] = True
@@ -101,17 +107,33 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
                     signal["status"] = "TP2"
                     emitted.append(_event(signal, "TP2", tp2, candle_at))
                     break
+
                 if high >= tp1 and not signal.get("tp1_notified"):
                     signal["tp1_notified"] = True
                     signal["status"] = "TP1"
                     emitted.append(_event(signal, "TP1", tp1, candle_at))
+
+                # Arm breakeven only after the candle survived the original/effective
+                # stop. Intrabar ordering is unknowable from OHLC, so the new stop
+                # becomes effective from the next observation.
+                if not signal.get("breakeven_armed"):
+                    trigger = breakeven_trigger_price(entry, tp1)
+                    if high >= trigger:
+                        evidence = signal.get("evidence") if isinstance(signal.get("evidence"), dict) else {}
+                        spread_pct = _d(evidence.get("spread_pct")) or Decimal("0")
+                        be_stop = protected_breakeven_stop(entry, spread_pct=spread_pct)
+                        if stop < be_stop < tp1:
+                            signal["breakeven_armed"] = True
+                            signal["breakeven_stop"] = str(be_stop)
+                            emitted.append(_event(signal, "BREAKEVEN_ARMED", be_stop, candle_at))
 
         if signal.get("status") in {"OPEN", "TP1"} and checked_at <= expires_at:
             try:
                 bid = _d(get_order_book(str(signal["symbol"]), 5).best_bid)
             except Exception:
                 bid = None
-            if bid is not None and bid > 0 and bid <= stop:
+            active_stop = _d(signal.get("breakeven_stop")) or stop
+            if bid is not None and bid > 0 and bid <= active_stop:
                 signal["status"] = "STOP"
                 emitted.append(_event(signal, "STOP", bid, checked_at))
             elif bid is not None and bid >= tp2:
