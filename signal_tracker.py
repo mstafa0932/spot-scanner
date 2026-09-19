@@ -9,7 +9,7 @@ import time
 from market_data import fetch_candles, get_order_book
 from risk_engine import breakeven_trigger_price, protected_breakeven_stop
 
-MAX_SIGNAL_AGE_SECONDS = 6 * 60 * 60
+MAX_SIGNAL_AGE_SECONDS = 6 * 60 * 60\nSHADOW_ENTRY_TTL_SECONDS = 90 * 60
 RISK_BUDGET_PCT = Decimal("2.00")
 
 
@@ -33,14 +33,18 @@ def register_signal(state: dict[str, Any], *, symbol: str, entry: Any, stop: Any
                     tp1: Any, tp2: Any, score: int, setup: str,
                     now: Optional[int] = None, evidence: Optional[dict] = None) -> None:
     opened_at = int(time.time() if now is None else now)
+    evidence = evidence or {}
+    shadow = bool(evidence.get("shadow_mode"))
     _signals(state).append({
         "id": f"{symbol}:{opened_at}", "symbol": symbol,
         "opened_at": opened_at, "entry": str(entry), "stop": str(stop),
         "tp1": str(tp1), "tp2": str(tp2), "score": score, "setup": setup,
-        "risk_budget_pct": str(RISK_BUDGET_PCT), "status": "OPEN",
+        "risk_budget_pct": str(RISK_BUDGET_PCT),
+        "status": "PENDING_ENTRY" if shadow else "OPEN",
         "tp1_notified": False, "events": [],
-        "tracking_mode": "paper_price_observation", "fill_confirmed": False,
-        "evidence": evidence or {},
+        "tracking_mode": "shadow_limit_simulation" if shadow else "paper_price_observation",
+        "fill_confirmed": False,
+        "evidence": evidence,
         "breakeven_armed": False,
         "breakeven_stop": None,
     })
@@ -88,6 +92,33 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
 
         if future is not None:
             for row in future.itertuples(index=False):
+                # Shadow mode simulates a passive LIMIT order.  It is not a
+                # position until the market actually trades through the entry.
+                if signal.get("status") == "PENDING_ENTRY":
+                    low0, high0 = _d(row.low), _d(row.high)
+                    if low0 is None or high0 is None or low0 <= 0 or high0 < low0:
+                        continue
+                    signal["last_processed_candle"] = int(row.timestamp)
+                    if low0 <= entry <= high0:
+                        signal["fill_confirmed"] = True
+                        signal["filled_at"] = int(row.timestamp) + 900
+                        signal["status"] = "OPEN"
+                        # Conservative OHLC treatment: if the fill candle also
+                        # pierced the stop, count the stop; do not award upside
+                        # targets on the ambiguous fill candle.
+                        if low0 <= stop:
+                            signal["status"] = "STOP"
+                            emitted.append(_event(signal, "STOP", stop, int(row.timestamp) + 900))
+                            break
+                        continue
+                    if int(row.timestamp) + 900 - opened_at >= SHADOW_ENTRY_TTL_SECONDS:
+                        signal["status"] = "ENTRY_EXPIRED"
+                        payload = _event(signal, "ENTRY_EXPIRED", entry, int(row.timestamp) + 900)
+                        payload["event"]["price_basis"] = "unfilled_limit_reference"
+                        emitted.append(payload)
+                        break
+
+
                 low, high = _d(row.low), _d(row.high)
                 candle_at = int(row.timestamp) + 900
                 if low is None or high is None or low <= 0 or high < low:
@@ -147,7 +178,12 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
                 signal["status"] = "TP1"
                 emitted.append(_event(signal, "TP1", bid, checked_at))
 
-        if signal.get("status") in {"OPEN", "TP1"} and checked_at - opened_at >= MAX_SIGNAL_AGE_SECONDS:
+        if signal.get("status") == "PENDING_ENTRY" and checked_at - opened_at >= SHADOW_ENTRY_TTL_SECONDS:
+            signal["status"] = "ENTRY_EXPIRED"
+            payload = _event(signal, "ENTRY_EXPIRED", entry, opened_at + SHADOW_ENTRY_TTL_SECONDS)
+            payload["event"]["price_basis"] = "unfilled_limit_reference"
+            emitted.append(payload)
+        elif signal.get("status") in {"OPEN", "TP1"} and checked_at - opened_at >= MAX_SIGNAL_AGE_SECONDS:
             signal["status"] = "EXPIRED"
             payload = _event(signal, "EXPIRED", entry, expires_at)
             payload["event"]["price_basis"] = "entry_reference_not_current_price"
