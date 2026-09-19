@@ -125,7 +125,7 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
                         if stop < be_stop < tp1:
                             signal["breakeven_armed"] = True
                             signal["breakeven_stop"] = str(be_stop)
-                            emitted.append(_event(signal, "BREAKEVEN_ARMED", be_stop, candle_at))
+                            signal["breakeven_armed_at"] = candle_at
 
         if signal.get("status") in {"OPEN", "TP1"} and checked_at <= expires_at:
             try:
