@@ -203,6 +203,11 @@ def deliver_pending_events(state: dict[str, Any], sender, formatter) -> int:
     """
     delivered = 0
     for signal in _signals(state):
+        evidence = signal.get("evidence")
+        if isinstance(evidence, dict) and evidence.get("shadow_mode") is True:
+            # Shadow observations are research-only and must never leak into
+            # Telegram if production mode is enabled later.
+            continue
         for event in signal.get("events", []):
             if event.get("delivered") is not False:
                 continue
