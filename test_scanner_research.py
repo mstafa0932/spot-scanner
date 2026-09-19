@@ -21,6 +21,7 @@ def prepare(monkeypatch, tmp_path):
     monkeypatch.setattr(scanner, "get_market_snapshot", lambda: {ticker.symbol: ticker})
     monkeypatch.setattr(scanner, "get_order_book", lambda *a: book)
     monkeypatch.setattr(scanner, "fetch_candles", lambda *a: frame)
+    monkeypatch.setattr(scanner, "recent_authentic", lambda *a, **k: True)
     tech = NS(rsi14=D("60"), recent_return_3=D("1"), volume_ratio=D("2"))
     monkeypatch.setattr(scanner, "analyze_symbol", lambda *a: tech)
     monkeypatch.setattr(scanner, "score_candidate", lambda *a: (85, []))
