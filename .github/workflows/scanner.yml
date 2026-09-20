@@ -5,8 +5,11 @@ on:
   schedule:
     - cron: '7,17,27,37,47,57 * * * *'
   push:
-    branches-ignore:
+    branches:
       - main
+      - 'feat/**'
+    paths-ignore:
+      - scanner_state.json
 
 permissions:
   contents: write
@@ -39,7 +42,7 @@ jobs:
         run: python -m pytest -q
 
       - name: Run scanner
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || github.ref == 'refs/heads/main'
         env:
           SHADOW_MODE: 'true'
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -49,7 +52,7 @@ jobs:
         run: python main.py
 
       - name: Persist scanner state
-        if: ${{ always() && github.event_name != 'push' }}
+        if: ${{ always() && (github.event_name != 'push' || github.ref == 'refs/heads/main') }}
         shell: bash
         run: |
           if [ ! -f scanner_state.json ]; then
