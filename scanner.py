@@ -41,6 +41,7 @@ from near_miss import record_near_miss, update_near_miss_outcomes
 from signal_tracker import register_signal, update_active_signals, deliver_pending_events
 from execution_research import evaluate_depth
 from candle_backfill import bind_history, recent_authentic
+from coverage_scheduler import CoverageCycle
 from risk_engine import build_risk_plan
 
 
@@ -223,6 +224,7 @@ def _empty_state() -> dict[str, Any]:
         "shadow_sent_signals": {},
         "shadow_daily_alerts": [],
         "shadow_last_alert_at": 0,
+        "coverage_scheduler": {},
     }
 
 
@@ -238,7 +240,8 @@ def load_state() -> dict[str, Any]:
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
                               ("near_misses", list), ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
-                              ("shadow_sent_signals", dict), ("shadow_daily_alerts", list)):
+                              ("shadow_sent_signals", dict), ("shadow_daily_alerts", list),
+                              ("coverage_scheduler", dict)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -260,6 +263,8 @@ def load_state() -> dict[str, Any]:
             state["shadow_sent_signals"] = raw["shadow_sent_signals"]
         if isinstance(raw.get("shadow_daily_alerts"), list):
             state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
+        if isinstance(raw.get("coverage_scheduler"), dict):
+            state["coverage_scheduler"] = raw["coverage_scheduler"]
         # Research state is isolated from trading signal/watchlist state.
         if isinstance(raw.get("accumulation_radar"), dict):
             state["accumulation_radar"] = raw["accumulation_radar"]
@@ -1022,12 +1027,14 @@ def run_scanner() -> None:
     discovered: list[Candidate] = []
     orderbook_checked = 0
     technical_checked = 0
+    coverage = CoverageCycle(state.setdefault("coverage_scheduler", {}), snapshot)
+    book_candidates = []
 
     # Pre-fill so symbols beyond capacity are not confused with rejected setups.
     for ticker in tickers:
         diagnostics["symbols"][ticker.symbol] = {"stage": "coverage", "reason": "not_evaluated_capacity"}
 
-    for ticker in tickers:
+    for ticker in coverage.order(tickers, "orderbooks", lambda item: item.symbol):
         if ticker.symbol in {"USDT_TL", "USDC_TL", "BTC_TL"}:
             note(ticker.symbol, "universe", "excluded_base_asset")
             continue
@@ -1037,8 +1044,11 @@ def run_scanner() -> None:
             continue
 
         if orderbook_checked >= MAX_ORDERBOOK_MARKETS:
-            break
+            # Continue cheap universe checks for the remaining markets, so a
+            # low-volume exclusion is not mislabeled as an API-capacity miss.
+            continue
         orderbook_checked += 1
+        coverage.attempted("orderbooks", ticker.symbol)
 
         try:
             book = get_order_book(ticker.symbol, ORDERBOOK_DEPTH)
@@ -1054,9 +1064,16 @@ def run_scanner() -> None:
             note(ticker.symbol, "book", "imbalance_too_low", imbalance=str(book.imbalance_ratio))
             continue
 
+        book_candidates.append((ticker, book))
+
+    # Independent fairness at the second budget prevents the same book-approved
+    # markets from repeatedly losing the last technical-analysis slots.
+    for ticker, book in coverage.order(book_candidates, "technicals", lambda item: item[0].symbol):
         if technical_checked >= MAX_TECHNICAL_MARKETS:
-            break
+            note(ticker.symbol, "coverage", "not_evaluated_technical_capacity")
+            continue
         technical_checked += 1
+        coverage.attempted("technicals", ticker.symbol)
 
         try:
             df_15 = fetch_candles(ticker.symbol, "15m", CANDLE_LIMIT)

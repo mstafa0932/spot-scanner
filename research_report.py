@@ -41,7 +41,9 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
         warnings.append("no_recent_completed_scan")
     if latest.get("status") != "completed":
         warnings.append("scan_not_completed")
-    if counts.get("not_evaluated_capacity", 0):
+    book_capacity = counts.get("not_evaluated_capacity", 0)
+    technical_capacity = counts.get("not_evaluated_technical_capacity", 0)
+    if book_capacity or technical_capacity:
         warnings.append("universe_not_fully_evaluated")
     signals = state.get("active_signals", [])
     pending = sum(event.get("delivered") is False for s in signals for event in s.get("events", []))
@@ -88,7 +90,9 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
         "coverage": {"snapshot_markets": latest.get("markets"),
                      "orderbooks_checked": latest.get("orderbooks_checked"),
                      "technical_checked": latest.get("technical_checked"),
-                     "unexamined_capacity": counts.get("not_evaluated_capacity", 0)},
+                     "unexamined_capacity": book_capacity + technical_capacity,
+                     "unexamined_orderbook_capacity": book_capacity,
+                     "unexamined_technical_capacity": technical_capacity},
         "rejection_reasons": dict(counts),
         "paper_signal_status_counts": dict(Counter(s.get("status", "unknown") for s in signals)),
         "pending_lifecycle_notifications": pending,

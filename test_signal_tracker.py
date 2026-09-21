@@ -8,7 +8,8 @@ def _state(low, high):
     signal_tracker.register_signal(state, symbol="TEST_TL", entry=Decimal("100"),
         stop=Decimal("98"), tp1=Decimal("101.5"), tp2=Decimal("102.3"),
         score=90, setup="BREAKOUT", now=1000)
-    return state, pd.DataFrame([{"timestamp": 1900, "low": low, "high": high}])
+    return state, pd.DataFrame([{"timestamp": 1900, "low": low, "high": high,
+                                 "is_authentic": True, "volume": 10}])
 
 
 def test_ambiguous_candle_is_stop_first(monkeypatch):
@@ -34,7 +35,8 @@ def test_shadow_limit_waits_for_fill(monkeypatch):
         tp1=Decimal("103"), tp2=Decimal("105"), score=90, setup="BREAKOUT",
         now=1000, evidence={"shadow_mode": True, "spread_pct": "0.10"}
     )
-    frame = pd.DataFrame([{"timestamp": 1900, "low": 100.5, "high": 101.5}])
+    frame = pd.DataFrame([{"timestamp": 1900, "low": 100.5, "high": 101.5,
+                           "is_authentic": True, "volume": 10}])
     monkeypatch.setattr(signal_tracker, "fetch_candles", lambda *a, **k: frame)
     monkeypatch.setattr(signal_tracker, "get_order_book", lambda *a, **k: None)
     assert signal_tracker.update_active_signals(state, now=3000) == []
@@ -49,17 +51,19 @@ def test_shadow_limit_fill_then_breakeven_persists(monkeypatch):
         tp1=Decimal("104"), tp2=Decimal("108"), score=90, setup="BREAKOUT",
         now=1000, evidence={"shadow_mode": True, "spread_pct": "0.10"}
     )
-    first = pd.DataFrame([{"timestamp": 1900, "low": 99.9, "high": 100.5}])
+    first = pd.DataFrame([{"timestamp": 1900, "low": 99.9, "high": 100.5,
+                           "is_authentic": True, "volume": 10}])
     monkeypatch.setattr(signal_tracker, "fetch_candles", lambda *a, **k: first)
     monkeypatch.setattr(signal_tracker, "get_order_book", lambda *a, **k: None)
     signal_tracker.update_active_signals(state, now=3000)
     sig = state["active_signals"][0]
     assert sig["status"] == "OPEN"
-    assert sig["fill_confirmed"] is True
+    assert sig["fill_confirmed"] is False
+    assert sig["fill_estimated"] is True
 
     second = pd.DataFrame([
-        {"timestamp": 1900, "low": 99.9, "high": 100.5},
-        {"timestamp": 2800, "low": 100.2, "high": 101.1},
+        {"timestamp": 1900, "low": 99.9, "high": 100.5, "is_authentic": True, "volume": 10},
+        {"timestamp": 2800, "low": 100.2, "high": 101.1, "is_authentic": True, "volume": 10},
     ])
     monkeypatch.setattr(signal_tracker, "fetch_candles", lambda *a, **k: second)
     signal_tracker.update_active_signals(state, now=4000)
