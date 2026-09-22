@@ -3,6 +3,8 @@
 This branch is a separately versioned research change. Keep the deployed baseline
 and its data unchanged through 2026-09-22 15:59 Europe/Istanbul. The workflow still
 sets `SHADOW_MODE=true`; a push to this feature branch runs tests, not the scanner.
+Manual workflow dispatch on a feature branch also runs tests only. Both scanner
+entry points and the public `run_scanner()` function reject non-Shadow mode.
 No strategy threshold or indicator implementation is changed.
 
 ## Execution semantics
@@ -53,7 +55,7 @@ is assumed. Existing HTTP retry and Retry-After handling are unchanged.
 
 ## Verification
 
-`python -m pytest -q`: 147 tests passed locally (Python 3.12).
+`python -m pytest -q`: 165 tests passed locally (Python 3.12).
 
 35 new simulator cases cover touches, penetration, deadline boundaries, delayed
 polls, synthetic/missing/malformed provenance, nonpositive volume, no targets
@@ -65,6 +67,28 @@ original tracker and all failed as expected, before passing on the repair.
 independent technical fairness, restart persistence, invalid state, scanner
 integration, and separate capacity counts. Existing tracker fixtures now declare
 the actual authentic/volume input contract instead of omitting provenance.
+
+18 additional measurement/safety cases cover premature Near-Miss checkpoints,
+bid-side observations, distinct rejection reasons, strict boolean provenance,
+research cohort persistence, exclusion of legacy/incomplete execution samples,
+synthetic radar inputs, public-entry-point Shadow enforcement, Shadow notification
+isolation, and fair retry rotation after failed quote requests.
+
+## Measurement separation and diagnostics
+
+- Each run, new simulated signal, Near-Miss record, and radar event carries a
+  research cohort. Old observations stay in state and are excluded from the new
+  execution performance sample. Version transitions are marked incomplete.
+- The per-run funnel follows the actual book-before-technicals pipeline. Each
+  recorded decision also retains its timestamp in an ordered transition list.
+- `signal_recorded` is separate from `alert_sent`: a Shadow record is not a
+  delivered Telegram alert. Shadow events never enter the notification backlog.
+- Near-Miss checkpoints require reaching the horizon, use sampled bid prices
+  for new records, and preserve legacy ask-based records separately. Failed
+  quote requests consume a scheduling turn so other symbols are still checked.
+- These are sampled quote observations, not exact intrabar MFE/MAE or fills.
+  Unknown fees and slippage remain unknown. Cohort/version labels must be kept
+  when extracting the baseline and when analyzing the repaired model.
 
 ## Post-freeze measurement requirements
 

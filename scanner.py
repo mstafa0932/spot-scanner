@@ -42,6 +42,7 @@ from signal_tracker import register_signal, update_active_signals, deliver_pendi
 from execution_research import evaluate_depth
 from candle_backfill import bind_history, recent_authentic
 from coverage_scheduler import CoverageCycle
+from research_cohort import ensure_cohort
 from risk_engine import build_risk_plan
 
 
@@ -60,7 +61,7 @@ if not LOGGER.handlers:
 STATE_FILE = Path(os.getenv("SCANNER_STATE_FILE", "scanner_state.json"))
 TELEGRAM_TOKEN_ENV = "TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
-SHADOW_MODE = os.getenv("SHADOW_MODE", "false").strip().lower() == "true"
+SHADOW_MODE = os.getenv("SHADOW_MODE", "true").strip().lower() == "true"
 
 # Universe / execution quality
 MIN_QUOTE_VOLUME_TL = Decimal(os.getenv("MIN_QUOTE_VOLUME_TL", "5000000"))
@@ -241,7 +242,8 @@ def load_state() -> dict[str, Any]:
                               ("near_misses", list), ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
                               ("shadow_sent_signals", dict), ("shadow_daily_alerts", list),
-                              ("coverage_scheduler", dict)):
+                              ("coverage_scheduler", dict), ("research_cohort", dict),
+                              ("research_cohort_history", list)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -265,6 +267,9 @@ def load_state() -> dict[str, Any]:
             state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
         if isinstance(raw.get("coverage_scheduler"), dict):
             state["coverage_scheduler"] = raw["coverage_scheduler"]
+        for key in ("research_cohort", "research_cohort_history", "execution_research"):
+            if key in raw:
+                state[key] = raw[key]
         # Research state is isolated from trading signal/watchlist state.
         if isinstance(raw.get("accumulation_radar"), dict):
             state["accumulation_radar"] = raw["accumulation_radar"]
@@ -965,15 +970,26 @@ def format_signal_event(payload: dict[str, Any]) -> str:
 
 
 def run_scanner() -> None:
+    # Guard the public function too: callers may import it instead of main.py.
+    if not SHADOW_MODE or os.getenv("SHADOW_MODE", "true").strip().lower() != "true":
+        raise RuntimeError("This release requires SHADOW_MODE=true")
     now = int(time.time())
     state = load_state()
+    cohort = ensure_cohort(state, now)
+    LOGGER.info("RESEARCH_COHORT | id=%s | code=%s | shadow=%s", cohort["id"], os.getenv("GITHUB_SHA"), SHADOW_MODE)
     bind_history(state)
     shadow_mode = SHADOW_MODE
-    diagnostics = {"started_at": now, "status": "running", "symbols": {}, "shadow_mode": shadow_mode}
+    diagnostics = {"started_at": now, "status": "running", "symbols": {}, "shadow_mode": shadow_mode,
+                   "research_cohort": cohort["id"], "code_sha": os.getenv("GITHUB_SHA"),
+                   "run_id": os.getenv("GITHUB_RUN_ID"), "transitions": []}
+    funnel = {"book_approved": 0, "data_valid": 0, "discovery_passed": 0,
+              "confirmed": 0, "limit_simulated": 0}
     observations = []
 
     def note(symbol, stage, reason, **metrics):
-        diagnostics["symbols"][symbol] = {"stage": stage, "reason": reason, **metrics}
+        decision = {"stage": stage, "reason": reason, "observed_at": int(time.time()), **metrics}
+        diagnostics["symbols"][symbol] = decision
+        diagnostics["transitions"].append({"symbol": symbol, **decision})
         LOGGER.info("Scan decision | %s | %s | %s", symbol, stage, reason)
 
     def finish_diagnostics(status):
@@ -1032,7 +1048,8 @@ def run_scanner() -> None:
 
     # Pre-fill so symbols beyond capacity are not confused with rejected setups.
     for ticker in tickers:
-        diagnostics["symbols"][ticker.symbol] = {"stage": "coverage", "reason": "not_evaluated_capacity"}
+        diagnostics["symbols"][ticker.symbol] = {"stage": "coverage", "reason": "not_evaluated_capacity",
+                                                  "observed_at": now}
 
     for ticker in coverage.order(tickers, "orderbooks", lambda item: item.symbol):
         if ticker.symbol in {"USDT_TL", "USDC_TL", "BTC_TL"}:
@@ -1065,6 +1082,7 @@ def run_scanner() -> None:
             continue
 
         book_candidates.append((ticker, book))
+        funnel["book_approved"] += 1
 
     # Independent fairness at the second budget prevents the same book-approved
     # markets from repeatedly losing the last technical-analysis slots.
@@ -1101,6 +1119,8 @@ def run_scanner() -> None:
         if not recent_authentic(df_4h, 1, 14400):
             note(ticker.symbol, "data", "recent_4h_integrity_failed")
             continue
+
+        funnel["data_valid"] += 1
 
         # Collect existing data only. Evaluate AFTER the normal alert path, with
         # no extra requests or interference with entry thresholds/cooldowns.
@@ -1143,6 +1163,7 @@ def run_scanner() -> None:
         )
 
         discovered.append(candidate)
+        funnel["discovery_passed"] += 1
         _update_watchlist(state, candidate, now)
 
     # Highest quality first. Only one alert can be sent.
@@ -1207,6 +1228,7 @@ def run_scanner() -> None:
         if not ready:
             note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason)
             continue
+        funnel["confirmed"] += 1
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
             note(candidate.symbol, "risk", "opportunity_unavailable")
@@ -1230,13 +1252,15 @@ def run_scanner() -> None:
         if shadow_mode:
             note(candidate.symbol, "shadow", "paper_signal_recorded")
             sent = True
-            state["shadow_last_alert_at"] = now
-            state.setdefault("shadow_daily_alerts", []).append(now)
-            state.setdefault("shadow_sent_signals", {})[candidate.symbol] = now
+            placed_at = int(time.time())
+            state["shadow_last_alert_at"] = placed_at
+            state.setdefault("shadow_daily_alerts", []).append(placed_at)
+            state.setdefault("shadow_sent_signals", {})[candidate.symbol] = placed_at
+            funnel["limit_simulated"] += 1
             register_signal(
                 state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
                 tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
-                setup=opp.setup, now=now, evidence=evidence,
+                setup=opp.setup, now=placed_at, evidence=evidence,
             )
             LOGGER.info(
                 "SHADOW signal: %s score=%d confirmations=%d entry=%s stop=%s tp1=%s",
@@ -1272,7 +1296,7 @@ def run_scanner() -> None:
         try:
             from accumulation_radar import advance
             state["accumulation_radar"] = advance(
-                state.get("accumulation_radar"), observations, snapshot, now, btc_ok, btc_reason
+                state.get("accumulation_radar"), observations, snapshot, now, btc_ok, btc_reason, cohort["id"]
             )
             diagnostics["radar_status"] = "shadow_only"
         except Exception as exc:
@@ -1281,8 +1305,14 @@ def run_scanner() -> None:
             LOGGER.warning("Shadow radar failed: %s", type(exc).__name__)
     else:
         diagnostics["radar_status"] = "disabled"
+    funnel.update(universe=len(snapshot), orderbooks_attempted=orderbook_checked,
+                  technicals_attempted=technical_checked,
+                  universe_excluded=sum(d["stage"] == "universe" for d in diagnostics["symbols"].values()))
     diagnostics.update(markets=len(snapshot), orderbooks_checked=orderbook_checked,
-                       technical_checked=technical_checked, discovered=len(discovered), alert_sent=sent)
+                       technical_checked=technical_checked, discovered=len(discovered),
+                       signal_recorded=sent, alert_sent=sent and not shadow_mode, funnel=funnel)
+    diagnostics["coverage_generation"] = coverage.state["generation"]
+    diagnostics["orderbook_markets_seen"] = len(coverage.state["orderbooks"])
     finish_diagnostics("completed")
 
     try:
@@ -1307,4 +1337,6 @@ def run_scanner() -> None:
 
 
 if __name__ == "__main__":
+    if not SHADOW_MODE:
+        raise RuntimeError("This release requires SHADOW_MODE=true")
     run_scanner()

@@ -51,6 +51,7 @@ def register_signal(state: dict[str, Any], *, symbol: str, entry: Any, stop: Any
         "fill_confirmed": False,
         "fill_estimated": False,
         "simulation_version": SIMULATION_VERSION if shadow else None,
+        "research_cohort": state.get("research_cohort", {}).get("id", "legacy"),
         "evidence": evidence,
         "breakeven_armed": False,
         "breakeven_stop": None,
@@ -94,6 +95,10 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
     for signal in _signals(state):
         if signal.get("status") not in {"PENDING_ENTRY", "OPEN", "TP1"}:
             continue
+        if (signal.get("tracking_mode") == "shadow_limit_simulation"
+                and signal.get("simulation_version") != SIMULATION_VERSION):
+            signal.setdefault("model_transition_from", signal.get("simulation_version") or "legacy")
+            signal["tracking_incomplete"] = True
         entry, stop, tp1, tp2 = map(_d, (signal.get("entry"), signal.get("stop"),
                                          signal.get("tp1"), signal.get("tp2")))
         if any(x is None for x in (entry, stop, tp1, tp2)):
@@ -260,7 +265,8 @@ def deliver_pending_events(state: dict[str, Any], sender, formatter) -> int:
     delivered = 0
     for signal in _signals(state):
         evidence = signal.get("evidence")
-        if isinstance(evidence, dict) and evidence.get("shadow_mode") is True:
+        if (signal.get("tracking_mode") == "shadow_limit_simulation"
+                or (isinstance(evidence, dict) and evidence.get("shadow_mode") is True)):
             # Shadow observations are research-only and must never leak into
             # Telegram if production mode is enabled later.
             continue

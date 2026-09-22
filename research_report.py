@@ -9,6 +9,28 @@ from pathlib import Path
 import time
 
 
+def is_shadow(signal):
+    evidence = signal.get("evidence") or {}
+    return (signal.get("tracking_mode") == "shadow_limit_simulation"
+            or (isinstance(evidence, dict) and evidence.get("shadow_mode") is True))
+
+
+def execution_sample(signals, cohort):
+    """Separate the repaired model's complete estimates from legacy observations."""
+    current = [s for s in signals if cohort and s.get("research_cohort") == cohort
+               and s.get("simulation_version") == "ohlc_penetration_v2" and is_shadow(s)]
+    complete = [s for s in current if not s.get("tracking_incomplete") and not s.get("model_transition_from")]
+    estimated = [s for s in complete if s.get("fill_estimated") is True and not s.get("fill_confirmed")]
+    return {"cohort": cohort, "current_records": len(current),
+            "excluded_legacy_records": len(signals) - len(current),
+            "incomplete_records": len(current) - len(complete),
+            "estimated_fill_status_counts": dict(Counter(s.get("status", "unknown") for s in estimated)),
+            "pending_entries": sum(s.get("status") == "PENDING_ENTRY" for s in complete),
+            "expired_entries": sum(s.get("status") == "ENTRY_EXPIRED" for s in complete),
+            "confirmed_exchange_fills": 0,
+            "basis": "ohlc_scenarios_not_realized_pnl"}
+
+
 def dec(value):
     try:
         n = Decimal(str(value))
@@ -46,13 +68,17 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
     if book_capacity or technical_capacity:
         warnings.append("universe_not_fully_evaluated")
     signals = state.get("active_signals", [])
-    pending = sum(event.get("delivered") is False for s in signals for event in s.get("events", []))
+    pending = sum(event.get("delivered") is False for s in signals if not is_shadow(s)
+                  for event in s.get("events", []))
+    shadow_events = sum(len(s.get("events", [])) for s in signals if is_shadow(s))
     if pending:
         warnings.append("lifecycle_notifications_pending")
     radar = state.get("accumulation_radar", {})
     if str(latest.get("radar_status", "")).startswith("error"):
         warnings.append("radar_error")
-    events = radar.get("events", [])
+    retained_events = radar.get("events", [])
+    cohort = state.get("research_cohort", {}).get("id")
+    events = [e for e in retained_events if not cohort or e.get("research_cohort") == cohort]
     horizons = {}
     for horizon in (3600, 14400, 86400):
         matured = [e for e in events if now - e.get("observed_at", now) >= horizon]
@@ -84,7 +110,7 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
     if fee_pct is None or slippage_pct is None:
         warnings.append("trading_costs_unspecified")
     return {
-        "version": 1, "generated_at": now, "mode": "research_only",
+        "version": 2, "generated_at": now, "mode": "research_only",
         "profitability_proven": False, "automatic_promotion_allowed": False,
         "warnings": warnings,
         "coverage": {"snapshot_markets": latest.get("markets"),
@@ -95,7 +121,15 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
                      "unexamined_technical_capacity": technical_capacity},
         "rejection_reasons": dict(counts),
         "paper_signal_status_counts": dict(Counter(s.get("status", "unknown") for s in signals)),
+        "paper_signal_status_counts_basis": "inventory_only_mixed_models_not_performance",
+        "research_cohort": state.get("research_cohort"),
+        "execution_sample": execution_sample(signals, cohort),
+        "funnel": latest.get("funnel", {}),
+        "funnel_order": ["universe", "orderbooks_attempted", "book_approved", "technicals_attempted",
+                         "data_valid", "discovery_passed", "confirmed", "limit_simulated"],
         "pending_lifecycle_notifications": pending,
+        "shadow_events_retained": shadow_events,
+        "legacy_radar_events_excluded": len(retained_events)-len(events),
         "radar_events_retained": len(events), "horizon_samples": horizons,
         "cost_assumptions_per_side": {"fee_pct": fee_pct, "slippage_pct": slippage_pct},
         "limitations": ["not_actual_trades", "last_price_is_not_executable_bid",

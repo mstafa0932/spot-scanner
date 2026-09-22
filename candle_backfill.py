@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from typing import Callable
 
 import pandas as pd
+from pandas.api.types import is_bool
 
 LOGGER = logging.getLogger("paribu_momentum_watcher.candle_backfill")
 
@@ -81,8 +82,8 @@ def _authentic_tail_count(frame: pd.DataFrame) -> int:
     if "is_authentic" not in frame.columns:
         return 0
     count = 0
-    for value in reversed(frame["is_authentic"].astype(bool).tolist()):
-        if not value:
+    for value in reversed(frame["is_authentic"].tolist()):
+        if not is_bool(value) or not bool(value):
             break
         count += 1
     return count
@@ -97,7 +98,7 @@ def recent_authentic(
     if bars <= 0 or len(frame) < bars or "is_authentic" not in frame.columns:
         return False
     tail = frame.tail(bars)
-    if not bool(tail["is_authentic"].astype(bool).all()):
+    if not all(is_bool(value) and bool(value) for value in tail["is_authentic"]):
         return False
     if len(tail) > 1:
         diffs = tail["timestamp"].diff().dropna()

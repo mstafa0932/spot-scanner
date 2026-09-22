@@ -12,7 +12,7 @@ NOW = 1800000000
 def fixture(now=NOW):
     rows = [{"timestamp": now - (49-i)*900, "open": 100,
              "high": 101, "low": 99, "close": 100.5,
-             "volume": 200 if i >= 46 else 100} for i in range(49)]
+             "volume": 200 if i >= 46 else 100, "is_authentic": True} for i in range(49)]
     frame = pd.DataFrame(rows)
     frame.attrs.update(source="PARIBU", resolution="15m")
     book = NS(best_bid=D("100.5"), best_ask=D("100.6"),
