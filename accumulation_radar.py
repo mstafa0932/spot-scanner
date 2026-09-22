@@ -44,6 +44,9 @@ def evaluate(frame, book, now):
         return None, "open_candle"
     if now - (times[-1] + INTERVAL) > 1200:
         return None, "stale_candles"
+    from candle_backfill import recent_authentic
+    if not recent_authentic(frame, 49, INTERVAL):
+        return None, "inauthentic_candles"
 
     bid, ask = number(book.best_bid), number(book.best_ask)
     imbalance = number(book.imbalance_ratio)
@@ -85,7 +88,7 @@ def evaluate(frame, book, now):
     }, "qualifies"
 
 
-def advance(previous, observations, snapshot, now, btc_ok, btc_reason):
+def advance(previous, observations, snapshot, now, btc_ok, btc_reason, research_cohort=None):
     """Transactional shadow state. Outcomes are sampled last prices, NOT fills.
 
     Missing horizon observations remain missing; no backfilled wins. Only samples
@@ -136,6 +139,7 @@ def advance(previous, observations, snapshot, now, btc_ok, btc_reason):
         recent_event = any(e["symbol"] == symbol and now - e["observed_at"] < 86400 for e in events)
         if confirmations >= 2 and now - first_seen >= 600 and not recent_event:
             events.append({**hypothesis, "id": f"{symbol}:{now}", "symbol": symbol,
+                           "research_cohort": research_cohort,
                            "observed_at": now, "confirmations": confirmations,
                            "status": "observing", "mode": "shadow_only",
                            "btc_ok": bool(btc_ok), "btc_reason": btc_reason,

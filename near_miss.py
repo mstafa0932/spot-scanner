@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
+import hashlib
 import os
 import time
 
@@ -33,6 +34,7 @@ MAX_PRICE_CHECKS_PER_RUN = max(
     1,
     int(os.getenv("NEAR_MISS_MAX_PRICE_CHECKS", "15")),
 )
+MEASUREMENT_VERSION = "bid_checkpoints_v2"
 
 
 def _dec(value: Any) -> Optional[Decimal]:
@@ -99,7 +101,9 @@ def record_near_miss(
 
     # Do not record the same symbol/gate every scan.
     for old in reversed(records):
-        if old.get("symbol") != symbol or old.get("gate") != gate:
+        if (old.get("symbol") != symbol or old.get("gate") != gate
+                or old.get("reason") != reason
+                or old.get("measurement_version") != MEASUREMENT_VERSION):
             continue
         try:
             age = now - int(old.get("observed_at", 0))
@@ -110,7 +114,11 @@ def record_near_miss(
 
     records.append(
         {
-            "id": f"{symbol}:{gate}:{now}",
+            "id": f"{symbol}:{gate}:{now}:{hashlib.sha256(reason.encode()).hexdigest()[:12]}",
+            "measurement_version": MEASUREMENT_VERSION,
+            "research_cohort": state.get("research_cohort", {}).get("id", "legacy"),
+            "reference_price_basis": "ask_at_rejection",
+            "excursion_basis": "sampled_quotes_not_exact_intracandle_mfe_mae",
             "symbol": symbol,
             "gate": gate,
             "reason": reason,
@@ -154,17 +162,27 @@ def update_near_miss_outcomes(state: dict[str, Any]) -> dict[str, int]:
             continue
         by_symbol.setdefault(symbol, []).append(record)
 
-    symbols = sorted(
-        by_symbol,
-        key=lambda s: max(int(r.get("observed_at", 0)) for r in by_symbol[s]),
-        reverse=True,
-    )[:MAX_PRICE_CHECKS_PER_RUN]
+    # Old observations must not starve while new rejections keep arriving.
+    def last_attempt(record):
+        try:
+            return int(record.get("last_attempted_at")
+                       or record.get("last_checked_at") or record["observed_at"])
+        except (TypeError, ValueError):
+            return int(record["observed_at"])
+
+    symbols = sorted(by_symbol, key=lambda s: min(
+        last_attempt(r) for r in by_symbol[s]
+    ))[:MAX_PRICE_CHECKS_PER_RUN]
 
     for symbol in symbols:
+        # A failed request consumes a turn; it must not starve other symbols.
+        attempted_at = int(time.time())
+        for record in by_symbol[symbol]:
+            record["last_attempted_at"] = attempted_at
         try:
             book = get_order_book(symbol, 5)
-            current_price = _dec(book.best_ask)
-            if current_price is None or current_price <= 0:
+            bid, ask = _dec(book.best_bid), _dec(book.best_ask)
+            if bid is None or ask is None or bid <= 0 or ask < bid:
                 result["errors"] += 1
                 continue
         except Exception:
@@ -172,8 +190,11 @@ def update_near_miss_outcomes(state: dict[str, Any]) -> dict[str, int]:
             continue
 
         result["checked"] += 1
+        sampled_at = int(time.time())
 
         for record in by_symbol[symbol]:
+            # Preserve the old ask-based series; never mix two price bases.
+            current_price = bid if record.get("measurement_version") == MEASUREMENT_VERSION else ask
             reference_price = _dec(record.get("reference_price"))
             if reference_price is None or reference_price <= 0:
                 continue
@@ -183,11 +204,11 @@ def update_near_miss_outcomes(state: dict[str, Any]) -> dict[str, int]:
             except (TypeError, ValueError):
                 continue
 
-            age = now - observed_at
+            age = sampled_at - observed_at
             change_pct = (current_price / reference_price - Decimal("1")) * Decimal("100")
 
             record["last_price"] = str(current_price)
-            record["last_checked_at"] = now
+            record["last_checked_at"] = sampled_at
 
             previous_gain = _dec(record.get("max_gain_pct")) or Decimal("0")
             previous_drawdown = _dec(record.get("max_drawdown_pct")) or Decimal("0")
@@ -202,11 +223,15 @@ def update_near_miss_outcomes(state: dict[str, Any]) -> dict[str, int]:
             for label, target_age in CHECKPOINTS.items():
                 if label in outcomes:
                     continue
-                if abs(age - target_age) > CHECKPOINT_TOLERANCE_SECONDS:
+                if not target_age <= age <= target_age + CHECKPOINT_TOLERANCE_SECONDS:
                     continue
 
                 outcomes[label] = {
-                    "checked_at": now,
+                    "checked_at": sampled_at,
+                    "actual_age_seconds": age,
+                    "target_age_seconds": target_age,
+                    "price_basis": ("sampled_bid_not_fill" if record.get("measurement_version") == MEASUREMENT_VERSION
+                                    else "legacy_sampled_ask_not_fill"),
                     "price": str(current_price),
                     "change_pct": str(change_pct),
                 }

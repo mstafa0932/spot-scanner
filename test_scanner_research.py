@@ -43,6 +43,7 @@ def test_rejection_recorded_and_state_roundtrip(monkeypatch, tmp_path):
 @pytest.mark.parametrize("disabled,broken", [(True, False), (False, True), (False, False)])
 def test_entry_path_survives_research_modes(monkeypatch, tmp_path, disabled, broken):
     prepare(monkeypatch, tmp_path)
+    monkeypatch.setattr(scanner, "SHADOW_MODE", True)
     monkeypatch.setenv("SHADOW_RADAR_ENABLED", "false" if disabled else "true")
     if broken:
         def fail(*a): raise ValueError("simulated research failure")
@@ -63,10 +64,13 @@ def test_entry_path_survives_research_modes(monkeypatch, tmp_path, disabled, bro
     monkeypatch.setattr(scanner, "send_telegram", lambda msg: messages.append(msg) or True)
     scanner.run_scanner()
     state = scanner.load_state()
-    assert messages == ["original-entry"]
-    assert state["sent_signals"] == {"SYN_TL": NOW}
+    assert messages == []
+    assert state["sent_signals"] == {}
+    assert state["shadow_sent_signals"] == {"SYN_TL": NOW}
     assert state["active_signals"][0]["entry"] == "100"
-    assert state["scan_diagnostics"][-1]["alert_sent"] is True
+    assert state["active_signals"][0]["status"] == "PENDING_ENTRY"
+    assert state["scan_diagnostics"][-1]["signal_recorded"] is True
+    assert state["scan_diagnostics"][-1]["alert_sent"] is False
     expected = "disabled" if disabled else "error:ValueError" if broken else "shadow_only"
     assert state["scan_diagnostics"][-1]["radar_status"] == expected
 

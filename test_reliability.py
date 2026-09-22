@@ -16,7 +16,10 @@ def signal():
 
 
 def bars(monkeypatch, rows, bid=None):
-    monkeypatch.setattr(tracker, "fetch_candles", lambda *a: pd.DataFrame(rows, columns=["timestamp", "low", "high"]))
+    frame = pd.DataFrame(rows, columns=["timestamp", "low", "high"])
+    frame["is_authentic"] = True
+    frame["volume"] = 10
+    monkeypatch.setattr(tracker, "fetch_candles", lambda *a: frame)
     monkeypatch.setattr(tracker, "get_order_book", lambda *a: NS(best_bid=bid))
 
 

@@ -8,6 +8,8 @@ from scanner import run_scanner
 
 
 def main() -> None:
+    if os.getenv("SHADOW_MODE", "true").strip().lower() != "true":
+        raise RuntimeError("This release requires SHADOW_MODE=true")
     print("🚀 MAIN: started")
 
     # ---------------- Scanner ----------------
