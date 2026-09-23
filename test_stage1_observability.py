@@ -93,12 +93,21 @@ def test_week1_metrics_emits_only_at_23_utc(tmp_path):
 def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, capsys):
     prepare(monkeypatch, tmp_path)
     monkeypatch.setattr(scanner, "discovery_ok", lambda *a: (False, "synthetic rejection"))
+    monkeypatch.setattr(
+        scanner,
+        "btc_gate",
+        lambda: (False, None, "BTC confirmed weakness RSI=42.0 | 3C=-1.00%"),
+    )
     scanner.run_scanner()
     output = capsys.readouterr().out
-    lines = [line for line in output.splitlines() if line.startswith("[FUNNEL]")]
+    lines = [
+        line for line in output.splitlines()
+        if line.startswith(("[FUNNEL]", "[BTC_GATE]"))
+    ]
     assert lines == [
         "[FUNNEL] universe=1 liq=1 spread=1 book=1 tech=1 "
-        "score=1 exec=0 candidates=0 selected=0"
+        "score=1 exec=0 candidates=0 selected=0",
+        "[BTC_GATE] ok=False reason=regime_bearish",
     ]
 
 # Stage 1 acceptance suite: branch CI trigger.
