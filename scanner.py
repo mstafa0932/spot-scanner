@@ -38,12 +38,13 @@ from market_data import (
 )
 from indicator_engine import IndicatorResult, analyze_symbol
 from near_miss import record_near_miss, update_near_miss_outcomes
+from near_miss_queue import enqueue_near_miss
 from signal_tracker import register_signal, update_active_signals, deliver_pending_events
 from execution_research import evaluate_depth
 from candle_backfill import bind_history, recent_authentic
 from coverage_scheduler import CoverageCycle
 from research_cohort import ensure_cohort
-from risk_engine import build_risk_plan
+from risk_engine import build_risk_plan, build_risk_plan_result
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -218,6 +219,7 @@ def _empty_state() -> dict[str, Any]:
         "sent_signals": {},
         "watchlist": {},
         "near_misses": [],
+        "near_miss_queue": {},
         "active_signals": [],
         "daily_alerts": [],
         "last_alert_at": 0,
@@ -239,7 +241,8 @@ def load_state() -> dict[str, Any]:
         if not isinstance(raw, dict):
             raise ValueError("Scanner state must be an object")
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
-                              ("near_misses", list), ("active_signals", list),
+                              ("near_misses", list), ("near_miss_queue", dict),
+                              ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
                               ("shadow_sent_signals", dict), ("shadow_daily_alerts", list),
                               ("coverage_scheduler", dict), ("research_cohort", dict),
@@ -255,6 +258,8 @@ def load_state() -> dict[str, Any]:
             state["watchlist"] = raw["watchlist"]
         if isinstance(raw.get("near_misses"), list):
             state["near_misses"] = raw["near_misses"]
+        if isinstance(raw.get("near_miss_queue"), dict):
+            state["near_miss_queue"] = raw["near_miss_queue"]
         if isinstance(raw.get("active_signals"), list):
             state["active_signals"] = raw["active_signals"]
         if isinstance(raw.get("daily_alerts"), list):
@@ -984,6 +989,7 @@ def run_scanner() -> None:
                    "run_id": os.getenv("GITHUB_RUN_ID"), "transitions": []}
     funnel = {"book_approved": 0, "data_valid": 0, "discovery_passed": 0,
               "confirmed": 0, "limit_simulated": 0}
+    obs = {"liq": 0, "spread": 0, "book": 0, "tech": 0, "score": 0, "exec": 0}
     observations = []
 
     def note(symbol, stage, reason, **metrics):
@@ -1014,14 +1020,8 @@ def run_scanner() -> None:
     elif new_events:
         diagnostics["shadow_pending_events"] = len(new_events)
 
-    # Follow previous near-misses first; persistence is handled by workflow.
-    near_result = update_near_miss_outcomes(state)
-    LOGGER.info(
-        "Near-Miss tracking: checked=%d updated=%d errors=%d",
-        near_result["checked"],
-        near_result["updated"],
-        near_result["errors"],
-    )
+    # Near-miss outcome evaluation is intentionally isolated from the scanner.
+    # check_near_misses.py owns candle-based maturation and archive updates.
 
     try:
         snapshot = get_market_snapshot()
@@ -1065,6 +1065,7 @@ def run_scanner() -> None:
             # low-volume exclusion is not mislabeled as an API-capacity miss.
             continue
         orderbook_checked += 1
+        obs["liq"] += 1
         coverage.attempted("orderbooks", ticker.symbol)
 
         try:
@@ -1076,11 +1077,25 @@ def run_scanner() -> None:
         # Cheap rejection before candle calls.
         if book.spread_percent > MAX_SPREAD_PCT:
             note(ticker.symbol, "book", "spread_too_high", spread_pct=str(book.spread_percent))
+            enqueue_near_miss(
+                state,
+                symbol=ticker.symbol,
+                rejected_price=book.best_ask,
+                rejected_stage="book:spread_too_high",
+            )
             continue
+        obs["spread"] += 1
         if book.imbalance_ratio < MIN_WATCH_IMBALANCE:
             note(ticker.symbol, "book", "imbalance_too_low", imbalance=str(book.imbalance_ratio))
+            enqueue_near_miss(
+                state,
+                symbol=ticker.symbol,
+                rejected_price=book.best_ask,
+                rejected_stage="book:imbalance_too_low",
+            )
             continue
 
+        obs["book"] += 1
         book_candidates.append((ticker, book))
         funnel["book_approved"] += 1
 
@@ -1133,7 +1148,10 @@ def run_scanner() -> None:
             note(ticker.symbol, "data", "indicators_unavailable")
             continue
 
+        obs["tech"] += 1
         score, reasons = score_candidate(ticker, book, tech_15, tech_1h, tech_4h)
+        if score >= DISCOVERY_MIN_SCORE:
+            obs["score"] += 1
         ok, discovery_reason = discovery_ok(
             ticker, book, tech_15, tech_1h, tech_4h, score
         )
@@ -1204,6 +1222,13 @@ def run_scanner() -> None:
                     rsi_15m=candidate.tech_15.rsi14,
                     volume_ratio_15m=candidate.tech_15.volume_ratio,
                 )
+            if 70 <= candidate.score <= 79 and trigger_reason.startswith("score "):
+                enqueue_near_miss(
+                    state,
+                    symbol=candidate.symbol,
+                    rejected_price=candidate.book.best_ask,
+                    rejected_stage="score_70_79",
+                )
             continue
 
         if not _global_alert_allowed(state, now, shadow_mode):
@@ -1231,9 +1256,28 @@ def run_scanner() -> None:
         funnel["confirmed"] += 1
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
-            note(candidate.symbol, "risk", "opportunity_unavailable")
+            risk_result = build_risk_plan_result(
+                book=candidate.book,
+                tech=candidate.tech_15,
+                setup=candidate.setup,
+                atr_multiplier=Decimal(os.getenv("ATR_STOP_MULTIPLIER_V2", "1.75")),
+                max_risk_pct=Decimal(os.getenv("MAX_STOP_PCT_V2", "4.00")),
+                min_rr=Decimal(os.getenv("MIN_REWARD_RISK", "1.50")),
+                tp1_pct=TP1_PCT,
+                tp2_pct=TP2_PCT,
+            )
+            risk_reason = risk_result.rejection_reason or "opportunity_unavailable"
+            note(candidate.symbol, "risk", risk_reason)
+            if risk_reason in {"tp1_blocked_by_wall", "rr_below_min"}:
+                enqueue_near_miss(
+                    state,
+                    symbol=candidate.symbol,
+                    rejected_price=candidate.book.best_ask,
+                    rejected_stage=f"execution:{risk_reason}",
+                )
             continue
 
+        obs["exec"] += 1
         depth_scenario = evaluate_depth(candidate.book)
         state["execution_research"] = {"symbol": candidate.symbol, "observed_at": int(time.time()),
                                        **depth_scenario}
@@ -1331,6 +1375,19 @@ def run_scanner() -> None:
         btc_ok,
         shadow_mode,
         sent,
+    )
+    print(
+        "[FUNNEL] "
+        f"universe={len(snapshot)} "
+        f"liq={obs['liq']} "
+        f"spread={obs['spread']} "
+        f"book={obs['book']} "
+        f"tech={obs['tech']} "
+        f"score={obs['score']} "
+        f"exec={obs['exec']} "
+        f"candidates={len(discovered)} "
+        f"selected={funnel['limit_simulated']}",
+        flush=True,
     )
 
     save_state(state)
