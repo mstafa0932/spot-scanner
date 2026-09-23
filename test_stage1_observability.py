@@ -100,3 +100,5 @@ def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, c
         "[FUNNEL] universe=1 liq=1 spread=1 book=1 tech=1 "
         "score=1 exec=0 candidates=0 selected=0"
     ]
+
+# Stage 1 acceptance suite: branch CI trigger.
