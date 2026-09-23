@@ -398,6 +398,32 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
         return False, None, f"BTC gate error: {exc}"
 
 
+def _btc_gate_reason_code(reason: str) -> str:
+    if reason == "BTC recent 4h candle integrity failed":
+        return "recent_4h_integrity_failed"
+    if reason == "BTC indicators unavailable":
+        return "indicators_unavailable"
+    if reason == "BTC 15m source is not Paribu":
+        return "source_15m_not_paribu"
+    if reason == "BTC 1h source is not Paribu":
+        return "source_1h_not_paribu"
+    if reason.startswith("BTC 3C drop "):
+        return "regime_3c_drop"
+    if reason.startswith("BTC 15m below EMA21 "):
+        return "ema21_15m_bearish"
+    if reason.startswith("BTC 1h below EMA21 "):
+        return "ema21_1h_bearish"
+    if reason.startswith("BTC confirmed weakness "):
+        return "regime_bearish"
+    if reason == "BTC bullish":
+        return "regime_bullish"
+    if reason.startswith("BTC neutral/acceptable "):
+        return "regime_neutral"
+    if reason.startswith("BTC gate error:"):
+        return "gate_error"
+    return "unknown"
+
+
 # ---------------------------------------------------------------------------
 # Candidate quality
 # ---------------------------------------------------------------------------
@@ -1387,6 +1413,10 @@ def run_scanner() -> None:
         f"exec={obs['exec']} "
         f"candidates={len(discovered)} "
         f"selected={funnel['limit_simulated']}",
+        flush=True,
+    )
+    print(
+        f"[BTC_GATE] ok={btc_ok} reason={_btc_gate_reason_code(btc_reason)}",
         flush=True,
     )
 
