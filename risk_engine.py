@@ -49,6 +49,12 @@ class RiskPlan:
     sell_wall_share: Decimal = D("0")
 
 
+@dataclass(frozen=True)
+class RiskPlanResult:
+    plan: Optional[RiskPlan]
+    rejection_reason: Optional[str] = None
+
+
 def limit_entry_price(book, tech, setup: str) -> Optional[Decimal]:
     """Choose a passive/reclaim limit reference instead of chasing the ask.
 
@@ -120,7 +126,7 @@ def _sell_wall_before_target(book, entry: Decimal, target: Decimal):
     return min(credible, key=lambda item: item[0])
 
 
-def build_risk_plan(
+def build_risk_plan_result(
     *,
     book,
     tech,
@@ -131,13 +137,13 @@ def build_risk_plan(
     min_rr: Decimal = D("1.50"),
     tp1_pct: Decimal = D("1.50"),
     tp2_pct: Decimal = D("2.30"),
-) -> Optional[RiskPlan]:
+) -> RiskPlanResult:
     entry = limit_entry_price(book, tech, setup)
     atr = _d(getattr(tech, "atr14", None))
     swing_low = _d(getattr(tech, "swing_low", None))
     spread_pct = _d(getattr(book, "spread_percent", None)) or D("0")
     if entry is None or atr is None or atr <= 0:
-        return None
+        return RiskPlanResult(None, "invalid_entry_or_atr")
 
     spread_fraction = spread_pct / D("100")
     cushion_fraction = max(spread_fraction * spread_cushion_multiplier, D("0.0010"))
@@ -149,16 +155,13 @@ def build_risk_plan(
 
     stop = min(atr_stop, structural_stop) if structural_stop else atr_stop
     if stop <= 0 or stop >= entry:
-        return None
+        return RiskPlanResult(None, "invalid_stop")
 
     risk = entry - stop
     risk_pct = risk / entry * D("100")
     if risk_pct <= 0 or risk_pct > max_risk_pct:
-        return None
+        return RiskPlanResult(None, "risk_out_of_range")
 
-    # Targets scale with the actual stop distance. Fixed percentage targets
-    # are retained only as floors so wider ATR/structure stops do not destroy
-    # reward/risk.
     raw_tp1 = max(
         entry * (D("1") + tp1_pct / D("100")),
         entry + risk * min_rr,
@@ -175,31 +178,59 @@ def build_risk_plan(
         step = price_step(wall_price)
         candidate_tp1 = wall_price - step
         if candidate_tp1 <= entry:
-            return None
+            return RiskPlanResult(None, "tp1_blocked_by_wall")
         candidate_rr = (candidate_tp1 - entry) / risk
         if candidate_rr < min_rr:
-            return None
+            return RiskPlanResult(None, "rr_below_min")
         tp1 = candidate_tp1
         adjusted = True
 
     rr = (tp1 - entry) / risk
     if rr < min_rr:
-        return None
+        return RiskPlanResult(None, "rr_below_min")
     if tp2 <= tp1:
         tp2 = tp1 + risk
 
-    return RiskPlan(
-        entry=entry,
-        stop=stop,
-        tp1=tp1,
-        tp2=tp2,
-        risk_pct=risk_pct,
-        reward_risk_tp1=rr,
-        target_adjusted_for_wall=adjusted,
-        sell_wall_price=wall_price,
-        sell_wall_share=wall_share,
+    return RiskPlanResult(
+        RiskPlan(
+            entry=entry,
+            stop=stop,
+            tp1=tp1,
+            tp2=tp2,
+            risk_pct=risk_pct,
+            reward_risk_tp1=rr,
+            target_adjusted_for_wall=adjusted,
+            sell_wall_price=wall_price,
+            sell_wall_share=wall_share,
+        ),
+        None,
     )
 
+
+def build_risk_plan(
+    *,
+    book,
+    tech,
+    setup: str,
+    atr_multiplier: Decimal = D("1.75"),
+    spread_cushion_multiplier: Decimal = D("1.50"),
+    max_risk_pct: Decimal = D("4.00"),
+    min_rr: Decimal = D("1.50"),
+    tp1_pct: Decimal = D("1.50"),
+    tp2_pct: Decimal = D("2.30"),
+) -> Optional[RiskPlan]:
+    """Compatibility wrapper preserving the pre-Stage-1 pass/fail contract."""
+    return build_risk_plan_result(
+        book=book,
+        tech=tech,
+        setup=setup,
+        atr_multiplier=atr_multiplier,
+        spread_cushion_multiplier=spread_cushion_multiplier,
+        max_risk_pct=max_risk_pct,
+        min_rr=min_rr,
+        tp1_pct=tp1_pct,
+        tp2_pct=tp2_pct,
+    ).plan
 
 def breakeven_trigger_price(entry: Decimal, tp1: Decimal) -> Decimal:
     """OR semantics: 75% of TP1 distance OR +1.0%, whichever occurs first."""
