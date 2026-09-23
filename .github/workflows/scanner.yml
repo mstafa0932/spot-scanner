@@ -71,5 +71,18 @@ jobs:
           fi
 
           git commit -m "Update scanner state [skip ci]"
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+          persisted=0
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              persisted=1
+              break
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 2))
+          done
+
+          if [ "$persisted" -ne 1 ]; then
+            echo "Failed to persist state after 3 retries"
+            exit 1
+          fi
