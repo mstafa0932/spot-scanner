@@ -225,4 +225,19 @@ def test_process_state_paces_after_every_mature_measurement(tmp_path, monkeypatc
     )
     assert sleeps == [0.3, 0.3]
 
+
+def test_favorable_excursion_candidate_metric_is_research_only(tmp_path):
+    archive = tmp_path / "near_misses_archive.jsonl"
+    rows = [
+        {"outcome": "measured", "mfe_pct": "1.50", "mae_pct": "-1.50"},
+        {"outcome": "measured", "mfe_pct": "2.00", "mae_pct": "-1.51"},
+        {"outcome": "measured", "mfe_pct": "1.49", "mae_pct": "-0.10"},
+        {"outcome": "incomplete_data", "mfe_pct": None, "mae_pct": None},
+    ]
+    archive.write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    assert check_near_misses.favorable_excursion_candidate_count(archive) == 1
+
 # Stage 1 acceptance suite: branch CI trigger.
