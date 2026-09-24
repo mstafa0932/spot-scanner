@@ -241,3 +241,39 @@ def test_favorable_excursion_candidate_metric_is_research_only(tmp_path):
     assert check_near_misses.favorable_excursion_candidate_count(archive) == 1
 
 # Stage 1 acceptance suite: branch CI trigger.
+
+
+def test_directive_009_candidate_lifecycle_deduplicates_symbol(monkeypatch):
+    import scanner
+    monkeypatch.setenv("GITHUB_RUN_ID", "1001")
+    state = {"candidate_lifecycle": {}}
+    scanner._candidate_lifecycle_update(
+        state, symbol="INJ_TL", score=91, lifecycle_state="discovery", now=100
+    )
+    scanner._candidate_lifecycle_update(
+        state, symbol="INJ_TL", score=92, lifecycle_state="confirmation_1_of_2",
+        reason="watching: confirmations 1/2", now=200
+    )
+    item = state["candidate_lifecycle"]["INJ_TL"]
+    assert item["candidate_id"] == "INJ_TL:1001"
+    assert item["first_seen_run"] == "1001"
+    assert item["max_score"] == 92
+    assert item["current_state"] == "confirmation_1_of_2"
+    assert len(item["history"]) == 2
+
+
+def test_directive_009_terminal_candidate_can_start_new_lifecycle(monkeypatch):
+    import scanner
+    state = {"candidate_lifecycle": {}}
+    monkeypatch.setenv("GITHUB_RUN_ID", "1001")
+    scanner._candidate_lifecycle_update(
+        state, symbol="SENT_TL", score=89, lifecycle_state="shadow_entry", now=100
+    )
+    monkeypatch.setenv("GITHUB_RUN_ID", "1002")
+    scanner._candidate_lifecycle_update(
+        state, symbol="SENT_TL", score=87, lifecycle_state="discovery", now=200
+    )
+    item = state["candidate_lifecycle"]["SENT_TL"]
+    assert item["candidate_id"] == "SENT_TL:1002"
+    assert item["first_seen_run"] == "1002"
+    assert item["current_state"] == "discovery"
