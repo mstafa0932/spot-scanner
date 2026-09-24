@@ -16,6 +16,8 @@ ARCHIVE_FILE = Path(os.getenv("NEAR_MISS_ARCHIVE_FILE", "near_misses_archive.jso
 INTERVAL_SECONDS = 15 * 60
 MATURITY_CANDLES = 16
 PRUNE_AFTER_SECONDS = 172800
+RESEARCH_FAVORABLE_MFE_PCT = Decimal("1.50")
+RESEARCH_MAE_LIMIT_PCT = Decimal("1.50")
 
 
 def _decimal(value: Any) -> Decimal | None:
@@ -77,6 +79,24 @@ def _event_id(symbol: str, record: dict[str, Any]) -> str:
     return f"{symbol}:{rejected_at}:{stage}"
 
 
+def _incomplete(
+    base: dict[str, Any],
+    *,
+    code: str,
+    detail: str,
+    candles: int = 0,
+) -> dict[str, Any]:
+    return {
+        **base,
+        "candles": int(candles),
+        "mfe_pct": None,
+        "mae_pct": None,
+        "outcome": "incomplete_data",
+        "incomplete_reason_code": code,
+        "incomplete_reason_detail": detail,
+    }
+
+
 def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., Any]) -> dict[str, Any]:
     rejected_at = int(record.get("rejected_at", 0) or 0)
     first_close = ((rejected_at // INTERVAL_SECONDS) + 1) * INTERVAL_SECONDS
@@ -92,28 +112,52 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
         "maturity_at": maturity_at,
     }
     if rejected_price is None or rejected_price <= 0:
-        return {**base, "candles": 0, "mfe_pct": None, "mae_pct": None, "outcome": "incomplete_data"}
+        return _incomplete(
+            base,
+            code="invalid_rejected_price",
+            detail="rejected_price is missing, non-finite, or <= 0",
+        )
 
     try:
         candles = fetcher(symbol, "15m", 250)
-    except Exception:
-        return {**base, "candles": 0, "mfe_pct": None, "mae_pct": None, "outcome": "incomplete_data"}
+    except Exception as exc:
+        return _incomplete(
+            base,
+            code="fetch_error",
+            detail=f"{type(exc).__name__}: {str(exc)[:200]}",
+        )
 
     required = {"timestamp", "high", "low"}
-    if not required.issubset(set(getattr(candles, "columns", []))):
-        return {**base, "candles": 0, "mfe_pct": None, "mae_pct": None, "outcome": "incomplete_data"}
+    columns = set(getattr(candles, "columns", []))
+    if not required.issubset(columns):
+        missing = ",".join(sorted(required - columns))
+        return _incomplete(
+            base,
+            code="missing_columns",
+            detail=f"missing_columns={missing}",
+        )
 
     window = candles[(candles["timestamp"] >= first_close) & (candles["timestamp"] < maturity_at)].copy()
     window = window.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
     expected = [first_close + i * INTERVAL_SECONDS for i in range(MATURITY_CANDLES)]
     actual = [int(x) for x in window["timestamp"].tolist()]
     if len(window) < MATURITY_CANDLES or actual != expected:
-        return {**base, "candles": len(window), "mfe_pct": None, "mae_pct": None, "outcome": "incomplete_data"}
+        return _incomplete(
+            base,
+            code="insufficient_window",
+            detail=f"expected={MATURITY_CANDLES} actual={len(window)} contiguous={actual == expected}",
+            candles=len(window),
+        )
 
     highs = [_decimal(x) for x in window["high"].tolist()]
     lows = [_decimal(x) for x in window["low"].tolist()]
     if any(x is None for x in highs + lows):
-        return {**base, "candles": len(window), "mfe_pct": None, "mae_pct": None, "outcome": "incomplete_data"}
+        return _incomplete(
+            base,
+            code="invalid_ohlc",
+            detail="measurement window contains invalid high/low values",
+            candles=len(window),
+        )
 
     raw_mfe = (max(highs) / rejected_price - Decimal("1")) * Decimal("100")
     raw_mae = (min(lows) / rejected_price - Decimal("1")) * Decimal("100")
@@ -126,6 +170,28 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
         "mae_pct": str(mae),
         "outcome": "measured",
     }
+
+
+def favorable_excursion_candidate_count(path: Path) -> int:
+    if not path.exists():
+        return 0
+    count = 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(row, dict) or row.get("outcome") != "measured":
+            continue
+        mfe = _decimal(row.get("mfe_pct"))
+        mae = _decimal(row.get("mae_pct"))
+        if mfe is None or mae is None:
+            continue
+        if mfe >= RESEARCH_FAVORABLE_MFE_PCT and abs(mae) <= RESEARCH_MAE_LIMIT_PCT:
+            count += 1
+    return count
 
 
 def process_state(
@@ -161,6 +227,7 @@ def process_state(
             continue
 
         row = _measure_event(symbol, record, fetcher)
+        time.sleep(0.3)
         row["processed_at"] = now
         append_archive(archive_path, row)
         archived.add(event_id)
@@ -171,6 +238,13 @@ def process_state(
             output(f"[NEAR_MISS] {symbol} | MFE:{mfe:+.3f}% | MAE:{mae:+.3f}% | measured")
         else:
             output(f"[NEAR_MISS] {symbol} | MFE:n/a | MAE:n/a | incomplete_data")
+
+        if row["outcome"] == "incomplete_data":
+            record["incomplete_reason_code"] = row.get("incomplete_reason_code")
+            record["incomplete_reason_detail"] = row.get("incomplete_reason_detail")
+        else:
+            record.pop("incomplete_reason_code", None)
+            record.pop("incomplete_reason_detail", None)
 
         record["processed"] = True
         record["processed_at"] = now
@@ -192,10 +266,14 @@ def process_state(
         total = len(queue)
         processed = sum(isinstance(r, dict) and r.get("processed") is True for r in queue.values())
         pending = total - processed
+        favorable = favorable_excursion_candidate_count(archive_path)
         output(
             "[WEEK1_METRICS] "
             f"queue={total} pending={pending} processed={processed} "
-            f"archive_events={len(archived)}"
+            f"archive_events={len(archived)} "
+            f"favorable_excursion_candidate={favorable} "
+            f"research_mfe_pct={RESEARCH_FAVORABLE_MFE_PCT} "
+            f"research_mae_abs_pct={RESEARCH_MAE_LIMIT_PCT}"
         )
 
     return changed
