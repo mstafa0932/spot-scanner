@@ -250,6 +250,40 @@ def process_state(
         record["processed_at"] = now
         changed = True
 
+    incomplete_rows = []
+    if archive_path.exists():
+        for line in archive_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                archived_row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(archived_row, dict) and archived_row.get("outcome") == "incomplete_data":
+                incomplete_rows.append(archived_row)
+    incomplete_total = len(incomplete_rows)
+    incomplete_classified = sum(
+        bool(row.get("incomplete_reason_code")) for row in incomplete_rows
+    )
+    coverage_ratio = (
+        incomplete_classified / incomplete_total if incomplete_total else 1.0
+    )
+    output(
+        "[INCOMPLETE_COVERAGE] "
+        f"incomplete_total={incomplete_total} "
+        f"incomplete_classified={incomplete_classified} "
+        f"coverage_ratio={coverage_ratio:.4f}"
+    )
+    if coverage_ratio >= 0.95:
+        distribution: dict[str, int] = {}
+        for row in incomplete_rows:
+            code = str(row.get("incomplete_reason_code") or "unclassified")
+            distribution[code] = distribution.get(code, 0) + 1
+        output(
+            "[INCOMPLETE_CODES] "
+            + json.dumps(distribution, sort_keys=True, separators=(",", ":"))
+        )
+
     cutoff = now - PRUNE_AFTER_SECONDS
     for symbol, record in list(queue.items()):
         if not isinstance(record, dict) or record.get("processed") is not True:
