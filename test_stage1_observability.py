@@ -5,7 +5,8 @@ import json
 import pandas as pd
 
 import scanner
-from check_near_misses import process_state
+import check_near_misses
+from check_near_misses import _measure_event, process_state
 from near_miss_queue import enqueue_near_miss
 from risk_engine import build_risk_plan_result
 from test_risk_engine import book, tech
@@ -109,5 +110,134 @@ def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, c
         "score=1 exec=0 candidates=0 selected=0",
         "[BTC_GATE] ok=False reason=regime_bearish",
     ]
+
+
+
+def _queued_record(*, price="100", rejected_at=1001, maturity_at=16200):
+    return {
+        "event_id": f"TEST_TL:{rejected_at}:score_70_79",
+        "rejected_at": rejected_at,
+        "rejected_price": price,
+        "rejected_stage": "score_70_79",
+        "maturity_at": maturity_at,
+        "processed": False,
+        "processed_at": None,
+    }
+
+
+def test_incomplete_reason_codes_cover_all_measurement_paths():
+    record = _queued_record()
+
+    invalid_price = _measure_event("TEST_TL", {**record, "rejected_price": "0"}, lambda *_: None)
+    assert invalid_price["incomplete_reason_code"] == "invalid_rejected_price"
+
+    def failing_fetcher(*_args):
+        raise RuntimeError("synthetic fetch failure")
+    fetch_error = _measure_event("TEST_TL", record, failing_fetcher)
+    assert fetch_error["incomplete_reason_code"] == "fetch_error"
+    assert fetch_error["incomplete_reason_detail"] == "RuntimeError: synthetic fetch failure"
+
+    missing_columns = _measure_event(
+        "TEST_TL",
+        record,
+        lambda *_: pd.DataFrame({"timestamp": [1800], "high": [101.0]}),
+    )
+    assert missing_columns["incomplete_reason_code"] == "missing_columns"
+
+    insufficient = _measure_event(
+        "TEST_TL",
+        record,
+        lambda *_: pd.DataFrame({
+            "timestamp": [1800 + i * 900 for i in range(15)],
+            "high": [101.0] * 15,
+            "low": [99.0] * 15,
+        }),
+    )
+    assert insufficient["incomplete_reason_code"] == "insufficient_window"
+
+    invalid_ohlc = _measure_event(
+        "TEST_TL",
+        record,
+        lambda *_: pd.DataFrame({
+            "timestamp": [1800 + i * 900 for i in range(16)],
+            "high": [101.0] * 15 + [None],
+            "low": [99.0] * 16,
+        }),
+    )
+    assert invalid_ohlc["incomplete_reason_code"] == "invalid_ohlc"
+
+
+def test_incomplete_reason_is_archived_and_retained_in_state(tmp_path, monkeypatch):
+    maturity_at = 16200
+    state = {"near_miss_queue": {"TEST_TL": _queued_record(maturity_at=maturity_at)}}
+    archive = tmp_path / "near_misses_archive.jsonl"
+    monkeypatch.setattr(check_near_misses.time, "sleep", lambda *_: None)
+
+    def failing_fetcher(*_args):
+        raise RuntimeError("synthetic 429")
+
+    assert process_state(
+        state,
+        now=maturity_at,
+        fetcher=failing_fetcher,
+        archive_path=archive,
+        output=lambda *_: None,
+    )
+    row = json.loads(archive.read_text(encoding="utf-8").strip())
+    assert row["incomplete_reason_code"] == "fetch_error"
+    assert row["incomplete_reason_detail"] == "RuntimeError: synthetic 429"
+    queued = state["near_miss_queue"]["TEST_TL"]
+    assert queued["incomplete_reason_code"] == "fetch_error"
+    assert queued["incomplete_reason_detail"] == "RuntimeError: synthetic 429"
+
+
+def test_process_state_paces_after_every_mature_measurement(tmp_path, monkeypatch):
+    maturity_at = 16200
+    state = {
+        "near_miss_queue": {
+            "A_TL": {
+                **_queued_record(maturity_at=maturity_at),
+                "event_id": "A_TL:1001:score_70_79",
+            },
+            "B_TL": {
+                **_queued_record(rejected_at=1002, maturity_at=maturity_at),
+                "event_id": "B_TL:1002:score_70_79",
+            },
+        }
+    }
+    archive = tmp_path / "near_misses_archive.jsonl"
+    sleeps = []
+    monkeypatch.setattr(check_near_misses.time, "sleep", lambda seconds: sleeps.append(seconds))
+
+    timestamps = [1800 + i * 900 for i in range(16)]
+    frame = pd.DataFrame({
+        "timestamp": timestamps,
+        "high": [101.0] * 16,
+        "low": [99.0] * 16,
+    })
+
+    process_state(
+        state,
+        now=maturity_at,
+        fetcher=lambda *_: frame,
+        archive_path=archive,
+        output=lambda *_: None,
+    )
+    assert sleeps == [0.3, 0.3]
+
+
+def test_favorable_excursion_candidate_metric_is_research_only(tmp_path):
+    archive = tmp_path / "near_misses_archive.jsonl"
+    rows = [
+        {"outcome": "measured", "mfe_pct": "1.50", "mae_pct": "-1.50"},
+        {"outcome": "measured", "mfe_pct": "2.00", "mae_pct": "-1.51"},
+        {"outcome": "measured", "mfe_pct": "1.49", "mae_pct": "-0.10"},
+        {"outcome": "incomplete_data", "mfe_pct": None, "mae_pct": None},
+    ]
+    archive.write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    assert check_near_misses.favorable_excursion_candidate_count(archive) == 1
 
 # Stage 1 acceptance suite: branch CI trigger.
