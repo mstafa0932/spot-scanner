@@ -228,6 +228,8 @@ def _empty_state() -> dict[str, Any]:
         "shadow_daily_alerts": [],
         "shadow_last_alert_at": 0,
         "coverage_scheduler": {},
+        "candidate_lifecycle": {},
+        "directive_009_runs": [],
     }
 
 
@@ -246,7 +248,8 @@ def load_state() -> dict[str, Any]:
                               ("daily_alerts", list), ("candle_gap_history", dict),
                               ("shadow_sent_signals", dict), ("shadow_daily_alerts", list),
                               ("coverage_scheduler", dict), ("research_cohort", dict),
-                              ("research_cohort_history", list)):
+                              ("research_cohort_history", list), ("candidate_lifecycle", dict),
+                              ("directive_009_runs", list)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -272,7 +275,8 @@ def load_state() -> dict[str, Any]:
             state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
         if isinstance(raw.get("coverage_scheduler"), dict):
             state["coverage_scheduler"] = raw["coverage_scheduler"]
-        for key in ("research_cohort", "research_cohort_history", "execution_research"):
+        for key in ("research_cohort", "research_cohort_history", "execution_research",
+                    "candidate_lifecycle", "directive_009_runs"):
             if key in raw:
                 state[key] = raw[key]
         # Research state is isolated from trading signal/watchlist state.
@@ -647,6 +651,75 @@ def discovery_ok(
 # ---------------------------------------------------------------------------
 
 
+def _run_id() -> str:
+    return str(os.getenv("GITHUB_RUN_ID") or f"local-{int(time.time())}")
+
+
+def _candidate_lifecycle_update(
+    state: dict[str, Any],
+    *,
+    symbol: str,
+    score: Optional[int],
+    lifecycle_state: str,
+    reason: Optional[str] = None,
+    now: Optional[int] = None,
+) -> dict[str, Any]:
+    """Persist one logical candidate across scheduled runs without changing strategy."""
+    observed_at = int(time.time() if now is None else now)
+    run_id = _run_id()
+    lifecycles = state.setdefault("candidate_lifecycle", {})
+    if not isinstance(lifecycles, dict):
+        lifecycles = {}
+        state["candidate_lifecycle"] = lifecycles
+
+    item = lifecycles.get(symbol)
+    terminal = {"rejected", "expired", "shadow_entry"}
+    if not isinstance(item, dict) or str(item.get("current_state")) in terminal:
+        candidate_id = f"{symbol}:{run_id}"
+        item = {
+            "candidate_id": candidate_id,
+            "symbol": symbol,
+            "first_seen_run": run_id,
+            "first_seen_at": datetime.fromtimestamp(observed_at, tz=timezone.utc).isoformat(),
+            "max_score": int(score or 0),
+            "current_state": lifecycle_state,
+            "history": [],
+        }
+        lifecycles[symbol] = item
+
+    if score is not None:
+        item["max_score"] = max(int(item.get("max_score", 0) or 0), int(score))
+    item["current_state"] = lifecycle_state
+    history = item.setdefault("history", [])
+    if not isinstance(history, list):
+        history = []
+        item["history"] = history
+    event = {
+        "run_id": run_id,
+        "ts": datetime.fromtimestamp(observed_at, tz=timezone.utc).isoformat(),
+        "score": int(score) if score is not None else None,
+        "state": lifecycle_state,
+    }
+    if reason:
+        event["reason"] = reason
+    # Idempotent within a run/state pair.
+    if not history or history[-1].get("run_id") != run_id or history[-1].get("state") != lifecycle_state:
+        history.append(event)
+    item["history"] = history[-64:]
+    return item
+
+
+def _candle_synthetic_rows(*frames: Any) -> int:
+    total = 0
+    for frame in frames:
+        try:
+            if "is_authentic" in frame.columns:
+                total += int((~frame["is_authentic"].astype(bool)).sum())
+        except Exception:
+            continue
+    return total
+
+
 def _watchlist(state: dict[str, Any]) -> dict[str, Any]:
     value = state.get("watchlist")
     if not isinstance(value, dict):
@@ -1016,6 +1089,7 @@ def run_scanner() -> None:
     funnel = {"book_approved": 0, "data_valid": 0, "discovery_passed": 0,
               "confirmed": 0, "limit_simulated": 0}
     obs = {"liq": 0, "spread": 0, "book": 0, "tech": 0, "score": 0, "exec": 0}
+    candle_stats = {"complete": 0, "synthetic": 0, "error": 0}
     observations = []
 
     def note(symbol, stage, reason, **metrics):
@@ -1139,9 +1213,11 @@ def run_scanner() -> None:
             df_1h = fetch_candles(ticker.symbol, "1h", CANDLE_LIMIT)
             df_4h = fetch_candles(ticker.symbol, "4h", CANDLE_LIMIT)
         except Exception as exc:
+            candle_stats["error"] += 1
             note(ticker.symbol, "data", "candle_error:" + type(exc).__name__)
             continue
 
+        candle_stats["synthetic"] += _candle_synthetic_rows(df_15, df_1h, df_4h)
         if not all(
             str(frame.attrs.get("source", "")).upper() == "PARIBU"
             for frame in (df_15, df_1h, df_4h)
@@ -1162,6 +1238,7 @@ def run_scanner() -> None:
             continue
 
         funnel["data_valid"] += 1
+        candle_stats["complete"] += 1
 
         # Collect existing data only. Evaluate AFTER the normal alert path, with
         # no extra requests or interference with entry thresholds/cooldowns.
@@ -1209,6 +1286,8 @@ def run_scanner() -> None:
         discovered.append(candidate)
         funnel["discovery_passed"] += 1
         _update_watchlist(state, candidate, now)
+        _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
+                                    lifecycle_state="discovery", now=now)
 
     # Highest quality first. Only one alert can be sent.
     discovered.sort(
@@ -1234,6 +1313,10 @@ def run_scanner() -> None:
 
         if not ready:
             note(candidate.symbol, "trigger", trigger_reason, score=candidate.score)
+            lifecycle_state = ("confirmation_1_of_2" if trigger_reason.startswith("watching: confirmations 1/")
+                               else "rejected")
+            _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
+                                        lifecycle_state=lifecycle_state, reason=trigger_reason, now=now)
             # Keep evidence on good-but-not-ready candidates without Telegram spam.
             if candidate.score >= NEAR_MISS_MIN_SCORE:
                 record_near_miss(
@@ -1280,6 +1363,8 @@ def run_scanner() -> None:
             note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason)
             continue
         funnel["confirmed"] += 1
+        _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
+                                    lifecycle_state="confirmation_2_of_2", reason="READY", now=now)
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
             risk_result = build_risk_plan_result(
@@ -1294,6 +1379,8 @@ def run_scanner() -> None:
             )
             risk_reason = risk_result.rejection_reason or "opportunity_unavailable"
             note(candidate.symbol, "risk", risk_reason)
+            _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
+                                        lifecycle_state="rejected", reason=risk_reason, now=now)
             if risk_reason in {"tp1_blocked_by_wall", "rr_below_min"}:
                 enqueue_near_miss(
                     state,
@@ -1321,6 +1408,8 @@ def run_scanner() -> None:
 
         if shadow_mode:
             note(candidate.symbol, "shadow", "paper_signal_recorded")
+            _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
+                                        lifecycle_state="shadow_entry", reason="paper_signal_recorded", now=now)
             sent = True
             placed_at = int(time.time())
             state["shadow_last_alert_at"] = placed_at
@@ -1402,25 +1491,55 @@ def run_scanner() -> None:
         shadow_mode,
         sent,
     )
-    print(
-        "[FUNNEL] "
-        f"universe={len(snapshot)} "
-        f"liq={obs['liq']} "
-        f"spread={obs['spread']} "
-        f"book={obs['book']} "
-        f"tech={obs['tech']} "
-        f"score={obs['score']} "
-        f"exec={obs['exec']} "
-        f"candidates={len(discovered)} "
-        f"selected={funnel['limit_simulated']}",
-        flush=True,
-    )
-    print(
-        f"[BTC_GATE] ok={btc_ok} reason={_btc_gate_reason_code(btc_reason)}",
-        flush=True,
-    )
+    stage_drops = {}
+    for decision in diagnostics["symbols"].values():
+        if isinstance(decision, dict):
+            key = f"{decision.get('stage', 'unknown')}:{decision.get('reason', 'unknown')}"
+            stage_drops[key] = stage_drops.get(key, 0) + 1
 
+    run_record = {
+        "run_id": _run_id(),
+        "started_at": now,
+        "finished_at": int(time.time()),
+        "btc_ok": bool(btc_ok),
+        "btc_reason": _btc_gate_reason_code(btc_reason),
+        "candles_complete": candle_stats["complete"],
+        "candles_synthetic": candle_stats["synthetic"],
+        "candles_error": candle_stats["error"],
+        "funnel": {
+            "universe": len(snapshot), "liq": obs["liq"], "spread": obs["spread"],
+            "book": obs["book"], "tech": obs["tech"], "score": obs["score"],
+            "candidates": len(discovered), "confirmed": funnel["confirmed"],
+            "exec": obs["exec"], "limit": funnel["limit_simulated"],
+        },
+        "stage_drops": stage_drops,
+    }
+    runs = state.setdefault("directive_009_runs", [])
+    if not isinstance(runs, list):
+        runs = []
+        state["directive_009_runs"] = runs
+    runs.append(run_record)
+    state["directive_009_runs"] = runs[-32:]
+
+    # Persist first; only then claim state_saved=OK in the observability line.
     save_state(state)
+    print(
+        "[INFRA_HEALTH] "
+        f"run_id={_run_id()} btc_ok={btc_ok} btc_reason={_btc_gate_reason_code(btc_reason)} "
+        f"candles_complete={candle_stats['complete']} "
+        f"candles_synthetic={candle_stats['synthetic']} "
+        f"candles_error={candle_stats['error']} state_saved=OK",
+        flush=True,
+    )
+    print(
+        "[FUNNEL_BEHAVIOR] "
+        f"run_id={_run_id()} universe={len(snapshot)} liq={obs['liq']} spread={obs['spread']} "
+        f"book={obs['book']} tech={obs['tech']} data_valid={funnel['data_valid']} "
+        f"score={obs['score']} candidates={len(discovered)} confirmed={funnel['confirmed']} "
+        f"exec={obs['exec']} limit={funnel['limit_simulated']} "
+        f"stage_drops={json.dumps(stage_drops, sort_keys=True, separators=(',', ':'))}",
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

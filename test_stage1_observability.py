@@ -64,7 +64,9 @@ def test_synthetic_near_miss_mfe_mae_and_archive_idempotency(tmp_path):
 
     assert process_state(state, now=maturity_at, fetcher=fetcher,
                          archive_path=archive, output=lines.append)
-    assert lines == ["[NEAR_MISS] TEST_TL | MFE:+3.200% | MAE:-1.300% | measured"]
+    assert lines[0] == "[NEAR_MISS] TEST_TL | MFE:+3.200% | MAE:-1.300% | measured"
+    assert "[INCOMPLETE_COVERAGE] incomplete_total=0 incomplete_classified=0 coverage_ratio=1.0000" in lines
+    assert "[INCOMPLETE_CODES] {}" in lines
     rows = [json.loads(x) for x in archive.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 1
     assert rows[0]["event_id"] == event_id
@@ -103,13 +105,16 @@ def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, c
     output = capsys.readouterr().out
     lines = [
         line for line in output.splitlines()
-        if line.startswith(("[FUNNEL]", "[BTC_GATE]"))
+        if line.startswith(("[INFRA_HEALTH]", "[FUNNEL_BEHAVIOR]"))
     ]
-    assert lines == [
-        "[FUNNEL] universe=1 liq=1 spread=1 book=1 tech=1 "
-        "score=1 exec=0 candidates=0 selected=0",
-        "[BTC_GATE] ok=False reason=regime_bearish",
-    ]
+    assert len(lines) == 2
+    assert lines[0].startswith("[INFRA_HEALTH] ")
+    assert "btc_ok=False" in lines[0]
+    assert "btc_reason=regime_bearish" in lines[0]
+    assert "state_saved=OK" in lines[0]
+    assert lines[1].startswith("[FUNNEL_BEHAVIOR] ")
+    assert "universe=1 liq=1 spread=1 book=1 tech=1 data_valid=1 " in lines[1]
+    assert "score=1 candidates=0 confirmed=0 exec=0 limit=0 " in lines[1]
 
 
 
@@ -241,3 +246,63 @@ def test_favorable_excursion_candidate_metric_is_research_only(tmp_path):
     assert check_near_misses.favorable_excursion_candidate_count(archive) == 1
 
 # Stage 1 acceptance suite: branch CI trigger.
+
+
+def test_directive_009_candidate_lifecycle_deduplicates_symbol(monkeypatch):
+    import scanner
+    monkeypatch.setenv("GITHUB_RUN_ID", "1001")
+    state = {"candidate_lifecycle": {}}
+    scanner._candidate_lifecycle_update(
+        state, symbol="INJ_TL", score=91, lifecycle_state="discovery", now=100
+    )
+    scanner._candidate_lifecycle_update(
+        state, symbol="INJ_TL", score=92, lifecycle_state="confirmation_1_of_2",
+        reason="watching: confirmations 1/2", now=200
+    )
+    item = state["candidate_lifecycle"]["INJ_TL"]
+    assert item["candidate_id"] == "INJ_TL:1001"
+    assert item["first_seen_run"] == "1001"
+    assert item["max_score"] == 92
+    assert item["current_state"] == "confirmation_1_of_2"
+    assert len(item["history"]) == 2
+
+
+def test_directive_009_terminal_candidate_can_start_new_lifecycle(monkeypatch):
+    import scanner
+    state = {"candidate_lifecycle": {}}
+    monkeypatch.setenv("GITHUB_RUN_ID", "1001")
+    scanner._candidate_lifecycle_update(
+        state, symbol="SENT_TL", score=89, lifecycle_state="shadow_entry", now=100
+    )
+    monkeypatch.setenv("GITHUB_RUN_ID", "1002")
+    scanner._candidate_lifecycle_update(
+        state, symbol="SENT_TL", score=87, lifecycle_state="discovery", now=200
+    )
+    item = state["candidate_lifecycle"]["SENT_TL"]
+    assert item["candidate_id"] == "SENT_TL:1002"
+    assert item["first_seen_run"] == "1002"
+    assert item["current_state"] == "discovery"
+
+
+def test_incomplete_coverage_below_threshold_hides_distribution_but_preserves_codes(tmp_path, monkeypatch):
+    maturity_at = 16200
+    state = {"near_miss_queue": {"TEST_TL": _queued_record(maturity_at=maturity_at)}}
+    archive = tmp_path / "near_misses_archive.jsonl"
+    # Historical unclassified row keeps coverage below 95%.
+    archive.write_text(json.dumps({"outcome": "incomplete_data"}) + "\n", encoding="utf-8")
+    monkeypatch.setattr(check_near_misses.time, "sleep", lambda *_: None)
+    lines = []
+
+    def failing_fetcher(*_args):
+        raise RuntimeError("synthetic 429")
+
+    assert process_state(
+        state, now=maturity_at, fetcher=failing_fetcher,
+        archive_path=archive, output=lines.append,
+    )
+    assert any("coverage_ratio=0.5000" in line for line in lines)
+    assert not any(line.startswith("[INCOMPLETE_CODES]") for line in lines)
+    queued = state["near_miss_queue"]["TEST_TL"]
+    assert queued["incomplete_reason_code"] == "fetch_error"
+    rows = [json.loads(x) for x in archive.read_text(encoding="utf-8").splitlines()]
+    assert rows[-1]["incomplete_reason_code"] == "fetch_error"
