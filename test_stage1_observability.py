@@ -64,7 +64,9 @@ def test_synthetic_near_miss_mfe_mae_and_archive_idempotency(tmp_path):
 
     assert process_state(state, now=maturity_at, fetcher=fetcher,
                          archive_path=archive, output=lines.append)
-    assert lines[0] == "[NEAR_MISS] TEST_TL | MFE:+3.200% | MAE:-1.300% | measured"\n    assert "[INCOMPLETE_COVERAGE] incomplete_total=0 incomplete_classified=0 coverage_ratio=1.0000" in lines\n    assert "[INCOMPLETE_CODES] {}" in lines
+    assert lines[0] == "[NEAR_MISS] TEST_TL | MFE:+3.200% | MAE:-1.300% | measured"
+    assert "[INCOMPLETE_COVERAGE] incomplete_total=0 incomplete_classified=0 coverage_ratio=1.0000" in lines
+    assert "[INCOMPLETE_CODES] {}" in lines
     rows = [json.loads(x) for x in archive.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 1
     assert rows[0]["event_id"] == event_id
