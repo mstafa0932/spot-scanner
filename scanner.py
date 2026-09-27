@@ -239,6 +239,100 @@ def fmt(price: Decimal) -> str:
     return format(price.quantize(price_step(price)), "f")
 
 
+def _hot_radar_order(
+    tickers: list[Any],
+    state: dict[str, Any],
+    coverage: CoverageCycle,
+    now: int,
+) -> tuple[list[Any], dict[str, Any]]:
+    """Boost fresh price+quote-volume acceleration without changing any gate.
+
+    The public Paribu ticker snapshot is already fetched for the whole universe.
+    A symbol is eligible for a boost only when both its last price and rolling
+    quote volume increased versus the previous scanner snapshot, and it was not
+    already order-book checked in the immediately preceding coverage generation.
+    The normal CoverageCycle order remains the fallback for every other symbol.
+    """
+    base_order = coverage.order(tickers, "orderbooks", lambda item: item.symbol)
+    previous = state.get("ticker_radar", {})
+    previous_markets = previous.get("markets", {}) if isinstance(previous, dict) else {}
+    if not isinstance(previous_markets, dict):
+        previous_markets = {}
+
+    current_markets: dict[str, dict[str, Any]] = {}
+    hot_rows: list[tuple[Decimal, Decimal, Decimal, Decimal, Any]] = []
+    previous_generation = max(0, int(coverage.state["generation"]) - 1)
+    orderbook_history = coverage.state.get("orderbooks", {})
+
+    for ticker in tickers:
+        symbol = str(getattr(ticker, "symbol", ""))
+        last = dec(getattr(ticker, "last", None))
+        quote_volume = dec(getattr(ticker, "quote_volume", None))
+        if not symbol or last is None or last <= 0:
+            continue
+
+        current_markets[symbol] = {
+            "last": str(last),
+            "quote_volume": str(quote_volume) if quote_volume is not None else None,
+        }
+
+        prior = previous_markets.get(symbol)
+        if not isinstance(prior, dict):
+            continue
+        prior_last = dec(prior.get("last"))
+        prior_quote = dec(prior.get("quote_volume"))
+        if (
+            prior_last is None
+            or prior_last <= 0
+            or prior_quote is None
+            or prior_quote <= 0
+            or quote_volume is None
+            or quote_volume <= 0
+        ):
+            continue
+
+        # A symbol inspected in the immediately preceding pulse is already fresh;
+        # do not let a continuing mover monopolize capacity on every run.
+        if orderbook_history.get(symbol, 0) == previous_generation:
+            continue
+
+        price_delta_pct = pct(last, prior_last)
+        quote_delta = quote_volume - prior_quote
+        if price_delta_pct <= 0 or quote_delta <= 0:
+            continue
+
+        quote_delta_pct = quote_delta / prior_quote * Decimal("100")
+        heat = price_delta_pct * quote_delta_pct
+        hot_rows.append((heat, price_delta_pct, quote_delta_pct, quote_volume, ticker))
+
+    hot_rows.sort(
+        key=lambda row: (row[0], row[1], row[2], row[3]),
+        reverse=True,
+    )
+    hot_symbols = [row[4].symbol for row in hot_rows]
+    hot_set = set(hot_symbols)
+    ordered = [row[4] for row in hot_rows]
+    ordered.extend(ticker for ticker in base_order if ticker.symbol not in hot_set)
+
+    state["ticker_radar"] = {
+        "observed_at": int(now),
+        "markets": current_markets,
+        "hot_symbols": hot_symbols,
+        "hot_metrics": {
+            row[4].symbol: {
+                "price_delta_pct": str(row[1]),
+                "quote_volume_delta_pct": str(row[2]),
+                "heat": str(row[0]),
+            }
+            for row in hot_rows
+        },
+    }
+    return ordered, {
+        "eligible_count": len(hot_symbols),
+        "hot_symbols": hot_symbols,
+    }
+
+
 def _empty_state() -> dict[str, Any]:
     return {
         "sent_signals": {},
@@ -253,6 +347,7 @@ def _empty_state() -> dict[str, Any]:
         "shadow_daily_alerts": [],
         "shadow_last_alert_at": 0,
         "coverage_scheduler": {},
+        "ticker_radar": {},
         "candidate_lifecycle": {},
         "directive_009_runs": [],
     }
@@ -272,7 +367,8 @@ def load_state() -> dict[str, Any]:
                               ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
                               ("shadow_sent_signals", dict), ("shadow_daily_alerts", list),
-                              ("coverage_scheduler", dict), ("research_cohort", dict),
+                              ("coverage_scheduler", dict), ("ticker_radar", dict),
+                              ("research_cohort", dict),
                               ("research_cohort_history", list), ("candidate_lifecycle", dict),
                               ("directive_009_runs", list)):
             if key in raw and not isinstance(raw[key], expected):
@@ -300,6 +396,8 @@ def load_state() -> dict[str, Any]:
             state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
         if isinstance(raw.get("coverage_scheduler"), dict):
             state["coverage_scheduler"] = raw["coverage_scheduler"]
+        if isinstance(raw.get("ticker_radar"), dict):
+            state["ticker_radar"] = raw["ticker_radar"]
         for key in ("research_cohort", "research_cohort_history", "execution_research",
                     "candidate_lifecycle", "directive_009_runs"):
             if key in raw:
@@ -1225,6 +1323,9 @@ def run_scanner() -> None:
     orderbook_checked = 0
     technical_checked = 0
     coverage = CoverageCycle(state.setdefault("coverage_scheduler", {}), snapshot)
+    orderbook_order, hot_radar = _hot_radar_order(tickers, state, coverage, now)
+    hot_symbol_set = set(hot_radar["hot_symbols"])
+    hot_orderbook_selected = 0
     book_candidates = []
 
     # Pre-fill so symbols beyond capacity are not confused with rejected setups.
@@ -1232,7 +1333,7 @@ def run_scanner() -> None:
         diagnostics["symbols"][ticker.symbol] = {"stage": "coverage", "reason": "not_evaluated_capacity",
                                                   "observed_at": now}
 
-    for ticker in coverage.order(tickers, "orderbooks", lambda item: item.symbol):
+    for ticker in orderbook_order:
         if ticker.symbol in {"USDT_TL", "USDC_TL", "BTC_TL"}:
             note(ticker.symbol, "universe", "excluded_base_asset")
             continue
@@ -1248,6 +1349,8 @@ def run_scanner() -> None:
         orderbook_checked += 1
         obs["liq"] += 1
         coverage.attempted("orderbooks", ticker.symbol)
+        if ticker.symbol in hot_symbol_set:
+            hot_orderbook_selected += 1
 
         try:
             book = get_order_book(ticker.symbol, ORDERBOOK_DEPTH)
@@ -1584,6 +1687,11 @@ def run_scanner() -> None:
                        signal_recorded=sent, alert_sent=telegram_alert_sent, funnel=funnel)
     diagnostics["coverage_generation"] = coverage.state["generation"]
     diagnostics["orderbook_markets_seen"] = len(coverage.state["orderbooks"])
+    diagnostics["hot_radar"] = {
+        "eligible_count": hot_radar["eligible_count"],
+        "selected_orderbooks": hot_orderbook_selected,
+        "hot_symbols": hot_radar["hot_symbols"],
+    }
     finish_diagnostics("completed")
 
     try:
@@ -1628,6 +1736,8 @@ def run_scanner() -> None:
         "cadence_late_after_seconds": CADENCE_LATE_AFTER_SECONDS,
         "cadence_gap_seconds": cadence_gap_seconds,
         "cadence_status": cadence_status,
+        "hot_radar_eligible": hot_radar["eligible_count"],
+        "hot_radar_selected": hot_orderbook_selected,
         "funnel": {
             "universe": len(snapshot), "liq": obs["liq"], "spread": obs["spread"],
             "book": obs["book"], "tech": obs["tech"], "score": obs["score"],
