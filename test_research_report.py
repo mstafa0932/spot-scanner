@@ -52,3 +52,19 @@ def test_health_and_pending_flags():
     assert report["pending_lifecycle_notifications"] == 1
     assert "universe_not_fully_evaluated" in report["warnings"]
     assert "no_recent_completed_scan" in report["warnings"]
+
+
+def test_cadence_report_flags_retained_late_gap():
+    s = state()
+    s["directive_009_runs"] = [
+        {"started_at": 1000},
+        {"started_at": 1600},
+        {"started_at": 4000},
+    ]
+    report = build_report(s, now=4100)
+    cadence = report["cadence"]
+    assert cadence["status"] == "late"
+    assert cadence["retained_runs"] == 3
+    assert cadence["max_gap_seconds"] == 2400
+    assert cadence["retained_late_gap_count"] == 1
+    assert "scanner_cadence_late" in report["warnings"]

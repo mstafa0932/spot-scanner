@@ -97,6 +97,23 @@ def _incomplete(
     }
 
 
+def _classify_fetch_error(exc: Exception) -> tuple[str, str]:
+    message = str(exc)
+    detail = f"{type(exc).__name__}: {message[:200]}"
+    lowered = message.lower()
+    if "Backfill gap limit exceeded" in message:
+        return "backfill_gap_limit_exceeded", detail
+    if "Consecutive synthetic candle limit exceeded" in message:
+        return "consecutive_synthetic_limit_exceeded", detail
+    if "Synthetic candle limit exceeded" in message:
+        return "synthetic_candle_limit_exceeded", detail
+    if "429" in message:
+        return "http_429", detail
+    if "timeout" in lowered or "timed out" in lowered:
+        return "timeout", detail
+    return "fetch_error", detail
+
+
 def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., Any]) -> dict[str, Any]:
     rejected_at = int(record.get("rejected_at", 0) or 0)
     first_close = ((rejected_at // INTERVAL_SECONDS) + 1) * INTERVAL_SECONDS
@@ -121,11 +138,8 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
     try:
         candles = fetcher(symbol, "15m", 250)
     except Exception as exc:
-        return _incomplete(
-            base,
-            code="fetch_error",
-            detail=f"{type(exc).__name__}: {str(exc)[:200]}",
-        )
+        code, detail = _classify_fetch_error(exc)
+        return _incomplete(base, code=code, detail=detail)
 
     required = {"timestamp", "high", "low"}
     columns = set(getattr(candles, "columns", []))
@@ -250,7 +264,7 @@ def process_state(
         record["processed_at"] = now
         changed = True
 
-    incomplete_rows = []
+    archive_rows = []
     if archive_path.exists():
         for line in archive_path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
@@ -259,22 +273,37 @@ def process_state(
                 archived_row = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if isinstance(archived_row, dict) and archived_row.get("outcome") == "incomplete_data":
-                incomplete_rows.append(archived_row)
+            if isinstance(archived_row, dict):
+                archive_rows.append(archived_row)
+
+    measured_total = sum(row.get("outcome") == "measured" for row in archive_rows)
+    incomplete_rows = [row for row in archive_rows if row.get("outcome") == "incomplete_data"]
     incomplete_total = len(incomplete_rows)
+    measurement_total = measured_total + incomplete_total
+    measurement_completeness = (
+        measured_total / measurement_total if measurement_total else 1.0
+    )
+    output(
+        "[MEASUREMENT_COMPLETENESS] "
+        f"measured_total={measured_total} "
+        f"incomplete_total={incomplete_total} "
+        f"measurement_total={measurement_total} "
+        f"measurement_completeness={measurement_completeness:.4f}"
+    )
+
     incomplete_classified = sum(
         bool(row.get("incomplete_reason_code")) for row in incomplete_rows
     )
-    coverage_ratio = (
+    classification_ratio = (
         incomplete_classified / incomplete_total if incomplete_total else 1.0
     )
     output(
-        "[INCOMPLETE_COVERAGE] "
+        "[INCOMPLETE_CLASSIFICATION] "
         f"incomplete_total={incomplete_total} "
         f"incomplete_classified={incomplete_classified} "
-        f"coverage_ratio={coverage_ratio:.4f}"
+        f"classification_ratio={classification_ratio:.4f}"
     )
-    if coverage_ratio >= 0.95:
+    if classification_ratio >= 0.95:
         distribution: dict[str, int] = {}
         for row in incomplete_rows:
             code = str(row.get("incomplete_reason_code") or "unclassified")

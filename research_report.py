@@ -51,6 +51,52 @@ def net_scenario(entry, exit_price, fee_pct, slippage_pct):
     return float((exit_price * (1-s) * (1-f) / (entry * (1+s) * (1+f)) - 1) * 100)
 
 
+def cadence_summary(state, now, expected_interval_seconds=600, late_after_seconds=1200):
+    runs = state.get("directive_009_runs", [])
+    starts = []
+    if isinstance(runs, list):
+        for row in runs:
+            if not isinstance(row, dict):
+                continue
+            try:
+                started_at = int(row.get("started_at", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if started_at > 0:
+                starts.append(started_at)
+    starts.sort()
+    if not starts:
+        return {
+            "status": "no_history",
+            "expected_interval_seconds": expected_interval_seconds,
+            "late_after_seconds": late_after_seconds,
+            "retained_runs": 0,
+            "last_started_at": None,
+            "current_gap_seconds": None,
+            "median_gap_seconds": None,
+            "max_gap_seconds": None,
+            "retained_late_gap_count": 0,
+        }
+    gaps = [b - a for a, b in zip(starts, starts[1:]) if b >= a]
+    ordered = sorted(gaps)
+    median_gap = ordered[(len(ordered) - 1) // 2] if ordered else None
+    max_gap = max(gaps) if gaps else None
+    current_gap = max(0, int(now) - starts[-1])
+    late_count = sum(gap > late_after_seconds for gap in gaps)
+    status = "late" if current_gap > late_after_seconds or late_count else "ok"
+    return {
+        "status": status,
+        "expected_interval_seconds": expected_interval_seconds,
+        "late_after_seconds": late_after_seconds,
+        "retained_runs": len(starts),
+        "last_started_at": starts[-1],
+        "current_gap_seconds": current_gap,
+        "median_gap_seconds": median_gap,
+        "max_gap_seconds": max_gap,
+        "retained_late_gap_count": late_count,
+    }
+
+
 def build_report(state, now=None, fee_pct=None, slippage_pct=None):
     now = int(time.time() if now is None else now)
     diagnostics = state.get("scan_diagnostics", [])
@@ -58,6 +104,9 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
     decisions = latest.get("symbols", {})
     counts = Counter(x.get("reason", "unknown") for x in decisions.values())
     warnings = []
+    cadence = cadence_summary(state, now)
+    if cadence["status"] == "late":
+        warnings.append("scanner_cadence_late")
     last_finished = latest.get("finished_at")
     if not last_finished or now - last_finished > 2700:
         warnings.append("no_recent_completed_scan")
@@ -110,9 +159,10 @@ def build_report(state, now=None, fee_pct=None, slippage_pct=None):
     if fee_pct is None or slippage_pct is None:
         warnings.append("trading_costs_unspecified")
     return {
-        "version": 2, "generated_at": now, "mode": "research_only",
+        "version": 3, "generated_at": now, "mode": "research_only",
         "profitability_proven": False, "automatic_promotion_allowed": False,
         "warnings": warnings,
+        "cadence": cadence,
         "coverage": {"snapshot_markets": latest.get("markets"),
                      "orderbooks_checked": latest.get("orderbooks_checked"),
                      "technical_checked": latest.get("technical_checked"),

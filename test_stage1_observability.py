@@ -65,7 +65,8 @@ def test_synthetic_near_miss_mfe_mae_and_archive_idempotency(tmp_path):
     assert process_state(state, now=maturity_at, fetcher=fetcher,
                          archive_path=archive, output=lines.append)
     assert lines[0] == "[NEAR_MISS] TEST_TL | MFE:+3.200% | MAE:-1.300% | measured"
-    assert "[INCOMPLETE_COVERAGE] incomplete_total=0 incomplete_classified=0 coverage_ratio=1.0000" in lines
+    assert "[MEASUREMENT_COMPLETENESS] measured_total=1 incomplete_total=0 measurement_total=1 measurement_completeness=1.0000" in lines
+    assert "[INCOMPLETE_CLASSIFICATION] incomplete_total=0 incomplete_classified=0 classification_ratio=1.0000" in lines
     assert "[INCOMPLETE_CODES] {}" in lines
     rows = [json.loads(x) for x in archive.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 1
@@ -111,6 +112,7 @@ def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, c
     assert lines[0].startswith("[INFRA_HEALTH] ")
     assert "btc_ok=False" in lines[0]
     assert "btc_reason=regime_bearish" in lines[0]
+    assert "cadence_status=first_observation" in lines[0]
     assert "state_saved=OK" in lines[0]
     assert lines[1].startswith("[FUNNEL_BEHAVIOR] ")
     assert "universe=1 liq=1 spread=1 book=1 tech=1 data_valid=1 " in lines[1]
@@ -141,6 +143,22 @@ def test_incomplete_reason_codes_cover_all_measurement_paths():
     fetch_error = _measure_event("TEST_TL", record, failing_fetcher)
     assert fetch_error["incomplete_reason_code"] == "fetch_error"
     assert fetch_error["incomplete_reason_detail"] == "RuntimeError: synthetic fetch failure"
+
+    classified = {
+        "CandleUnavailableError: Synthetic candle limit exceeded: 42>8":
+            "synthetic_candle_limit_exceeded",
+        "CandleUnavailableError: Consecutive synthetic candle limit exceeded: 3>2":
+            "consecutive_synthetic_limit_exceeded",
+        "CandleUnavailableError: Backfill gap limit exceeded: sample":
+            "backfill_gap_limit_exceeded",
+        "HTTP 429 from upstream": "http_429",
+        "request timed out": "timeout",
+    }
+    for message, expected in classified.items():
+        def classified_fetcher(*_args, _message=message):
+            raise RuntimeError(_message)
+        result = _measure_event("TEST_TL", record, classified_fetcher)
+        assert result["incomplete_reason_code"] == expected
 
     missing_columns = _measure_event(
         "TEST_TL",
@@ -189,10 +207,10 @@ def test_incomplete_reason_is_archived_and_retained_in_state(tmp_path, monkeypat
         output=lambda *_: None,
     )
     row = json.loads(archive.read_text(encoding="utf-8").strip())
-    assert row["incomplete_reason_code"] == "fetch_error"
+    assert row["incomplete_reason_code"] == "http_429"
     assert row["incomplete_reason_detail"] == "RuntimeError: synthetic 429"
     queued = state["near_miss_queue"]["TEST_TL"]
-    assert queued["incomplete_reason_code"] == "fetch_error"
+    assert queued["incomplete_reason_code"] == "http_429"
     assert queued["incomplete_reason_detail"] == "RuntimeError: synthetic 429"
 
 
@@ -284,7 +302,7 @@ def test_directive_009_terminal_candidate_can_start_new_lifecycle(monkeypatch):
     assert item["current_state"] == "discovery"
 
 
-def test_incomplete_coverage_below_threshold_hides_distribution_but_preserves_codes(tmp_path, monkeypatch):
+def test_incomplete_classification_below_threshold_hides_distribution_but_preserves_codes(tmp_path, monkeypatch):
     maturity_at = 16200
     state = {"near_miss_queue": {"TEST_TL": _queued_record(maturity_at=maturity_at)}}
     archive = tmp_path / "near_misses_archive.jsonl"
@@ -300,9 +318,16 @@ def test_incomplete_coverage_below_threshold_hides_distribution_but_preserves_co
         state, now=maturity_at, fetcher=failing_fetcher,
         archive_path=archive, output=lines.append,
     )
-    assert any("coverage_ratio=0.5000" in line for line in lines)
+    assert any("classification_ratio=0.5000" in line for line in lines)
+    assert any("measurement_completeness=0.0000" in line for line in lines)
     assert not any(line.startswith("[INCOMPLETE_CODES]") for line in lines)
     queued = state["near_miss_queue"]["TEST_TL"]
-    assert queued["incomplete_reason_code"] == "fetch_error"
+    assert queued["incomplete_reason_code"] == "http_429"
     rows = [json.loads(x) for x in archive.read_text(encoding="utf-8").splitlines()]
-    assert rows[-1]["incomplete_reason_code"] == "fetch_error"
+    assert rows[-1]["incomplete_reason_code"] == "http_429"
+
+
+def test_cadence_health_uses_two_expected_intervals_as_operational_late_boundary():
+    assert scanner._cadence_health([], now=1000) == (None, "first_observation")
+    assert scanner._cadence_health([{"started_at": 1000}], now=1600) == (600, "ok")
+    assert scanner._cadence_health([{"started_at": 1000}], now=2201) == (1201, "late")
