@@ -63,6 +63,7 @@ STATE_FILE = Path(os.getenv("SCANNER_STATE_FILE", "scanner_state.json"))
 TELEGRAM_TOKEN_ENV = "TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
 SHADOW_MODE = os.getenv("SHADOW_MODE", "true").strip().lower() == "true"
+TELEGRAM_READY_ALERTS = os.getenv("TELEGRAM_READY_ALERTS", "false").strip().lower() == "true"
 EXPECTED_RUN_INTERVAL_SECONDS = max(
     300, int(os.getenv("EXPECTED_RUN_INTERVAL_SECONDS", "600"))
 )
@@ -369,6 +370,13 @@ def send_telegram(message: str) -> bool:
         # Request exceptions can include the bot token in their URL.
         LOGGER.error("Telegram request failed: %s", type(exc).__name__)
         return False
+
+
+def send_shadow_ready_alert(opportunity: TriggeredOpportunity) -> bool:
+    """Send a confirmed READY alert while keeping the release in shadow mode."""
+    if not TELEGRAM_READY_ALERTS:
+        return False
+    return send_telegram(format_opportunity(opportunity))
 
 
 # ---------------------------------------------------------------------------
@@ -1394,6 +1402,7 @@ def run_scanner() -> None:
     )
 
     sent = False
+    telegram_alert_sent = False
 
     for candidate in discovered:
         item = _watchlist(state).get(candidate.symbol)
@@ -1503,6 +1512,15 @@ def run_scanner() -> None:
             note(candidate.symbol, "shadow", "paper_signal_recorded")
             _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
                                         lifecycle_state="shadow_entry", reason="paper_signal_recorded", now=now)
+            if TELEGRAM_READY_ALERTS:
+                telegram_alert_sent = send_shadow_ready_alert(opp)
+                if telegram_alert_sent:
+                    LOGGER.info(
+                        "SHADOW READY Telegram alert sent: %s score=%d confirmations=%d",
+                        candidate.symbol, candidate.score, confirmations,
+                    )
+                else:
+                    LOGGER.error("SHADOW READY Telegram alert failed: %s", candidate.symbol)
             sent = True
             placed_at = int(time.time())
             state["shadow_last_alert_at"] = placed_at
@@ -1523,6 +1541,7 @@ def run_scanner() -> None:
 
         if send_telegram(format_opportunity(opp)):
             note(candidate.symbol, "notification", "entry_alert_sent")
+            telegram_alert_sent = True
             sent = True
             state["last_alert_at"] = now
             state.setdefault("daily_alerts", []).append(now)
@@ -1562,7 +1581,7 @@ def run_scanner() -> None:
                   universe_excluded=sum(d["stage"] == "universe" for d in diagnostics["symbols"].values()))
     diagnostics.update(markets=len(snapshot), orderbooks_checked=orderbook_checked,
                        technical_checked=technical_checked, discovered=len(discovered),
-                       signal_recorded=sent, alert_sent=sent and not shadow_mode, funnel=funnel)
+                       signal_recorded=sent, alert_sent=telegram_alert_sent, funnel=funnel)
     diagnostics["coverage_generation"] = coverage.state["generation"]
     diagnostics["orderbook_markets_seen"] = len(coverage.state["orderbooks"])
     finish_diagnostics("completed")

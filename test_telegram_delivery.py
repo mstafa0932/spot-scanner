@@ -50,3 +50,20 @@ def test_missing_credentials_never_sends(monkeypatch):
     monkeypatch.setattr(scanner.requests, "post", post)
     assert scanner.send_telegram("test") is False
     post.assert_not_called()
+
+def test_shadow_ready_alert_requires_explicit_opt_in(monkeypatch):
+    opportunity = Mock()
+    sender = Mock(return_value=True)
+    formatter = Mock(return_value="ready-message")
+    monkeypatch.setattr(scanner, "send_telegram", sender)
+    monkeypatch.setattr(scanner, "format_opportunity", formatter)
+
+    monkeypatch.setattr(scanner, "TELEGRAM_READY_ALERTS", False)
+    assert scanner.send_shadow_ready_alert(opportunity) is False
+    sender.assert_not_called()
+
+    monkeypatch.setattr(scanner, "TELEGRAM_READY_ALERTS", True)
+    assert scanner.send_shadow_ready_alert(opportunity) is True
+    formatter.assert_called_once_with(opportunity)
+    sender.assert_called_once_with("ready-message")
+
