@@ -63,6 +63,13 @@ STATE_FILE = Path(os.getenv("SCANNER_STATE_FILE", "scanner_state.json"))
 TELEGRAM_TOKEN_ENV = "TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
 SHADOW_MODE = os.getenv("SHADOW_MODE", "true").strip().lower() == "true"
+EXPECTED_RUN_INTERVAL_SECONDS = max(
+    300, int(os.getenv("EXPECTED_RUN_INTERVAL_SECONDS", "600"))
+)
+CADENCE_LATE_AFTER_SECONDS = max(
+    EXPECTED_RUN_INTERVAL_SECONDS,
+    int(os.getenv("CADENCE_LATE_AFTER_SECONDS", str(EXPECTED_RUN_INTERVAL_SECONDS * 2))),
+)
 
 # Universe / execution quality
 MIN_QUOTE_VOLUME_TL = Decimal(os.getenv("MIN_QUOTE_VOLUME_TL", "5000000"))
@@ -180,6 +187,23 @@ class TriggeredOpportunity:
 # ---------------------------------------------------------------------------
 # Utilities / state
 # ---------------------------------------------------------------------------
+
+
+def _cadence_health(runs: list[Any], now: int) -> tuple[Optional[int], str]:
+    starts: list[int] = []
+    for row in runs:
+        if not isinstance(row, dict):
+            continue
+        try:
+            started_at = int(row.get("started_at", 0) or 0)
+        except (TypeError, ValueError):
+            continue
+        if started_at > 0:
+            starts.append(started_at)
+    if not starts:
+        return None, "first_observation"
+    gap = max(0, int(now) - max(starts))
+    return gap, ("ok" if gap <= CADENCE_LATE_AFTER_SECONDS else "late")
 
 
 def dec(value: Any) -> Optional[Decimal]:
@@ -1497,6 +1521,12 @@ def run_scanner() -> None:
             key = f"{decision.get('stage', 'unknown')}:{decision.get('reason', 'unknown')}"
             stage_drops[key] = stage_drops.get(key, 0) + 1
 
+    runs = state.setdefault("directive_009_runs", [])
+    if not isinstance(runs, list):
+        runs = []
+        state["directive_009_runs"] = runs
+    cadence_gap_seconds, cadence_status = _cadence_health(runs, now)
+
     run_record = {
         "run_id": _run_id(),
         "started_at": now,
@@ -1506,6 +1536,10 @@ def run_scanner() -> None:
         "candles_complete": candle_stats["complete"],
         "candles_synthetic": candle_stats["synthetic"],
         "candles_error": candle_stats["error"],
+        "cadence_expected_seconds": EXPECTED_RUN_INTERVAL_SECONDS,
+        "cadence_late_after_seconds": CADENCE_LATE_AFTER_SECONDS,
+        "cadence_gap_seconds": cadence_gap_seconds,
+        "cadence_status": cadence_status,
         "funnel": {
             "universe": len(snapshot), "liq": obs["liq"], "spread": obs["spread"],
             "book": obs["book"], "tech": obs["tech"], "score": obs["score"],
@@ -1514,10 +1548,6 @@ def run_scanner() -> None:
         },
         "stage_drops": stage_drops,
     }
-    runs = state.setdefault("directive_009_runs", [])
-    if not isinstance(runs, list):
-        runs = []
-        state["directive_009_runs"] = runs
     runs.append(run_record)
     state["directive_009_runs"] = runs[-32:]
 
@@ -1528,7 +1558,10 @@ def run_scanner() -> None:
         f"run_id={_run_id()} btc_ok={btc_ok} btc_reason={_btc_gate_reason_code(btc_reason)} "
         f"candles_complete={candle_stats['complete']} "
         f"candles_synthetic={candle_stats['synthetic']} "
-        f"candles_error={candle_stats['error']} state_saved=OK",
+        f"candles_error={candle_stats['error']} "
+        f"cadence_expected_seconds={EXPECTED_RUN_INTERVAL_SECONDS} "
+        f"cadence_gap_seconds={cadence_gap_seconds if cadence_gap_seconds is not None else 'na'} "
+        f"cadence_status={cadence_status} state_saved=OK",
         flush=True,
     )
     print(
