@@ -27,6 +27,62 @@ def test_rotating_selection_survives_restart_under_unchanged_budget():
     assert len(seen) == 234
 
 
+def test_hot_radar_boosts_unchecked_mover_without_changing_capacity():
+    root = {"coverage_scheduler": {}}
+    first = [
+        NS(symbol=f"M{i}_TL", last=D("100"), quote_volume=D("10000000"))
+        for i in range(6)
+    ]
+    cycle1 = CoverageCycle(root["coverage_scheduler"], [x.symbol for x in first])
+    ordered1, meta1 = scanner._hot_radar_order(first, root, cycle1, now=100)
+    assert meta1["eligible_count"] == 0
+    for ticker in ordered1[:2]:
+        cycle1.attempted("orderbooks", ticker.symbol)
+
+    second = [
+        NS(
+            symbol=f"M{i}_TL",
+            last=D("102") if i == 4 else D("100"),
+            quote_volume=D("12000000") if i == 4 else D("10000000"),
+        )
+        for i in range(6)
+    ]
+    cycle2 = CoverageCycle(root["coverage_scheduler"], [x.symbol for x in second])
+    ordered2, meta2 = scanner._hot_radar_order(second, root, cycle2, now=700)
+
+    assert ordered2[0].symbol == "M4_TL"
+    assert meta2["hot_symbols"][0] == "M4_TL"
+    assert len(ordered2) == len(second)
+    assert len({x.symbol for x in ordered2}) == len(second)
+
+
+def test_hot_radar_does_not_reboost_symbol_checked_previous_generation():
+    root = {"coverage_scheduler": {}}
+    first = [
+        NS(symbol=f"M{i}_TL", last=D("100"), quote_volume=D("10000000"))
+        for i in range(4)
+    ]
+    cycle1 = CoverageCycle(root["coverage_scheduler"], [x.symbol for x in first])
+    ordered1, _ = scanner._hot_radar_order(first, root, cycle1, now=100)
+    for ticker in ordered1[:2]:
+        cycle1.attempted("orderbooks", ticker.symbol)
+
+    second = [
+        NS(
+            symbol=f"M{i}_TL",
+            last=D("103") if i == 0 else D("100"),
+            quote_volume=D("13000000") if i == 0 else D("10000000"),
+        )
+        for i in range(4)
+    ]
+    cycle2 = CoverageCycle(root["coverage_scheduler"], [x.symbol for x in second])
+    ordered2, meta2 = scanner._hot_radar_order(second, root, cycle2, now=700)
+
+    assert "M0_TL" not in meta2["hot_symbols"]
+    # Normal least-recently-attempted fairness remains in force.
+    assert [x.symbol for x in ordered2[:2]] == ["M2_TL", "M3_TL"]
+
+
 def test_two_budgets_rotate_independently():
     state = {}
     symbols = list("ABCD")
@@ -86,6 +142,7 @@ def test_scanner_rotates_both_budgets_without_changing_gates(monkeypatch, tmp_pa
         assert len(book_calls) - before_books == 2
         assert len(technical_calls) - before_technicals == 1
         state = scanner.load_state()
+        assert isinstance(state.get("ticker_radar"), dict)
         decisions = state["scan_diagnostics"][-1]["symbols"]
         assert decisions["LOW_TL"]["reason"] == "quote_volume_below_minimum"
         assert not state["active_signals"]
