@@ -133,7 +133,9 @@ def test_btc_gate_blocks_recent_synthetic_candle(monkeypatch):
 def test_btc_gate_rejects_old_synthetic_even_if_recent_16_authentic(monkeypatch):
     import scanner
     full = frame()
-    repaired = repair(full.drop(20), 900, NOW, lambda *a: full.iloc[:0], "BTC")
+    # Keep the unresolved gap close enough that fewer than MIN_ROWS=205
+    # authentic candles remain after it, forcing the tagged synthetic fallback.
+    repaired = repair(full.drop(100), 900, NOW, lambda *a: full.iloc[:0], "BTC")
     repaired.attrs["source"] = "PARIBU"
     assert recent_authentic(repaired, 16, 900)
 
@@ -198,11 +200,15 @@ def test_backfill_transport_does_not_retry_internally():
     assert md.BACKFILL_SESSION.get_adapter("https://web.paribu.com").max_retries.total == 0
 
 
-def test_old_gap_is_synthetic_but_recent_16_stays_authentic():
+def test_old_gap_with_sufficient_authentic_suffix_discards_broken_prefix():
     full = frame()
     result = repair(full.drop(20), 900, NOW, lambda *a: full.iloc[:0], "BTC")
-    assert len(result) == 250
-    assert int((~result["is_authentic"]).sum()) == 1
+    assert len(result) >= 205
+    assert result["is_authentic"].all()
+    assert result.attrs["backfill"]["status"] == "authentic_contiguous_suffix"
+    assert result.attrs["backfill"]["missing_after_real_recovery"] == 1
+    assert result.attrs["backfill"]["returned_window_missing"] == 0
+    assert int(result["timestamp"].iloc[0]) == int(full["timestamp"].iloc[21])
     assert recent_authentic(result, 16, 900)
 
 

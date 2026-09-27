@@ -328,6 +328,50 @@ def repair(
         detail["missing_after"] = len(missing)
         LOGGER.info("CANDLE_REPAIR_ATTEMPT %s", json.dumps(detail))
 
+    # If historical gaps remain but the newest contiguous suffix is fully
+    # authentic, current, and long enough for every technical indicator,
+    # discard only the broken historical prefix. This preserves the
+    # authentic-only invariant without fabricating OHLCV rows.
+    if missing:
+        authentic_suffix = recent_contiguous(x, interval)
+        suffix_is_current = (
+            not authentic_suffix.empty
+            and int(authentic_suffix["timestamp"].iloc[-1]) == last
+        )
+        if suffix_is_current and len(authentic_suffix) >= minimum_contiguous:
+            result = authentic_suffix.copy().reset_index(drop=True)
+            result["is_authentic"] = True
+            result["data_quality"] = "PARIBU"
+            quality = {
+                "synthetic_count": 0,
+                "synthetic_timestamps": [],
+                "max_consecutive_synthetic": 0,
+                "authentic_tail": len(result),
+            }
+            report.update(
+                recovered=report["missing_before"] - len(missing),
+                missing_after_real_recovery=len(missing),
+                missing_after=len(missing),
+                gaps_after_utc=[[utc(a), utc(b)] for a, b in spans(missing, interval)],
+                returned_window_missing=0,
+                synthetic_count=0,
+                synthetic_timestamps=[],
+                max_consecutive_synthetic=0,
+                authentic_tail=len(result),
+                discarded_prefix_rows=max(0, len(x) - len(result)),
+                status="authentic_contiguous_suffix",
+            )
+            _history[label] = {
+                "observed_at": int(now),
+                "missing_timestamps": sorted(missing),
+                "report": report,
+            }
+            result.attrs.update(original_attrs)
+            result.attrs["backfill"] = report
+            result.attrs["candle_quality"] = quality
+            LOGGER.info("CANDLE_REPAIR_RESULT %s", json.dumps(report))
+            return result
+
     result = _regularize_with_synthetic_rows(
         x,
         interval_s=interval,
