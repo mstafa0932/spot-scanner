@@ -42,6 +42,22 @@ def test_all_unfinished_candles_excluded(monkeypatch):
     assert len(md.validate_candles(pd.concat([df, extra]), "15m")) == 250
 
 
+def test_trading_data_gate_requires_every_row_to_be_authentic():
+    frames = []
+    for _ in range(3):
+        frame = candles()
+        frame["is_authentic"] = True
+        frames.append(frame)
+    assert scanner._all_candles_authentic(*frames)
+
+    frames[0].loc[10, "is_authentic"] = False
+    assert not scanner._all_candles_authentic(*frames)
+
+    frames[0]["is_authentic"] = True
+    frames[1] = frames[1].drop(columns=["is_authentic"])
+    assert not scanner._all_candles_authentic(*frames)
+
+
 def test_repeat_candle_is_not_confirmation():
     state = {}
     candidate = NS(symbol="SYN_TL", candle_at=NOW-900, score=80, reasons=[], setup="WATCHING",

@@ -127,10 +127,10 @@ def test_btc_gate_blocks_recent_synthetic_candle(monkeypatch):
     monkeypatch.setattr(scanner, "fetch_candles", lambda *a: repaired)
     ok, _, reason = scanner.btc_gate()
     assert not ok
-    assert "recent 4h candle integrity failed" in reason
+    assert reason == "BTC synthetic candles present"
 
 
-def test_btc_gate_allows_old_synthetic_if_recent_16_authentic(monkeypatch):
+def test_btc_gate_rejects_old_synthetic_even_if_recent_16_authentic(monkeypatch):
     import scanner
     full = frame()
     repaired = repair(full.drop(20), 900, NOW, lambda *a: full.iloc[:0], "BTC")
@@ -152,7 +152,8 @@ def test_btc_gate_allows_old_synthetic_if_recent_16_authentic(monkeypatch):
     monkeypatch.setattr(scanner, "fetch_candles", lambda *a: repaired)
     monkeypatch.setattr(scanner, "analyze_symbol", lambda *a: tech)
     ok, _, reason = scanner.btc_gate()
-    assert ok
+    assert not ok
+    assert reason == "BTC synthetic candles present"
     assert "BTC" in reason
 
 

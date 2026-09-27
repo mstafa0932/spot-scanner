@@ -1,4 +1,4 @@
-name: Acceptance Cadence Controller
+name: Cadence Controller
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: acceptance-cadence-controller
+  group: paribu-cadence-controller
   cancel-in-progress: false
 
 jobs:
@@ -30,8 +30,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "[ACCEPTANCE] controller_started_at=$(date -u +%FT%TZ)"
-          echo "[ACCEPTANCE] planned_dispatches=24 interval_seconds=600"
+          echo "[CADENCE] controller_started_at=$(date -u +%FT%TZ)"
+          echo "[CADENCE] planned_dispatches=24 interval_seconds=600"
 
           for i in $(seq 1 24); do
             sleep 600
@@ -45,7 +45,16 @@ jobs:
               "https://api.github.com/repos/${REPO}/actions/workflows/scanner.yml/dispatches" \
               --data '{"ref":"main"}'
 
-            echo "[ACCEPTANCE] dispatch=${i}/24 at=${dispatched_at}"
+            echo "[CADENCE] dispatch=${i}/24 at=${dispatched_at}"
           done
 
-          echo "[ACCEPTANCE] controller_finished_at=$(date -u +%FT%TZ)"
+          echo "[CADENCE] chaining_successor_at=$(date -u +%FT%TZ)"
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${REPO}/actions/workflows/acceptance_cadence_controller.yml/dispatches" \
+            --data '{"ref":"main"}'
+
+          echo "[CADENCE] controller_finished_at=$(date -u +%FT%TZ)"
