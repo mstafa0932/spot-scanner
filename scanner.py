@@ -748,6 +748,38 @@ def _candle_synthetic_rows(*frames: Any) -> int:
     return total
 
 
+def _candle_error_reason_code(exc: Exception) -> str:
+    """Classify candle-fetch failures without changing scanner behavior."""
+    message = f"{type(exc).__name__}: {exc}".lower()
+    if "backfill gap limit exceeded" in message:
+        return "backfill_gap_limit_exceeded"
+    if "consecutive synthetic candle limit exceeded" in message:
+        return "consecutive_synthetic_limit_exceeded"
+    if "synthetic candle limit exceeded" in message:
+        return "synthetic_candle_limit_exceeded"
+    if "only " in message and "closed paribu candles" in message:
+        return "insufficient_history"
+    if "no valid rows to anchor backfill" in message or "no paribu candles available" in message:
+        return "empty_history"
+    if "gaps or irregular candle spacing" in message:
+        return "irregular_spacing"
+    if "stale candles" in message:
+        return "stale_candles"
+    if "http 429" in message or "too many requests" in message:
+        return "http_429"
+    if "timed out" in message or "timeout" in message:
+        return "timeout"
+    if "invalid json" in message:
+        return "invalid_json"
+    if "paribuschemaerror" in message or "schema" in message:
+        return "schema_error"
+    if "paribu chart unavailable" in message:
+        return "chart_unavailable"
+    if "candleunavailableerror" in message:
+        return "candle_unavailable_other"
+    return "unexpected_error"
+
+
 def _all_candles_authentic(*frames: Any) -> bool:
     """Fail closed unless every candle used by indicators is genuine Paribu data."""
     for frame in frames:
@@ -1249,14 +1281,31 @@ def run_scanner() -> None:
         technical_checked += 1
         coverage.attempted("technicals", ticker.symbol)
 
-        try:
-            df_15 = fetch_candles(ticker.symbol, "15m", CANDLE_LIMIT)
-            df_1h = fetch_candles(ticker.symbol, "1h", CANDLE_LIMIT)
-            df_4h = fetch_candles(ticker.symbol, "4h", CANDLE_LIMIT)
-        except Exception as exc:
-            candle_stats["error"] += 1
-            note(ticker.symbol, "data", "candle_error:" + type(exc).__name__)
+        candle_frames: dict[str, Any] = {}
+        candle_fetch_failed = False
+        for timeframe in ("15m", "1h", "4h"):
+            try:
+                candle_frames[timeframe] = fetch_candles(
+                    ticker.symbol, timeframe, CANDLE_LIMIT
+                )
+            except Exception as exc:
+                candle_stats["error"] += 1
+                note(
+                    ticker.symbol,
+                    "data",
+                    "candle_error:" + _candle_error_reason_code(exc),
+                    timeframe=timeframe,
+                    error_type=type(exc).__name__,
+                    error_detail=str(exc)[:240],
+                )
+                candle_fetch_failed = True
+                break
+        if candle_fetch_failed:
             continue
+
+        df_15 = candle_frames["15m"]
+        df_1h = candle_frames["1h"]
+        df_4h = candle_frames["4h"]
 
         candle_stats["synthetic"] += _candle_synthetic_rows(df_15, df_1h, df_4h)
         if not all(
