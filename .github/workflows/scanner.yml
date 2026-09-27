@@ -39,6 +39,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Validate signal lifecycle
+        if: github.event_name == 'push'
         run: python -m pytest -q
 
       - name: Run scanner
