@@ -94,6 +94,50 @@ def test_week1_metrics_emits_only_at_23_utc(tmp_path):
     assert sum(line.startswith("[WEEK1_METRICS]") for line in lines) == 1
 
 
+def test_candle_error_reason_taxonomy_is_specific():
+    samples = {
+        ValueError("Backfill gap limit exceeded: sample"):
+            "backfill_gap_limit_exceeded",
+        ValueError("Synthetic candle limit exceeded: 9>8"):
+            "synthetic_candle_limit_exceeded",
+        ValueError("Consecutive synthetic candle limit exceeded: 3>2"):
+            "consecutive_synthetic_limit_exceeded",
+        RuntimeError("Only 40 closed Paribu candles for 15m; 205 required"):
+            "insufficient_history",
+        RuntimeError("Gaps or irregular candle spacing for 1h"):
+            "irregular_spacing",
+        RuntimeError("Stale candles for 4h: close age=20000s"):
+            "stale_candles",
+        RuntimeError("HTTP 429 from https://web.paribu.com/chart/history"):
+            "http_429",
+        RuntimeError("request timed out"):
+            "timeout",
+        RuntimeError("Paribu chart unavailable for abc_tl 15m: HTTP 503"):
+            "chart_unavailable",
+    }
+    for exc, expected in samples.items():
+        assert scanner._candle_error_reason_code(exc) == expected
+
+
+def test_scanner_records_candle_error_reason_and_timeframe(monkeypatch, tmp_path):
+    prepare(monkeypatch, tmp_path)
+    original_fetch = scanner.fetch_candles
+
+    def failing_fetch(symbol, timeframe, limit):
+        if timeframe == "1h":
+            raise RuntimeError("Backfill gap limit exceeded: sample")
+        return original_fetch(symbol, timeframe, limit)
+
+    monkeypatch.setattr(scanner, "fetch_candles", failing_fetch)
+    scanner.run_scanner()
+    decision = scanner.load_state()["scan_diagnostics"][-1]["symbols"]["SYN_TL"]
+    assert decision["stage"] == "data"
+    assert decision["reason"] == "candle_error:backfill_gap_limit_exceeded"
+    assert decision["timeframe"] == "1h"
+    assert decision["error_type"] == "RuntimeError"
+    assert "Backfill gap limit exceeded" in decision["error_detail"]
+
+
 def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, capsys):
     prepare(monkeypatch, tmp_path)
     monkeypatch.setattr(scanner, "discovery_ok", lambda *a: (False, "synthetic rejection"))
