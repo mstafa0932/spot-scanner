@@ -381,6 +381,8 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
     try:
         df_15 = fetch_candles("BTC_TL", "15m", CANDLE_LIMIT)
         df_1h = fetch_candles("BTC_TL", "1h", CANDLE_LIMIT)
+        if not _all_candles_authentic(df_15, df_1h):
+            return False, None, "BTC synthetic candles present"
         if not recent_authentic(df_15, 16, 900):
             return False, None, "BTC recent 4h candle integrity failed"
 
@@ -427,6 +429,8 @@ def btc_gate() -> tuple[bool, Optional[IndicatorResult], str]:
 
 
 def _btc_gate_reason_code(reason: str) -> str:
+    if reason == "BTC synthetic candles present":
+        return "synthetic_candles_present"
     if reason == "BTC recent 4h candle integrity failed":
         return "recent_4h_integrity_failed"
     if reason == "BTC indicators unavailable":
@@ -742,6 +746,19 @@ def _candle_synthetic_rows(*frames: Any) -> int:
         except Exception:
             continue
     return total
+
+
+def _all_candles_authentic(*frames: Any) -> bool:
+    """Fail closed unless every candle used by indicators is genuine Paribu data."""
+    for frame in frames:
+        try:
+            if "is_authentic" not in frame.columns or frame.empty:
+                return False
+            if not bool(frame["is_authentic"].astype(bool).all()):
+                return False
+        except Exception:
+            return False
+    return True
 
 
 def _watchlist(state: dict[str, Any]) -> dict[str, Any]:
@@ -1249,8 +1266,11 @@ def run_scanner() -> None:
             note(ticker.symbol, "data", "non_paribu_candles")
             continue
 
-        # Historical synthetic rows may warm long indicators, but entries may
-        # not be based on synthetic recent observations.
+        # Trading decisions are fail-closed: no synthetic row may influence
+        # indicators, score, confirmation, or BTC regime decisions.
+        if not _all_candles_authentic(df_15, df_1h, df_4h):
+            note(ticker.symbol, "data", "synthetic_candles_present")
+            continue
         if not recent_authentic(df_15, 4, 900):
             note(ticker.symbol, "data", "recent_15m_integrity_failed")
             continue
