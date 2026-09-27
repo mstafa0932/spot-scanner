@@ -11412,15 +11412,13 @@
       "processed_at": null
     },
     "DASH_TL": {
-      "event_id": "DASH_TL:1790505364:book:spread_too_high",
-      "rejected_at": 1790505364,
-      "rejected_price": "3505.26",
+      "event_id": "DASH_TL:1790528005:book:spread_too_high",
+      "rejected_at": 1790528005,
+      "rejected_price": "3448.46",
       "rejected_stage": "book:spread_too_high",
-      "maturity_at": 1790520300,
-      "processed": true,
-      "processed_at": 1790525986,
-      "incomplete_reason_code": "backfill_gap_limit_exceeded",
-      "incomplete_reason_detail": "CandleUnavailableError: Backfill gap limit exceeded: {\"market\": \"dash_tl:15m\", \"requests\": 0, \"errors\": [], \"missing_before\": 154, \"missing_after\": 154, \"status\": \"gap_limit_exceeded\", \"window_utc\": [\"2026-09-24T13:15:00+00:"
+      "maturity_at": 1790542800,
+      "processed": false,
+      "processed_at": null
     },
     "JASMY_TL": {
       "event_id": "JASMY_TL:1790505364:book:imbalance_too_low",
@@ -11518,6 +11516,15 @@
       "rejected_price": "10.469",
       "rejected_stage": "book:imbalance_too_low",
       "maturity_at": 1790538300,
+      "processed": false,
+      "processed_at": null
+    },
+    "APE_TL": {
+      "event_id": "APE_TL:1790528004:book:imbalance_too_low",
+      "rejected_at": 1790528004,
+      "rejected_price": "8.09",
+      "rejected_stage": "book:imbalance_too_low",
+      "maturity_at": 1790542800,
       "processed": false,
       "processed_at": null
     }
@@ -11706,12 +11713,12 @@
       "score": 90,
       "setup": "PULLBACK",
       "risk_budget_pct": "2.00",
-      "status": "PENDING_ENTRY",
+      "status": "OPEN",
       "tp1_notified": false,
       "events": [],
       "tracking_mode": "shadow_limit_simulation",
       "fill_confirmed": false,
-      "fill_estimated": false,
+      "fill_estimated": true,
       "simulation_version": "ohlc_penetration_v2",
       "research_cohort": "shadow_integrity_v2:1790082787",
       "evidence": {
@@ -11740,7 +11747,19 @@
       "breakeven_armed": false,
       "breakeven_stop": null,
       "tracking_data_error": null,
-      "last_processed_candle": 1790525700
+      "last_processed_candle": 1790526600,
+      "filled_at": 1790527500,
+      "fill_evidence": {
+        "model": "ohlc_penetration_v2",
+        "basis": "authentic_positive_volume_price_penetration",
+        "candle_open": 1790526600,
+        "candle_close": 1790527500,
+        "low": "476.66",
+        "high": "481.11",
+        "volume": "2053.15",
+        "time_basis": "bar_close_upper_bound_not_exact_fill_time",
+        "quantity_basis": "unknown_no_queue_or_partial_fill_model"
+      }
     }
   ],
   "daily_alerts": [
@@ -11751,7 +11770,7 @@
   "last_alert_at": 1789667271,
   "candle_gap_history": {
     "btc_tl:15m": {
-      "observed_at": 1790527404,
+      "observed_at": 1790528004,
       "missing_timestamps": [],
       "report": {
         "market": "btc_tl:15m",
@@ -11763,8 +11782,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -11778,7 +11797,7 @@
       }
     },
     "xrp_tl:15m": {
-      "observed_at": 1790527430,
+      "observed_at": 1790528042,
       "missing_timestamps": [],
       "report": {
         "market": "xrp_tl:15m",
@@ -11790,8 +11809,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -11805,7 +11824,7 @@
       }
     },
     "xrp_tl:1h": {
-      "observed_at": 1790527431,
+      "observed_at": 1790528042,
       "missing_timestamps": [],
       "report": {
         "market": "xrp_tl:1h",
@@ -11832,7 +11851,7 @@
       }
     },
     "xrp_tl:4h": {
-      "observed_at": 1790527431,
+      "observed_at": 1790528042,
       "missing_timestamps": [],
       "report": {
         "market": "xrp_tl:4h",
@@ -12057,7 +12076,7 @@
       }
     },
     "trx_tl:15m": {
-      "observed_at": 1790526830,
+      "observed_at": 1790528029,
       "missing_timestamps": [],
       "report": {
         "market": "trx_tl:15m",
@@ -12069,8 +12088,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -12084,7 +12103,7 @@
       }
     },
     "trx_tl:1h": {
-      "observed_at": 1790526830,
+      "observed_at": 1790528029,
       "missing_timestamps": [],
       "report": {
         "market": "trx_tl:1h",
@@ -12111,7 +12130,7 @@
       }
     },
     "trx_tl:4h": {
-      "observed_at": 1790526831,
+      "observed_at": 1790528029,
       "missing_timestamps": [],
       "report": {
         "market": "trx_tl:4h",
@@ -12370,7 +12389,7 @@
       }
     },
     "pendle_tl:15m": {
-      "observed_at": 1790526833,
+      "observed_at": 1790528030,
       "missing_timestamps": [
         1790406000,
         1790450100,
@@ -12387,8 +12406,8 @@
         "continuing_count": 4,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -12436,7 +12455,7 @@
           1790523900
         ],
         "max_consecutive_synthetic": 1,
-        "authentic_tail": 2,
+        "authentic_tail": 3,
         "status": "synthetic_fallback"
       }
     },
@@ -13685,7 +13704,7 @@
       }
     },
     "xaut_tl:15m": {
-      "observed_at": 1790526840,
+      "observed_at": 1790528035,
       "missing_timestamps": [
         1790279100
       ],
@@ -13699,8 +13718,8 @@
         "continuing_count": 1,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -13721,12 +13740,12 @@
           1790279100
         ],
         "max_consecutive_synthetic": 1,
-        "authentic_tail": 274,
+        "authentic_tail": 275,
         "status": "synthetic_fallback"
       }
     },
     "xaut_tl:1h": {
-      "observed_at": 1790526841,
+      "observed_at": 1790528036,
       "missing_timestamps": [],
       "report": {
         "market": "xaut_tl:1h",
@@ -13753,7 +13772,7 @@
       }
     },
     "xaut_tl:4h": {
-      "observed_at": 1790526842,
+      "observed_at": 1790528036,
       "missing_timestamps": [],
       "report": {
         "market": "xaut_tl:4h",
@@ -14648,7 +14667,7 @@
       }
     },
     "xcn_tl:15m": {
-      "observed_at": 1790526836,
+      "observed_at": 1790528031,
       "missing_timestamps": [],
       "report": {
         "market": "xcn_tl:15m",
@@ -14660,8 +14679,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -14675,7 +14694,7 @@
       }
     },
     "xcn_tl:1h": {
-      "observed_at": 1790526836,
+      "observed_at": 1790528031,
       "missing_timestamps": [],
       "report": {
         "market": "xcn_tl:1h",
@@ -14702,7 +14721,7 @@
       }
     },
     "xcn_tl:4h": {
-      "observed_at": 1790526836,
+      "observed_at": 1790528032,
       "missing_timestamps": [],
       "report": {
         "market": "xcn_tl:4h",
@@ -14819,7 +14838,7 @@
       }
     },
     "avax_tl:15m": {
-      "observed_at": 1790526839,
+      "observed_at": 1790528034,
       "missing_timestamps": [
         1790394300,
         1790469900,
@@ -14837,8 +14856,8 @@
         "continuing_count": 5,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -14895,7 +14914,7 @@
           1790485200
         ],
         "max_consecutive_synthetic": 1,
-        "authentic_tail": 45,
+        "authentic_tail": 46,
         "status": "synthetic_fallback"
       }
     },
@@ -15177,7 +15196,7 @@
       }
     },
     "syn_tl:15m": {
-      "observed_at": 1790526847,
+      "observed_at": 1790528028,
       "missing_timestamps": [],
       "report": {
         "market": "syn_tl:15m",
@@ -15189,8 +15208,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -15204,7 +15223,7 @@
       }
     },
     "syn_tl:1h": {
-      "observed_at": 1790526847,
+      "observed_at": 1790528029,
       "missing_timestamps": [],
       "report": {
         "market": "syn_tl:1h",
@@ -15231,7 +15250,7 @@
       }
     },
     "syn_tl:4h": {
-      "observed_at": 1790526847,
+      "observed_at": 1790528029,
       "missing_timestamps": [],
       "report": {
         "market": "syn_tl:4h",
@@ -15258,7 +15277,7 @@
       }
     },
     "eth_tl:15m": {
-      "observed_at": 1790526848,
+      "observed_at": 1790528041,
       "missing_timestamps": [],
       "report": {
         "market": "eth_tl:15m",
@@ -15270,8 +15289,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -15285,7 +15304,7 @@
       }
     },
     "eth_tl:1h": {
-      "observed_at": 1790526849,
+      "observed_at": 1790528041,
       "missing_timestamps": [],
       "report": {
         "market": "eth_tl:1h",
@@ -15312,7 +15331,7 @@
       }
     },
     "eth_tl:4h": {
-      "observed_at": 1790526849,
+      "observed_at": 1790528041,
       "missing_timestamps": [],
       "report": {
         "market": "eth_tl:4h",
@@ -16876,7 +16895,7 @@
       }
     },
     "btc_tl:1h": {
-      "observed_at": 1790527404,
+      "observed_at": 1790528004,
       "missing_timestamps": [],
       "report": {
         "market": "btc_tl:1h",
@@ -17374,7 +17393,7 @@
       }
     },
     "alt_tl:15m": {
-      "observed_at": 1790525635,
+      "observed_at": 1790528025,
       "missing_timestamps": [
         1790380800
       ],
@@ -17388,8 +17407,8 @@
         "continuing_count": 1,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:00:00+00:00",
-          "2026-09-27T15:45:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -17410,7 +17429,7 @@
           1790380800
         ],
         "max_consecutive_synthetic": 1,
-        "authentic_tail": 159,
+        "authentic_tail": 162,
         "status": "synthetic_fallback"
       }
     },
@@ -18553,7 +18572,7 @@
       }
     },
     "nmr_tl:15m": {
-      "observed_at": 1790527404,
+      "observed_at": 1790528030,
       "missing_timestamps": [],
       "report": {
         "market": "nmr_tl:15m",
@@ -18565,8 +18584,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -18580,7 +18599,7 @@
       }
     },
     "nmr_tl:1h": {
-      "observed_at": 1790526831,
+      "observed_at": 1790528030,
       "missing_timestamps": [],
       "report": {
         "market": "nmr_tl:1h",
@@ -18607,7 +18626,7 @@
       }
     },
     "nmr_tl:4h": {
-      "observed_at": 1790526831,
+      "observed_at": 1790528030,
       "missing_timestamps": [],
       "report": {
         "market": "nmr_tl:4h",
@@ -19026,7 +19045,7 @@
       }
     },
     "acm_tl:15m": {
-      "observed_at": 1790525622,
+      "observed_at": 1790528026,
       "missing_timestamps": [
         1790325900,
         1790483400
@@ -19037,12 +19056,12 @@
         "errors": [],
         "recovered": 0,
         "missing_before": 2,
-        "classification": "new",
-        "continuing_count": 0,
-        "new_count": 2,
+        "classification": "continuing",
+        "continuing_count": 2,
+        "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:00:00+00:00",
-          "2026-09-27T15:45:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -19072,7 +19091,7 @@
           1790483400
         ],
         "max_consecutive_synthetic": 1,
-        "authentic_tail": 45,
+        "authentic_tail": 48,
         "status": "synthetic_fallback"
       }
     },
@@ -19345,7 +19364,7 @@
       }
     },
     "fet_tl:15m": {
-      "observed_at": 1790526842,
+      "observed_at": 1790528037,
       "missing_timestamps": [
         1790388900,
         1790401500,
@@ -19364,8 +19383,8 @@
         "continuing_count": 6,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -19423,7 +19442,7 @@
           1790481600
         ],
         "max_consecutive_synthetic": 2,
-        "authentic_tail": 49,
+        "authentic_tail": 50,
         "status": "synthetic_fallback"
       }
     },
@@ -20849,7 +20868,7 @@
       }
     },
     "neo_tl:15m": {
-      "observed_at": 1790525629,
+      "observed_at": 1790528027,
       "missing_timestamps": [
         1790372700,
         1790382600,
@@ -20867,8 +20886,8 @@
         "continuing_count": 5,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:00:00+00:00",
-          "2026-09-27T15:45:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -20925,12 +20944,12 @@
           1790499600
         ],
         "max_consecutive_synthetic": 1,
-        "authentic_tail": 27,
+        "authentic_tail": 30,
         "status": "synthetic_fallback"
       }
     },
     "fet_tl:1h": {
-      "observed_at": 1790526843,
+      "observed_at": 1790528037,
       "missing_timestamps": [],
       "report": {
         "market": "fet_tl:1h",
@@ -20957,7 +20976,7 @@
       }
     },
     "fet_tl:4h": {
-      "observed_at": 1790526843,
+      "observed_at": 1790528037,
       "missing_timestamps": [],
       "report": {
         "market": "fet_tl:4h",
@@ -21343,7 +21362,7 @@
       }
     },
     "akt_tl:15m": {
-      "observed_at": 1790517795,
+      "observed_at": 1790528023,
       "missing_timestamps": [],
       "report": {
         "market": "akt_tl:15m",
@@ -21355,8 +21374,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T11:00:00+00:00",
-          "2026-09-27T13:45:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -21370,7 +21389,7 @@
       }
     },
     "akt_tl:1h": {
-      "observed_at": 1790517795,
+      "observed_at": 1790528023,
       "missing_timestamps": [],
       "report": {
         "market": "akt_tl:1h",
@@ -21382,8 +21401,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-09-15T02:00:00+00:00",
-          "2026-09-27T13:00:00+00:00"
+          "2026-09-15T04:00:00+00:00",
+          "2026-09-27T15:00:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -21397,7 +21416,7 @@
       }
     },
     "akt_tl:4h": {
-      "observed_at": 1790517796,
+      "observed_at": 1790528023,
       "missing_timestamps": [],
       "report": {
         "market": "akt_tl:4h",
@@ -21409,8 +21428,8 @@
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
-          "2026-08-08T12:00:00+00:00",
-          "2026-09-27T08:00:00+00:00"
+          "2026-08-08T16:00:00+00:00",
+          "2026-09-27T12:00:00+00:00"
         ],
         "gaps_before_utc": [],
         "missing_after_real_recovery": 0,
@@ -22028,7 +22047,7 @@
       }
     },
     "ens_tl:15m": {
-      "observed_at": 1790526843,
+      "observed_at": 1790528038,
       "missing_timestamps": [
         1790361900,
         1790362800
@@ -22043,8 +22062,8 @@
         "continuing_count": 2,
         "new_count": 0,
         "window_utc": [
-          "2026-09-24T13:30:00+00:00",
-          "2026-09-27T16:15:00+00:00"
+          "2026-09-24T13:45:00+00:00",
+          "2026-09-27T16:30:00+00:00"
         ],
         "gaps_before_utc": [
           [
@@ -22066,7 +22085,7 @@
           1790362800
         ],
         "max_consecutive_synthetic": 2,
-        "authentic_tail": 181,
+        "authentic_tail": 182,
         "status": "synthetic_fallback"
       }
     },
@@ -23148,7 +23167,7 @@
       }
     },
     "ens_tl:1h": {
-      "observed_at": 1790526844,
+      "observed_at": 1790528038,
       "missing_timestamps": [],
       "report": {
         "market": "ens_tl:1h",
@@ -23175,7 +23194,7 @@
       }
     },
     "ens_tl:4h": {
-      "observed_at": 1790526845,
+      "observed_at": 1790528038,
       "missing_timestamps": [],
       "report": {
         "market": "ens_tl:4h",
@@ -25137,7 +25156,7 @@
       }
     },
     "avax_tl:1h": {
-      "observed_at": 1790526840,
+      "observed_at": 1790528034,
       "missing_timestamps": [],
       "report": {
         "market": "avax_tl:1h",
@@ -25164,7 +25183,7 @@
       }
     },
     "avax_tl:4h": {
-      "observed_at": 1790526840,
+      "observed_at": 1790528035,
       "missing_timestamps": [],
       "report": {
         "market": "avax_tl:4h",
@@ -25353,7 +25372,7 @@
       }
     },
     "neo_tl:1h": {
-      "observed_at": 1790525630,
+      "observed_at": 1790528028,
       "missing_timestamps": [],
       "report": {
         "market": "neo_tl:1h",
@@ -25380,7 +25399,7 @@
       }
     },
     "neo_tl:4h": {
-      "observed_at": 1790525631,
+      "observed_at": 1790528028,
       "missing_timestamps": [],
       "report": {
         "market": "neo_tl:4h",
@@ -25769,7 +25788,7 @@
       }
     },
     "alt_tl:1h": {
-      "observed_at": 1790525636,
+      "observed_at": 1790528025,
       "missing_timestamps": [],
       "report": {
         "market": "alt_tl:1h",
@@ -25796,7 +25815,7 @@
       }
     },
     "alt_tl:4h": {
-      "observed_at": 1790525637,
+      "observed_at": 1790528026,
       "missing_timestamps": [],
       "report": {
         "market": "alt_tl:4h",
@@ -29497,7 +29516,7 @@
       }
     },
     "pendle_tl:1h": {
-      "observed_at": 1790526834,
+      "observed_at": 1790528031,
       "missing_timestamps": [],
       "report": {
         "market": "pendle_tl:1h",
@@ -29524,7 +29543,7 @@
       }
     },
     "pendle_tl:4h": {
-      "observed_at": 1790526834,
+      "observed_at": 1790528031,
       "missing_timestamps": [],
       "report": {
         "market": "pendle_tl:4h",
@@ -29951,7 +29970,7 @@
       }
     },
     "acm_tl:1h": {
-      "observed_at": 1790525624,
+      "observed_at": 1790528027,
       "missing_timestamps": [],
       "report": {
         "market": "acm_tl:1h",
@@ -29959,7 +29978,7 @@
         "errors": [],
         "recovered": 0,
         "missing_before": 0,
-        "classification": "first_observation",
+        "classification": "clear",
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
@@ -29978,7 +29997,7 @@
       }
     },
     "acm_tl:4h": {
-      "observed_at": 1790525624,
+      "observed_at": 1790528027,
       "missing_timestamps": [],
       "report": {
         "market": "acm_tl:4h",
@@ -29986,7 +30005,7 @@
         "errors": [],
         "recovered": 0,
         "missing_before": 0,
-        "classification": "first_observation",
+        "classification": "clear",
         "continuing_count": 0,
         "new_count": 0,
         "window_utc": [
@@ -30014,82 +30033,82 @@
   "shadow_last_alert_at": 1790524454,
   "coverage_scheduler": {
     "orderbooks": {
-      "SYN_TL": 131,
-      "PEPE_TL": 131,
-      "XRP_TL": 132,
+      "SYN_TL": 133,
+      "PEPE_TL": 133,
+      "XRP_TL": 133,
       "BONK_TL": 132,
-      "ETH_TL": 132,
+      "ETH_TL": 133,
       "PUMP_TL": 132,
-      "BTTC_TL": 131,
-      "SPK_TL": 131,
-      "ETHFI_TL": 131,
+      "BTTC_TL": 133,
+      "SPK_TL": 133,
+      "ETHFI_TL": 133,
       "CHZ_TL": 132,
-      "TRX_TL": 131,
-      "TRUMP_TL": 131,
+      "TRX_TL": 133,
+      "TRUMP_TL": 133,
       "BAT_TL": 132,
-      "NMR_TL": 131,
-      "HOT_TL": 131,
-      "COMP_TL": 131,
+      "NMR_TL": 133,
+      "HOT_TL": 133,
+      "COMP_TL": 133,
       "ZETA_TL": 132,
-      "GAL_TL": 131,
-      "SAUBER_TL": 131,
-      "RENDER_TL": 131,
-      "AVAX_TL": 131,
-      "STG_TL": 131,
+      "GAL_TL": 133,
+      "SAUBER_TL": 133,
+      "RENDER_TL": 133,
+      "AVAX_TL": 133,
+      "STG_TL": 133,
       "GRASS_TL": 132,
-      "FLOKI_TL": 131,
-      "HYPE_TL": 131,
-      "ADA_TL": 131,
-      "FF_TL": 131,
-      "SHIB_TL": 131,
-      "SKL_TL": 131,
-      "ALT_TL": 131,
-      "DOGE_TL": 131,
-      "ENA_TL": 131,
-      "HNT_TL": 131,
-      "0G_TL": 131,
-      "PENGU_TL": 131,
-      "SAHARA_TL": 131,
+      "FLOKI_TL": 133,
+      "HYPE_TL": 133,
+      "ADA_TL": 133,
+      "FF_TL": 133,
+      "SHIB_TL": 133,
+      "SKL_TL": 133,
+      "ALT_TL": 133,
+      "DOGE_TL": 133,
+      "ENA_TL": 133,
+      "HNT_TL": 133,
+      "0G_TL": 133,
+      "PENGU_TL": 133,
+      "SAHARA_TL": 133,
       "S_TL": 98,
-      "CITY_TL": 131,
+      "CITY_TL": 133,
       "SUI_TL": 132,
-      "FET_TL": 131,
-      "ATM_TL": 131,
-      "RE_TL": 131,
-      "ARB_TL": 131,
-      "ANKR_TL": 131,
-      "STORJ_TL": 131,
-      "SUPER_TL": 131,
-      "KITE_TL": 131,
-      "APT_TL": 131,
-      "WLD_TL": 131,
-      "PLUME_TL": 131,
-      "UNI_TL": 131,
+      "FET_TL": 133,
+      "ATM_TL": 133,
+      "RE_TL": 133,
+      "ARB_TL": 133,
+      "ANKR_TL": 133,
+      "STORJ_TL": 133,
+      "SUPER_TL": 133,
+      "KITE_TL": 133,
+      "APT_TL": 133,
+      "WLD_TL": 133,
+      "PLUME_TL": 133,
+      "UNI_TL": 133,
       "STRK_TL": 132,
-      "NEAR_TL": 131,
-      "AKT_TL": 131,
-      "ZRO_TL": 131,
-      "PENDLE_TL": 131,
-      "XAUT_TL": 131,
-      "MINA_TL": 131,
-      "TNSR_TL": 131,
+      "NEAR_TL": 133,
+      "AKT_TL": 133,
+      "ZRO_TL": 133,
+      "PENDLE_TL": 133,
+      "XAUT_TL": 133,
+      "MINA_TL": 133,
+      "TNSR_TL": 133,
       "SOL_TL": 132,
-      "ENS_TL": 131,
-      "XCN_TL": 131,
-      "TLM_TL": 131,
-      "EIGEN_TL": 131,
-      "MORPHO_TL": 131,
-      "ONT_TL": 131,
-      "LINK_TL": 131,
-      "NEO_TL": 131,
-      "SEI_TL": 131,
-      "ACM_TL": 131,
+      "ENS_TL": 133,
+      "XCN_TL": 133,
+      "TLM_TL": 133,
+      "EIGEN_TL": 133,
+      "MORPHO_TL": 133,
+      "ONT_TL": 133,
+      "LINK_TL": 133,
+      "NEO_TL": 133,
+      "SEI_TL": 133,
+      "ACM_TL": 133,
       "WIF_TL": 128,
-      "MANA_TL": 131,
-      "JTO_TL": 131,
-      "ODOS_TL": 131,
-      "LDO_TL": 131,
-      "VANRY_TL": 131,
+      "MANA_TL": 133,
+      "JTO_TL": 133,
+      "ODOS_TL": 133,
+      "LDO_TL": 133,
+      "VANRY_TL": 133,
       "BCH_TL": 112,
       "TAO_TL": 117,
       "ASR_TL": 132,
@@ -30099,7 +30118,7 @@
       "ALGO_TL": 132,
       "FLR_TL": 132,
       "STX_TL": 132,
-      "AUDIO_TL": 132,
+      "AUDIO_TL": 133,
       "COW_TL": 132,
       "ZK_TL": 132,
       "DYM_TL": 132,
@@ -30114,8 +30133,8 @@
       "ILV_TL": 132,
       "LINEA_TL": 132,
       "CTSI_TL": 132,
-      "BJK_TL": 131,
-      "REEF_TL": 131,
+      "BJK_TL": 133,
+      "REEF_TL": 133,
       "RVN_TL": 132,
       "ALIGN_TL": 132,
       "OXT_TL": 132,
@@ -30127,14 +30146,14 @@
       "MEME_TL": 132,
       "KAITO_TL": 132,
       "OGN_TL": 110,
-      "SEVILLA_TL": 131,
+      "SEVILLA_TL": 133,
       "H_TL": 132,
       "XAI_TL": 132,
       "BAL_TL": 132,
       "FB_TL": 104,
       "SYRUP_TL": 132,
-      "ONDO_TL": 131,
-      "APE_TL": 92,
+      "ONDO_TL": 133,
+      "APE_TL": 133,
       "T_TL": 132,
       "ATH_TL": 132,
       "ZIL_TL": 62,
@@ -30159,7 +30178,7 @@
       "XTZ_TL": 132,
       "ZKC_TL": 2,
       "JUV_TL": 132,
-      "BERA_TL": 131,
+      "BERA_TL": 133,
       "XPL_TL": 132,
       "TURBO_TL": 83,
       "RAD_TL": 132,
@@ -30170,17 +30189,17 @@
       "MEGA_TL": 73,
       "JASMY_TL": 132,
       "BIO_TL": 132,
-      "SPELL_TL": 131,
+      "SPELL_TL": 133,
       "BAR_TL": 132,
       "WLFI_TL": 108,
       "GRT_TL": 106,
       "CLV_TL": 108,
       "THETA_TL": 132,
       "ALICE_TL": 132,
-      "PYTH_TL": 131,
+      "PYTH_TL": 133,
       "ICP_TL": 132,
       "ZRX_TL": 17,
-      "MET_TL": 131,
+      "MET_TL": 133,
       "BEAM_TL": 132,
       "SENT_TL": 94,
       "DOT_TL": 107,
@@ -30189,20 +30208,20 @@
       "ATLAS_TL": 88,
       "SNX_TL": 102,
       "OP_TL": 91,
-      "EFC_TL": 131,
+      "EFC_TL": 133,
       "LTC_TL": 99,
       "LAYER_TL": 83,
       "LIT_TL": 102,
       "SKY_TL": 90,
-      "W_TL": 131,
+      "W_TL": 133,
       "AVNT_TL": 107,
       "ARG_TL": 89,
       "CFG_TL": 98,
       "NAP_TL": 132,
       "INTER_TL": 97,
       "MNT_TL": 95,
-      "2Z_TL": 131,
-      "QNT_TL": 132,
+      "2Z_TL": 133,
+      "QNT_TL": 133,
       "SAND_TL": 103,
       "AAVE_TL": 116,
       "JOE_TL": 107,
@@ -30214,34 +30233,34 @@
       "DYDX_TL": 124,
       "AXL_TL": 132,
       "ORCA_TL": 132,
-      "DASH_TL": 128,
+      "DASH_TL": 133,
       "MAGIC_TL": 132
     },
     "technicals": {
       "PEPE_TL": 119,
-      "XRP_TL": 132,
+      "XRP_TL": 133,
       "BONK_TL": 132,
-      "ETH_TL": 131,
-      "TRX_TL": 131,
+      "ETH_TL": 133,
+      "TRX_TL": 133,
       "BAT_TL": 131,
       "GAL_TL": 131,
       "SAUBER_TL": 131,
-      "AVAX_TL": 131,
+      "AVAX_TL": 133,
       "STG_TL": 125,
-      "ADA_TL": 129,
+      "ADA_TL": 133,
       "FF_TL": 123,
-      "ALT_TL": 129,
+      "ALT_TL": 133,
       "DOGE_TL": 129,
       "ENA_TL": 105,
       "0G_TL": 123,
       "SUI_TL": 130,
-      "AKT_TL": 115,
+      "AKT_TL": 133,
       "ZRO_TL": 105,
-      "XAUT_TL": 131,
-      "MINA_TL": 131,
-      "ENS_TL": 131,
-      "LINK_TL": 131,
-      "NEO_TL": 129,
+      "XAUT_TL": 133,
+      "MINA_TL": 133,
+      "ENS_TL": 133,
+      "LINK_TL": 133,
+      "NEO_TL": 133,
       "SEI_TL": 109,
       "WIF_TL": 73,
       "LDO_TL": 121,
@@ -30260,14 +30279,14 @@
       "BERA_TL": 95,
       "AERO_TL": 120,
       "ZORA_TL": 72,
-      "SYN_TL": 131,
+      "SYN_TL": 133,
       "PUMP_TL": 132,
       "TRUMP_TL": 129,
       "HOT_TL": 111,
-      "NMR_TL": 131,
+      "NMR_TL": 133,
       "SKL_TL": 125,
       "PENGU_TL": 123,
-      "FET_TL": 131,
+      "FET_TL": 133,
       "PLUME_TL": 77,
       "SOL_TL": 126,
       "BCH_TL": 110,
@@ -30277,7 +30296,7 @@
       "ENJ_TL": 132,
       "TIA_TL": 130,
       "GRAM_TL": 130,
-      "BJK_TL": 94,
+      "BJK_TL": 133,
       "MON_TL": 80,
       "ZIL_TL": 62,
       "LPT_TL": 130,
@@ -30299,14 +30318,14 @@
       "ILV_TL": 88,
       "RVN_TL": 110,
       "CTSI_TL": 32,
-      "REEF_TL": 58,
+      "REEF_TL": 133,
       "CRV_TL": 108,
       "XTZ_TL": 116,
       "ITA_TL": 96,
       "BAR_TL": 132,
       "COMP_TL": 23,
       "ANKR_TL": 79,
-      "UNI_TL": 131,
+      "UNI_TL": 133,
       "PSG_TL": 128,
       "WAVES_TL": 126,
       "ARB_TL": 119,
@@ -30315,7 +30334,7 @@
       "AXS_TL": 130,
       "API3_TL": 118,
       "STORJ_TL": 127,
-      "XCN_TL": 131,
+      "XCN_TL": 133,
       "JTO_TL": 119,
       "ZRX_TL": 17,
       "APE_TL": 78,
@@ -30330,7 +30349,7 @@
       "KAITO_TL": 102,
       "H_TL": 103,
       "RAD_TL": 112,
-      "SHIB_TL": 131,
+      "SHIB_TL": 133,
       "MORPHO_TL": 123,
       "ZK_TL": 98,
       "SENT_TL": 90,
@@ -30344,11 +30363,11 @@
       "BAL_TL": 122,
       "SAHARA_TL": 131,
       "TURBO_TL": 75,
-      "SUPER_TL": 97,
+      "SUPER_TL": 133,
       "ASM_TL": 126,
       "OGFAN_TL": 104,
       "ALLO_TL": 96,
-      "ONDO_TL": 127,
+      "ONDO_TL": 133,
       "MIOTA_TL": 94,
       "ASR_TL": 132,
       "OP_TL": 91,
@@ -30358,7 +30377,7 @@
       "RAY_TL": 78,
       "VVV_TL": 75,
       "NEAR_TL": 113,
-      "EIGEN_TL": 131,
+      "EIGEN_TL": 133,
       "LTC_TL": 99,
       "LIT_TL": 92,
       "SPK_TL": 83,
@@ -30373,17 +30392,17 @@
       "EFC_TL": 96,
       "AAVE_TL": 105,
       "CFG_TL": 98,
-      "PENDLE_TL": 131,
+      "PENDLE_TL": 133,
       "2Z_TL": 99,
       "OGN_TL": 108,
       "GRASS_TL": 100,
       "AFC_TL": 101,
       "SAFA_TL": 128,
-      "ONT_TL": 127,
-      "SPELL_TL": 131,
+      "ONT_TL": 133,
+      "SPELL_TL": 133,
       "AVL_TL": 106,
       "QNT_TL": 130,
-      "ATM_TL": 131,
+      "ATM_TL": 133,
       "SFA_TL": 108,
       "WLFI_TL": 108,
       "RLC_TL": 109,
@@ -30393,9 +30412,9 @@
       "OMG_TL": 130,
       "BEAM_TL": 126,
       "FLR_TL": 128,
-      "ACM_TL": 129
+      "ACM_TL": 133
     },
-    "generation": 132
+    "generation": 133
   },
   "candidate_lifecycle": {
     "XRP_TL": {
@@ -31018,44 +31037,6 @@
     }
   },
   "directive_009_runs": [
-    {
-      "run_id": "36200355575",
-      "started_at": 1790378212,
-      "finished_at": 1790378253,
-      "btc_ok": true,
-      "btc_reason": "regime_neutral",
-      "candles_complete": 19,
-      "candles_synthetic": 35,
-      "candles_error": 9,
-      "funnel": {
-        "universe": 234,
-        "liq": 80,
-        "spread": 62,
-        "book": 30,
-        "tech": 19,
-        "score": 16,
-        "candidates": 6,
-        "confirmed": 0,
-        "exec": 0,
-        "limit": 0
-      },
-      "stage_drops": {
-        "discovery:RSI outside watch range": 1,
-        "universe:excluded_base_asset": 3,
-        "discovery:volume not expanding": 9,
-        "coverage:not_evaluated_capacity": 81,
-        "trigger:watching: confirmations 1/2": 3,
-        "book:imbalance_too_low": 32,
-        "trigger:score 73 < 80": 1,
-        "data:recent_15m_integrity_failed": 2,
-        "trigger:score 78 < 80": 1,
-        "book:spread_too_high": 18,
-        "data:candle_error:CandleUnavailableError": 9,
-        "discovery:15m momentum not constructive": 3,
-        "trigger:score 75 < 80": 1,
-        "universe:quote_volume_below_minimum": 70
-      }
-    },
     {
       "run_id": "36209308886",
       "started_at": 1790386955,
@@ -32206,6 +32187,46 @@
         "data:candle_error:CandleUnavailableError": 9,
         "universe:quote_volume_below_minimum": 77
       }
+    },
+    {
+      "run_id": "36334869116",
+      "started_at": 1790528003,
+      "finished_at": 1790528042,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 14,
+      "candles_synthetic": 25,
+      "candles_error": 13,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 600,
+      "cadence_status": "ok",
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 63,
+        "book": 28,
+        "tech": 14,
+        "score": 4,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:spread_too_high": 17,
+        "discovery:RSI outside watch range": 7,
+        "coverage:not_evaluated_capacity": 76,
+        "discovery:ATR outside range": 2,
+        "book:imbalance_too_low": 35,
+        "discovery:volume not expanding": 3,
+        "discovery:1h clearly weak": 1,
+        "data:recent_15m_integrity_failed": 1,
+        "data:candle_error:CandleUnavailableError": 13,
+        "discovery:15m momentum not constructive": 1,
+        "universe:quote_volume_below_minimum": 75
+      }
     }
   ],
   "research_cohort": {
@@ -32235,67 +32256,9 @@
   "accumulation_radar": {
     "version": 1,
     "mode": "shadow_only",
-    "updated_at": 1790527403,
+    "updated_at": 1790528003,
     "watches": {},
     "events": [
-      {
-        "candle_at": 1789921800,
-        "reference_ask": "0.01964",
-        "range_low": 0.01894,
-        "range_high": 0.01964,
-        "range_pct": 3.6959,
-        "volume_ratio": 3.2231,
-        "book_imbalance": 5.06979838297243,
-        "spread_pct": 0.2552,
-        "returns_pct": [
-          3.0446194225721923,
-          3.5337552742616074,
-          2.186361270171777
-        ],
-        "evidence": [
-          "price_compression",
-          "sustained_volume_expansion",
-          "bid_heavy_book"
-        ],
-        "limitations": [
-          "book_orders_can_be_cancelled",
-          "no_executed_buy_side_data",
-          "no_whale_or_news_data",
-          "not_an_entry_signal"
-        ],
-        "id": "HOT_TL:1789922806",
-        "symbol": "HOT_TL",
-        "observed_at": 1789922806,
-        "confirmations": 2,
-        "status": "observation_complete",
-        "mode": "shadow_only",
-        "btc_ok": true,
-        "btc_reason": "BTC bullish",
-        "outcomes": {
-          "3600": {
-            "sampled_at": 1789926591,
-            "actual_age_seconds": 3785,
-            "last_price": 0.01935,
-            "return_pct": -1.4765784114053049
-          },
-          "14400": {
-            "sampled_at": 1789937884,
-            "actual_age_seconds": 15078,
-            "last_price": 0.01943,
-            "return_pct": -1.069246435845228
-          },
-          "86400": {
-            "sampled_at": 1790009312,
-            "actual_age_seconds": 86506,
-            "last_price": 0.02047,
-            "return_pct": 4.226069246435826
-          }
-        },
-        "sampled_max_return_pct": 4.226069246435826,
-        "sampled_min_return_pct": -2.342158859470478,
-        "last_sample_at": 1790010506,
-        "last_sample_price": 0.02038
-      },
       {
         "candle_at": 1789924500,
         "reference_ask": "127755",
@@ -32647,2538 +32610,23 @@
       }
     ],
     "decisions": {
-      "BONK_TL": "weak_book",
-      "CHZ_TL": "no_volume_expansion",
-      "XAI_TL": "no_compression_or_weak_close",
-      "JASMY_TL": "no_compression_or_weak_close",
-      "XRP_TL": "no_compression_or_weak_close",
-      "PUMP_TL": "extended_or_falling"
+      "AKT_TL": "no_compression_or_weak_close",
+      "ALT_TL": "no_volume_expansion",
+      "ACM_TL": "inauthentic_candles",
+      "NEO_TL": "inauthentic_candles",
+      "SYN_TL": "no_volume_expansion",
+      "TRX_TL": "no_compression_or_weak_close",
+      "NMR_TL": "no_volume_expansion",
+      "XCN_TL": "no_volume_expansion",
+      "AVAX_TL": "inauthentic_candles",
+      "XAUT_TL": "no_compression_or_weak_close",
+      "FET_TL": "weak_book",
+      "ENS_TL": "no_compression_or_weak_close",
+      "ETH_TL": "no_compression_or_weak_close",
+      "XRP_TL": "no_compression_or_weak_close"
     }
   },
   "scan_diagnostics": [
-    {
-      "started_at": 1790521391,
-      "status": "completed",
-      "symbols": {
-        "USDT_TL": {
-          "stage": "universe",
-          "reason": "excluded_base_asset",
-          "observed_at": 1790521392
-        },
-        "XRP_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521434,
-          "score": 42,
-          "rsi": "40.73002909077287",
-          "return_3": "-0.7635523874360925340061137600",
-          "volume_ratio": "1.0967806556991755"
-        },
-        "AUDIO_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521414
-        },
-        "ETH_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521435,
-          "score": 33,
-          "rsi": "35.089740260042504",
-          "return_3": "-0.7107680222369931717928575700",
-          "volume_ratio": "1.071776211502282"
-        },
-        "BTC_TL": {
-          "stage": "universe",
-          "reason": "excluded_base_asset",
-          "observed_at": 1790521392
-        },
-        "SYN_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521435,
-          "score": 24,
-          "rsi": "37.238026707804025",
-          "return_3": "-1.102535832414553472987872110",
-          "volume_ratio": "0.788603315495988"
-        },
-        "QNT_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521393,
-          "spread_pct": "0.4945911704512230776727414482"
-        },
-        "ETHFI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BAT_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521421,
-          "score": 48,
-          "rsi": "35.68383101173819",
-          "return_3": "-0.4709912224363091415114536500",
-          "volume_ratio": "1.0965923755044793"
-        },
-        "PUMP_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521423,
-          "score": 83,
-          "rsi": "77.42447584411906",
-          "return_3": "1.439162668992586131705189700",
-          "volume_ratio": "1.8332281887548045"
-        },
-        "TRX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SPK_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521393,
-          "imbalance": "0.1230895033683253785071652895"
-        },
-        "CHZ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "NMR_TL": {
-          "stage": "trigger",
-          "reason": "score 78 < 80",
-          "observed_at": 1790521435,
-          "score": 78
-        },
-        "COMP_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521394,
-          "imbalance": "0.1687908080665278577156868030"
-        },
-        "BAL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ALT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521394,
-          "imbalance": "0.6373140896145492488270000817"
-        },
-        "TRUMP_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521394,
-          "imbalance": "0.5122438884903667580038967121"
-        },
-        "TNSR_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521395,
-          "spread_pct": "0.4901960784313725490196078431"
-        },
-        "BONK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BTTC_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "observed_at": 1790521412,
-          "score": 49,
-          "rsi": "48.76775030529549",
-          "return_3": "-0.7629427792915531335149863800",
-          "volume_ratio": "0.9115153506064094"
-        },
-        "GAL_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521395,
-          "imbalance": "0.4952899761410842771613432356"
-        },
-        "RENDER_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521395,
-          "imbalance": "0.5956662699944448010811075557"
-        },
-        "PENDLE_TL": {
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "observed_at": 1790521425,
-          "score": 69,
-          "rsi": "50.81816716557069",
-          "return_3": "-0.8962373483736382600633547100",
-          "volume_ratio": "0.40481981710923026"
-        },
-        "WLD_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.4043602722887112453230798846"
-        },
-        "OMG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "PEPE_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.4521730419284472467976699687"
-        },
-        "XAI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SUPER_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521396,
-          "spread_pct": "0.6042296072507552870090634441"
-        },
-        "ADA_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.4267855869332049097222495418"
-        },
-        "HYPE_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.1558356539432830260374156521"
-        },
-        "HNT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.5180245902059322313208349115"
-        },
-        "RE_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.2240411042420489181571564979"
-        },
-        "MAGIC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ARB_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.6127237862826006620283847018"
-        },
-        "CITY_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.7897159271099738674617422927"
-        },
-        "SPELL_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521426
-        },
-        "ZRO_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521398,
-          "imbalance": "0.1567185078322443898787031628"
-        },
-        "GRASS_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "XCN_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521426,
-          "score": 44,
-          "rsi": "43.752142368426675",
-          "return_3": "-0.3528028224225793806350450800",
-          "volume_ratio": "0.7214111244678995"
-        },
-        "SAHARA_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521428,
-          "score": 54,
-          "rsi": "41.65749787296343",
-          "return_3": "-0.5621486570893191755153029400",
-          "volume_ratio": "1.6006529344238758"
-        },
-        "ODOS_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521398,
-          "spread_pct": "1.190476190476190476190476190"
-        },
-        "COW_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "APT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521399,
-          "imbalance": "0.7841717920190934778276973232"
-        },
-        "W_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521399,
-          "imbalance": "0.2698030412244910814640788404"
-        },
-        "KITE_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521399,
-          "spread_pct": "0.4568106312292358803986710963"
-        },
-        "ANKR_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.3366754282959058392200111802"
-        },
-        "ASR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "LRC_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "TLM_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.2434224623680592546547188206"
-        },
-        "PLUME_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.3131798937606565397339754071"
-        },
-        "ATM_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521416
-        },
-        "ENA_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.2676668862103974665494473062"
-        },
-        "NEAR_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521401,
-          "spread_pct": "0.6827009848157884411660846706"
-        },
-        "FET_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521418,
-          "score": 32,
-          "rsi": "39.70258245175615",
-          "return_3": "-0.9266279167719652935725718100",
-          "volume_ratio": "0.4846639937796876"
-        },
-        "JTO_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521401,
-          "imbalance": "0.6893555031725559691222888478"
-        },
-        "SEVILLA_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521401,
-          "spread_pct": "1.626016260162601626016260163"
-        },
-        "STORJ_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521402,
-          "spread_pct": "0.6451612903225806451612903226"
-        },
-        "SHIB_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521402,
-          "imbalance": "0.5349537874455288278417561922"
-        },
-        "LINEA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "RAD_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "OXT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SKL_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521429
-        },
-        "AVAX_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521402,
-          "imbalance": "0.8390665585304204265791200113"
-        },
-        "AKT_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521403,
-          "spread_pct": "0.4766160262138814417634792970"
-        },
-        "XAUT_TL": {
-          "stage": "discovery",
-          "reason": "ATR outside range",
-          "observed_at": 1790521430,
-          "score": 74,
-          "rsi": "53.66544673276734",
-          "return_3": "0.048769292558379711974295700",
-          "volume_ratio": "1.1225776777361263"
-        },
-        "JASMY_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "STG_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521403,
-          "spread_pct": "0.4264705882352941176470588235"
-        },
-        "EIGEN_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521403,
-          "imbalance": "0.5580882696132117189574234402"
-        },
-        "ACM_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521403,
-          "spread_pct": "0.6517016654598117306299782766"
-        },
-        "MORPHO_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521404,
-          "imbalance": "0.6213124309191767425256609278"
-        },
-        "ENS_TL": {
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521420,
-          "score": 31,
-          "rsi": "39.38690218920094",
-          "return_3": "-0.8627678054429646786334684400",
-          "volume_ratio": "1.2094175330186383"
-        },
-        "STX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "PEPPER_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "HOT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521404,
-          "imbalance": "0.7283570624147675430850474437"
-        },
-        "2Z_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521404,
-          "spread_pct": "0.6191950464396284829721362229"
-        },
-        "GRAM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "NEO_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521405,
-          "spread_pct": "0.4498216224600589421436326974"
-        },
-        "MANA_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521405,
-          "imbalance": "0.5351717228855124976758837655"
-        },
-        "SUI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "0G_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521405,
-          "imbalance": "0.5709666990395191831658810935"
-        },
-        "PENGU_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521415
-        },
-        "UNI_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521405,
-          "imbalance": "0.2006065933598822604993766633"
-        },
-        "ONT_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521406,
-          "imbalance": "0.7390887454903849289708203570"
-        },
-        "WAVES_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "GALA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "FLOKI_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521406,
-          "imbalance": "0.7812750967408502282489529060"
-        },
-        "RAY_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "FIL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SEI_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521406,
-          "imbalance": "0.3948446525001965049754027263"
-        },
-        "PSG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ALGO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "FLR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "CRV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "DOGE_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521431
-        },
-        "PYTH_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521406,
-          "spread_pct": "0.4889975550122249388753056235"
-        },
-        "ALICE_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "TIA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "LDO_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521413
-        },
-        "AXS_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ILV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "AXL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "DYM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "INJ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "REEF_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521407,
-          "spread_pct": "0.7812500"
-        },
-        "VANRY_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521407,
-          "imbalance": "0.6410596718167966451133565105"
-        },
-        "OGFAN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "LPT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ENJ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "API3_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "MEME_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "THETA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ZK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "LINK_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521432
-        },
-        "SAFA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ASM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "DRIFT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ORCA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "AERO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "EFC_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521408,
-          "spread_pct": "1.95312500"
-        },
-        "BAND_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SOL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ZETA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "VET_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BELG_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "GOAT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "T_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SYRUP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ICP_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BEAM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "VVV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SFA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ONDO_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521408,
-          "spread_pct": "0.4567948229920060905976398934"
-        },
-        "BJK_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521408,
-          "spread_pct": "0.8100810081008100810081008101"
-        },
-        "KAITO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BLUR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "XTZ_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "CTSI_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "STRK_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BAR_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "RVN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ATH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "SAUBER_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521432
-        },
-        "FF_TL": {
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521433
-        },
-        "XLM_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "ALIGN_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "MINA_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521409,
-          "spread_pct": "0.4354136429608127721335268505"
-        },
-        "JUV_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BIO_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "MIOTA_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "PNUT_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "MET_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521409,
-          "imbalance": "0.6431017003259026434981881591"
-        },
-        "XPL_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "WIF_TL": {
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521409,
-          "spread_pct": "0.4177109440267335004177109440"
-        },
-        "DYDX_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "BERA_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521409,
-          "imbalance": "0.1002656994808746963260567231"
-        },
-        "UMA_TL": {
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521409,
-          "imbalance": "0.1376815989763997224987733257"
-        },
-        "DASH_TL": {
-          "stage": "coverage",
-          "reason": "not_evaluated_capacity",
-          "observed_at": 1790521391
-        },
-        "TURBO_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4879943.3666"
-        },
-        "AIXBT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4873619.6284"
-        },
-        "TAO_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4783091"
-        },
-        "H_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4747540.318"
-        },
-        "BCH_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4689558.23"
-        },
-        "SNX_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4600857.03"
-        },
-        "RLC_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4536246.92"
-        },
-        "SPAIN_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4431318.527"
-        },
-        "OGN_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4387940.442"
-        },
-        "AVL_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4239442.89"
-        },
-        "IO_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4185376.69"
-        },
-        "TRA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4103257.68"
-        },
-        "NAP_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4101902.43"
-        },
-        "MNT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3948876.04"
-        },
-        "DOT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3842292.47"
-        },
-        "APE_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3814719.59"
-        },
-        "AAVE_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3678250.43"
-        },
-        "CLV_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3632688.315"
-        },
-        "ALLO_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3489655.281"
-        },
-        "VIRTUAL_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3365639.28"
-        },
-        "ATLAS_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3181994.909"
-        },
-        "SAND_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3062762.29"
-        },
-        "AFC_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3002146.93"
-        },
-        "S_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2953467.87"
-        },
-        "MON_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2931543.004"
-        },
-        "FB_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2915670.56"
-        },
-        "LIT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2741920.14"
-        },
-        "ATOM_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2734119.29"
-        },
-        "RACA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2721179.35377"
-        },
-        "ZORA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2625410.549"
-        },
-        "NST_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2606459.38"
-        },
-        "CFG_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2555967.417"
-        },
-        "CEEK_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2477067.622"
-        },
-        "SENT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2468061.5984"
-        },
-        "GRT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2412328.67"
-        },
-        "ZKC_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2411636.28"
-        },
-        "OP_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2336215.44"
-        },
-        "WLFI_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2234737.68"
-        },
-        "LAYER_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2200104.54"
-        },
-        "ARG_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2110761.49"
-        },
-        "JUP_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2043570.69"
-        },
-        "MOVE_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2028134.815"
-        },
-        "GLM_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1999213.482"
-        },
-        "PDA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1797412.989"
-        },
-        "ARKM_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1612422.01"
-        },
-        "MEGA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1588595.964"
-        },
-        "SPURS_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1551745.06"
-        },
-        "MASK_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1529145.74"
-        },
-        "BENFICA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1437750.62"
-        },
-        "JOE_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1356546.08"
-        },
-        "ITA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1350748.28"
-        },
-        "AEVO_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1319225.49"
-        },
-        "A_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1270399.53"
-        },
-        "GOZ_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1242317.44"
-        },
-        "ZIL_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1241329.7803"
-        },
-        "INTER_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1205828.44"
-        },
-        "AVNT_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1148952.98"
-        },
-        "ASTER_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1145765.65"
-        },
-        "RED_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1075902.68"
-        },
-        "VCF_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1038660.9"
-        },
-        "LTC_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1037027.05"
-        },
-        "SKY_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "998104.57"
-        },
-        "IMX_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "938889.58"
-        },
-        "WAL_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "906502.22"
-        },
-        "USDC_TL": {
-          "stage": "universe",
-          "reason": "excluded_base_asset",
-          "observed_at": 1790521392
-        },
-        "POR_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "793039.44"
-        },
-        "ASTON_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "772595.43"
-        },
-        "MANTA_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "680491.04"
-        },
-        "SAM_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "628718.24"
-        },
-        "ME_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "426312.58"
-        },
-        "ANIME_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "378766.169"
-        },
-        "ZRX_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "365457.57"
-        },
-        "POL_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "293308.13"
-        },
-        "1INCH_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "119571.16"
-        },
-        "TON_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "0"
-        },
-        "TRYC_TL": {
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "0"
-        }
-      },
-      "shadow_mode": true,
-      "research_cohort": "shadow_integrity_v2:1790082787",
-      "code_sha": "20d754a81ab25e02763a1db7bd76e81da98c4105",
-      "run_id": "36328102913",
-      "transitions": [
-        {
-          "symbol": "USDT_TL",
-          "stage": "universe",
-          "reason": "excluded_base_asset",
-          "observed_at": 1790521392
-        },
-        {
-          "symbol": "BTC_TL",
-          "stage": "universe",
-          "reason": "excluded_base_asset",
-          "observed_at": 1790521392
-        },
-        {
-          "symbol": "VIRTUAL_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3365639.28"
-        },
-        {
-          "symbol": "ATOM_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2734119.29"
-        },
-        {
-          "symbol": "RACA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2721179.35377"
-        },
-        {
-          "symbol": "NST_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2606459.38"
-        },
-        {
-          "symbol": "CEEK_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2477067.622"
-        },
-        {
-          "symbol": "GLM_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1999213.482"
-        },
-        {
-          "symbol": "PDA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1797412.989"
-        },
-        {
-          "symbol": "ARKM_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1612422.01"
-        },
-        {
-          "symbol": "SPURS_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1551745.06"
-        },
-        {
-          "symbol": "MASK_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1529145.74"
-        },
-        {
-          "symbol": "BENFICA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1437750.62"
-        },
-        {
-          "symbol": "AEVO_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1319225.49"
-        },
-        {
-          "symbol": "A_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1270399.53"
-        },
-        {
-          "symbol": "GOZ_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1242317.44"
-        },
-        {
-          "symbol": "ASTER_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1145765.65"
-        },
-        {
-          "symbol": "RED_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1075902.68"
-        },
-        {
-          "symbol": "VCF_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1038660.9"
-        },
-        {
-          "symbol": "IMX_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "938889.58"
-        },
-        {
-          "symbol": "WAL_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "906502.22"
-        },
-        {
-          "symbol": "USDC_TL",
-          "stage": "universe",
-          "reason": "excluded_base_asset",
-          "observed_at": 1790521392
-        },
-        {
-          "symbol": "POR_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "793039.44"
-        },
-        {
-          "symbol": "ASTON_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "772595.43"
-        },
-        {
-          "symbol": "MANTA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "680491.04"
-        },
-        {
-          "symbol": "SAM_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "628718.24"
-        },
-        {
-          "symbol": "ME_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "426312.58"
-        },
-        {
-          "symbol": "ANIME_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "378766.169"
-        },
-        {
-          "symbol": "POL_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "293308.13"
-        },
-        {
-          "symbol": "1INCH_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "119571.16"
-        },
-        {
-          "symbol": "TON_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "0"
-        },
-        {
-          "symbol": "TRYC_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "0"
-        },
-        {
-          "symbol": "ZKC_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2411636.28"
-        },
-        {
-          "symbol": "ZRX_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "365457.57"
-        },
-        {
-          "symbol": "ZIL_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1241329.7803"
-        },
-        {
-          "symbol": "MEGA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1588595.964"
-        },
-        {
-          "symbol": "MOVE_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2028134.815"
-        },
-        {
-          "symbol": "TURBO_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4879943.3666"
-        },
-        {
-          "symbol": "LAYER_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2200104.54"
-        },
-        {
-          "symbol": "ATLAS_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3181994.909"
-        },
-        {
-          "symbol": "ARG_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2110761.49"
-        },
-        {
-          "symbol": "ZORA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2625410.549"
-        },
-        {
-          "symbol": "SKY_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "998104.57"
-        },
-        {
-          "symbol": "OP_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2336215.44"
-        },
-        {
-          "symbol": "APE_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3814719.59"
-        },
-        {
-          "symbol": "SENT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2468061.5984"
-        },
-        {
-          "symbol": "MNT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3948876.04"
-        },
-        {
-          "symbol": "SPAIN_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4431318.527"
-        },
-        {
-          "symbol": "INTER_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1205828.44"
-        },
-        {
-          "symbol": "AIXBT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4873619.6284"
-        },
-        {
-          "symbol": "ALLO_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3489655.281"
-        },
-        {
-          "symbol": "S_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2953467.87"
-        },
-        {
-          "symbol": "CFG_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2555967.417"
-        },
-        {
-          "symbol": "LTC_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1037027.05"
-        },
-        {
-          "symbol": "JUP_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2043570.69"
-        },
-        {
-          "symbol": "AFC_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3002146.93"
-        },
-        {
-          "symbol": "SNX_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4600857.03"
-        },
-        {
-          "symbol": "LIT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2741920.14"
-        },
-        {
-          "symbol": "SAND_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3062762.29"
-        },
-        {
-          "symbol": "ITA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1350748.28"
-        },
-        {
-          "symbol": "MON_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2931543.004"
-        },
-        {
-          "symbol": "FB_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2915670.56"
-        },
-        {
-          "symbol": "NAP_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4101902.43"
-        },
-        {
-          "symbol": "GRT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2412328.67"
-        },
-        {
-          "symbol": "DOT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3842292.47"
-        },
-        {
-          "symbol": "JOE_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1356546.08"
-        },
-        {
-          "symbol": "AVNT_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "1148952.98"
-        },
-        {
-          "symbol": "AVL_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4239442.89"
-        },
-        {
-          "symbol": "TRA_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4103257.68"
-        },
-        {
-          "symbol": "CLV_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3632688.315"
-        },
-        {
-          "symbol": "WLFI_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "2234737.68"
-        },
-        {
-          "symbol": "H_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4747540.318"
-        },
-        {
-          "symbol": "RLC_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4536246.92"
-        },
-        {
-          "symbol": "IO_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4185376.69"
-        },
-        {
-          "symbol": "OGN_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4387940.442"
-        },
-        {
-          "symbol": "BCH_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4689558.23"
-        },
-        {
-          "symbol": "AAVE_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "3678250.43"
-        },
-        {
-          "symbol": "TAO_TL",
-          "stage": "universe",
-          "reason": "quote_volume_below_minimum",
-          "observed_at": 1790521392,
-          "quote_volume": "4783091"
-        },
-        {
-          "symbol": "QNT_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521393,
-          "spread_pct": "0.4945911704512230776727414482"
-        },
-        {
-          "symbol": "SPK_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521393,
-          "imbalance": "0.1230895033683253785071652895"
-        },
-        {
-          "symbol": "COMP_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521394,
-          "imbalance": "0.1687908080665278577156868030"
-        },
-        {
-          "symbol": "ALT_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521394,
-          "imbalance": "0.6373140896145492488270000817"
-        },
-        {
-          "symbol": "TRUMP_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521394,
-          "imbalance": "0.5122438884903667580038967121"
-        },
-        {
-          "symbol": "TNSR_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521395,
-          "spread_pct": "0.4901960784313725490196078431"
-        },
-        {
-          "symbol": "GAL_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521395,
-          "imbalance": "0.4952899761410842771613432356"
-        },
-        {
-          "symbol": "RENDER_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521395,
-          "imbalance": "0.5956662699944448010811075557"
-        },
-        {
-          "symbol": "WLD_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.4043602722887112453230798846"
-        },
-        {
-          "symbol": "PEPE_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.4521730419284472467976699687"
-        },
-        {
-          "symbol": "SUPER_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521396,
-          "spread_pct": "0.6042296072507552870090634441"
-        },
-        {
-          "symbol": "ADA_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.4267855869332049097222495418"
-        },
-        {
-          "symbol": "HYPE_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521396,
-          "imbalance": "0.1558356539432830260374156521"
-        },
-        {
-          "symbol": "HNT_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.5180245902059322313208349115"
-        },
-        {
-          "symbol": "RE_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.2240411042420489181571564979"
-        },
-        {
-          "symbol": "ARB_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.6127237862826006620283847018"
-        },
-        {
-          "symbol": "CITY_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521397,
-          "imbalance": "0.7897159271099738674617422927"
-        },
-        {
-          "symbol": "ZRO_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521398,
-          "imbalance": "0.1567185078322443898787031628"
-        },
-        {
-          "symbol": "ODOS_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521398,
-          "spread_pct": "1.190476190476190476190476190"
-        },
-        {
-          "symbol": "APT_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521399,
-          "imbalance": "0.7841717920190934778276973232"
-        },
-        {
-          "symbol": "W_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521399,
-          "imbalance": "0.2698030412244910814640788404"
-        },
-        {
-          "symbol": "KITE_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521399,
-          "spread_pct": "0.4568106312292358803986710963"
-        },
-        {
-          "symbol": "ANKR_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.3366754282959058392200111802"
-        },
-        {
-          "symbol": "TLM_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.2434224623680592546547188206"
-        },
-        {
-          "symbol": "PLUME_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.3131798937606565397339754071"
-        },
-        {
-          "symbol": "ENA_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521400,
-          "imbalance": "0.2676668862103974665494473062"
-        },
-        {
-          "symbol": "NEAR_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521401,
-          "spread_pct": "0.6827009848157884411660846706"
-        },
-        {
-          "symbol": "JTO_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521401,
-          "imbalance": "0.6893555031725559691222888478"
-        },
-        {
-          "symbol": "SEVILLA_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521401,
-          "spread_pct": "1.626016260162601626016260163"
-        },
-        {
-          "symbol": "STORJ_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521402,
-          "spread_pct": "0.6451612903225806451612903226"
-        },
-        {
-          "symbol": "SHIB_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521402,
-          "imbalance": "0.5349537874455288278417561922"
-        },
-        {
-          "symbol": "AVAX_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521402,
-          "imbalance": "0.8390665585304204265791200113"
-        },
-        {
-          "symbol": "AKT_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521403,
-          "spread_pct": "0.4766160262138814417634792970"
-        },
-        {
-          "symbol": "STG_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521403,
-          "spread_pct": "0.4264705882352941176470588235"
-        },
-        {
-          "symbol": "EIGEN_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521403,
-          "imbalance": "0.5580882696132117189574234402"
-        },
-        {
-          "symbol": "ACM_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521403,
-          "spread_pct": "0.6517016654598117306299782766"
-        },
-        {
-          "symbol": "MORPHO_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521404,
-          "imbalance": "0.6213124309191767425256609278"
-        },
-        {
-          "symbol": "HOT_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521404,
-          "imbalance": "0.7283570624147675430850474437"
-        },
-        {
-          "symbol": "2Z_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521404,
-          "spread_pct": "0.6191950464396284829721362229"
-        },
-        {
-          "symbol": "NEO_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521405,
-          "spread_pct": "0.4498216224600589421436326974"
-        },
-        {
-          "symbol": "MANA_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521405,
-          "imbalance": "0.5351717228855124976758837655"
-        },
-        {
-          "symbol": "0G_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521405,
-          "imbalance": "0.5709666990395191831658810935"
-        },
-        {
-          "symbol": "UNI_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521405,
-          "imbalance": "0.2006065933598822604993766633"
-        },
-        {
-          "symbol": "ONT_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521406,
-          "imbalance": "0.7390887454903849289708203570"
-        },
-        {
-          "symbol": "FLOKI_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521406,
-          "imbalance": "0.7812750967408502282489529060"
-        },
-        {
-          "symbol": "SEI_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521406,
-          "imbalance": "0.3948446525001965049754027263"
-        },
-        {
-          "symbol": "PYTH_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521406,
-          "spread_pct": "0.4889975550122249388753056235"
-        },
-        {
-          "symbol": "REEF_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521407,
-          "spread_pct": "0.7812500"
-        },
-        {
-          "symbol": "VANRY_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521407,
-          "imbalance": "0.6410596718167966451133565105"
-        },
-        {
-          "symbol": "EFC_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521408,
-          "spread_pct": "1.95312500"
-        },
-        {
-          "symbol": "ONDO_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521408,
-          "spread_pct": "0.4567948229920060905976398934"
-        },
-        {
-          "symbol": "BJK_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521408,
-          "spread_pct": "0.8100810081008100810081008101"
-        },
-        {
-          "symbol": "MINA_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521409,
-          "spread_pct": "0.4354136429608127721335268505"
-        },
-        {
-          "symbol": "MET_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521409,
-          "imbalance": "0.6431017003259026434981881591"
-        },
-        {
-          "symbol": "WIF_TL",
-          "stage": "book",
-          "reason": "spread_too_high",
-          "observed_at": 1790521409,
-          "spread_pct": "0.4177109440267335004177109440"
-        },
-        {
-          "symbol": "BERA_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521409,
-          "imbalance": "0.1002656994808746963260567231"
-        },
-        {
-          "symbol": "UMA_TL",
-          "stage": "book",
-          "reason": "imbalance_too_low",
-          "observed_at": 1790521409,
-          "imbalance": "0.1376815989763997224987733257"
-        },
-        {
-          "symbol": "BTTC_TL",
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "observed_at": 1790521412,
-          "score": 49,
-          "rsi": "48.76775030529549",
-          "return_3": "-0.7629427792915531335149863800",
-          "volume_ratio": "0.9115153506064094"
-        },
-        {
-          "symbol": "LDO_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521413
-        },
-        {
-          "symbol": "AUDIO_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521414
-        },
-        {
-          "symbol": "PENGU_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521415
-        },
-        {
-          "symbol": "ATM_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521416
-        },
-        {
-          "symbol": "FET_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521418,
-          "score": 32,
-          "rsi": "39.70258245175615",
-          "return_3": "-0.9266279167719652935725718100",
-          "volume_ratio": "0.4846639937796876"
-        },
-        {
-          "symbol": "ENS_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521420,
-          "score": 31,
-          "rsi": "39.38690218920094",
-          "return_3": "-0.8627678054429646786334684400",
-          "volume_ratio": "1.2094175330186383"
-        },
-        {
-          "symbol": "BAT_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521421,
-          "score": 48,
-          "rsi": "35.68383101173819",
-          "return_3": "-0.4709912224363091415114536500",
-          "volume_ratio": "1.0965923755044793"
-        },
-        {
-          "symbol": "PUMP_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521423,
-          "score": 83,
-          "rsi": "77.42447584411906",
-          "return_3": "1.439162668992586131705189700",
-          "volume_ratio": "1.8332281887548045"
-        },
-        {
-          "symbol": "NMR_TL",
-          "stage": "discovery",
-          "reason": "passed_pending_trigger",
-          "observed_at": 1790521423,
-          "score": 78
-        },
-        {
-          "symbol": "PENDLE_TL",
-          "stage": "discovery",
-          "reason": "15m momentum not constructive",
-          "observed_at": 1790521425,
-          "score": 69,
-          "rsi": "50.81816716557069",
-          "return_3": "-0.8962373483736382600633547100",
-          "volume_ratio": "0.40481981710923026"
-        },
-        {
-          "symbol": "SPELL_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521426
-        },
-        {
-          "symbol": "XCN_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521426,
-          "score": 44,
-          "rsi": "43.752142368426675",
-          "return_3": "-0.3528028224225793806350450800",
-          "volume_ratio": "0.7214111244678995"
-        },
-        {
-          "symbol": "SAHARA_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521428,
-          "score": 54,
-          "rsi": "41.65749787296343",
-          "return_3": "-0.5621486570893191755153029400",
-          "volume_ratio": "1.6006529344238758"
-        },
-        {
-          "symbol": "SKL_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521429
-        },
-        {
-          "symbol": "XAUT_TL",
-          "stage": "discovery",
-          "reason": "ATR outside range",
-          "observed_at": 1790521430,
-          "score": 74,
-          "rsi": "53.66544673276734",
-          "return_3": "0.048769292558379711974295700",
-          "volume_ratio": "1.1225776777361263"
-        },
-        {
-          "symbol": "DOGE_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521431
-        },
-        {
-          "symbol": "LINK_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521432
-        },
-        {
-          "symbol": "SAUBER_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521432
-        },
-        {
-          "symbol": "FF_TL",
-          "stage": "data",
-          "reason": "candle_error:CandleUnavailableError",
-          "observed_at": 1790521433
-        },
-        {
-          "symbol": "XRP_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521434,
-          "score": 42,
-          "rsi": "40.73002909077287",
-          "return_3": "-0.7635523874360925340061137600",
-          "volume_ratio": "1.0967806556991755"
-        },
-        {
-          "symbol": "ETH_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521435,
-          "score": 33,
-          "rsi": "35.089740260042504",
-          "return_3": "-0.7107680222369931717928575700",
-          "volume_ratio": "1.071776211502282"
-        },
-        {
-          "symbol": "SYN_TL",
-          "stage": "discovery",
-          "reason": "RSI outside watch range",
-          "observed_at": 1790521435,
-          "score": 24,
-          "rsi": "37.238026707804025",
-          "return_3": "-1.102535832414553472987872110",
-          "volume_ratio": "0.788603315495988"
-        },
-        {
-          "symbol": "NMR_TL",
-          "stage": "trigger",
-          "reason": "score 78 < 80",
-          "observed_at": 1790521435,
-          "score": 78
-        }
-      ],
-      "btc_ok": true,
-      "btc_reason": "BTC neutral/acceptable | RSI=40.5",
-      "radar_status": "shadow_only",
-      "markets": 234,
-      "orderbooks_checked": 80,
-      "technical_checked": 23,
-      "discovered": 1,
-      "signal_recorded": false,
-      "alert_sent": false,
-      "funnel": {
-        "book_approved": 23,
-        "data_valid": 13,
-        "discovery_passed": 1,
-        "confirmed": 0,
-        "limit_simulated": 0,
-        "universe": 234,
-        "orderbooks_attempted": 80,
-        "technicals_attempted": 23,
-        "universe_excluded": 78
-      },
-      "coverage_generation": 121,
-      "orderbook_markets_seen": 202,
-      "finished_at": 1790521435,
-      "seconds_since_previous_run": 603
-    },
     {
       "started_at": 1790521992,
       "status": "completed",
@@ -62910,11 +60358,2531 @@
       "orderbook_markets_seen": 202,
       "finished_at": 1790527432,
       "seconds_since_previous_run": 600
+    },
+    {
+      "started_at": 1790528003,
+      "status": "completed",
+      "symbols": {
+        "USDT_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1790528004
+        },
+        "AUDIO_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528020,
+          "spread_pct": "0.4329004329004329004329004329"
+        },
+        "XRP_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528042,
+          "score": 41,
+          "rsi": "41.38276709653998",
+          "return_3": "0.039098839168947432284855300",
+          "volume_ratio": "0.5738559241884925"
+        },
+        "QNT_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528020,
+          "spread_pct": "1.416980980931287874257746347"
+        },
+        "ETH_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528042,
+          "score": 41,
+          "rsi": "34.40579313268721",
+          "return_3": "-0.1961872752020804976160964800",
+          "volume_ratio": "0.8932820422714988"
+        },
+        "PUMP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1790528004
+        },
+        "BAT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SYN_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528029,
+          "score": 39,
+          "rsi": "43.978582593553725",
+          "return_3": "0.786516853932584269662921300",
+          "volume_ratio": "0.8515163923280434"
+        },
+        "TRX_TL": {
+          "stage": "discovery",
+          "reason": "ATR outside range",
+          "observed_at": 1790528030,
+          "score": 43,
+          "rsi": "46.231072264710875",
+          "return_3": "-0.0736241487207804159764402700",
+          "volume_ratio": "1.0356438575160938"
+        },
+        "ETHFI_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528006,
+          "imbalance": "0.6125043534995045357708744724"
+        },
+        "SPK_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528006,
+          "imbalance": "0.8334155399445796075436064627"
+        },
+        "CHZ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1790528030,
+          "score": 77,
+          "rsi": "64.93791726833864",
+          "return_3": "0.545454545454545454545454500",
+          "volume_ratio": "0.9773089533904811"
+        },
+        "COMP_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528006,
+          "imbalance": "0.4165290808053723202505085165"
+        },
+        "BAL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "TNSR_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528006,
+          "spread_pct": "0.5050505050505050505050505051"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "1h clearly weak",
+          "observed_at": 1790528026,
+          "score": 53,
+          "rsi": "47.015204813795094",
+          "return_3": "0.696774193548387096774193500",
+          "volume_ratio": "1.0915924146021787"
+        },
+        "RENDER_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528007,
+          "imbalance": "0.6989051525900990914948251297"
+        },
+        "TRUMP_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528007,
+          "imbalance": "0.6888054144092214453349378393"
+        },
+        "BTTC_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528008,
+          "spread_pct": "0.7782101167315175097276264591"
+        },
+        "BONK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "GAL_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528008,
+          "imbalance": "0.7511349360476346747366221368"
+        },
+        "PENDLE_TL": {
+          "stage": "data",
+          "reason": "recent_15m_integrity_failed",
+          "observed_at": 1790528031
+        },
+        "MAGIC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "PEPE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528008,
+          "imbalance": "0.2351591462762873341776481985"
+        },
+        "XAI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ADA_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528026
+        },
+        "OMG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "WLD_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528008,
+          "imbalance": "0.4953909219890324871970022270"
+        },
+        "SUPER_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528023
+        },
+        "HYPE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.1685309745840921446887491854"
+        },
+        "RE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.2569039288491047425807070660"
+        },
+        "HNT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.6451490768737453410393635702"
+        },
+        "ARB_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.4785142041783210377458475190"
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528010,
+          "spread_pct": "0.5631958087753765553372626064"
+        },
+        "GRASS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ZRO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528010,
+          "imbalance": "0.1664459401884782576898074595"
+        },
+        "CITY_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528010,
+          "spread_pct": "0.7777777777777777777777777778"
+        },
+        "SAHARA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528010,
+          "imbalance": "0.6851411634407194218082514079"
+        },
+        "XCN_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1790528032,
+          "score": 68,
+          "rsi": "55.24669459961072",
+          "return_3": "0.705882352941176470588235300",
+          "volume_ratio": "0.4180412979417655"
+        },
+        "ODOS_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528010,
+          "spread_pct": "0.7092198581560283687943262411"
+        },
+        "COW_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ASR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "LRC_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ATM_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528032
+        },
+        "ANKR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528011,
+          "imbalance": "0.4931930192448721216248958165"
+        },
+        "SPELL_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528033
+        },
+        "KITE_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528011,
+          "spread_pct": "0.4672255050158032156108286382"
+        },
+        "APT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528011,
+          "imbalance": "0.7905772731266870591322864247"
+        },
+        "TLM_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.3071242168564641496446131955"
+        },
+        "NEAR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.7141516408922780016519988694"
+        },
+        "SEVILLA_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528012,
+          "spread_pct": "0.800"
+        },
+        "PLUME_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.2698528114777370112712791896"
+        },
+        "SHIB_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528034
+        },
+        "JASMY_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ENA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.6044329549450159349321879409"
+        },
+        "LINEA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "JTO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528013,
+          "imbalance": "0.4962615995371603631529634703"
+        },
+        "ACM_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1790528027,
+          "score": 69,
+          "rsi": "51.66782794524483",
+          "return_3": "0",
+          "volume_ratio": "0.5160795234389449"
+        },
+        "SKL_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528013,
+          "imbalance": "0.6080675819067030738969190437"
+        },
+        "STORJ_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528013,
+          "spread_pct": "0.5144694533762057877813504823"
+        },
+        "OXT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "RAD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "AVAX_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528035,
+          "score": 44,
+          "rsi": "44.83443711168943",
+          "return_3": "-0.9491437274787324937776291800",
+          "volume_ratio": "0.3218692146836629"
+        },
+        "AKT_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528023,
+          "score": 41,
+          "rsi": "37.09758446124464",
+          "return_3": "-0.3850710900473933649289099500",
+          "volume_ratio": "1.0941572680171328"
+        },
+        "XAUT_TL": {
+          "stage": "discovery",
+          "reason": "ATR outside range",
+          "observed_at": 1790528036,
+          "score": 67,
+          "rsi": "51.54862726309179",
+          "return_3": "0.025340785755609637148635700",
+          "volume_ratio": "1.0511101784562333"
+        },
+        "EIGEN_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528037
+        },
+        "STG_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528014,
+          "spread_pct": "0.5995028512940488375493493201"
+        },
+        "FET_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1790528038,
+          "score": 57,
+          "rsi": "51.38237480821378",
+          "return_3": "0.978473581213307240704501000",
+          "volume_ratio": "0.6087000768712144"
+        },
+        "STX_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SUI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "MORPHO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528015,
+          "imbalance": "0.6834064191266300461648683339"
+        },
+        "PENGU_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528015,
+          "spread_pct": "0.5331146196432232930079967193"
+        },
+        "ENS_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528039,
+          "score": 35,
+          "rsi": "39.21047371435687",
+          "return_3": "-0.3070444775857531362400210500",
+          "volume_ratio": "1.0144405077488308"
+        },
+        "GRAM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "HOT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528015,
+          "imbalance": "0.4187539810649234369344817109"
+        },
+        "PEPPER_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ONT_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528024
+        },
+        "NEO_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528028,
+          "score": 38,
+          "rsi": "44.341181904802525",
+          "return_3": "0.340689121176926054974835500",
+          "volume_ratio": "0.5723852868091652"
+        },
+        "MANA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528016,
+          "imbalance": "0.6692160626437468896228788515"
+        },
+        "0G_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528016,
+          "imbalance": "0.5424759043081729842440850891"
+        },
+        "PSG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "2Z_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528017,
+          "spread_pct": "0.6191950464396284829721362229"
+        },
+        "ALICE_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "WAVES_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "RAY_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "JUV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "UNI_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528039
+        },
+        "SEI_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528017,
+          "imbalance": "0.5529153603273126829434395765"
+        },
+        "DOGE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528017,
+          "imbalance": "0.7604705999420050500897062747"
+        },
+        "GALA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "PYTH_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528017,
+          "spread_pct": "0.4866180048661800486618004866"
+        },
+        "FLR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ALGO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "FLOKI_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528018,
+          "imbalance": "0.5936512622976588080159010946"
+        },
+        "LDO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528018,
+          "imbalance": "0.5449916449008941833383441457"
+        },
+        "AXS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "CRV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "REEF_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528021
+        },
+        "AXL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ILV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "TIA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "LINK_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528040
+        },
+        "FIL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "VANRY_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528018,
+          "imbalance": "0.4765883872264122819027629782"
+        },
+        "OGFAN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "EFC_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528018,
+          "spread_pct": "1.149425287356321839080459770"
+        },
+        "API3_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "LPT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SAUBER_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528019,
+          "spread_pct": "0.5484460694698354661791590494"
+        },
+        "ASM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "THETA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SOL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "DRIFT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ZK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "AERO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ENJ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BAR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ORCA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SAFA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "INJ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BEAM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ONDO_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528025
+        },
+        "BJK_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528022
+        },
+        "VET_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BELG_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "VVV_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "GOAT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "T_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SYRUP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "KAITO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "SFA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "XTZ_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "CTSI_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "STRK_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "FF_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528020,
+          "imbalance": "0.4210469014375444313733314082"
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "MEME_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ALIGN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ZETA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BLUR_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "XLM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "ICP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BERA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528020,
+          "imbalance": "0.2605907136673018367461753551"
+        },
+        "RVN_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "XPL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "APE_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528004,
+          "imbalance": "0.5163070071590264560973648834"
+        },
+        "H_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "MET_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528020,
+          "imbalance": "0.8115378314175153887482599170"
+        },
+        "NAP_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "MINA_TL": {
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528041
+        },
+        "AVL_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "BIO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "MIOTA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1790528003
+        },
+        "DASH_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528005,
+          "spread_pct": "3.490228560453279554403149909"
+        },
+        "SPAIN_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4874517.663"
+        },
+        "TURBO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4681241.9296"
+        },
+        "BCH_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4641123.89"
+        },
+        "TAO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4621578"
+        },
+        "WIF_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528005,
+          "quote_volume": "4533641.08"
+        },
+        "PNUT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528005,
+          "quote_volume": "4460206.7"
+        },
+        "RLC_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4365000.8"
+        },
+        "INTER_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4257450.45"
+        },
+        "OGN_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4198230.15"
+        },
+        "AIXBT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4089527.3546"
+        },
+        "ZORA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4083613.679"
+        },
+        "MNT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3990907.03"
+        },
+        "TRA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3884490.1"
+        },
+        "UMA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3801240.62"
+        },
+        "SNX_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3780970.56"
+        },
+        "CLV_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3758370.48"
+        },
+        "AAVE_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3698817.67"
+        },
+        "VIRTUAL_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3491547.2"
+        },
+        "ATLAS_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3364071.2789"
+        },
+        "SAND_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3297411.22"
+        },
+        "ZKC_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3272644.18"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3141461.89"
+        },
+        "AFC_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3123063.09"
+        },
+        "IO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3121924.32"
+        },
+        "MON_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2961709.324"
+        },
+        "DYDX_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2934102.35"
+        },
+        "FB_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2779005.97"
+        },
+        "CEEK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2766406.879"
+        },
+        "S_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2737158.58"
+        },
+        "GRT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2678257.31"
+        },
+        "ATOM_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2631680.65"
+        },
+        "ALLO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2583973.72"
+        },
+        "NST_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2493748.84"
+        },
+        "RACA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2473688.19652"
+        },
+        "DOT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2436365.19"
+        },
+        "SENT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2392566.5168"
+        },
+        "CFG_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2322186.915"
+        },
+        "OP_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2309735.79"
+        },
+        "LAYER_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2252358.64"
+        },
+        "GLM_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2025930.594"
+        },
+        "JUP_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2020908.89"
+        },
+        "MEGA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2016927.206"
+        },
+        "WLFI_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1991543.56"
+        },
+        "PDA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1955419.101"
+        },
+        "ARG_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1892063.51"
+        },
+        "MOVE_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1792786.664"
+        },
+        "ITA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1727592.62"
+        },
+        "POL_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1696338.55"
+        },
+        "USDC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1790528004
+        },
+        "BENFICA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1534803.48"
+        },
+        "SKY_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1445027.58"
+        },
+        "ARKM_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1377266.57"
+        },
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1342276.94"
+        },
+        "SPURS_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1336211.53"
+        },
+        "ZIL_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1327264.5077"
+        },
+        "GOZ_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1299097.45"
+        },
+        "A_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1261630.77"
+        },
+        "RED_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1198138.09"
+        },
+        "JOE_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1167892.53"
+        },
+        "IMX_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1049876.23"
+        },
+        "LTC_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "986634.7"
+        },
+        "VCF_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "978080.9"
+        },
+        "AEVO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "966544.84"
+        },
+        "AVNT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "965299.08"
+        },
+        "ASTON_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "963053.63"
+        },
+        "POR_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "861894.5"
+        },
+        "WAL_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "802090.04"
+        },
+        "ASTER_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "792434.02"
+        },
+        "MANTA_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "665312.97"
+        },
+        "ME_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "422179.86"
+        },
+        "ZRX_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "414949.97"
+        },
+        "ANIME_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "414501.74"
+        },
+        "SAM_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "411237.26"
+        },
+        "1INCH_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "114506.34"
+        },
+        "TRYC_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "0"
+        },
+        "TON_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "0"
+        }
+      },
+      "shadow_mode": true,
+      "research_cohort": "shadow_integrity_v2:1790082787",
+      "code_sha": "e4409203b4eef19f008df73dd2cebb391500232c",
+      "run_id": "36334869116",
+      "transitions": [
+        {
+          "symbol": "USDT_TL",
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1790528004
+        },
+        {
+          "symbol": "BTC_TL",
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1790528004
+        },
+        {
+          "symbol": "VIRTUAL_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3491547.2"
+        },
+        {
+          "symbol": "CEEK_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2766406.879"
+        },
+        {
+          "symbol": "ATOM_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2631680.65"
+        },
+        {
+          "symbol": "NST_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2493748.84"
+        },
+        {
+          "symbol": "RACA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2473688.19652"
+        },
+        {
+          "symbol": "GLM_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2025930.594"
+        },
+        {
+          "symbol": "PDA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1955419.101"
+        },
+        {
+          "symbol": "POL_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1696338.55"
+        },
+        {
+          "symbol": "USDC_TL",
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1790528004
+        },
+        {
+          "symbol": "BENFICA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1534803.48"
+        },
+        {
+          "symbol": "ARKM_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1377266.57"
+        },
+        {
+          "symbol": "MASK_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1342276.94"
+        },
+        {
+          "symbol": "SPURS_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1336211.53"
+        },
+        {
+          "symbol": "GOZ_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1299097.45"
+        },
+        {
+          "symbol": "A_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1261630.77"
+        },
+        {
+          "symbol": "RED_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1198138.09"
+        },
+        {
+          "symbol": "IMX_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1049876.23"
+        },
+        {
+          "symbol": "VCF_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "978080.9"
+        },
+        {
+          "symbol": "AEVO_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "966544.84"
+        },
+        {
+          "symbol": "ASTON_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "963053.63"
+        },
+        {
+          "symbol": "POR_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "861894.5"
+        },
+        {
+          "symbol": "WAL_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "802090.04"
+        },
+        {
+          "symbol": "ASTER_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "792434.02"
+        },
+        {
+          "symbol": "MANTA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "665312.97"
+        },
+        {
+          "symbol": "ME_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "422179.86"
+        },
+        {
+          "symbol": "ANIME_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "414501.74"
+        },
+        {
+          "symbol": "SAM_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "411237.26"
+        },
+        {
+          "symbol": "1INCH_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "114506.34"
+        },
+        {
+          "symbol": "TRYC_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "0"
+        },
+        {
+          "symbol": "TON_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "0"
+        },
+        {
+          "symbol": "ZKC_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3272644.18"
+        },
+        {
+          "symbol": "ZRX_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "414949.97"
+        },
+        {
+          "symbol": "ZIL_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1327264.5077"
+        },
+        {
+          "symbol": "MEGA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2016927.206"
+        },
+        {
+          "symbol": "MOVE_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1792786.664"
+        },
+        {
+          "symbol": "TURBO_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4681241.9296"
+        },
+        {
+          "symbol": "LAYER_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2252358.64"
+        },
+        {
+          "symbol": "ATLAS_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3364071.2789"
+        },
+        {
+          "symbol": "ARG_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1892063.51"
+        },
+        {
+          "symbol": "ZORA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4083613.679"
+        },
+        {
+          "symbol": "SKY_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1445027.58"
+        },
+        {
+          "symbol": "OP_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2309735.79"
+        },
+        {
+          "symbol": "APE_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528004,
+          "imbalance": "0.5163070071590264560973648834"
+        },
+        {
+          "symbol": "SENT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2392566.5168"
+        },
+        {
+          "symbol": "MNT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3990907.03"
+        },
+        {
+          "symbol": "SPAIN_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4874517.663"
+        },
+        {
+          "symbol": "INTER_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4257450.45"
+        },
+        {
+          "symbol": "AIXBT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4089527.3546"
+        },
+        {
+          "symbol": "S_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2737158.58"
+        },
+        {
+          "symbol": "ALLO_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2583973.72"
+        },
+        {
+          "symbol": "CFG_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2322186.915"
+        },
+        {
+          "symbol": "LTC_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "986634.7"
+        },
+        {
+          "symbol": "JUP_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2020908.89"
+        },
+        {
+          "symbol": "AFC_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3123063.09"
+        },
+        {
+          "symbol": "SNX_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3780970.56"
+        },
+        {
+          "symbol": "LIT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3141461.89"
+        },
+        {
+          "symbol": "SAND_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3297411.22"
+        },
+        {
+          "symbol": "ITA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1727592.62"
+        },
+        {
+          "symbol": "MON_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2961709.324"
+        },
+        {
+          "symbol": "FB_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2779005.97"
+        },
+        {
+          "symbol": "GRT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2678257.31"
+        },
+        {
+          "symbol": "DOT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2436365.19"
+        },
+        {
+          "symbol": "JOE_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1167892.53"
+        },
+        {
+          "symbol": "AVNT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "965299.08"
+        },
+        {
+          "symbol": "TRA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3884490.1"
+        },
+        {
+          "symbol": "CLV_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3758370.48"
+        },
+        {
+          "symbol": "WLFI_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "1991543.56"
+        },
+        {
+          "symbol": "RLC_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4365000.8"
+        },
+        {
+          "symbol": "IO_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3121924.32"
+        },
+        {
+          "symbol": "OGN_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4198230.15"
+        },
+        {
+          "symbol": "BCH_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4641123.89"
+        },
+        {
+          "symbol": "AAVE_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3698817.67"
+        },
+        {
+          "symbol": "TAO_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "4621578"
+        },
+        {
+          "symbol": "UMA_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "3801240.62"
+        },
+        {
+          "symbol": "DYDX_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528004,
+          "quote_volume": "2934102.35"
+        },
+        {
+          "symbol": "DASH_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528005,
+          "spread_pct": "3.490228560453279554403149909"
+        },
+        {
+          "symbol": "WIF_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528005,
+          "quote_volume": "4533641.08"
+        },
+        {
+          "symbol": "PNUT_TL",
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1790528005,
+          "quote_volume": "4460206.7"
+        },
+        {
+          "symbol": "ETHFI_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528006,
+          "imbalance": "0.6125043534995045357708744724"
+        },
+        {
+          "symbol": "SPK_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528006,
+          "imbalance": "0.8334155399445796075436064627"
+        },
+        {
+          "symbol": "COMP_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528006,
+          "imbalance": "0.4165290808053723202505085165"
+        },
+        {
+          "symbol": "TNSR_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528006,
+          "spread_pct": "0.5050505050505050505050505051"
+        },
+        {
+          "symbol": "RENDER_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528007,
+          "imbalance": "0.6989051525900990914948251297"
+        },
+        {
+          "symbol": "TRUMP_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528007,
+          "imbalance": "0.6888054144092214453349378393"
+        },
+        {
+          "symbol": "BTTC_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528008,
+          "spread_pct": "0.7782101167315175097276264591"
+        },
+        {
+          "symbol": "GAL_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528008,
+          "imbalance": "0.7511349360476346747366221368"
+        },
+        {
+          "symbol": "PEPE_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528008,
+          "imbalance": "0.2351591462762873341776481985"
+        },
+        {
+          "symbol": "WLD_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528008,
+          "imbalance": "0.4953909219890324871970022270"
+        },
+        {
+          "symbol": "HYPE_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.1685309745840921446887491854"
+        },
+        {
+          "symbol": "RE_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.2569039288491047425807070660"
+        },
+        {
+          "symbol": "HNT_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.6451490768737453410393635702"
+        },
+        {
+          "symbol": "ARB_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528009,
+          "imbalance": "0.4785142041783210377458475190"
+        },
+        {
+          "symbol": "W_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528010,
+          "spread_pct": "0.5631958087753765553372626064"
+        },
+        {
+          "symbol": "ZRO_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528010,
+          "imbalance": "0.1664459401884782576898074595"
+        },
+        {
+          "symbol": "CITY_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528010,
+          "spread_pct": "0.7777777777777777777777777778"
+        },
+        {
+          "symbol": "SAHARA_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528010,
+          "imbalance": "0.6851411634407194218082514079"
+        },
+        {
+          "symbol": "ODOS_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528010,
+          "spread_pct": "0.7092198581560283687943262411"
+        },
+        {
+          "symbol": "ANKR_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528011,
+          "imbalance": "0.4931930192448721216248958165"
+        },
+        {
+          "symbol": "KITE_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528011,
+          "spread_pct": "0.4672255050158032156108286382"
+        },
+        {
+          "symbol": "APT_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528011,
+          "imbalance": "0.7905772731266870591322864247"
+        },
+        {
+          "symbol": "TLM_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.3071242168564641496446131955"
+        },
+        {
+          "symbol": "NEAR_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.7141516408922780016519988694"
+        },
+        {
+          "symbol": "SEVILLA_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528012,
+          "spread_pct": "0.800"
+        },
+        {
+          "symbol": "PLUME_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.2698528114777370112712791896"
+        },
+        {
+          "symbol": "ENA_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528012,
+          "imbalance": "0.6044329549450159349321879409"
+        },
+        {
+          "symbol": "JTO_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528013,
+          "imbalance": "0.4962615995371603631529634703"
+        },
+        {
+          "symbol": "SKL_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528013,
+          "imbalance": "0.6080675819067030738969190437"
+        },
+        {
+          "symbol": "STORJ_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528013,
+          "spread_pct": "0.5144694533762057877813504823"
+        },
+        {
+          "symbol": "STG_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528014,
+          "spread_pct": "0.5995028512940488375493493201"
+        },
+        {
+          "symbol": "MORPHO_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528015,
+          "imbalance": "0.6834064191266300461648683339"
+        },
+        {
+          "symbol": "PENGU_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528015,
+          "spread_pct": "0.5331146196432232930079967193"
+        },
+        {
+          "symbol": "HOT_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528015,
+          "imbalance": "0.4187539810649234369344817109"
+        },
+        {
+          "symbol": "MANA_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528016,
+          "imbalance": "0.6692160626437468896228788515"
+        },
+        {
+          "symbol": "0G_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528016,
+          "imbalance": "0.5424759043081729842440850891"
+        },
+        {
+          "symbol": "2Z_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528017,
+          "spread_pct": "0.6191950464396284829721362229"
+        },
+        {
+          "symbol": "SEI_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528017,
+          "imbalance": "0.5529153603273126829434395765"
+        },
+        {
+          "symbol": "DOGE_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528017,
+          "imbalance": "0.7604705999420050500897062747"
+        },
+        {
+          "symbol": "PYTH_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528017,
+          "spread_pct": "0.4866180048661800486618004866"
+        },
+        {
+          "symbol": "FLOKI_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528018,
+          "imbalance": "0.5936512622976588080159010946"
+        },
+        {
+          "symbol": "LDO_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528018,
+          "imbalance": "0.5449916449008941833383441457"
+        },
+        {
+          "symbol": "VANRY_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528018,
+          "imbalance": "0.4765883872264122819027629782"
+        },
+        {
+          "symbol": "EFC_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528018,
+          "spread_pct": "1.149425287356321839080459770"
+        },
+        {
+          "symbol": "SAUBER_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528019,
+          "spread_pct": "0.5484460694698354661791590494"
+        },
+        {
+          "symbol": "FF_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528020,
+          "imbalance": "0.4210469014375444313733314082"
+        },
+        {
+          "symbol": "BERA_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528020,
+          "imbalance": "0.2605907136673018367461753551"
+        },
+        {
+          "symbol": "MET_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1790528020,
+          "imbalance": "0.8115378314175153887482599170"
+        },
+        {
+          "symbol": "AUDIO_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528020,
+          "spread_pct": "0.4329004329004329004329004329"
+        },
+        {
+          "symbol": "QNT_TL",
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1790528020,
+          "spread_pct": "1.416980980931287874257746347"
+        },
+        {
+          "symbol": "REEF_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528021
+        },
+        {
+          "symbol": "BJK_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528022
+        },
+        {
+          "symbol": "SUPER_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528023
+        },
+        {
+          "symbol": "AKT_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528023,
+          "score": 41,
+          "rsi": "37.09758446124464",
+          "return_3": "-0.3850710900473933649289099500",
+          "volume_ratio": "1.0941572680171328"
+        },
+        {
+          "symbol": "ONT_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528024
+        },
+        {
+          "symbol": "ONDO_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528025
+        },
+        {
+          "symbol": "ALT_TL",
+          "stage": "discovery",
+          "reason": "1h clearly weak",
+          "observed_at": 1790528026,
+          "score": 53,
+          "rsi": "47.015204813795094",
+          "return_3": "0.696774193548387096774193500",
+          "volume_ratio": "1.0915924146021787"
+        },
+        {
+          "symbol": "ADA_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528026
+        },
+        {
+          "symbol": "ACM_TL",
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1790528027,
+          "score": 69,
+          "rsi": "51.66782794524483",
+          "return_3": "0",
+          "volume_ratio": "0.5160795234389449"
+        },
+        {
+          "symbol": "NEO_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528028,
+          "score": 38,
+          "rsi": "44.341181904802525",
+          "return_3": "0.340689121176926054974835500",
+          "volume_ratio": "0.5723852868091652"
+        },
+        {
+          "symbol": "SYN_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528029,
+          "score": 39,
+          "rsi": "43.978582593553725",
+          "return_3": "0.786516853932584269662921300",
+          "volume_ratio": "0.8515163923280434"
+        },
+        {
+          "symbol": "TRX_TL",
+          "stage": "discovery",
+          "reason": "ATR outside range",
+          "observed_at": 1790528030,
+          "score": 43,
+          "rsi": "46.231072264710875",
+          "return_3": "-0.0736241487207804159764402700",
+          "volume_ratio": "1.0356438575160938"
+        },
+        {
+          "symbol": "NMR_TL",
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1790528030,
+          "score": 77,
+          "rsi": "64.93791726833864",
+          "return_3": "0.545454545454545454545454500",
+          "volume_ratio": "0.9773089533904811"
+        },
+        {
+          "symbol": "PENDLE_TL",
+          "stage": "data",
+          "reason": "recent_15m_integrity_failed",
+          "observed_at": 1790528031
+        },
+        {
+          "symbol": "XCN_TL",
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1790528032,
+          "score": 68,
+          "rsi": "55.24669459961072",
+          "return_3": "0.705882352941176470588235300",
+          "volume_ratio": "0.4180412979417655"
+        },
+        {
+          "symbol": "ATM_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528032
+        },
+        {
+          "symbol": "SPELL_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528033
+        },
+        {
+          "symbol": "SHIB_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528034
+        },
+        {
+          "symbol": "AVAX_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528035,
+          "score": 44,
+          "rsi": "44.83443711168943",
+          "return_3": "-0.9491437274787324937776291800",
+          "volume_ratio": "0.3218692146836629"
+        },
+        {
+          "symbol": "XAUT_TL",
+          "stage": "discovery",
+          "reason": "ATR outside range",
+          "observed_at": 1790528036,
+          "score": 67,
+          "rsi": "51.54862726309179",
+          "return_3": "0.025340785755609637148635700",
+          "volume_ratio": "1.0511101784562333"
+        },
+        {
+          "symbol": "EIGEN_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528037
+        },
+        {
+          "symbol": "FET_TL",
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1790528038,
+          "score": 57,
+          "rsi": "51.38237480821378",
+          "return_3": "0.978473581213307240704501000",
+          "volume_ratio": "0.6087000768712144"
+        },
+        {
+          "symbol": "ENS_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528039,
+          "score": 35,
+          "rsi": "39.21047371435687",
+          "return_3": "-0.3070444775857531362400210500",
+          "volume_ratio": "1.0144405077488308"
+        },
+        {
+          "symbol": "UNI_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528039
+        },
+        {
+          "symbol": "LINK_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528040
+        },
+        {
+          "symbol": "MINA_TL",
+          "stage": "data",
+          "reason": "candle_error:CandleUnavailableError",
+          "observed_at": 1790528041
+        },
+        {
+          "symbol": "ETH_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528042,
+          "score": 41,
+          "rsi": "34.40579313268721",
+          "return_3": "-0.1961872752020804976160964800",
+          "volume_ratio": "0.8932820422714988"
+        },
+        {
+          "symbol": "XRP_TL",
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1790528042,
+          "score": 41,
+          "rsi": "41.38276709653998",
+          "return_3": "0.039098839168947432284855300",
+          "volume_ratio": "0.5738559241884925"
+        }
+      ],
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=39.4",
+      "radar_status": "shadow_only",
+      "markets": 234,
+      "orderbooks_checked": 80,
+      "technical_checked": 28,
+      "discovered": 0,
+      "signal_recorded": false,
+      "alert_sent": false,
+      "funnel": {
+        "book_approved": 28,
+        "data_valid": 14,
+        "discovery_passed": 0,
+        "confirmed": 0,
+        "limit_simulated": 0,
+        "universe": 234,
+        "orderbooks_attempted": 80,
+        "technicals_attempted": 28,
+        "universe_excluded": 78
+      },
+      "coverage_generation": 133,
+      "orderbook_markets_seen": 202,
+      "finished_at": 1790528042,
+      "seconds_since_previous_run": 600
     }
   ],
   "research_summary": {
     "version": 3,
-    "generated_at": 1790527432,
+    "generated_at": 1790528042,
     "mode": "research_only",
     "profitability_proven": false,
     "automatic_promotion_allowed": false,
@@ -62929,35 +62897,39 @@
       "expected_interval_seconds": 600,
       "late_after_seconds": 1200,
       "retained_runs": 32,
-      "last_started_at": 1790526803,
-      "current_gap_seconds": 629,
+      "last_started_at": 1790527403,
+      "current_gap_seconds": 639,
       "median_gap_seconds": 604,
       "max_gap_seconds": 19670,
-      "retained_late_gap_count": 11
+      "retained_late_gap_count": 10
     },
     "coverage": {
       "snapshot_markets": 234,
       "orderbooks_checked": 80,
-      "technical_checked": 15,
-      "unexamined_capacity": 74,
-      "unexamined_orderbook_capacity": 74,
+      "technical_checked": 28,
+      "unexamined_capacity": 76,
+      "unexamined_orderbook_capacity": 76,
       "unexamined_technical_capacity": 0
     },
     "rejection_reasons": {
       "excluded_base_asset": 3,
-      "RSI outside watch range": 3,
-      "spread_too_high": 39,
-      "imbalance_too_low": 26,
-      "not_evaluated_capacity": 74,
-      "15m momentum not constructive": 3,
-      "candle_error:CandleUnavailableError": 9,
-      "quote_volume_below_minimum": 77
+      "spread_too_high": 17,
+      "RSI outside watch range": 7,
+      "not_evaluated_capacity": 76,
+      "ATR outside range": 2,
+      "imbalance_too_low": 35,
+      "volume not expanding": 3,
+      "1h clearly weak": 1,
+      "recent_15m_integrity_failed": 1,
+      "candle_error:CandleUnavailableError": 13,
+      "15m momentum not constructive": 1,
+      "quote_volume_below_minimum": 75
     },
     "paper_signal_status_counts": {
       "TP2": 1,
       "EXPIRED": 2,
       "STOP": 1,
-      "PENDING_ENTRY": 1
+      "OPEN": 1
     },
     "paper_signal_status_counts_basis": "inventory_only_mixed_models_not_performance",
     "research_cohort": {
@@ -62974,22 +62946,24 @@
       "current_records": 1,
       "excluded_legacy_records": 4,
       "incomplete_records": 0,
-      "estimated_fill_status_counts": {},
-      "pending_entries": 1,
+      "estimated_fill_status_counts": {
+        "OPEN": 1
+      },
+      "pending_entries": 0,
       "expired_entries": 0,
       "confirmed_exchange_fills": 0,
       "basis": "ohlc_scenarios_not_realized_pnl"
     },
     "funnel": {
-      "book_approved": 15,
-      "data_valid": 6,
+      "book_approved": 28,
+      "data_valid": 14,
       "discovery_passed": 0,
       "confirmed": 0,
       "limit_simulated": 0,
       "universe": 234,
       "orderbooks_attempted": 80,
-      "technicals_attempted": 15,
-      "universe_excluded": 80
+      "technicals_attempted": 28,
+      "universe_excluded": 78
     },
     "funnel_order": [
       "universe",
@@ -63003,7 +62977,7 @@
     ],
     "pending_lifecycle_notifications": 0,
     "shadow_events_retained": 0,
-    "legacy_radar_events_excluded": 7,
+    "legacy_radar_events_excluded": 6,
     "radar_events_retained": 0,
     "horizon_samples": {
       "3600": {
