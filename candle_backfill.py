@@ -25,6 +25,8 @@ MAX_SYNTHETIC_TOTAL = 8
 MAX_CONSECUTIVE_SYNTHETIC = 2
 PUBLICATION_GRACE_SECONDS = 60
 MAX_RECENT_PROBE_ROWS = 500
+# Recovery cooldown only; never a trading or candle-acceptance parameter.
+NEGATIVE_CACHE_TTL_SECONDS = 15 * 60
 
 _history: dict[str, dict] = {}
 _REQUIRED = ("timestamp", "open", "high", "low", "close", "volume")
@@ -50,6 +52,36 @@ def bind_history(state: dict) -> None:
     if not isinstance(history, dict):
         raise ValueError("Invalid candle gap history")
     _history = history
+
+
+def _reuse_negative_cache(previous, missing, now, report, *, scope="full_history"):
+    """Reuse only a bounded, successful no-recovery observation.
+
+    Cache hits retain the original expiry. Transport/provenance failures and
+    legacy entries without explicit expiry are not evidence of absent candles.
+    """
+    if not isinstance(previous, dict) or not missing:
+        return False
+    if previous.get("missing_timestamps_scope", "full_history") != scope:
+        return False
+    saved = previous.get("report", {})
+    attempted = saved.get("negative_cache_attempted_at")
+    expires = saved.get("negative_cache_expires_at")
+    if type(attempted) is not int or type(expires) is not int:
+        return False
+    if not (attempted <= now < expires == attempted + NEGATIVE_CACHE_TTL_SECONDS):
+        return False
+    if missing != set(previous.get("missing_timestamps", [])):
+        return False
+    report.update(negative_cache_attempted_at=attempted, negative_cache_expires_at=expires)
+    return True
+
+
+def _cache_no_recovery(report, now):
+    report.update(
+        negative_cache_attempted_at=int(now),
+        negative_cache_expires_at=int(now) + NEGATIVE_CACHE_TTL_SECONDS,
+    )
 
 
 def utc(ts: int) -> str:
@@ -261,6 +293,11 @@ def _validated_recent_rows(rows, *, start: int, end: int, interval: int):
              | (x["low"] > x[["open", "close"]].min(axis=1))
              | (x["low"] > x["high"])).any()):
         raise ValueError("Invalid recent-window OHLC relationship")
+    duplicates = x[x.duplicated("timestamp", keep=False)]
+    if not duplicates.empty and duplicates.groupby("timestamp")[
+        ["open", "high", "low", "close", "volume"]
+    ].nunique().gt(1).any().any():
+        raise ValueError("Conflicting duplicate Paribu candle")
     return x.loc[:, list(_REQUIRED)].copy()
 
 
@@ -278,7 +315,10 @@ def _validated_recovery_rows(rows, *, start: int, end: int, interval: int):
         raise RecoveryProvenanceError("Recovered candle is not authentic")
     if not bool(rows["data_quality"].eq("PARIBU").all()):
         raise RecoveryProvenanceError("Recovered candle data_quality is not PARIBU")
-    return _validated_recent_rows(rows, start=start, end=end, interval=interval)
+    try:
+        return _validated_recent_rows(rows, start=start, end=end, interval=interval)
+    except ValueError as exc:
+        raise RecoveryProvenanceError(str(exc)) from exc
 
 
 def _persist_failure(label: str, now: int, missing, report: dict, exc: Exception) -> None:
@@ -321,23 +361,8 @@ def _probe_recent_window(frame, interval, now, request_range, label, minimum, re
         combined = existing
 
         previous = _history.get(label)
-        previous_missing = (
-            set(previous.get("missing_timestamps", []))
-            if isinstance(previous, dict)
-            and previous.get("missing_timestamps_scope") == "recent_probe_window"
-            else set()
-        )
-        previous_report = previous.get("report", {}) if isinstance(previous, dict) else {}
-        previous_attempted = (
-            int(previous_report.get("requests", 0) or 0) > 0
-            or previous_report.get("recovery_skipped_reason")
-               == "unchanged_recent_gap_fingerprint"
-        )
-        same_unrecovered_recent_gap = (
-            bool(missing)
-            and missing == previous_missing
-            and int(previous_report.get("recovered", 0) or 0) == 0
-            and previous_attempted
+        same_unrecovered_recent_gap = _reuse_negative_cache(
+            previous, missing, now, report, scope="recent_probe_window",
         )
         if same_unrecovered_recent_gap:
             report["recovery_skipped_reason"] = "unchanged_recent_gap_fingerprint"
@@ -356,6 +381,8 @@ def _probe_recent_window(frame, interval, now, request_range, label, minimum, re
             )
             if not recovered.empty:
                 combined = pd.concat([existing, recovered], ignore_index=True)
+            if not (set(int(t) for t in recovered["timestamp"]) & missing):
+                _cache_no_recovery(report, now)
         missing = expected - set(int(t) for t in combined["timestamp"])
         if missing:
             raise ValueError(f"Recent window incomplete: {len(missing)} missing")
@@ -412,7 +439,14 @@ def repair(
         raise ValueError("No valid rows to anchor backfill")
 
     original_attrs = dict(frame.attrs)
-    x = frame.sort_values("timestamp").copy()
+    # Initial rows need the same numeric/provenance checks as recovered rows;
+    # otherwise suffix/canonicalization could silently promote synthetic input.
+    x = _validated_recent_rows(
+        frame, start=0, end=(int(now) // interval - 1) * interval, interval=interval,
+    ).sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
+    if x.empty:
+        raise ValueError("No valid closed rows to anchor backfill")
+    x.attrs.update(original_attrs)
     first = int(x["timestamp"].iloc[0])
     latest_actual = int(x["timestamp"].iloc[-1])
     expected_last = _expected_last_closed_open(now, interval)
@@ -470,15 +504,7 @@ def repair(
     }
     LOGGER.info("CANDLE_REPAIR_START %s", json.dumps(report))
 
-    previous_report = previous.get("report", {}) if isinstance(previous, dict) else {}
-    previous_attempted = (
-        int(previous_report.get("requests", 0) or 0) > 0
-        or previous_report.get("recovery_skipped_reason")
-           == "unchanged_gap_fingerprint"
-    )
-    same_unrecovered_gap = bool(missing) and missing == previous_missing and (
-        int(previous_report.get("recovered", 0) or 0) == 0
-    ) and previous_attempted
+    same_unrecovered_gap = _reuse_negative_cache(previous, missing, now, report)
     if same_unrecovered_gap:
         report["recovery_skipped_reason"] = "unchanged_gap_fingerprint"
         LOGGER.info("CANDLE_REPAIR_NEGATIVE_CACHE %s", json.dumps({
@@ -556,6 +582,10 @@ def repair(
     if fatal_recovery_error is not None:
         _persist_failure(label, now, missing, report, fatal_recovery_error)
         raise ValueError(str(fatal_recovery_error)) from fatal_recovery_error
+
+    if (report["requests"] > 0 and not report["errors"]
+            and missing and len(missing) == report["missing_before"]):
+        _cache_no_recovery(report, now)
 
     # If historical gaps remain but the newest contiguous suffix is fully
     # authentic, current, and long enough for every technical indicator,
