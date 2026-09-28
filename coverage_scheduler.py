@@ -33,3 +33,28 @@ class CoverageCycle:
 
     def attempted(self, stage: str, symbol: str) -> None:
         self.state[stage][symbol] = self.state["generation"]
+
+    def prioritize(
+        self, items: Iterable[Any], stage: str, symbol: Callable,
+        priority_symbols: Iterable[str], budget: int,
+    ) -> tuple[list, list[str]]:
+        """Reserve at least half the slots for least-recently-attempted work.
+
+        Priority changes scheduling only. Missing symbols consume no slots;
+        unused priority capacity returns to normal coverage. The caller still
+        applies its unchanged request cap and all market/strategy gates.
+        """
+        base = self.order(items, stage, symbol)
+        by_symbol = {symbol(item): item for item in base}
+        selected = []
+        selected_set = set()
+        priority_budget = max(0, int(budget)) // 2
+        for name in priority_symbols:
+            if len(selected) >= priority_budget:
+                break
+            if name in by_symbol and name not in selected_set:
+                selected.append(name)
+                selected_set.add(name)
+        ordered = [by_symbol[name] for name in selected]
+        ordered.extend(item for item in base if symbol(item) not in selected_set)
+        return ordered, selected

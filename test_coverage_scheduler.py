@@ -56,7 +56,8 @@ def test_hot_radar_boosts_unchecked_mover_without_changing_capacity():
     assert len({x.symbol for x in ordered2}) == len(second)
 
 
-def test_hot_radar_does_not_reboost_symbol_checked_previous_generation():
+def test_hot_radar_can_recheck_new_motion_without_consuming_fair_slots(monkeypatch):
+    monkeypatch.setattr(scanner, "MAX_ORDERBOOK_MARKETS", 2)
     root = {"coverage_scheduler": {}}
     first = [
         NS(symbol=f"M{i}_TL", last=D("100"), quote_volume=D("10000000"))
@@ -78,9 +79,9 @@ def test_hot_radar_does_not_reboost_symbol_checked_previous_generation():
     cycle2 = CoverageCycle(root["coverage_scheduler"], [x.symbol for x in second])
     ordered2, meta2 = scanner._hot_radar_order(second, root, cycle2, now=700)
 
-    assert "M0_TL" not in meta2["hot_symbols"]
-    # Normal least-recently-attempted fairness remains in force.
-    assert [x.symbol for x in ordered2[:2]] == ["M2_TL", "M3_TL"]
+    assert "M0_TL" in meta2["hot_symbols"]
+    # Fresh motion is revisited, while one slot still serves an older market.
+    assert [x.symbol for x in ordered2[:2]] == ["M0_TL", "M2_TL"]
 
 
 def test_two_budgets_rotate_independently():
