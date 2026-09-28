@@ -107,12 +107,15 @@ def test_request_budget_then_bounded_synthetic_fill():
 
 def test_gap_limit_and_trailing_gap():
     full = frame()
-
-    def forbidden(*a):
-        pytest.fail("should not request enormous gap")
+    calls = []
+    def bounded(start, end):
+        calls.append((start, end))
+        assert end - start == 205 * 900
+        return full.iloc[:0]
 
     with pytest.raises(ValueError, match="limit"):
-        repair(full.drop(range(10, 150)), 900, NOW, forbidden, "BTC")
+        repair(full.drop(range(10, 150)), 900, NOW, bounded, "BTC")
+    assert len(calls) == 1
 
     result = repair(full.iloc[:-1], 900, NOW+61, lambda *a: full.tail(1), "BTC")
     assert result.attrs["backfill"]["recovered"] == 1
