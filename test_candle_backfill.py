@@ -30,6 +30,14 @@ def payload(df):
              ("l", "low"), ("c", "close"), ("v", "volume")]}}
 
 
+def authentic_rows(df):
+    x = df.copy()
+    x["is_authentic"] = True
+    x["data_quality"] = "PARIBU"
+    x.attrs["source"] = "PARIBU"
+    return x
+
+
 def test_real_backfill_preserves_prices_and_provenance(monkeypatch):
     monkeypatch.setattr(md.time, "time", lambda: NOW)
     full = frame()
@@ -117,7 +125,7 @@ def test_gap_limit_and_trailing_gap():
         repair(full.drop(range(10, 150)), 900, NOW, bounded, "BTC")
     assert len(calls) == 1
 
-    result = repair(full.iloc[:-1], 900, NOW+61, lambda *a: full.tail(1), "BTC")
+    result = repair(full.iloc[:-1], 900, NOW+61, lambda *a: authentic_rows(full.tail(1)), "BTC")
     assert result.attrs["backfill"]["recovered"] == 1
     assert result.attrs["backfill"]["status"] == "complete_real"
 
@@ -169,7 +177,7 @@ def test_fourth_attempt_can_recover_and_logs_each_attempt(caplog):
 
     def request(*a):
         calls.append(a)
-        return full if len(calls) == 4 else full.iloc[:0]
+        return authentic_rows(full) if len(calls) == 4 else full.iloc[:0]
 
     result = repair(full.drop(100), 900, NOW, request, "BTC")
     assert len(calls) == 4
@@ -232,3 +240,100 @@ def test_total_synthetic_gap_limit_fails_closed():
     missing = [10, 20, 30, 40, 50, 60, 70, 80, 90]
     with pytest.raises(ValueError, match="Synthetic candle limit exceeded"):
         repair(full.drop(missing), 900, NOW, lambda *a: full.iloc[:0], "BTC")
+
+def test_failed_closed_state_is_persisted_and_identical_gap_is_negative_cached():
+    state = {}
+    bind_history(state)
+    full = frame()
+    missing = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+    calls = []
+
+    def request(*args):
+        calls.append(args)
+        return full.iloc[:0]
+
+    with pytest.raises(ValueError, match="Synthetic candle limit exceeded"):
+        repair(full.drop(missing), 900, NOW, request, "BTC")
+
+    first_calls = len(calls)
+    saved = state["candle_gap_history"]["BTC"]
+    assert saved["report"]["status"] == "failed_closed"
+    assert saved["report"]["failure_type"] == "ValueError"
+    assert set(saved["missing_timestamps"])
+
+    with pytest.raises(ValueError, match="Synthetic candle limit exceeded"):
+        repair(full.drop(missing), 900, NOW + 600, request, "BTC")
+
+    assert len(calls) == first_calls
+    report = state["candle_gap_history"]["BTC"]["report"]
+    assert report["classification"] == "continuing"
+    assert report["recovery_skipped_reason"] == "unchanged_gap_fingerprint"
+
+
+def test_targeted_recovery_rejects_unproven_provenance_and_persists_failure():
+    state = {}
+    bind_history(state)
+    full = frame()
+    calls = []
+
+    def request(*args):
+        calls.append(args)
+        # Structurally valid OHLCV, but no explicit Paribu authenticity tags.
+        return full.tail(3).copy()
+
+    with pytest.raises(ValueError, match="provenance"):
+        repair(full.drop(248), 900, NOW, request, "BTC")
+
+    assert len(calls) == 1
+    report = state["candle_gap_history"]["BTC"]["report"]
+    assert report["status"] == "failed_closed"
+    assert report["provenance_rejected"] is True
+
+
+def test_http_429_aborts_remaining_backfill_attempts_and_persists_failure():
+    state = {}
+    bind_history(state)
+    full = frame()
+    calls = []
+
+    def request(*args):
+        calls.append(args)
+        raise md.ParibuHTTPError(
+            "HTTP 429 from Paribu",
+            status_code=429,
+            retry_after="17",
+        )
+
+    with pytest.raises(ValueError, match="HTTP 429"):
+        repair(full.drop(100), 900, NOW, request, "BTC")
+
+    assert len(calls) == 1
+    report = state["candle_gap_history"]["BTC"]["report"]
+    assert report["status"] == "failed_closed"
+    assert report["rate_limited"] is True
+    assert report["retry_after"] == "17"
+
+
+def test_backfill_429_blocks_later_http_requests_in_same_process(monkeypatch):
+    md._BACKFILL_RATE_LIMITED = False
+    md._BACKFILL_RETRY_AFTER = None
+    calls = []
+
+    def fake_get_json(*args, **kwargs):
+        calls.append((args, kwargs))
+        raise md.ParibuHTTPError(
+            "HTTP 429 from Paribu",
+            status_code=429,
+            retry_after="9",
+        )
+
+    monkeypatch.setattr(md, "get_json", fake_get_json)
+
+    with pytest.raises(md.ParibuHTTPError, match="429"):
+        md._request_backfill_json({"symbol": "btc_tl"})
+    with pytest.raises(md.ParibuHTTPError, match="blocked"):
+        md._request_backfill_json({"symbol": "eth_tl"})
+
+    assert len(calls) == 1
+    assert md._BACKFILL_RETRY_AFTER == "9"
+
