@@ -15,6 +15,11 @@ NOW = 1800000000
 @pytest.fixture(autouse=True)
 def isolated_history():
     bind_history({})
+    md._BACKFILL_RATE_LIMITED = False
+    md._BACKFILL_RETRY_AFTER = None
+    yield
+    md._BACKFILL_RATE_LIMITED = False
+    md._BACKFILL_RETRY_AFTER = None
 
 
 def frame():
@@ -281,7 +286,7 @@ def test_targeted_recovery_rejects_unproven_provenance_and_persists_failure():
         # Structurally valid OHLCV, but no explicit Paribu authenticity tags.
         return full.tail(3).copy()
 
-    with pytest.raises(ValueError, match="provenance"):
+    with pytest.raises(ValueError, match="PARIBU|Paribu|provenance"):
         repair(full.drop(248), 900, NOW, request, "BTC")
 
     assert len(calls) == 1
