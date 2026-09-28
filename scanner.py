@@ -245,24 +245,33 @@ def _hot_radar_order(
     coverage: CoverageCycle,
     now: int,
 ) -> tuple[list[Any], dict[str, Any]]:
-    """Boost fresh price+quote-volume acceleration without changing any gate.
+    """Bound priority boosts while preserving market coverage and entry gates.
 
-    The public Paribu ticker snapshot is already fetched for the whole universe.
-    A symbol is eligible for a boost only when both its last price and rolling
-    quote volume increased versus the previous scanner snapshot, and it was not
-    already order-book checked in the immediately preceding coverage generation.
-    The normal CoverageCycle order remains the fallback for every other symbol.
+    Rolling 24h volume differences are a ranking proxy, not interval trade flow.
+    Only fresh snapshots are comparable. Pending confirmations get a bounded
+    priority when another CLOSED 15m candle could exist; no confirmation is
+    granted here. At least half of every budget remains ordinary fair coverage.
     """
     base_order = coverage.order(tickers, "orderbooks", lambda item: item.symbol)
     previous = state.get("ticker_radar", {})
+    if not isinstance(previous, dict):
+        previous = {}
     previous_markets = previous.get("markets", {}) if isinstance(previous, dict) else {}
     if not isinstance(previous_markets, dict):
         previous_markets = {}
 
     current_markets: dict[str, dict[str, Any]] = {}
     hot_rows: list[tuple[Decimal, Decimal, Decimal, Decimal, Any]] = []
-    previous_generation = max(0, int(coverage.state["generation"]) - 1)
-    orderbook_history = coverage.state.get("orderbooks", {})
+    previous_at = previous.get("observed_at")
+    comparable = (
+        type(previous_at) is int
+        and 0 < now - previous_at <= CADENCE_LATE_AFTER_SECONDS
+    )
+
+    def universe_eligible(ticker):
+        volume = dec(getattr(ticker, "quote_volume", None))
+        return (ticker.symbol not in {"USDT_TL", "USDC_TL", "BTC_TL"}
+                and volume is not None and volume >= MIN_QUOTE_VOLUME_TL)
 
     for ticker in tickers:
         symbol = str(getattr(ticker, "symbol", ""))
@@ -275,6 +284,9 @@ def _hot_radar_order(
             "last": str(last),
             "quote_volume": str(quote_volume) if quote_volume is not None else None,
         }
+
+        if not comparable or not universe_eligible(ticker):
+            continue
 
         prior = previous_markets.get(symbol)
         if not isinstance(prior, dict):
@@ -291,11 +303,6 @@ def _hot_radar_order(
         ):
             continue
 
-        # A symbol inspected in the immediately preceding pulse is already fresh;
-        # do not let a continuing mover monopolize capacity on every run.
-        if orderbook_history.get(symbol, 0) == previous_generation:
-            continue
-
         price_delta_pct = pct(last, prior_last)
         quote_delta = quote_volume - prior_quote
         if price_delta_pct <= 0 or quote_delta <= 0:
@@ -310,12 +317,42 @@ def _hot_radar_order(
         reverse=True,
     )
     hot_symbols = [row[4].symbol for row in hot_rows]
-    hot_set = set(hot_symbols)
-    ordered = [row[4] for row in hot_rows]
-    ordered.extend(ticker for ticker in base_order if ticker.symbol not in hot_set)
+    confirmation_symbols = []
+    lifecycles = state.get("candidate_lifecycle", {})
+    if not isinstance(lifecycles, dict):
+        lifecycles = {}
+    latest_closed_open = (now // 900 - 1) * 900
+    for ticker in base_order:
+        lifecycle = lifecycles.get(ticker.symbol, {})
+        watch = _watchlist(state).get(ticker.symbol, {})
+        if (not universe_eligible(ticker) or not isinstance(lifecycle, dict)
+                or not isinstance(watch, dict)
+                or lifecycle.get("current_state") != "confirmation_1_of_2"):
+            continue
+        observations = _recent_observations(watch, now)
+        if observations and max(int(o["candle_at"]) for o in observations) < latest_closed_open:
+            confirmation_symbols.append(ticker.symbol)
+
+    # Follow-up watches cannot consume every priority slot either. This is a
+    # scheduling quota, not an RSI/score/liquidity or execution parameter.
+    confirmation_quota = max(0, min(MAX_ORDERBOOK_MARKETS // 2,
+                                    max(1, MAX_ORDERBOOK_MARKETS // 4)))
+    confirmation_symbols = confirmation_symbols[:confirmation_quota]
+    priorities = list(dict.fromkeys(confirmation_symbols + hot_symbols))
+    eligible = [ticker for ticker in tickers if universe_eligible(ticker)]
+    ordered, selected_priority = coverage.prioritize(
+        eligible, "orderbooks", lambda item: item.symbol,
+        priorities, MAX_ORDERBOOK_MARKETS,
+    )
+    # Keep excluded symbols for the normal universe-rejection diagnostics.
+    ordered.extend(ticker for ticker in base_order if not universe_eligible(ticker))
 
     state["ticker_radar"] = {
+        "version": 2,
         "observed_at": int(now),
+        "previous_observed_at": previous_at,
+        "snapshot_comparable": comparable,
+        "volume_basis": "rolling_24h_difference_not_trade_flow",
         "markets": current_markets,
         "hot_symbols": hot_symbols,
         "hot_metrics": {
@@ -330,6 +367,11 @@ def _hot_radar_order(
     return ordered, {
         "eligible_count": len(hot_symbols),
         "hot_symbols": hot_symbols,
+        "confirmation_symbols": confirmation_symbols,
+        "priority_symbols": priorities,
+        "selected_priority_symbols": selected_priority,
+        "snapshot_comparable": comparable,
+        "priority_budget": MAX_ORDERBOOK_MARKETS // 2,
     }
 
 
@@ -1385,7 +1427,11 @@ def run_scanner() -> None:
 
     # Independent fairness at the second budget prevents the same book-approved
     # markets from repeatedly losing the last technical-analysis slots.
-    for ticker, book in coverage.order(book_candidates, "technicals", lambda item: item[0].symbol):
+    technical_order, technical_priority = coverage.prioritize(
+        book_candidates, "technicals", lambda item: item[0].symbol,
+        hot_radar["priority_symbols"], MAX_TECHNICAL_MARKETS,
+    )
+    for ticker, book in technical_order:
         if technical_checked >= MAX_TECHNICAL_MARKETS:
             note(ticker.symbol, "coverage", "not_evaluated_technical_capacity")
             continue
@@ -1459,16 +1505,25 @@ def run_scanner() -> None:
         score, reasons = score_candidate(ticker, book, tech_15, tech_1h, tech_4h)
         if score >= DISCOVERY_MIN_SCORE:
             obs["score"] += 1
+        close = dec(getattr(tech_15, "current_close", None))
+        atr = dec(getattr(tech_15, "atr14", None))
+        indicator_metrics = {
+            "score": score, "rsi": str(tech_15.rsi14),
+            "return_3": str(tech_15.recent_return_3),
+            "volume_ratio": str(tech_15.volume_ratio),
+            "atr_pct": str(atr / close * 100) if close and close > 0 and atr is not None else None,
+            "macd_histogram": str(getattr(tech_15, "macd_histogram", "")),
+            "closed_candle_at": int(df_15["timestamp"].iloc[-1]),
+            "authentic_only": True,
+        }
         ok, discovery_reason = discovery_ok(
             ticker, book, tech_15, tech_1h, tech_4h, score
         )
         if not ok:
-            note(ticker.symbol, "discovery", discovery_reason, score=score,
-                 rsi=str(tech_15.rsi14), return_3=str(tech_15.recent_return_3),
-                 volume_ratio=str(tech_15.volume_ratio))
+            note(ticker.symbol, "discovery", discovery_reason, **indicator_metrics)
             continue
 
-        note(ticker.symbol, "discovery", "passed_pending_trigger", score=score)
+        note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
 
         setup_ok, setup = setup_type(tech_15)
         if not setup_ok:
@@ -1688,9 +1743,15 @@ def run_scanner() -> None:
     diagnostics["coverage_generation"] = coverage.state["generation"]
     diagnostics["orderbook_markets_seen"] = len(coverage.state["orderbooks"])
     diagnostics["hot_radar"] = {
+        "version": 2,
         "eligible_count": hot_radar["eligible_count"],
         "selected_orderbooks": hot_orderbook_selected,
         "hot_symbols": hot_radar["hot_symbols"],
+        "snapshot_comparable": hot_radar["snapshot_comparable"],
+        "priority_budget": hot_radar["priority_budget"],
+        "confirmation_symbols": hot_radar["confirmation_symbols"],
+        "selected_priority_symbols": hot_radar["selected_priority_symbols"],
+        "technical_priority_symbols": technical_priority,
     }
     finish_diagnostics("completed")
 
