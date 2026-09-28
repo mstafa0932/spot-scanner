@@ -5,7 +5,7 @@ Policy:
 - Small isolated historical gaps may be represented by synthetic flat candles
   (O=H=L=C=previous close, volume=0) only to preserve calculation continuity.
 - Synthetic rows are explicitly tagged and must never masquerade as exchange data.
-- Large or consecutive outages fail closed.
+- Large outages get one bounded recent-window probe; incomplete data fails closed.
 """
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ MAX_MISSING = 100
 MAX_SYNTHETIC_TOTAL = 8
 MAX_CONSECUTIVE_SYNTHETIC = 2
 PUBLICATION_GRACE_SECONDS = 60
+MAX_RECENT_PROBE_ROWS = 500
 
 _history: dict[str, dict] = {}
 _REQUIRED = ("timestamp", "open", "high", "low", "close", "volume")
@@ -212,6 +213,115 @@ def _regularize_with_synthetic_rows(
     return regular
 
 
+def _validated_recent_rows(rows, *, start: int, end: int, interval: int):
+    """Validate genuine callback rows before any provenance is assigned.
+
+    The callback is the existing Paribu REST reader. Untagged exchange rows are
+    permitted, but explicit synthetic/invalid provenance is never upgraded.
+    """
+    if rows is None or (isinstance(rows, pd.DataFrame) and rows.empty):
+        return pd.DataFrame(columns=list(_REQUIRED))
+    if not isinstance(rows, pd.DataFrame) or not set(_REQUIRED).issubset(rows.columns):
+        raise ValueError("Invalid recent-window candle schema")
+    source = rows.attrs.get("source")
+    if source is not None and str(source).upper() != "PARIBU":
+        raise ValueError("Non-Paribu recent-window source")
+    x = rows.copy()
+    for column in _REQUIRED:
+        x[column] = pd.to_numeric(x[column], errors="coerce")
+    if (x[list(_REQUIRED)].isna().any().any()
+            or x[list(_REQUIRED)].isin([float("inf"), float("-inf")]).any().any()):
+        raise ValueError("Non-finite recent-window OHLCV")
+    if not bool(x["timestamp"].mod(interval).eq(0).all()):
+        raise ValueError("Recent-window candle off UTC grid")
+    x = x[(x["timestamp"] >= start) & (x["timestamp"] <= end)].copy()
+    if "is_authentic" in x.columns and not all(
+        is_bool(value) and bool(value) for value in x["is_authentic"]
+    ):
+        raise ValueError("Inauthentic recent-window candle")
+    if "data_quality" in x.columns and not bool(x["data_quality"].eq("PARIBU").all()):
+        raise ValueError("Invalid recent-window provenance")
+    if (bool((x[["open", "high", "low", "close"]] <= 0).any().any())
+            or bool((x["volume"] < 0).any())):
+        raise ValueError("Invalid recent-window price/volume")
+    if bool(((x["high"] < x[["open", "close"]].max(axis=1))
+             | (x["low"] > x[["open", "close"]].min(axis=1))
+             | (x["low"] > x["high"])).any()):
+        raise ValueError("Invalid recent-window OHLC relationship")
+    return x.loc[:, list(_REQUIRED)].copy()
+
+
+def _probe_recent_window(frame, interval, now, request_range, label, minimum, report):
+    """Avoid an unbounded historical repair, never skip authentic validation."""
+    if type(minimum) is not int or not 1 <= minimum <= MAX_RECENT_PROBE_ROWS:
+        raise ValueError("Invalid bounded recent-window size")
+    last = max(int(frame["timestamp"].max()), _expected_last_closed_open(now, interval))
+    start = last - (minimum - 1) * interval
+    expected = set(range(start, last + interval, interval))
+    missing = expected.copy()
+    result = None
+    report.update(
+        recovery_mode="bounded_recent_window", request_budget=1,
+        requested_window_utc=[utc(start), utc(last)],
+        missing_cause="unverified", returned_window_missing=None, recovered=0,
+    )
+    LOGGER.info("CANDLE_REPAIR_START %s", json.dumps(report))
+    try:
+        existing = _validated_recent_rows(frame, start=start, end=last, interval=interval)
+        original = set(int(t) for t in existing["timestamp"])
+        missing = expected - original
+        report["recent_missing_before"] = len(missing)
+        combined = existing
+        if missing:
+            report["requests"] = 1
+            # One normal-sized request, regardless of how long the old outage is.
+            recovered = request_range(start, last + interval)
+            recovered = _validated_recent_rows(recovered, start=start, end=last, interval=interval)
+            if not recovered.empty:
+                combined = pd.concat([existing, recovered], ignore_index=True)
+        missing = expected - set(int(t) for t in combined["timestamp"])
+        if missing:
+            raise ValueError(f"Recent window incomplete: {len(missing)} missing")
+        # Complete timestamp coverage is required BEFORE canonicalization, so
+        # regularization has no missing row to interpolate or forward-fill.
+        result = _regularize_with_synthetic_rows(
+            combined, interval_s=interval, target_last_ts=last, minimum_rows=minimum,
+        )
+        if len(result) != minimum or not bool(result["is_authentic"].all()):
+            raise ValueError("Recent window failed authentic coverage")
+        recovered_count = len(expected - original)
+        report.update(
+            recovered=recovered_count,
+            missing_after=report["missing_before"] - recovered_count,
+            returned_window_missing=0, synthetic_count=0,
+            authentic_tail=len(result), status="authentic_recent_window",
+        )
+    except Exception as exc:
+        result = None
+        report["errors"].append(type(exc).__name__ + ": " + str(exc)[:240])
+        report["returned_window_missing"] = len(missing) if missing else None
+    if report["requests"]:
+        LOGGER.info("CANDLE_REPAIR_ATTEMPT %s", json.dumps({
+            "market": label, "attempt": 1, "recovery_mode": "bounded_recent_window",
+            "result": "success" if result is not None else "incomplete_or_invalid",
+            "returned_window_missing": report["returned_window_missing"],
+            "errors": report["errors"],
+        }))
+    _history[label] = {
+        "observed_at": int(now), "missing_timestamps": sorted(missing),
+        "missing_timestamps_scope": "recent_probe_window", "report": report,
+    }
+    LOGGER.log(logging.INFO if result is not None else logging.WARNING,
+               "CANDLE_REPAIR_RESULT %s", json.dumps(report))
+    if result is None:
+        raise ValueError("Backfill gap limit exceeded: " + json.dumps(report))
+    quality = dict(result.attrs["candle_quality"])
+    result.attrs.update(frame.attrs)
+    result.attrs["backfill"] = report
+    result.attrs["candle_quality"] = quality
+    return result
+
+
 def repair(
     frame: pd.DataFrame,
     interval: int,
@@ -244,8 +354,9 @@ def repair(
             "status": "gap_limit_exceeded",
             "window_utc": [utc(first), utc(last)],
         }
-        LOGGER.warning("CANDLE_REPAIR_RESULT %s", json.dumps(report))
-        raise ValueError("Backfill gap limit exceeded: " + json.dumps(report))
+        return _probe_recent_window(
+            x, interval, now, request_range, label, minimum_contiguous, report,
+        )
 
     expected = set(range(first, last + interval, interval))
     missing = expected - actual
