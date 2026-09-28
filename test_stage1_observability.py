@@ -160,7 +160,7 @@ def test_funnel_line_is_emitted_once_for_synthetic_scan(monkeypatch, tmp_path, c
     assert "state_saved=OK" in lines[0]
     assert lines[1].startswith("[FUNNEL_BEHAVIOR] ")
     assert "universe=1 liq=1 spread=1 book=1 tech=1 data_valid=1 " in lines[1]
-    assert "score=1 candidates=0 confirmed=0 exec=0 limit=0 " in lines[1]
+    assert "score=1 early_watch=0 watch_alerts=0 candidates=0 confirmed=0 exec=0 limit=0 " in lines[1]
 
 
 
