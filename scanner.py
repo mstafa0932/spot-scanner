@@ -64,6 +64,7 @@ TELEGRAM_TOKEN_ENV = "TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
 SHADOW_MODE = os.getenv("SHADOW_MODE", "true").strip().lower() == "true"
 TELEGRAM_READY_ALERTS = os.getenv("TELEGRAM_READY_ALERTS", "false").strip().lower() == "true"
+TELEGRAM_EARLY_WATCH_ALERTS = os.getenv("TELEGRAM_EARLY_WATCH_ALERTS", "false").strip().lower() == "true"
 EXPECTED_RUN_INTERVAL_SECONDS = max(
     300, int(os.getenv("EXPECTED_RUN_INTERVAL_SECONDS", "600"))
 )
@@ -517,6 +518,82 @@ def send_shadow_ready_alert(opportunity: TriggeredOpportunity) -> bool:
     if not TELEGRAM_READY_ALERTS:
         return False
     return send_telegram(format_opportunity(opportunity))
+
+
+def _early_watch_mtf_ok(
+    book: OrderBookSnapshot,
+    tech_15: IndicatorResult,
+    score: int,
+    btc_ok: bool,
+    discovery_reason: str,
+) -> bool:
+    """Informational cohort: all current short-term guards pass except 1h/4h trend."""
+    if not btc_ok or discovery_reason not in {"1h clearly weak", "4h clearly weak"}:
+        return False
+    if book.spread_percent > MAX_SPREAD_PCT or book.imbalance_ratio < MIN_WATCH_IMBALANCE:
+        return False
+    if not (WATCH_RSI_LOW <= tech_15.rsi14 <= WATCH_RSI_HIGH):
+        return False
+    atr_pct = tech_15.atr14 / tech_15.current_close * Decimal("100")
+    if atr_pct < MIN_ATR_PCT or atr_pct > MAX_ATR_PCT:
+        return False
+    fomo_ok, _ = anti_fomo_ok(tech_15)
+    if not fomo_ok:
+        return False
+    if not (tech_15.is_above_ema21 and tech_15.macd_histogram > 0):
+        return False
+    if tech_15.volume_ratio < MIN_WATCH_VOLUME_RATIO:
+        return False
+    if score < DISCOVERY_MIN_SCORE:
+        return False
+    return True
+
+
+def format_early_watch(
+    *,
+    symbol: str,
+    score: int,
+    reason: str,
+    book: OrderBookSnapshot,
+    tech_15: IndicatorResult,
+    btc_reason: str,
+) -> str:
+    return (
+        "👀 <b>PARIBU — EARLY WATCH / مراقبة مبكرة</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        f"🪙 <b>{html.escape(symbol)}</b>\n"
+        f"⭐ <b>الدرجة الحالية:</b> {score}/100\n"
+        f"⏳ <b>سبب عدم READY:</b> {html.escape(reason)}\n"
+        f"• Spread: {book.spread_percent:.2f}%\n"
+        f"• Order Book: {book.imbalance_ratio:.2f}x\n"
+        f"• Volume Ratio 15m: {tech_15.volume_ratio:.2f}x\n"
+        f"• RSI 15m: {tech_15.rsi14:.1f}\n"
+        f"• حركة آخر 3 شموع: {tech_15.recent_return_3:+.2f}%\n"
+        f"₿ <b>BTC:</b> {html.escape(btc_reason)}\n\n"
+        "⚠️ <b>ليست توصية دخول ولا READY.</b>\n"
+        "انتظر فقط رسالة READY المؤكدة 2/2 قبل أي تنفيذ يدوي."
+    )
+
+
+def send_early_watch_alert(
+    *,
+    symbol: str,
+    score: int,
+    reason: str,
+    book: OrderBookSnapshot,
+    tech_15: IndicatorResult,
+    btc_reason: str,
+) -> bool:
+    if not TELEGRAM_EARLY_WATCH_ALERTS:
+        return False
+    return send_telegram(format_early_watch(
+        symbol=symbol,
+        score=score,
+        reason=reason,
+        book=book,
+        tech_15=tech_15,
+        btc_reason=btc_reason,
+    ))
 
 
 # ---------------------------------------------------------------------------
@@ -1308,6 +1385,7 @@ def run_scanner() -> None:
                    "research_cohort": cohort["id"], "code_sha": os.getenv("GITHUB_SHA"),
                    "run_id": os.getenv("GITHUB_RUN_ID"), "transitions": []}
     funnel = {"book_approved": 0, "data_valid": 0, "discovery_passed": 0,
+              "early_watch": 0, "early_watch_alerts": 0,
               "confirmed": 0, "limit_simulated": 0}
     obs = {"liq": 0, "spread": 0, "book": 0, "tech": 0, "score": 0, "exec": 0}
     candle_stats = {"complete": 0, "synthetic": 0, "error": 0}
@@ -1318,6 +1396,13 @@ def run_scanner() -> None:
         diagnostics["symbols"][symbol] = decision
         diagnostics["transitions"].append({"symbol": symbol, **decision})
         LOGGER.info("Scan decision | %s | %s | %s", symbol, stage, reason)
+        if metrics and stage in {"book", "discovery", "trigger", "execution", "risk"}:
+            LOGGER.info(
+                "Scan metrics | %s | %s | %s",
+                symbol,
+                stage,
+                json.dumps(metrics, sort_keys=True, default=str, separators=(",", ":")),
+            )
 
     def finish_diagnostics(status):
         diagnostics["status"] = status
@@ -1521,6 +1606,50 @@ def run_scanner() -> None:
         )
         if not ok:
             note(ticker.symbol, "discovery", discovery_reason, **indicator_metrics)
+            if _early_watch_mtf_ok(book, tech_15, score, btc_ok, discovery_reason):
+                funnel["early_watch"] += 1
+                recorded = record_near_miss(
+                    state,
+                    symbol=ticker.symbol,
+                    gate="EARLY_WATCH_MTF",
+                    reason=discovery_reason,
+                    reference_price=book.best_ask,
+                    score=score,
+                    spread_pct=book.spread_percent,
+                    imbalance=book.imbalance_ratio,
+                    rsi_15m=tech_15.rsi14,
+                    volume_ratio_15m=tech_15.volume_ratio,
+                )
+                enqueue_near_miss(
+                    state,
+                    symbol=ticker.symbol,
+                    rejected_price=book.best_ask,
+                    rejected_stage="early_watch_mtf:" + discovery_reason.replace(" ", "_"),
+                    now=now,
+                )
+                if recorded:
+                    sent_watch = send_early_watch_alert(
+                        symbol=ticker.symbol,
+                        score=score,
+                        reason=discovery_reason,
+                        book=book,
+                        tech_15=tech_15,
+                        btc_reason=btc_reason,
+                    )
+                    if sent_watch:
+                        funnel["early_watch_alerts"] += 1
+                    LOGGER.info(
+                        "EARLY_WATCH | %s | reason=%s | score=%d | spread=%s | imbalance=%s | "
+                        "volume_ratio=%s | rsi=%s | sent=%s",
+                        ticker.symbol,
+                        discovery_reason,
+                        score,
+                        book.spread_percent,
+                        book.imbalance_ratio,
+                        tech_15.volume_ratio,
+                        tech_15.rsi14,
+                        sent_watch,
+                    )
             continue
 
         note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
@@ -1802,6 +1931,8 @@ def run_scanner() -> None:
         "funnel": {
             "universe": len(snapshot), "liq": obs["liq"], "spread": obs["spread"],
             "book": obs["book"], "tech": obs["tech"], "score": obs["score"],
+            "early_watch": funnel["early_watch"],
+            "early_watch_alerts": funnel["early_watch_alerts"],
             "candidates": len(discovered), "confirmed": funnel["confirmed"],
             "exec": obs["exec"], "limit": funnel["limit_simulated"],
         },
@@ -1827,8 +1958,9 @@ def run_scanner() -> None:
         "[FUNNEL_BEHAVIOR] "
         f"run_id={_run_id()} universe={len(snapshot)} liq={obs['liq']} spread={obs['spread']} "
         f"book={obs['book']} tech={obs['tech']} data_valid={funnel['data_valid']} "
-        f"score={obs['score']} candidates={len(discovered)} confirmed={funnel['confirmed']} "
-        f"exec={obs['exec']} limit={funnel['limit_simulated']} "
+        f"score={obs['score']} early_watch={funnel['early_watch']} "
+        f"watch_alerts={funnel['early_watch_alerts']} candidates={len(discovered)} "
+        f"confirmed={funnel['confirmed']} exec={obs['exec']} limit={funnel['limit_simulated']} "
         f"stage_drops={json.dumps(stage_drops, sort_keys=True, separators=(',', ':'))}",
         flush=True,
     )
