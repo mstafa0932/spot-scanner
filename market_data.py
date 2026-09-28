@@ -56,6 +56,11 @@ class ParibuDataError(Exception):
 class ParibuHTTPError(ParibuDataError):
     """HTTP/network/data endpoint failure."""
 
+    def __init__(self, message: str, *, status_code=None, retry_after=None):
+        super().__init__(message)
+        self.status_code = status_code
+        self.retry_after = retry_after
+
 
 class ParibuSchemaError(ParibuDataError):
     """Unexpected Paribu JSON structure."""
@@ -138,6 +143,8 @@ SESSION = _make_session()
 BACKFILL_SESSION = _make_session()
 BACKFILL_SESSION.mount("https://", HTTPAdapter(max_retries=0))
 BACKFILL_SESSION.mount("http://", HTTPAdapter(max_retries=0))
+_BACKFILL_RATE_LIMITED = False
+_BACKFILL_RETRY_AFTER = None
 
 
 def get_json(url: str, params: Optional[dict[str, Any]] = None, *, _session=None) -> Any:
@@ -152,7 +159,9 @@ def get_json(url: str, params: Optional[dict[str, Any]] = None, *, _session=None
 
     if response.status_code != 200:
         raise ParibuHTTPError(
-            f"HTTP {response.status_code} from {url}: {response.text[:300]}"
+            f"HTTP {response.status_code} from {url}: {response.text[:300]}",
+            status_code=response.status_code,
+            retry_after=response.headers.get("Retry-After"),
         )
 
     try:
@@ -499,6 +508,40 @@ def validate_candles(df: pd.DataFrame, resolution: str, *, require_history: bool
     return x
 
 
+def _request_backfill_json(params: dict[str, Any]) -> Any:
+    """Abort further targeted backfill HTTP calls for this scanner process after 429."""
+    global _BACKFILL_RATE_LIMITED, _BACKFILL_RETRY_AFTER
+    if _BACKFILL_RATE_LIMITED:
+        raise ParibuHTTPError(
+            "HTTP 429 backfill blocked for remainder of scanner cycle",
+            status_code=429,
+            retry_after=_BACKFILL_RETRY_AFTER,
+        )
+    try:
+        return get_json(
+            PARIBU_CHART_HISTORY_URL,
+            _session=BACKFILL_SESSION,
+            params=params,
+        )
+    except ParibuHTTPError as exc:
+        if exc.status_code == 429:
+            _BACKFILL_RATE_LIMITED = True
+            _BACKFILL_RETRY_AFTER = exc.retry_after
+        raise
+
+
+def _tag_paribu_recovery_rows(rows: pd.DataFrame, resolution: str) -> pd.DataFrame:
+    tagged = rows.copy()
+    tagged["is_authentic"] = True
+    tagged["data_quality"] = "PARIBU"
+    tagged.attrs.update(
+        source="PARIBU",
+        provider="Paribu",
+        resolution=str(resolution).lower(),
+    )
+    return tagged
+
+
 def fetch_candles(
     symbol: str,
     resolution: str = "15m",
@@ -545,12 +588,16 @@ def fetch_candles(
     prepared = validate_candles(raw, resolution, require_history=False)
     if str(resolution).strip().lower() != "1d":
         def request_range(start, end):
-            recovered_payload = get_json(PARIBU_CHART_HISTORY_URL, _session=BACKFILL_SESSION, params={
+            recovered_payload = _request_backfill_json({
                 "type": "advanced", "symbol": normalized, "resolution": chart_resolution,
                 "from": start, "to": end,
             })
-            return validate_candles(_parse_candle_payload(recovered_payload),
-                                    resolution, require_history=False)
+            recovered = validate_candles(
+                _parse_candle_payload(recovered_payload),
+                resolution,
+                require_history=False,
+            )
+            return _tag_paribu_recovery_rows(recovered, resolution)
         try:
             prepared = repair(prepared, interval_seconds, end_s, request_range,
                               normalized + ":" + resolution,
