@@ -30,6 +30,19 @@ _history: dict[str, dict] = {}
 _REQUIRED = ("timestamp", "open", "high", "low", "close", "volume")
 
 
+class RecoveryProvenanceError(ValueError):
+    """Recovered rows failed the explicit Paribu authenticity contract."""
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    message = str(exc)
+    return (
+        getattr(exc, "status_code", None) == 429
+        or "429" in message
+        or "too many requests" in message.lower()
+    )
+
+
 def bind_history(state: dict) -> None:
     """Reuse scanner_state.json persistence; no transient repair state."""
     global _history
@@ -251,6 +264,40 @@ def _validated_recent_rows(rows, *, start: int, end: int, interval: int):
     return x.loc[:, list(_REQUIRED)].copy()
 
 
+def _validated_recovery_rows(rows, *, start: int, end: int, interval: int):
+    """Require explicit Paribu provenance for targeted recovery callbacks."""
+    if rows is None or (isinstance(rows, pd.DataFrame) and rows.empty):
+        return pd.DataFrame(columns=list(_REQUIRED))
+    if not isinstance(rows, pd.DataFrame):
+        raise RecoveryProvenanceError("Recovered candle payload is not a DataFrame")
+    if str(rows.attrs.get("source", "")).upper() != "PARIBU":
+        raise RecoveryProvenanceError("Non-Paribu recovered candle source")
+    if "is_authentic" not in rows.columns or "data_quality" not in rows.columns:
+        raise RecoveryProvenanceError("Recovered candle provenance is missing")
+    if not all(is_bool(value) and bool(value) for value in rows["is_authentic"]):
+        raise RecoveryProvenanceError("Recovered candle is not authentic")
+    if not bool(rows["data_quality"].eq("PARIBU").all()):
+        raise RecoveryProvenanceError("Recovered candle data_quality is not PARIBU")
+    return _validated_recent_rows(rows, start=start, end=end, interval=interval)
+
+
+def _persist_failure(label: str, now: int, missing, report: dict, exc: Exception) -> None:
+    report.update(
+        recovered=report.get("missing_before", len(missing)) - len(missing),
+        missing_after_real_recovery=len(missing),
+        missing_after=len(missing),
+        status="failed_closed",
+        failure_type=type(exc).__name__,
+        failure_detail=str(exc)[:240],
+    )
+    _history[label] = {
+        "observed_at": int(now),
+        "missing_timestamps": sorted(missing),
+        "report": report,
+    }
+    LOGGER.warning("CANDLE_REPAIR_RESULT %s", json.dumps(report))
+
+
 def _probe_recent_window(frame, interval, now, request_range, label, minimum, report):
     """Avoid an unbounded historical repair, never skip authentic validation."""
     if type(minimum) is not int or not 1 <= minimum <= MAX_RECENT_PROBE_ROWS:
@@ -272,11 +319,41 @@ def _probe_recent_window(frame, interval, now, request_range, label, minimum, re
         missing = expected - original
         report["recent_missing_before"] = len(missing)
         combined = existing
-        if missing:
+
+        previous = _history.get(label)
+        previous_missing = (
+            set(previous.get("missing_timestamps", []))
+            if isinstance(previous, dict)
+            and previous.get("missing_timestamps_scope") == "recent_probe_window"
+            else set()
+        )
+        previous_report = previous.get("report", {}) if isinstance(previous, dict) else {}
+        previous_attempted = (
+            int(previous_report.get("requests", 0) or 0) > 0
+            or previous_report.get("recovery_skipped_reason")
+               == "unchanged_recent_gap_fingerprint"
+        )
+        same_unrecovered_recent_gap = (
+            bool(missing)
+            and missing == previous_missing
+            and int(previous_report.get("recovered", 0) or 0) == 0
+            and previous_attempted
+        )
+        if same_unrecovered_recent_gap:
+            report["recovery_skipped_reason"] = "unchanged_recent_gap_fingerprint"
+            LOGGER.info("CANDLE_REPAIR_NEGATIVE_CACHE %s", json.dumps({
+                "market": label,
+                "missing": len(missing),
+                "reason": "unchanged_recent_gap_fingerprint",
+            }))
+
+        if missing and not same_unrecovered_recent_gap:
             report["requests"] = 1
             # One normal-sized request, regardless of how long the old outage is.
             recovered = request_range(start, last + interval)
-            recovered = _validated_recent_rows(recovered, start=start, end=last, interval=interval)
+            recovered = _validated_recovery_rows(
+                recovered, start=start, end=last, interval=interval
+            )
             if not recovered.empty:
                 combined = pd.concat([existing, recovered], ignore_index=True)
         missing = expected - set(int(t) for t in combined["timestamp"])
@@ -393,7 +470,27 @@ def repair(
     }
     LOGGER.info("CANDLE_REPAIR_START %s", json.dumps(report))
 
+    previous_report = previous.get("report", {}) if isinstance(previous, dict) else {}
+    previous_attempted = (
+        int(previous_report.get("requests", 0) or 0) > 0
+        or previous_report.get("recovery_skipped_reason")
+           == "unchanged_gap_fingerprint"
+    )
+    same_unrecovered_gap = bool(missing) and missing == previous_missing and (
+        int(previous_report.get("recovered", 0) or 0) == 0
+    ) and previous_attempted
+    if same_unrecovered_gap:
+        report["recovery_skipped_reason"] = "unchanged_gap_fingerprint"
+        LOGGER.info("CANDLE_REPAIR_NEGATIVE_CACHE %s", json.dumps({
+            "market": label,
+            "missing": len(missing),
+            "reason": "unchanged_gap_fingerprint",
+        }))
+
+    fatal_recovery_error = None
     for attempt in range(1, MAX_REQUESTS + 1):
+        if same_unrecovered_gap:
+            break
         if not missing:
             break
         start, end = min(missing), max(missing)
@@ -407,10 +504,16 @@ def repair(
         }
         try:
             rows = request_range(start - interval, end + interval)
-            if rows is None or rows.empty:
-                recovered = pd.DataFrame(columns=x.columns)
-            else:
-                recovered = rows[rows["timestamp"].astype("int64").isin(missing)].copy()
+            recovered = _validated_recovery_rows(
+                rows,
+                start=start - interval,
+                end=end + interval,
+                interval=interval,
+            )
+            if not recovered.empty:
+                recovered = recovered[
+                    recovered["timestamp"].astype("int64").isin(missing)
+                ].copy()
 
             if not recovered.empty:
                 x = pd.concat([x, recovered], ignore_index=True)
@@ -436,8 +539,23 @@ def repair(
             error = type(exc).__name__ + ": " + str(exc)[:240]
             report["errors"].append(error)
             detail.update(result="error", error=error)
+            if _is_rate_limit_error(exc):
+                report["rate_limited"] = True
+                retry_after = getattr(exc, "retry_after", None)
+                if retry_after is not None:
+                    report["retry_after"] = str(retry_after)
+                fatal_recovery_error = exc
+            elif isinstance(exc, RecoveryProvenanceError):
+                report["provenance_rejected"] = True
+                fatal_recovery_error = exc
         detail["missing_after"] = len(missing)
         LOGGER.info("CANDLE_REPAIR_ATTEMPT %s", json.dumps(detail))
+        if fatal_recovery_error is not None:
+            break
+
+    if fatal_recovery_error is not None:
+        _persist_failure(label, now, missing, report, fatal_recovery_error)
+        raise ValueError(str(fatal_recovery_error)) from fatal_recovery_error
 
     # If historical gaps remain but the newest contiguous suffix is fully
     # authentic, current, and long enough for every technical indicator,
@@ -483,12 +601,16 @@ def repair(
             LOGGER.info("CANDLE_REPAIR_RESULT %s", json.dumps(report))
             return result
 
-    result = _regularize_with_synthetic_rows(
-        x,
-        interval_s=interval,
-        target_last_ts=last,
-        minimum_rows=minimum_contiguous,
-    )
+    try:
+        result = _regularize_with_synthetic_rows(
+            x,
+            interval_s=interval,
+            target_last_ts=last,
+            minimum_rows=minimum_contiguous,
+        )
+    except Exception as exc:
+        _persist_failure(label, now, missing, report, exc)
+        raise
     quality = result.attrs["candle_quality"]
     report.update(
         recovered=report["missing_before"] - len(missing),

@@ -5,12 +5,17 @@ import pytest
 
 from candle_backfill import bind_history, repair
 import market_data as md
-from test_candle_backfill import NOW, frame, payload
+from test_candle_backfill import NOW, frame, payload, authentic_rows
 
 
 @pytest.fixture(autouse=True)
 def isolated_history():
     bind_history({})
+    md._BACKFILL_RATE_LIMITED = False
+    md._BACKFILL_RETRY_AFTER = None
+    yield
+    md._BACKFILL_RATE_LIMITED = False
+    md._BACKFILL_RETRY_AFTER = None
 
 
 def test_large_gap_gets_one_bounded_genuine_recovery_before_rejection():
@@ -18,7 +23,7 @@ def test_large_gap_gets_one_bounded_genuine_recovery_before_rejection():
     calls = []
     def request(start, end):
         calls.append((start, end))
-        return full[(full.timestamp >= start) & (full.timestamp < end)]
+        return authentic_rows(full[(full.timestamp >= start) & (full.timestamp < end)])
     result = repair(full.drop(range(10, 150)), 900, NOW, request, "SKY:15m")
     assert len(calls) == 1
     assert calls[0] == (int(full.timestamp.iloc[-205]), int(full.timestamp.iloc[-1]) + 900)
@@ -32,6 +37,7 @@ def test_large_gap_gets_one_bounded_genuine_recovery_before_rejection():
 def test_bad_recent_recovery_never_creates_an_authentic_window(kind):
     full = frame()
     rows = full.tail(205).astype({"open": float, "high": float, "low": float, "close": float}).copy()
+    rows = authentic_rows(rows)
     if kind == "empty": rows = rows.iloc[:0]
     elif kind == "partial": rows = rows.drop(100)
     elif kind == "stale": rows.timestamp -= 900 * 300
@@ -61,8 +67,8 @@ def test_transport_failure_is_recorded_without_retry_storm():
     bind_history(state)
     def failed(*args):
         calls.append(args)
-        raise md.ParibuHTTPError("429 test response")
-    with pytest.raises(ValueError, match="Backfill gap limit exceeded"):
+        raise md.ParibuHTTPError("HTTP 429 test response", status_code=429)
+    with pytest.raises(ValueError, match="429|Backfill gap limit exceeded"):
         repair(frame().drop(range(10, 150)), 900, NOW, failed, "AXL:15m")
     assert len(calls) == 1
     assert "429" in state["candle_gap_history"]["AXL:15m"]["report"]["errors"][0]
@@ -105,7 +111,7 @@ def test_old_contiguous_history_does_not_pass_current_window_requirement():
     old.timestamp -= 300 * 900
     calls = []
     with pytest.raises(ValueError, match="Backfill gap limit exceeded"):
-        repair(old, 900, NOW + 61, lambda *a: calls.append(a) or old, "TEST:15m")
+        repair(old, 900, NOW + 61, lambda *a: calls.append(a) or authentic_rows(old), "TEST:15m")
     assert len(calls) == 1
 
 
@@ -115,7 +121,7 @@ def test_unclosed_bar_does_not_replace_missing_last_closed_bar():
     opened.timestamp = NOW
     response = pd.concat([full.iloc[:-1], opened], ignore_index=True)
     with pytest.raises(ValueError, match="Backfill gap limit exceeded"):
-        repair(full.iloc[:140], 900, NOW + 61, lambda *a: response, "TEST:15m")
+        repair(full.iloc[:140], 900, NOW + 61, lambda *a: authentic_rows(response), "TEST:15m")
 
 
 def test_explicit_foreign_exchange_response_is_rejected():
@@ -123,3 +129,25 @@ def test_explicit_foreign_exchange_response_is_rejected():
     rows.attrs["source"] = "OTHER_EXCHANGE"
     with pytest.raises(ValueError, match="Non-Paribu"):
         repair(frame().drop(range(10, 150)), 900, NOW, lambda *a: rows, "TEST:15m")
+
+def test_large_gap_negative_cache_skips_identical_recent_probe():
+    full = frame()
+    state = {}
+    bind_history(state)
+    calls = []
+
+    def request(start, end):
+        calls.append((start, end))
+        return full.iloc[:0]
+
+    with pytest.raises(ValueError, match="Backfill gap limit exceeded"):
+        repair(full.drop(range(10, 150)), 900, NOW, request, "SKY:15m")
+    first_calls = len(calls)
+
+    with pytest.raises(ValueError, match="Backfill gap limit exceeded"):
+        repair(full.drop(range(10, 150)), 900, NOW + 600, request, "SKY:15m")
+
+    assert len(calls) == first_calls
+    report = state["candle_gap_history"]["SKY:15m"]["report"]
+    assert report["recovery_skipped_reason"] == "unchanged_recent_gap_fingerprint"
+
