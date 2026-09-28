@@ -35,10 +35,11 @@ class RecoveryProvenanceError(ValueError):
 
 
 def _is_rate_limit_error(exc: Exception) -> bool:
+    message = str(exc)
     return (
         getattr(exc, "status_code", None) == 429
-        or "HTTP 429" in str(exc)
-        or "too many requests" in str(exc).lower()
+        or "429" in message
+        or "too many requests" in message.lower()
     )
 
 
@@ -270,7 +271,7 @@ def _validated_recovery_rows(rows, *, start: int, end: int, interval: int):
     if not isinstance(rows, pd.DataFrame):
         raise RecoveryProvenanceError("Recovered candle payload is not a DataFrame")
     if str(rows.attrs.get("source", "")).upper() != "PARIBU":
-        raise RecoveryProvenanceError("Recovered candle source is not PARIBU")
+        raise RecoveryProvenanceError("Non-Paribu recovered candle source")
     if "is_authentic" not in rows.columns or "data_quality" not in rows.columns:
         raise RecoveryProvenanceError("Recovered candle provenance is missing")
     if not all(is_bool(value) and bool(value) for value in rows["is_authentic"]):
@@ -318,7 +319,35 @@ def _probe_recent_window(frame, interval, now, request_range, label, minimum, re
         missing = expected - original
         report["recent_missing_before"] = len(missing)
         combined = existing
-        if missing:
+
+        previous = _history.get(label)
+        previous_missing = (
+            set(previous.get("missing_timestamps", []))
+            if isinstance(previous, dict)
+            and previous.get("missing_timestamps_scope") == "recent_probe_window"
+            else set()
+        )
+        previous_report = previous.get("report", {}) if isinstance(previous, dict) else {}
+        previous_attempted = (
+            int(previous_report.get("requests", 0) or 0) > 0
+            or previous_report.get("recovery_skipped_reason")
+               == "unchanged_recent_gap_fingerprint"
+        )
+        same_unrecovered_recent_gap = (
+            bool(missing)
+            and missing == previous_missing
+            and int(previous_report.get("recovered", 0) or 0) == 0
+            and previous_attempted
+        )
+        if same_unrecovered_recent_gap:
+            report["recovery_skipped_reason"] = "unchanged_recent_gap_fingerprint"
+            LOGGER.info("CANDLE_REPAIR_NEGATIVE_CACHE %s", json.dumps({
+                "market": label,
+                "missing": len(missing),
+                "reason": "unchanged_recent_gap_fingerprint",
+            }))
+
+        if missing and not same_unrecovered_recent_gap:
             report["requests"] = 1
             # One normal-sized request, regardless of how long the old outage is.
             recovered = request_range(start, last + interval)
@@ -442,9 +471,14 @@ def repair(
     LOGGER.info("CANDLE_REPAIR_START %s", json.dumps(report))
 
     previous_report = previous.get("report", {}) if isinstance(previous, dict) else {}
+    previous_attempted = (
+        int(previous_report.get("requests", 0) or 0) > 0
+        or previous_report.get("recovery_skipped_reason")
+           == "unchanged_gap_fingerprint"
+    )
     same_unrecovered_gap = bool(missing) and missing == previous_missing and (
         int(previous_report.get("recovered", 0) or 0) == 0
-    ) and int(previous_report.get("requests", 0) or 0) > 0
+    ) and previous_attempted
     if same_unrecovered_gap:
         report["recovery_skipped_reason"] = "unchanged_gap_fingerprint"
         LOGGER.info("CANDLE_REPAIR_NEGATIVE_CACHE %s", json.dumps({
