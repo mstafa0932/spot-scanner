@@ -150,3 +150,63 @@ def test_many_pending_confirmations_leave_hot_and_fair_slots(monkeypatch):
     assert len(meta["confirmation_symbols"]) == 20
     assert len(meta["selected_priority_symbols"]) == 40
     assert [t.symbol for t in ordered[:80]][40:] == [f"M{i}_TL" for i in range(20, 60)]
+
+
+
+def test_early_watch_followup_gets_priority_without_ready_confirmation(monkeypatch):
+    monkeypatch.setattr(scanner, "MAX_ORDERBOOK_MARKETS", 4)
+    items = tickers(hot=0)
+    root = {
+        "coverage_scheduler": {"generation": 2, "orderbooks": {"M7_TL": 2}},
+        "early_watch_followups": {
+            "M7_TL": {
+                "symbol": "M7_TL",
+                "first_seen": 3000,
+                "last_seen": 3610,
+                "last_candle_at": 2700,
+                "last_score": 82,
+                "max_score": 82,
+                "last_reason": "4h clearly weak",
+            }
+        },
+        "watchlist": {},
+        "candidate_lifecycle": {},
+    }
+    cycle = CoverageCycle(root["coverage_scheduler"], [t.symbol for t in items])
+    ordered, meta = scanner._hot_radar_order(items, root, cycle, now=4510)
+    assert ordered[0].symbol == "M7_TL"
+    assert meta["early_watch_symbols"] == ["M7_TL"]
+    assert meta["confirmation_symbols"] == []
+    assert root["watchlist"] == {}
+
+
+def test_early_watch_followup_waits_for_new_closed_candle(monkeypatch):
+    monkeypatch.setattr(scanner, "MAX_ORDERBOOK_MARKETS", 4)
+    items = tickers(hot=0)
+    root = {
+        "coverage_scheduler": {"generation": 2},
+        "early_watch_followups": {
+            "M7_TL": {
+                "last_seen": 3000,
+                "last_candle_at": 2700,
+            }
+        },
+    }
+    cycle = CoverageCycle(root["coverage_scheduler"], [t.symbol for t in items])
+    ordered, meta = scanner._hot_radar_order(items, root, cycle, now=3200)
+    assert "M7_TL" not in meta["early_watch_symbols"]
+    assert ordered[0].symbol == "M0_TL"
+
+
+def test_recorded_early_watch_is_separate_from_ready_confirmation_history():
+    root = scanner._empty_state()
+    scanner._record_early_watch_followup(
+        root,
+        symbol="SYN_TL",
+        now=1000,
+        candle_at=900,
+        score=82,
+        reason="4h clearly weak",
+    )
+    assert root["early_watch_followups"]["SYN_TL"]["last_score"] == 82
+    assert "SYN_TL" not in root["watchlist"]
