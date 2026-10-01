@@ -319,6 +319,7 @@ def _hot_radar_order(
     )
     hot_symbols = [row[4].symbol for row in hot_rows]
     confirmation_symbols = []
+    early_watch_symbols = []
     lifecycles = state.get("candidate_lifecycle", {})
     if not isinstance(lifecycles, dict):
         lifecycles = {}
@@ -339,7 +340,39 @@ def _hot_radar_order(
     confirmation_quota = max(0, min(MAX_ORDERBOOK_MARKETS // 2,
                                     max(1, MAX_ORDERBOOK_MARKETS // 4)))
     confirmation_symbols = confirmation_symbols[:confirmation_quota]
-    priorities = list(dict.fromkeys(confirmation_symbols + hot_symbols))
+
+    # EARLY WATCH is informational, but it must actually be followed. Give a
+    # bounded scheduling priority when a new closed 15m candle can exist.
+    # This never counts as a READY confirmation and never bypasses any gate.
+    followups = _early_watch_followups(state)
+    for ticker in base_order:
+        item = followups.get(ticker.symbol, {})
+        if not universe_eligible(ticker) or not isinstance(item, dict):
+            continue
+        try:
+            last_seen = int(item.get("last_seen", 0) or 0)
+            last_candle_at = int(item.get("last_candle_at", 0) or 0)
+        except (TypeError, ValueError):
+            continue
+        if (
+            last_seen > 0
+            and 0 <= now - last_seen <= WATCHLIST_TTL_SECONDS
+            and last_candle_at > 0
+            and last_candle_at < latest_closed_open
+        ):
+            early_watch_symbols.append(ticker.symbol)
+
+    early_watch_quota = max(
+        0,
+        min(
+            MAX_ORDERBOOK_MARKETS // 2,
+            max(1, MAX_ORDERBOOK_MARKETS // 8),
+        ),
+    )
+    early_watch_symbols = early_watch_symbols[:early_watch_quota]
+    priorities = list(dict.fromkeys(
+        confirmation_symbols + early_watch_symbols + hot_symbols
+    ))
     eligible = [ticker for ticker in tickers if universe_eligible(ticker)]
     ordered, selected_priority = coverage.prioritize(
         eligible, "orderbooks", lambda item: item.symbol,
@@ -369,6 +402,7 @@ def _hot_radar_order(
         "eligible_count": len(hot_symbols),
         "hot_symbols": hot_symbols,
         "confirmation_symbols": confirmation_symbols,
+        "early_watch_symbols": early_watch_symbols,
         "priority_symbols": priorities,
         "selected_priority_symbols": selected_priority,
         "snapshot_comparable": comparable,
@@ -380,6 +414,7 @@ def _empty_state() -> dict[str, Any]:
     return {
         "sent_signals": {},
         "watchlist": {},
+        "early_watch_followups": {},
         "near_misses": [],
         "near_miss_queue": {},
         "active_signals": [],
@@ -406,6 +441,7 @@ def load_state() -> dict[str, Any]:
         if not isinstance(raw, dict):
             raise ValueError("Scanner state must be an object")
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
+                              ("early_watch_followups", dict),
                               ("near_misses", list), ("near_miss_queue", dict),
                               ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
@@ -423,6 +459,8 @@ def load_state() -> dict[str, Any]:
             state["sent_signals"] = raw["sent_signals"]
         if isinstance(raw.get("watchlist"), dict):
             state["watchlist"] = raw["watchlist"]
+        if isinstance(raw.get("early_watch_followups"), dict):
+            state["early_watch_followups"] = raw["early_watch_followups"]
         if isinstance(raw.get("near_misses"), list):
             state["near_misses"] = raw["near_misses"]
         if isinstance(raw.get("near_miss_queue"), dict):
@@ -1026,6 +1064,56 @@ def _watchlist(state: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _early_watch_followups(state: dict[str, Any]) -> dict[str, Any]:
+    """Persist EARLY WATCH follow-up scheduling without granting READY confirmations."""
+    value = state.get("early_watch_followups")
+    if not isinstance(value, dict):
+        value = {}
+        state["early_watch_followups"] = value
+    return value
+
+
+def _record_early_watch_followup(
+    state: dict[str, Any],
+    *,
+    symbol: str,
+    now: int,
+    candle_at: int,
+    score: int,
+    reason: str,
+) -> dict[str, Any]:
+    followups = _early_watch_followups(state)
+    item = followups.get(symbol)
+    if not isinstance(item, dict):
+        item = {
+            "symbol": symbol,
+            "first_seen": int(now),
+            "max_score": int(score),
+        }
+        followups[symbol] = item
+    item["last_seen"] = int(now)
+    item["last_candle_at"] = int(candle_at)
+    item["last_score"] = int(score)
+    item["max_score"] = max(int(item.get("max_score", 0) or 0), int(score))
+    item["last_reason"] = str(reason)
+    return item
+
+
+def _prune_early_watch_followups(state: dict[str, Any], now: int) -> None:
+    followups = _early_watch_followups(state)
+    stale: list[str] = []
+    for symbol, item in followups.items():
+        try:
+            last_seen = int(item.get("last_seen", 0))
+        except (AttributeError, TypeError, ValueError):
+            stale.append(symbol)
+            continue
+        if last_seen <= 0 or now - last_seen > WATCHLIST_TTL_SECONDS:
+            stale.append(symbol)
+    for symbol in stale:
+        followups.pop(symbol, None)
+
+
 def _prune_watchlist(state: dict[str, Any], now: int) -> None:
     watch = _watchlist(state)
     stale: list[str] = []
@@ -1416,6 +1504,7 @@ def run_scanner() -> None:
         state["scan_diagnostics"] = history[-12:]
 
     _prune_watchlist(state, now)
+    _prune_early_watch_followups(state, now)
 
     new_events = update_active_signals(state, now)
     if new_events:
@@ -1608,6 +1697,22 @@ def run_scanner() -> None:
             note(ticker.symbol, "discovery", discovery_reason, **indicator_metrics)
             if _early_watch_mtf_ok(book, tech_15, score, btc_ok, discovery_reason):
                 funnel["early_watch"] += 1
+                _record_early_watch_followup(
+                    state,
+                    symbol=ticker.symbol,
+                    now=now,
+                    candle_at=int(df_15["timestamp"].iloc[-1]),
+                    score=score,
+                    reason=discovery_reason,
+                )
+                _candidate_lifecycle_update(
+                    state,
+                    symbol=ticker.symbol,
+                    score=score,
+                    lifecycle_state="early_watch",
+                    reason=discovery_reason,
+                    now=now,
+                )
                 recorded = record_near_miss(
                     state,
                     symbol=ticker.symbol,
@@ -1653,6 +1758,7 @@ def run_scanner() -> None:
             continue
 
         note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
+        _early_watch_followups(state).pop(ticker.symbol, None)
 
         setup_ok, setup = setup_type(tech_15)
         if not setup_ok:
