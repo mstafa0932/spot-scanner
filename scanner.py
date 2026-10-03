@@ -320,6 +320,7 @@ def _hot_radar_order(
     hot_symbols = [row[4].symbol for row in hot_rows]
     confirmation_symbols = []
     early_watch_symbols = []
+    execution_followup_symbols = []
     lifecycles = state.get("candidate_lifecycle", {})
     if not isinstance(lifecycles, dict):
         lifecycles = {}
@@ -370,8 +371,25 @@ def _hot_radar_order(
         ),
     )
     early_watch_symbols = early_watch_symbols[:early_watch_quota]
+
+    execution_followups = _execution_followups(state)
+    for ticker in base_order:
+        item = execution_followups.get(ticker.symbol, {})
+        if not universe_eligible(ticker) or not isinstance(item, dict):
+            continue
+        try:
+            last_seen = int(item.get("last_seen", 0) or 0)
+        except (TypeError, ValueError):
+            continue
+        if last_seen > 0 and 0 <= now - last_seen <= WATCHLIST_TTL_SECONDS:
+            execution_followup_symbols.append(ticker.symbol)
+    execution_followup_quota = max(
+        0, min(MAX_ORDERBOOK_MARKETS // 2, max(1, MAX_ORDERBOOK_MARKETS // 8))
+    )
+    execution_followup_symbols = execution_followup_symbols[:execution_followup_quota]
+
     priorities = list(dict.fromkeys(
-        confirmation_symbols + early_watch_symbols + hot_symbols
+        confirmation_symbols + early_watch_symbols + execution_followup_symbols + hot_symbols
     ))
     eligible = [ticker for ticker in tickers if universe_eligible(ticker)]
     ordered, selected_priority = coverage.prioritize(
@@ -403,6 +421,7 @@ def _hot_radar_order(
         "hot_symbols": hot_symbols,
         "confirmation_symbols": confirmation_symbols,
         "early_watch_symbols": early_watch_symbols,
+        "execution_followup_symbols": execution_followup_symbols,
         "priority_symbols": priorities,
         "selected_priority_symbols": selected_priority,
         "snapshot_comparable": comparable,
@@ -415,6 +434,7 @@ def _empty_state() -> dict[str, Any]:
         "sent_signals": {},
         "watchlist": {},
         "early_watch_followups": {},
+        "execution_followups": {},
         "near_misses": [],
         "near_miss_queue": {},
         "active_signals": [],
@@ -441,7 +461,7 @@ def load_state() -> dict[str, Any]:
         if not isinstance(raw, dict):
             raise ValueError("Scanner state must be an object")
         for key, expected in (("sent_signals", dict), ("watchlist", dict),
-                              ("early_watch_followups", dict),
+                              ("early_watch_followups", dict), ("execution_followups", dict),
                               ("near_misses", list), ("near_miss_queue", dict),
                               ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
@@ -461,6 +481,8 @@ def load_state() -> dict[str, Any]:
             state["watchlist"] = raw["watchlist"]
         if isinstance(raw.get("early_watch_followups"), dict):
             state["early_watch_followups"] = raw["early_watch_followups"]
+        if isinstance(raw.get("execution_followups"), dict):
+            state["execution_followups"] = raw["execution_followups"]
         if isinstance(raw.get("near_misses"), list):
             state["near_misses"] = raw["near_misses"]
         if isinstance(raw.get("near_miss_queue"), dict):
@@ -1099,6 +1121,37 @@ def _record_early_watch_followup(
     return item
 
 
+def _execution_followups(state: dict[str, Any]) -> dict[str, Any]:
+    value = state.get("execution_followups")
+    if not isinstance(value, dict):
+        value = {}
+        state["execution_followups"] = value
+    return value
+
+
+def _record_execution_followup(
+    state: dict[str, Any], *, symbol: str, now: int, reason: str
+) -> None:
+    item = _execution_followups(state).get(symbol)
+    if not isinstance(item, dict):
+        item = {"symbol": symbol, "first_seen": int(now), "checks": 0}
+        _execution_followups(state)[symbol] = item
+    item["last_seen"] = int(now)
+    item["last_reason"] = str(reason)
+    item["checks"] = int(item.get("checks", 0) or 0) + 1
+
+
+def _prune_execution_followups(state: dict[str, Any], now: int) -> None:
+    followups = _execution_followups(state)
+    for symbol, item in list(followups.items()):
+        try:
+            last_seen = int(item.get("last_seen", 0) or 0)
+        except (AttributeError, TypeError, ValueError):
+            last_seen = 0
+        if last_seen <= 0 or now - last_seen > WATCHLIST_TTL_SECONDS:
+            followups.pop(symbol, None)
+
+
 def _prune_early_watch_followups(state: dict[str, Any], now: int) -> None:
     followups = _early_watch_followups(state)
     stale: list[str] = []
@@ -1505,6 +1558,7 @@ def run_scanner() -> None:
 
     _prune_watchlist(state, now)
     _prune_early_watch_followups(state, now)
+    _prune_execution_followups(state, now)
 
     new_events = update_active_signals(state, now)
     if new_events:
@@ -1576,6 +1630,8 @@ def run_scanner() -> None:
 
         # Cheap rejection before candle calls.
         if book.spread_percent > MAX_SPREAD_PCT:
+            if ticker.symbol in hot_symbol_set or ticker.symbol in _execution_followups(state):
+                _record_execution_followup(state, symbol=ticker.symbol, now=now, reason="spread_too_high")
             note(ticker.symbol, "book", "spread_too_high", spread_pct=str(book.spread_percent))
             enqueue_near_miss(
                 state,
@@ -1586,6 +1642,8 @@ def run_scanner() -> None:
             continue
         obs["spread"] += 1
         if book.imbalance_ratio < MIN_WATCH_IMBALANCE:
+            if ticker.symbol in hot_symbol_set or ticker.symbol in _execution_followups(state):
+                _record_execution_followup(state, symbol=ticker.symbol, now=now, reason="imbalance_too_low")
             note(ticker.symbol, "book", "imbalance_too_low", imbalance=str(book.imbalance_ratio))
             enqueue_near_miss(
                 state,
@@ -1596,6 +1654,7 @@ def run_scanner() -> None:
             continue
 
         obs["book"] += 1
+        _execution_followups(state).pop(ticker.symbol, None)
         book_candidates.append((ticker, book))
         funnel["book_approved"] += 1
 
