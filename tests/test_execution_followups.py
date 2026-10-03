@@ -2,7 +2,7 @@ from scanner import (
     _execution_followups,
     _record_execution_followup,
     _prune_execution_followups,
-    WATCHLIST_TTL_SECONDS,
+    EXECUTION_FOLLOWUP_TTL_SECONDS,
 )
 
 
@@ -27,7 +27,7 @@ def test_execution_followup_expires_at_existing_watch_ttl():
     _record_execution_followup(
         state, symbol="SUPER_TL", now=1000, reason="spread_too_high"
     )
-    _prune_execution_followups(state, 1000 + WATCHLIST_TTL_SECONDS + 1)
+    _prune_execution_followups(state, 1000 + EXECUTION_FOLLOWUP_TTL_SECONDS + 1)
     assert "SUPER_TL" not in _execution_followups(state)
 
 
@@ -38,3 +38,20 @@ def test_execution_followup_state_is_isolated_from_ready_watchlist():
     )
     assert state["watchlist"]["ALT_TL"]["confirmations"] == 1
     assert _execution_followups(state)["ALT_TL"]["checks"] == 1
+
+
+def test_execution_followup_survives_multiple_transient_rejections_then_clears():
+    state = {}
+    _record_execution_followup(
+        state, symbol="STRK_TL", now=1000, reason="spread_too_high"
+    )
+    _record_execution_followup(
+        state, symbol="STRK_TL", now=1600, reason="imbalance_too_low"
+    )
+    _prune_execution_followups(state, 2200)
+    assert "STRK_TL" in _execution_followups(state)
+
+    # Passing the book gate is represented by the scanner removing the
+    # execution-only follow-up before technical evaluation.
+    _execution_followups(state).pop("STRK_TL", None)
+    assert "STRK_TL" not in _execution_followups(state)
