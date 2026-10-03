@@ -99,6 +99,10 @@ WATCHLIST_TTL_SECONDS = max(
     int(os.getenv("WATCHLIST_TTL_SECONDS", str(8 * 60 * 60))),
 )
 WATCH_HISTORY_LIMIT = max(3, int(os.getenv("WATCH_HISTORY_LIMIT", "8")))
+EXECUTION_FOLLOWUP_TTL_SECONDS = max(
+    EXPECTED_RUN_INTERVAL_SECONDS * 2,
+    int(os.getenv("EXECUTION_FOLLOWUP_TTL_SECONDS", str(2 * 60 * 60))),
+)
 
 # No spam: at most one strong alert in this global cooldown window.
 GLOBAL_ALERT_COOLDOWN_SECONDS = max(
@@ -381,7 +385,7 @@ def _hot_radar_order(
             last_seen = int(item.get("last_seen", 0) or 0)
         except (TypeError, ValueError):
             continue
-        if last_seen > 0 and 0 <= now - last_seen <= WATCHLIST_TTL_SECONDS:
+        if last_seen > 0 and 0 <= now - last_seen <= EXECUTION_FOLLOWUP_TTL_SECONDS:
             execution_followup_symbols.append(ticker.symbol)
     execution_followup_quota = max(
         0, min(MAX_ORDERBOOK_MARKETS // 2, max(1, MAX_ORDERBOOK_MARKETS // 8))
@@ -1148,7 +1152,7 @@ def _prune_execution_followups(state: dict[str, Any], now: int) -> None:
             last_seen = int(item.get("last_seen", 0) or 0)
         except (AttributeError, TypeError, ValueError):
             last_seen = 0
-        if last_seen <= 0 or now - last_seen > WATCHLIST_TTL_SECONDS:
+        if last_seen <= 0 or now - last_seen > EXECUTION_FOLLOWUP_TTL_SECONDS:
             followups.pop(symbol, None)
 
 
