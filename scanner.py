@@ -1658,7 +1658,10 @@ def run_scanner() -> None:
             continue
 
         obs["book"] += 1
-        _execution_followups(state).pop(ticker.symbol, None)
+        # Do not clear a transient execution follow-up merely because one book
+        # snapshot recovered. Keep its bounded priority through candle/data
+        # validation; otherwise a temporary synthetic-candle failure can erase
+        # a correctly detected hot candidate before the next scan.
         book_candidates.append((ticker, book))
         funnel["book_approved"] += 1
 
@@ -1726,6 +1729,11 @@ def run_scanner() -> None:
 
         funnel["data_valid"] += 1
         candle_stats["complete"] += 1
+
+        # The candidate has now recovered through BOTH execution and authentic
+        # market-data gates. It may leave execution follow-up safely; all
+        # strategy/trigger gates below still apply normally.
+        _execution_followups(state).pop(ticker.symbol, None)
 
         # Collect existing data only. Evaluate AFTER the normal alert path, with
         # no extra requests or interference with entry thresholds/cooldowns.
@@ -1895,6 +1903,18 @@ def run_scanner() -> None:
                     symbol=candidate.symbol,
                     rejected_price=candidate.book.best_ask,
                     rejected_stage="score_70_79",
+                )
+                # A near-threshold trigger is not dead. Re-evaluate it on the
+                # next closed 15m candle with bounded EARLY-WATCH priority.
+                # This does NOT lower ALERT_MIN_SCORE and does NOT count as a
+                # READY confirmation.
+                _record_early_watch_followup(
+                    state,
+                    symbol=candidate.symbol,
+                    now=now,
+                    candle_at=candidate.candle_at,
+                    score=candidate.score,
+                    reason=trigger_reason,
                 )
             continue
 
