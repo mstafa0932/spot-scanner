@@ -114,7 +114,7 @@ SYMBOL_ALERT_COOLDOWN_SECONDS = max(
     int(os.getenv("SYMBOL_ALERT_COOLDOWN_SECONDS", str(12 * 60 * 60))),
 )
 MAX_DAILY_ALERTS = max(1, min(3, int(os.getenv("MAX_DAILY_ALERTS", "3"))))
-RISK_BUDGET_PCT = Decimal(os.getenv("RISK_BUDGET_PCT", "2.00"))
+RISK_BUDGET_PCT = Decimal(os.getenv("RISK_BUDGET_PCT", "1.00"))
 
 # Anti-FOMO
 MAX_RETURN_3 = Decimal(os.getenv("MAX_RETURN_3", "3.20"))
@@ -382,10 +382,16 @@ def _hot_radar_order(
         if not universe_eligible(ticker) or not isinstance(item, dict):
             continue
         try:
+            first_seen = int(item.get("first_seen", 0) or 0)
             last_seen = int(item.get("last_seen", 0) or 0)
+            started_at = first_seen or last_seen
         except (TypeError, ValueError):
             continue
-        if last_seen > 0 and 0 <= now - last_seen <= EXECUTION_FOLLOWUP_TTL_SECONDS:
+        if (
+            started_at > 0
+            and last_seen > 0
+            and 0 <= now - started_at <= EXECUTION_FOLLOWUP_TTL_SECONDS
+        ):
             execution_followup_symbols.append(ticker.symbol)
     execution_followup_quota = max(
         0, min(MAX_ORDERBOOK_MARKETS // 2, max(1, MAX_ORDERBOOK_MARKETS // 8))
@@ -1185,10 +1191,14 @@ def _prune_execution_followups(state: dict[str, Any], now: int) -> None:
     followups = _execution_followups(state)
     for symbol, item in list(followups.items()):
         try:
+            # TTL is a fixed episode lifetime. Repeated transient rejections
+            # must not renew it forever and monopolize the priority budget.
+            first_seen = int(item.get("first_seen", 0) or 0)
             last_seen = int(item.get("last_seen", 0) or 0)
+            started_at = first_seen or last_seen
         except (AttributeError, TypeError, ValueError):
-            last_seen = 0
-        if last_seen <= 0 or now - last_seen > EXECUTION_FOLLOWUP_TTL_SECONDS:
+            started_at = 0
+        if started_at <= 0 or now - started_at > EXECUTION_FOLLOWUP_TTL_SECONDS:
             followups.pop(symbol, None)
 
 
