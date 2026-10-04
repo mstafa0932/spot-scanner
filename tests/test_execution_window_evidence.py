@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from scanner import _execution_followups, _record_execution_followup
+from scanner import (\n    EXECUTION_FOLLOWUP_TTL_SECONDS,\n    _execution_followups,\n    _prune_execution_followups,\n    _record_execution_followup,\n)
 
 
 def test_execution_followup_keeps_bounded_forensic_history():
@@ -38,3 +38,41 @@ def test_execution_journal_does_not_create_ready_confirmation():
     )
     assert state["watchlist"] == {}
     assert _execution_followups(state)["ORCA_TL"]["last_reason"] == "spread_too_high"
+
+
+def test_execution_followup_ttl_is_not_renewed_by_rejections():
+    state = {"execution_followups": {}}
+    _record_execution_followup(
+        state, symbol="BAT_TL", now=1000, reason="imbalance_too_low"
+    )
+    # A rejection near the end of the window updates last_seen but must not
+    # restart the episode lifetime.
+    _record_execution_followup(
+        state,
+        symbol="BAT_TL",
+        now=1000 + EXECUTION_FOLLOWUP_TTL_SECONDS - 1,
+        reason="spread_too_high",
+    )
+    _prune_execution_followups(
+        state, 1000 + EXECUTION_FOLLOWUP_TTL_SECONDS + 1
+    )
+    assert "BAT_TL" not in _execution_followups(state)
+
+
+def test_legacy_followup_without_first_seen_uses_last_seen_once():
+    state = {
+        "execution_followups": {
+            "AKT_TL": {
+                "symbol": "AKT_TL",
+                "last_seen": 2000,
+                "last_reason": "spread_too_high",
+                "checks": 3,
+            }
+        }
+    }
+    _prune_execution_followups(state, 2001)
+    assert "AKT_TL" in _execution_followups(state)
+    _prune_execution_followups(
+        state, 2000 + EXECUTION_FOLLOWUP_TTL_SECONDS + 1
+    )
+    assert "AKT_TL" not in _execution_followups(state)
