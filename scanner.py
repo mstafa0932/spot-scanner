@@ -45,6 +45,7 @@ from candle_backfill import bind_history, recent_authentic
 from coverage_scheduler import CoverageCycle
 from research_cohort import ensure_cohort
 from risk_engine import build_risk_plan, build_risk_plan_result
+from episode_journal import record_episode_event
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -457,6 +458,7 @@ def _empty_state() -> dict[str, Any]:
         "coverage_scheduler": {},
         "ticker_radar": {},
         "candidate_lifecycle": {},
+        "candidate_episodes": {},
         "directive_009_runs": [],
     }
 
@@ -479,7 +481,7 @@ def load_state() -> dict[str, Any]:
                               ("coverage_scheduler", dict), ("ticker_radar", dict),
                               ("research_cohort", dict),
                               ("research_cohort_history", list), ("candidate_lifecycle", dict),
-                              ("directive_009_runs", list)):
+                              ("candidate_episodes", dict), ("directive_009_runs", list)):
             if key in raw and not isinstance(raw[key], expected):
                 raise ValueError("Invalid state field: " + key)
 
@@ -512,7 +514,7 @@ def load_state() -> dict[str, Any]:
         if isinstance(raw.get("ticker_radar"), dict):
             state["ticker_radar"] = raw["ticker_radar"]
         for key in ("research_cohort", "research_cohort_history", "execution_research",
-                    "candidate_lifecycle", "directive_009_runs"):
+                    "candidate_lifecycle", "candidate_episodes", "directive_009_runs"):
             if key in raw:
                 state[key] = raw[key]
         # Research state is isolated from trading signal/watchlist state.
@@ -1583,9 +1585,14 @@ def run_scanner() -> None:
     observations = []
 
     def note(symbol, stage, reason, **metrics):
-        decision = {"stage": stage, "reason": reason, "observed_at": int(time.time()), **metrics}
+        observed_at = int(time.time())
+        decision = {"stage": stage, "reason": reason, "observed_at": observed_at, **metrics}
         diagnostics["symbols"][symbol] = decision
         diagnostics["transitions"].append({"symbol": symbol, **decision})
+        record_episode_event(
+            state, symbol=symbol, stage=stage, reason=reason,
+            observed_at=observed_at, run_id=_run_id(), metrics=metrics,
+        )
         LOGGER.info("Scan decision | %s | %s | %s", symbol, stage, reason)
         if metrics and stage in {"book", "discovery", "trigger", "execution", "risk"}:
             LOGGER.info(
@@ -1647,6 +1654,13 @@ def run_scanner() -> None:
     hot_symbol_set = set(hot_radar["hot_symbols"])
     hot_orderbook_selected = 0
     book_candidates = []
+    hot_metrics = state.get("ticker_radar", {}).get("hot_metrics", {})
+    for hot_symbol in hot_radar["hot_symbols"]:
+        record_episode_event(
+            state, symbol=hot_symbol, stage="radar", reason="hot_radar_detected",
+            observed_at=now, run_id=_run_id(),
+            metrics=hot_metrics.get(hot_symbol, {}) if isinstance(hot_metrics, dict) else {},
+        )
 
     # Pre-fill so symbols beyond capacity are not confused with rejected setups.
     for ticker in tickers:
@@ -1837,6 +1851,20 @@ def run_scanner() -> None:
                     lifecycle_state="early_watch",
                     reason=discovery_reason,
                     now=now,
+                )
+                record_episode_event(
+                    state, symbol=ticker.symbol, stage="early_watch",
+                    reason=discovery_reason, observed_at=now, run_id=_run_id(),
+                    metrics={
+                        "score": score, "price": str(book.best_ask),
+                        "spread_pct": str(book.spread_percent),
+                        "imbalance": str(book.imbalance_ratio),
+                        "rsi": str(tech_15.rsi14),
+                        "volume_ratio": str(tech_15.volume_ratio),
+                        "return_3": str(tech_15.recent_return_3),
+                        "closed_candle_at": int(df_15["timestamp"].iloc[-1]),
+                        "btc_ok": bool(btc_ok), "btc_reason": btc_reason,
+                    },
                 )
                 recorded = record_near_miss(
                     state,
