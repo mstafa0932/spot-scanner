@@ -114,7 +114,7 @@ SYMBOL_ALERT_COOLDOWN_SECONDS = max(
     int(os.getenv("SYMBOL_ALERT_COOLDOWN_SECONDS", str(12 * 60 * 60))),
 )
 MAX_DAILY_ALERTS = max(1, min(3, int(os.getenv("MAX_DAILY_ALERTS", "3"))))
-RISK_BUDGET_PCT = Decimal(os.getenv("RISK_BUDGET_PCT", "2.00"))
+RISK_BUDGET_PCT = Decimal(os.getenv("RISK_BUDGET_PCT", "1.00"))
 
 # Anti-FOMO
 MAX_RETURN_3 = Decimal(os.getenv("MAX_RETURN_3", "3.20"))
@@ -382,10 +382,16 @@ def _hot_radar_order(
         if not universe_eligible(ticker) or not isinstance(item, dict):
             continue
         try:
+            first_seen = int(item.get("first_seen", 0) or 0)
             last_seen = int(item.get("last_seen", 0) or 0)
+            started_at = first_seen or last_seen
         except (TypeError, ValueError):
             continue
-        if last_seen > 0 and 0 <= now - last_seen <= EXECUTION_FOLLOWUP_TTL_SECONDS:
+        if (
+            started_at > 0
+            and last_seen > 0
+            and 0 <= now - started_at <= EXECUTION_FOLLOWUP_TTL_SECONDS
+        ):
             execution_followup_symbols.append(ticker.symbol)
     execution_followup_quota = max(
         0, min(MAX_ORDERBOOK_MARKETS // 2, max(1, MAX_ORDERBOOK_MARKETS // 8))
@@ -1134,25 +1140,65 @@ def _execution_followups(state: dict[str, Any]) -> dict[str, Any]:
 
 
 def _record_execution_followup(
-    state: dict[str, Any], *, symbol: str, now: int, reason: str
+    state: dict[str, Any],
+    *,
+    symbol: str,
+    now: int,
+    reason: str,
+    spread_pct: Decimal | None = None,
+    imbalance: Decimal | None = None,
+    best_ask: Decimal | None = None,
 ) -> None:
     item = _execution_followups(state).get(symbol)
     if not isinstance(item, dict):
-        item = {"symbol": symbol, "first_seen": int(now), "checks": 0}
+        item = {
+            "symbol": symbol,
+            "first_seen": int(now),
+            "checks": 0,
+            "reason_counts": {},
+            "history": [],
+        }
         _execution_followups(state)[symbol] = item
+
     item["last_seen"] = int(now)
     item["last_reason"] = str(reason)
     item["checks"] = int(item.get("checks", 0) or 0) + 1
+
+    counts = item.get("reason_counts")
+    if not isinstance(counts, dict):
+        counts = {}
+        item["reason_counts"] = counts
+    counts[str(reason)] = int(counts.get(str(reason), 0) or 0) + 1
+
+    # Keep a bounded forensic trace of the execution window. This is
+    # observability only: it does not relax spread/imbalance/READY gates.
+    history = item.get("history")
+    if not isinstance(history, list):
+        history = []
+        item["history"] = history
+    event = {"at": int(now), "reason": str(reason)}
+    if spread_pct is not None:
+        event["spread_pct"] = str(spread_pct)
+    if imbalance is not None:
+        event["imbalance"] = str(imbalance)
+    if best_ask is not None:
+        event["best_ask"] = str(best_ask)
+    history.append(event)
+    del history[:-12]
 
 
 def _prune_execution_followups(state: dict[str, Any], now: int) -> None:
     followups = _execution_followups(state)
     for symbol, item in list(followups.items()):
         try:
+            # TTL is a fixed episode lifetime. Repeated transient rejections
+            # must not renew it forever and monopolize the priority budget.
+            first_seen = int(item.get("first_seen", 0) or 0)
             last_seen = int(item.get("last_seen", 0) or 0)
+            started_at = first_seen or last_seen
         except (AttributeError, TypeError, ValueError):
-            last_seen = 0
-        if last_seen <= 0 or now - last_seen > EXECUTION_FOLLOWUP_TTL_SECONDS:
+            started_at = 0
+        if started_at <= 0 or now - started_at > EXECUTION_FOLLOWUP_TTL_SECONDS:
             followups.pop(symbol, None)
 
 
@@ -1635,7 +1681,11 @@ def run_scanner() -> None:
         # Cheap rejection before candle calls.
         if book.spread_percent > MAX_SPREAD_PCT:
             if ticker.symbol in hot_symbol_set or ticker.symbol in _execution_followups(state):
-                _record_execution_followup(state, symbol=ticker.symbol, now=now, reason="spread_too_high")
+                _record_execution_followup(
+                    state, symbol=ticker.symbol, now=now, reason="spread_too_high",
+                    spread_pct=book.spread_percent, imbalance=book.imbalance_ratio,
+                    best_ask=book.best_ask,
+                )
             note(ticker.symbol, "book", "spread_too_high", spread_pct=str(book.spread_percent))
             enqueue_near_miss(
                 state,
@@ -1647,7 +1697,11 @@ def run_scanner() -> None:
         obs["spread"] += 1
         if book.imbalance_ratio < MIN_WATCH_IMBALANCE:
             if ticker.symbol in hot_symbol_set or ticker.symbol in _execution_followups(state):
-                _record_execution_followup(state, symbol=ticker.symbol, now=now, reason="imbalance_too_low")
+                _record_execution_followup(
+                    state, symbol=ticker.symbol, now=now, reason="imbalance_too_low",
+                    spread_pct=book.spread_percent, imbalance=book.imbalance_ratio,
+                    best_ask=book.best_ask,
+                )
             note(ticker.symbol, "book", "imbalance_too_low", imbalance=str(book.imbalance_ratio))
             enqueue_near_miss(
                 state,
