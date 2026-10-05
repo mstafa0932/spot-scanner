@@ -1,6 +1,11 @@
 from decimal import Decimal
 
-from scanner import (\n    EXECUTION_FOLLOWUP_TTL_SECONDS,\n    _execution_followups,\n    _prune_execution_followups,\n    _record_execution_followup,\n)
+from scanner import (
+    EXECUTION_FOLLOWUP_TTL_SECONDS,
+    _execution_followups,
+    _prune_execution_followups,
+    _record_execution_followup,
+)
 
 
 def test_execution_followup_keeps_bounded_forensic_history():
