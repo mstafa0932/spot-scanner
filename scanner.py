@@ -1958,10 +1958,14 @@ def run_scanner() -> None:
                     rejected_price=candidate.book.best_ask,
                     rejected_stage="score_70_79",
                 )
-                # A near-threshold trigger is not dead. Re-evaluate it on the
-                # next closed 15m candle with bounded EARLY-WATCH priority.
-                # This does NOT lower ALERT_MIN_SCORE and does NOT count as a
-                # READY confirmation.
+
+            # A candidate that has already cleared the alert score is not dead
+            # merely because a time-sensitive trigger gate is temporarily out
+            # of range (RLC_TL: score 83, then RSI 69.3). Preserve bounded
+            # priority so the next CLOSED 15m candle re-evaluates the full
+            # trigger. This changes scheduling only: no score/RSI/book gate is
+            # relaxed and no READY confirmation is granted here.
+            if candidate.score >= NEAR_MISS_MIN_SCORE:
                 _record_early_watch_followup(
                     state,
                     symbol=candidate.symbol,
