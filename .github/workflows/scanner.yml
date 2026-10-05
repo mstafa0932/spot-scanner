@@ -65,10 +65,24 @@ jobs:
         if: ${{ always() && github.ref == 'refs/heads/main' }}
         shell: bash
         run: |
-          if [ ! -f scanner_state.json ]; then
-            echo "scanner_state.json was not created; nothing to persist."
-            exit 0
+          if [ ! -s scanner_state.json ]; then
+            echo "scanner_state.json is missing or empty; refusing to persist invalid state."
+            exit 1
           fi
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("scanner_state.json")
+          try:
+              state = json.loads(path.read_text(encoding="utf-8"))
+          except Exception as exc:
+              raise SystemExit(f"scanner_state.json is invalid JSON: {exc}")
+          if not isinstance(state, dict) or not state:
+              raise SystemExit("scanner_state.json must be a non-empty JSON object")
+          print(f"Validated scanner_state.json: {path.stat().st_size} bytes")
+          PY
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
