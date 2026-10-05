@@ -1,0 +1,67 @@
+name: Paribu Raw Candle Diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query Paribu chart history read-only
+        shell: python
+        run: |
+          import json, time, urllib.parse, urllib.request
+          from datetime import datetime, timezone
+
+          URL = "https://web.paribu.com/chart/history"
+          HEADERS = {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
+          }
+          intervals = {"15m": ("15", 900), "1h": ("60", 3600), "4h": ("240", 14400)}
+          symbols = ["juv_tl", "rad_tl"]
+          now = int(time.time())
+
+          def extract_ts(payload):
+              if not isinstance(payload, dict):
+                  return []
+              for key in ("t", "time", "timestamp", "timestamps"):
+                  v = payload.get(key)
+                  if isinstance(v, list):
+                      return [int(x) for x in v if isinstance(x, (int, float))]
+              for outer in ("data", "result", "payload"):
+                  v = payload.get(outer)
+                  if isinstance(v, dict):
+                      out = extract_ts(v)
+                      if out: return out
+              return []
+
+          print("symbol|resolution|window|status|bytes|candles|first_ts|last_ts|empty_response")
+          for symbol in symbols:
+              for label, (resolution, seconds) in intervals.items():
+                  for window, start in (("scanner", now - seconds * 300), ("30d", now - 30*86400)):
+                      params = {"type":"advanced","symbol":symbol,"resolution":resolution,"from":start,"to":now}
+                      req = urllib.request.Request(URL+"?"+urllib.parse.urlencode(params), headers=HEADERS)
+                      try:
+                          with urllib.request.urlopen(req, timeout=20) as resp:
+                              raw = resp.read()
+                              status = resp.status
+                          try:
+                              payload = json.loads(raw)
+                              ts = extract_ts(payload)
+                          except Exception:
+                              ts = []
+                          empty = len(raw) == 0 or len(ts) == 0
+                          first = datetime.fromtimestamp(min(ts), timezone.utc).isoformat() if ts else "-"
+                          last = datetime.fromtimestamp(max(ts), timezone.utc).isoformat() if ts else "-"
+                          print(f"{symbol}|{label}|{window}|{status}|{len(raw)}|{len(ts)}|{first}|{last}|{empty}")
+                          if empty:
+                              print("EMPTY_RAW:", raw[:1000].decode("utf-8","replace"))
+                      except Exception as exc:
+                          print(f"{symbol}|{label}|{window}|ERROR|0|0|-|-|True")
+                          print("ERROR:", repr(exc))
