@@ -25,36 +25,179 @@ jobs:
       - name: Dispatch scanner every 10 minutes for 4 hours
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPO: ${{ github.repository }}
         shell: bash
         run: |
-          set -euo pipefail
-
-          echo "[CADENCE] controller_started_at=$(date -u +%FT%TZ)"
-          echo "[CADENCE] planned_dispatches=24 interval_seconds=600"
-
-          for i in $(seq 1 24); do
-            sleep 600
-            dispatched_at=$(date -u +%FT%TZ)
-
-            curl --fail-with-body --silent --show-error \
-              --request POST \
-              --header "Accept: application/vnd.github+json" \
-              --header "Authorization: Bearer ${GH_TOKEN}" \
-              --header "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/${REPO}/actions/workflows/scanner.yml/dispatches" \
-              --data '{"ref":"main"}'
-
-            echo "[CADENCE] dispatch=${i}/24 at=${dispatched_at}"
-          done
-
-          echo "[CADENCE] chaining_successor_at=$(date -u +%FT%TZ)"
-          curl --fail-with-body --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer ${GH_TOKEN}" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${REPO}/actions/workflows/acceptance_cadence_controller.yml/dispatches" \
-            --data '{"ref":"main"}'
-
-          echo "[CADENCE] controller_finished_at=$(date -u +%FT%TZ)"
+          python -u - <<'PY'
+          import datetime as dt
+          import email.utils
+          import json
+          import os
+          import subprocess
+          import tempfile
+          import time
+          from pathlib import Path
+          
+          BASE = 'https://api.github.com/repos/' + os.environ['REPO']
+          TOKEN = os.environ['GH_TOKEN']
+          DISPATCH_DEADLINE = float('inf')
+          
+          
+          def request(method, url, payload=None):
+              remaining = DISPATCH_DEADLINE - time.monotonic()
+              if remaining <= 1:
+                  return 0, {}, '', True
+              limit = min(30, remaining - 1)
+              with tempfile.TemporaryDirectory() as directory:
+                  headers, body = Path(directory) / 'headers', Path(directory) / 'body'
+                  args = ['curl', '--silent', '--show-error', '--connect-timeout', '5',
+                          '--max-time', str(limit), '--request', method, '--dump-header', str(headers),
+                          '--output', str(body), '--write-out', '%{http_code}',
+                          '--header', 'Accept: application/vnd.github+json',
+                          '--header', 'Authorization: Bearer ' + TOKEN,
+                          '--header', 'X-GitHub-Api-Version: 2022-11-28', url]
+                  if payload is not None:
+                      args += ['--data', json.dumps(payload)]
+                  try:
+                      result = subprocess.run(args, capture_output=True, text=True, timeout=limit + 1)
+                  except subprocess.TimeoutExpired:
+                      return 0, {}, '', True
+                  parsed = {}
+                  if headers.exists():
+                      for line in headers.read_text().splitlines():
+                          if ':' in line:
+                              key, value = line.split(':', 1)
+                              parsed[key.lower()] = value.strip()
+                  return (int(result.stdout) if result.stdout.isdigit() else 0, parsed,
+                          body.read_text() if body.exists() else '', result.returncode != 0)
+          
+          
+          def run_ids(workflow):
+              status, _, body, failed = request('GET', BASE + '/actions/workflows/' + workflow +
+                                               '/runs?branch=main&event=workflow_dispatch&per_page=100')
+              if failed or status != 200:
+                  return None
+              try:
+                  return {r['id'] for r in json.loads(body)['workflow_runs']
+                          if r['head_branch'] == 'main' and r['event'] == 'workflow_dispatch'}
+              except (ValueError, KeyError, TypeError):
+                  return None
+          
+          
+          def retry_delay(headers, attempt):
+              value = headers.get('retry-after', '')
+              try:
+                  after = float(value)
+              except ValueError:
+                  try:
+                      after = email.utils.parsedate_to_datetime(value).timestamp() - time.time()
+                  except (ValueError, TypeError, OverflowError):
+                      after = 0
+              return max(5 * 2 ** attempt, after, 0)
+          
+          
+          def dispatch(workflow):
+              global DISPATCH_DEADLINE
+              DISPATCH_DEADLINE = time.monotonic() + 180
+              # No blind resend: keep the baseline across attempts and delayed visibility.
+              baseline = run_ids(workflow)
+              if baseline is None:
+                  print('::error::Cannot establish dispatch baseline; no POST sent', flush=True)
+                  return False
+              for attempt in range(3):
+                  if attempt:
+                      current = run_ids(workflow)
+                      if current is None:
+                          print('::error::Cannot reconcile previous dispatch; no resend', flush=True)
+                          return False
+                      if current - baseline:
+                          print('[CADENCE] dispatch_observed workflow=' + workflow +
+                                ' run_ids=' + str(sorted(current - baseline)), flush=True)
+                          return True
+                  status, headers, _, uncertain = request('POST', BASE + '/actions/workflows/' +
+                                                         workflow + '/dispatches', {'ref': 'main'})
+                  if status == 204 and not uncertain:
+                      print('[CADENCE] dispatch_accepted workflow=' + workflow + ' http=204', flush=True)
+                      return True
+                  transient = uncertain or status in (408, 429, 500, 502, 503, 504) or (
+                      status == 403 and 'retry-after' in headers)
+                  print('[CADENCE] dispatch_failed workflow=' + workflow + ' attempt=' +
+                        str(attempt + 1) + ' http=' + str(status) +
+                        ' uncertain=' + str(uncertain), flush=True)
+                  if transient:
+                      delay = retry_delay(headers, attempt)
+                      if delay + 10 >= DISPATCH_DEADLINE - time.monotonic():
+                          print('::error::Retry-After/backoff exceeds retry budget; recovery required', flush=True)
+                          return False
+                      time.sleep(delay)
+                      for _ in range(3):
+                          if DISPATCH_DEADLINE - time.monotonic() <= 10:
+                              return False
+                          time.sleep(10)
+                          current = run_ids(workflow)
+                          if current is None:
+                              print('::error::Reconciliation unavailable; no resend', flush=True)
+                              return False
+                          if current - baseline:
+                              print('[CADENCE] dispatch_observed workflow=' + workflow +
+                                    ' run_ids=' + str(sorted(current - baseline)), flush=True)
+                              return True
+                  if not transient or attempt == 2:
+                      break
+              return False
+          
+          
+          def notify(workflow):
+              message = ('[CADENCE FAILURE] ' + workflow + ' dispatch unconfirmed. ' +
+                         'Final acceptance reset; existing reliability watch must verify recovery. ' +
+                         'https://github.com/' + os.environ['REPO'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID'])
+              print('::error::' + message, flush=True)
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  summary.write(message + '\n')
+              token, chat = os.environ.get('TELEGRAM_BOT_TOKEN'), os.environ.get('TELEGRAM_CHAT_ID')
+              if token and chat:
+                  args = ['curl', '--silent', '--show-error', '--connect-timeout', '5', '--max-time', '15',
+                          '--fail-with-body', '--request', 'POST',
+                          'https://api.telegram.org/bot' + token + '/sendMessage',
+                          '--data-urlencode', 'chat_id=' + chat, '--data-urlencode', 'text=' + message]
+                  try:
+                      result = subprocess.run(args, capture_output=True, text=True, timeout=20)
+                      delivered = result.returncode == 0 and json.loads(result.stdout).get('ok') is True
+                  except (subprocess.TimeoutExpired, ValueError):
+                      delivered = False
+                  if not delivered:
+                      print('::error::Telegram failure notification not delivered', flush=True)
+          
+          
+          def safe_dispatch(workflow):
+              try:
+                  return dispatch(workflow)
+              except Exception as exc:
+                  print('::error::Dispatch exception: ' + type(exc).__name__, flush=True)
+                  return False
+          
+          
+          def main():
+              print('[CADENCE] controller_started_at=' + dt.datetime.now(dt.timezone.utc).isoformat(), flush=True)
+              failed = False
+              deadline = time.monotonic()
+              try:
+                  for index in range(24):
+                      deadline += 600
+                      time.sleep(max(0, deadline - time.monotonic()))
+                      if not safe_dispatch('scanner.yml'):
+                          failed = True
+                          notify('scanner.yml')
+              finally:
+                  # Chain even after exhausted scanner retries; the concurrency lock is unchanged.
+                  if not safe_dispatch('acceptance_cadence_controller.yml'):
+                      failed = True
+                      notify('acceptance_cadence_controller.yml')
+              return int(failed)
+          
+          
+          if __name__ == '__main__':
+              raise SystemExit(main())
+          PY
