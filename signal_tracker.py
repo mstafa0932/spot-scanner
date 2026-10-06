@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
+import os
 import time
 
 from pandas.api.types import is_bool
@@ -13,7 +14,7 @@ from risk_engine import breakeven_trigger_price, protected_breakeven_stop
 
 MAX_SIGNAL_AGE_SECONDS = 6 * 60 * 60
 SHADOW_ENTRY_TTL_SECONDS = 90 * 60
-RISK_BUDGET_PCT = Decimal("2.00")
+RISK_BUDGET_PCT = Decimal(os.getenv("RISK_BUDGET_PCT", "1.00"))
 CANDLE_SECONDS = 15 * 60
 SIMULATION_VERSION = "ohlc_penetration_v2"
 
