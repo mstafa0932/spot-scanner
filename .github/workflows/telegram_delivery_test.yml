@@ -1,0 +1,41 @@
+name: Telegram Delivery Acceptance Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send clearly labeled test message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import os
+          import json
+          import urllib.parse
+          import urllib.request
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat_id = os.environ["TELEGRAM_CHAT_ID"]
+          data = urllib.parse.urlencode(
+              {
+                  "chat_id": chat_id,
+                  "text": "🧪 اختبار قبول تقني لبوت Paribu — هذه رسالة اختبار فقط وليست توصية تداول.",
+              }
+          ).encode()
+          request = urllib.request.Request(
+              f"https://api.telegram.org/bot{token}/sendMessage", data=data, method="POST"
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              payload = json.load(response)
+          if payload.get("ok") is not True or not payload.get("result", {}).get("message_id"):
+              raise SystemExit("Telegram did not return a documented message_id")
+          print(f"telegram_test_delivered message_id={payload['result']['message_id']}")
+          PY
