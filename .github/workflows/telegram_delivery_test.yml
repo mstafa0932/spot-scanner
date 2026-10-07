@@ -2,6 +2,11 @@ name: Telegram Delivery Acceptance Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/telegram_delivery_test.yml
 
 permissions:
   contents: read
