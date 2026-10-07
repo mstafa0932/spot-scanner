@@ -1784,10 +1784,9 @@ def run_scanner() -> None:
         funnel["data_valid"] += 1
         candle_stats["complete"] += 1
 
-        # The candidate has now recovered through BOTH execution and authentic
-        # market-data gates. It may leave execution follow-up safely; all
-        # strategy/trigger gates below still apply normally.
-        _execution_followups(state).pop(ticker.symbol, None)
+        # Keep an execution follow-up until it hands over to a strategy watch
+        # or passes the final refreshed quote. A preliminary book recovery
+        # must not erase its bounded priority or restart its fixed TTL.
 
         # Collect existing data only. Evaluate AFTER the normal alert path, with
         # no extra requests or interference with entry thresholds/cooldowns.
@@ -1819,6 +1818,7 @@ def run_scanner() -> None:
             ticker, book, tech_15, tech_1h, tech_4h, score
         )
         if not ok:
+            _execution_followups(state).pop(ticker.symbol, None)
             note(ticker.symbol, "discovery", discovery_reason, **indicator_metrics)
             if _early_watch_mtf_ok(book, tech_15, score, btc_ok, discovery_reason):
                 funnel["early_watch"] += 1
@@ -1974,6 +1974,7 @@ def run_scanner() -> None:
                     score=candidate.score,
                     reason=trigger_reason,
                 )
+            _execution_followups(state).pop(candidate.symbol, None)
             continue
 
         if not _global_alert_allowed(state, now, shadow_mode):
@@ -1990,14 +1991,26 @@ def run_scanner() -> None:
         try:
             candidate = replace(candidate, book=get_order_book(candidate.symbol))
         except ParibuDataError:
+            _record_execution_followup(
+                state, symbol=candidate.symbol, now=int(time.time()),
+                reason="fresh_book_unavailable",
+            )
             note(candidate.symbol, "execution", "fresh_book_unavailable")
             continue
         ready, trigger_reason, avg_imbalance, confirmations = trigger_check(
             candidate, item, btc_ok, btc_reason, int(time.time())
         )
         if not ready:
+            _record_execution_followup(
+                state, symbol=candidate.symbol, now=int(time.time()),
+                reason="fresh_book_rejected: " + trigger_reason,
+                spread_pct=candidate.book.spread_percent,
+                imbalance=candidate.book.imbalance_ratio,
+                best_ask=candidate.book.best_ask,
+            )
             note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason)
             continue
+        _execution_followups(state).pop(candidate.symbol, None)
         funnel["confirmed"] += 1
         _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
                                     lifecycle_state="confirmation_2_of_2", reason="READY", now=now)
