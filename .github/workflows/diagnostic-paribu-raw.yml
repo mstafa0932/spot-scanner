@@ -2,6 +2,27 @@ name: Paribu Raw Candle Diagnostic
 
 on:
   workflow_dispatch:
+    inputs:
+      symbol:
+        description: 'Symbol (e.g. CTSI_TL); blank uses legacy JUV/RAD diagnostic'
+        required: false
+        default: ''
+        type: string
+      resolution:
+        description: 'Paribu advanced resolution (15, 60, 240)'
+        required: false
+        default: '15'
+        type: string
+      from_ts:
+        description: 'UTC Unix start timestamp; required with symbol'
+        required: false
+        default: ''
+        type: string
+      to_ts:
+        description: 'UTC Unix end timestamp; required with symbol'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -10,11 +31,16 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      DIAG_SYMBOL: ${{ inputs.symbol }}
+      DIAG_RESOLUTION: ${{ inputs.resolution }}
+      DIAG_FROM_TS: ${{ inputs.from_ts }}
+      DIAG_TO_TS: ${{ inputs.to_ts }}
     steps:
       - name: Query Paribu chart history read-only
         shell: python
         run: |
-          import json, time, urllib.parse, urllib.request
+          import json, os, re, time, urllib.error, urllib.parse, urllib.request
           from datetime import datetime, timezone
 
           URL = "https://web.paribu.com/chart/history"
@@ -23,45 +49,71 @@ jobs:
               "Accept": "application/json",
               "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
           }
-          intervals = {"15m": ("15", 900), "1h": ("60", 3600), "4h": ("240", 14400)}
-          symbols = ["juv_tl", "rad_tl"]
-          now = int(time.time())
+          intervals = {"15": 900, "60": 3600, "240": 14400}
 
           def extract_ts(payload):
-              if not isinstance(payload, dict):
+              if isinstance(payload, dict):
+                  for key in ("t", "time", "timestamp", "timestamps"):
+                      v = payload.get(key)
+                      if isinstance(v, list):
+                          return [int(x) for x in v if isinstance(x, (int, float))]
+                  for outer in ("data", "result", "payload"):
+                      if outer in payload:
+                          out = extract_ts(payload[outer])
+                          if out:
+                              return out
                   return []
-              for key in ("t", "time", "timestamp", "timestamps"):
-                  v = payload.get(key)
-                  if isinstance(v, list):
-                      return [int(x) for x in v if isinstance(x, (int, float))]
-              for outer in ("data", "result", "payload"):
-                  v = payload.get(outer)
-                  if isinstance(v, dict):
-                      out = extract_ts(v)
-                      if out: return out
+              if isinstance(payload, list):
+                  if payload and all(isinstance(row, (list, tuple)) and row and isinstance(row[0], (int, float)) for row in payload):
+                      return [int(row[0]) for row in payload]
+                  return []
               return []
 
+          def query(symbol, resolution, start, end, window):
+              params = {"type": "advanced", "symbol": symbol.lower(), "resolution": resolution, "from": start, "to": end}
+              req = urllib.request.Request(URL + "?" + urllib.parse.urlencode(params), headers=HEADERS)
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as resp:
+                      raw, status = resp.read(), resp.status
+              except urllib.error.HTTPError as exc:
+                  raw, status = exc.read(), exc.code
+              except Exception as exc:
+                  print(f"{symbol}|{resolution}|{window}|NETWORK_ERROR|0|0|-|-|True")
+                  print("ERROR:", repr(exc))
+                  return
+              try:
+                  payload = json.loads(raw)
+                  ts = extract_ts(payload)
+                  parse_error = None
+              except Exception as exc:
+                  ts, parse_error = [], repr(exc)
+              first = datetime.fromtimestamp(min(ts), timezone.utc).isoformat() if ts else "-"
+              last = datetime.fromtimestamp(max(ts), timezone.utc).isoformat() if ts else "-"
+              print(f"{symbol}|{resolution}|{window}|{status}|{len(raw)}|{len(ts)}|{first}|{last}|{not bool(ts)}")
+              print("RAW_PREFIX:", raw[:500].decode("utf-8", "replace"))
+              print("JSON_PARSE_ERROR:", parse_error)
+              print("RETURNED_TIMESTAMPS:", json.dumps(sorted(set(ts))))
+              print("JSON_TOP_LEVEL:", type(payload).__name__ if parse_error is None else "unavailable")
+
+          symbol = os.environ.get("DIAG_SYMBOL", "").strip().upper()
+          resolution = os.environ.get("DIAG_RESOLUTION", "15").strip()
+          from_ts = os.environ.get("DIAG_FROM_TS", "").strip()
+          to_ts = os.environ.get("DIAG_TO_TS", "").strip()
           print("symbol|resolution|window|status|bytes|candles|first_ts|last_ts|empty_response")
-          for symbol in symbols:
-              for label, (resolution, seconds) in intervals.items():
-                  for window, start in (("scanner", now - seconds * 300), ("30d", now - 30*86400)):
-                      params = {"type":"advanced","symbol":symbol,"resolution":resolution,"from":start,"to":now}
-                      req = urllib.request.Request(URL+"?"+urllib.parse.urlencode(params), headers=HEADERS)
-                      try:
-                          with urllib.request.urlopen(req, timeout=20) as resp:
-                              raw = resp.read()
-                              status = resp.status
-                          try:
-                              payload = json.loads(raw)
-                              ts = extract_ts(payload)
-                          except Exception:
-                              ts = []
-                          empty = len(raw) == 0 or len(ts) == 0
-                          first = datetime.fromtimestamp(min(ts), timezone.utc).isoformat() if ts else "-"
-                          last = datetime.fromtimestamp(max(ts), timezone.utc).isoformat() if ts else "-"
-                          print(f"{symbol}|{label}|{window}|{status}|{len(raw)}|{len(ts)}|{first}|{last}|{empty}")
-                          if empty:
-                              print("EMPTY_RAW:", raw[:1000].decode("utf-8","replace"))
-                      except Exception as exc:
-                          print(f"{symbol}|{label}|{window}|ERROR|0|0|-|-|True")
-                          print("ERROR:", repr(exc))
+          if symbol:
+              if not re.fullmatch(r"[A-Z0-9]+_TL", symbol):
+                  raise ValueError("Invalid symbol")
+              if resolution not in intervals:
+                  raise ValueError("Invalid resolution; use 15, 60, or 240")
+              if not (from_ts.isdigit() and to_ts.isdigit()):
+                  raise ValueError("Both from_ts and to_ts are required for a custom symbol")
+              start, end = int(from_ts), int(to_ts)
+              if not (0 < start < end and end - start <= 35 * 86400):
+                  raise ValueError("Invalid or excessive timestamp window")
+              query(symbol, resolution, start, end, "custom")
+          else:
+              now = int(time.time())
+              for legacy_symbol in ("juv_tl", "rad_tl"):
+                  for legacy_resolution, seconds in intervals.items():
+                      for window, start in (("scanner", now - seconds * 300), ("30d", now - 30 * 86400)):
+                          query(legacy_symbol, legacy_resolution, start, now, window)
