@@ -1883,7 +1883,10 @@ def run_scanner() -> None:
             continue
 
         note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
-        _early_watch_followups(state).pop(ticker.symbol, None)
+        # Preserve a prior EARLY WATCH episode through trigger evaluation.
+        # On a temporary rejection below NEAR_MISS_MIN_SCORE, the original
+        # last_seen remains unchanged so the existing TTL still expires it.
+        # No confirmation is granted and no READY gate is bypassed.
 
         setup_ok, setup = setup_type(tech_15)
         if not setup_ok:
@@ -1976,6 +1979,9 @@ def run_scanner() -> None:
                 )
             _execution_followups(state).pop(candidate.symbol, None)
             continue
+
+        # Trigger gates passed; the earlier EARLY WATCH follow-up is complete.
+        _early_watch_followups(state).pop(candidate.symbol, None)
 
         if not _global_alert_allowed(state, now, shadow_mode):
             note(candidate.symbol, "cooldown", "global_limit_or_cooldown")
