@@ -1883,7 +1883,9 @@ def run_scanner() -> None:
             continue
 
         note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
-        _early_watch_followups(state).pop(ticker.symbol, None)
+        # Preserve the bounded follow-up across discovery -> trigger.
+        # A transient trigger rejection must not discard the previous EARLY WATCH.
+        # READY gates and confirmation accounting remain unchanged.
 
         setup_ok, setup = setup_type(tech_15)
         if not setup_ok:
