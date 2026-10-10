@@ -1883,9 +1883,9 @@ def run_scanner() -> None:
             continue
 
         note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
-        # Preserve the bounded follow-up across discovery -> trigger.
-        # A transient trigger rejection must not discard the previous EARLY WATCH.
-        # READY gates and confirmation accounting remain unchanged.
+        # Keep EARLY WATCH follow-up until the bounded TTL expires. The
+        # scheduling path checks for a newly closed candle; no READY gate is
+        # bypassed and no confirmation is granted by this follow-up.
 
         setup_ok, setup = setup_type(tech_15)
         if not setup_ok:
