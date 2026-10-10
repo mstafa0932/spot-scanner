@@ -245,3 +245,19 @@ def test_existing_rlc_fix_keeps_real_trigger_gate_and_distinct_candles(monkeypat
     fourth = scan()
     assert calls["books"][0] == SYMBOL
     assert len(fourth["active_signals"]) == 1
+
+
+def test_early_watch_followup_survives_low_score_trigger_rejection(monkeypatch, tmp_path):
+    """A discovery pass must not silently erase a previously scheduled watch."""
+    clock, calls, scan = pipeline(monkeypatch, tmp_path)
+    initial = scan()
+    original = initial["early_watch_followups"][SYMBOL]
+    original_seen = original["last_seen"]
+    # A low-score trigger rejection should retain the original episode without
+    # renewing its TTL. Use a deterministic trigger gate in this focused test.
+    monkeypatch.setattr(scanner, "NEAR_MISS_MIN_SCORE", 100)
+    clock.update(now=NOW + 900, rsi=D("60"))
+    rejected = scan()
+    assert SYMBOL in rejected["early_watch_followups"]
+    assert rejected["early_watch_followups"][SYMBOL]["last_seen"] == original_seen
+    assert not rejected["active_signals"]
