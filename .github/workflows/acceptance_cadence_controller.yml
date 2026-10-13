@@ -57,7 +57,7 @@ jobs:
                           '--output', str(body), '--write-out', '%{http_code}',
                           '--header', 'Accept: application/vnd.github+json',
                           '--header', 'Authorization: Bearer ' + TOKEN,
-                          '--header', 'X-GitHub-Api-Version: 2022-11-28', url]
+                          '--header', 'X-GitHub-Api-Version: 2026-03-10', url]
                   if payload is not None:
                       args += ['--data', json.dumps(payload)]
                   try:
@@ -116,11 +116,25 @@ jobs:
                           print('[CADENCE] dispatch_observed workflow=' + workflow +
                                 ' run_ids=' + str(sorted(current - baseline)), flush=True)
                           return True
-                  status, headers, _, uncertain = request('POST', BASE + '/actions/workflows/' +
-                                                         workflow + '/dispatches', {'ref': 'main'})
-                  if status == 204 and not uncertain:
-                      print('[CADENCE] dispatch_accepted workflow=' + workflow + ' http=204', flush=True)
-                      return True
+                  status, headers, body, uncertain = request('POST', BASE + '/actions/workflows/' +
+                                                            workflow + '/dispatches', {'ref': 'main'})
+                  if status == 200 and not uncertain:
+                      try:
+                          run = json.loads(body)
+                          run_id = int(run['workflow_run_id'])
+                          if run_id > 0:
+                              print('[CADENCE] dispatch_confirmed workflow=' + workflow +
+                                    ' run_id=' + str(run_id), flush=True)
+                              return True
+                      except (ValueError, KeyError, TypeError):
+                          print('::warning::Dispatch returned 200 without a valid run ID; reconciling', flush=True)
+                          current = run_ids(workflow)
+                          if current is not None and current - baseline:
+                              print('[CADENCE] dispatch_observed workflow=' + workflow +
+                                    ' run_ids=' + str(sorted(current - baseline)), flush=True)
+                              return True
+                          # Avoid duplicate POST when the response was accepted but not identifiable.
+                          return False
                   transient = uncertain or status in (408, 429, 500, 502, 503, 504) or (
                       status == 403 and 'retry-after' in headers)
                   print('[CADENCE] dispatch_failed workflow=' + workflow + ' attempt=' +
