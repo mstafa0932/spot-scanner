@@ -182,12 +182,13 @@ def test_fourth_distinct_gap_can_recover_and_logs_each_attempt(caplog):
 
     def request(*a):
         calls.append(a)
-        return authentic_rows(full) if len(calls) == 4 else full.iloc[:0]
+        return authentic_rows(full.iloc[[100, 110, 120, 130]]) if len(calls) == 4 else full.iloc[:0]
 
     result = repair(full.drop([100, 110, 120, 130]), 900, NOW, request, "BTC")
     assert len(calls) == 4
     assert len(set(calls)) == 4
-    assert result.attrs["backfill"]["status"] == "complete_real"
+    assert result.attrs["backfill"]["status"] == "synthetic_fallback"
+    assert int((~result["is_authentic"]).sum()) == 3
     assert caplog.text.count("CANDLE_REPAIR_ATTEMPT") == 4
 
 
