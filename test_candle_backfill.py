@@ -75,7 +75,7 @@ def test_unresolved_old_gap_uses_tagged_synthetic_fallback(monkeypatch, network_
 
     monkeypatch.setattr(md, "get_json", get)
     result = md.fetch_candles("BTC_TL")
-    assert len(calls) == 5
+    assert len(calls) == 2
     synthetic = result[~result["is_authentic"]]
     assert len(synthetic) == 1
     row = synthetic.iloc[0]
@@ -175,7 +175,7 @@ def test_btc_gate_rejects_old_synthetic_even_if_recent_16_authentic(monkeypatch)
     assert "BTC" in reason
 
 
-def test_fourth_attempt_can_recover_and_logs_each_attempt(caplog):
+def test_fourth_distinct_gap_can_recover_and_logs_each_attempt(caplog):
     caplog.set_level("INFO", logger="paribu_momentum_watcher.candle_backfill")
     full = frame()
     calls = []
@@ -184,8 +184,9 @@ def test_fourth_attempt_can_recover_and_logs_each_attempt(caplog):
         calls.append(a)
         return authentic_rows(full) if len(calls) == 4 else full.iloc[:0]
 
-    result = repair(full.drop(100), 900, NOW, request, "BTC")
+    result = repair(full.drop([100, 110, 120, 130]), 900, NOW, request, "BTC")
     assert len(calls) == 4
+    assert len(set(calls)) == 4
     assert result.attrs["backfill"]["status"] == "complete_real"
     assert caplog.text.count("CANDLE_REPAIR_ATTEMPT") == 4
 
