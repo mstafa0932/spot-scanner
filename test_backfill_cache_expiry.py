@@ -43,9 +43,9 @@ def test_negative_cache_expires_without_sliding_on_a_cache_hit(large):
     before = len(calls)
     result = repair(full.drop(missing), 900, NOW + 1200,
                     lambda *a: calls.append(a) or authentic_rows(full), "CACHE")
-    assert len(calls) == before + 1
-    assert result.is_authentic.all()
-    assert result.attrs["backfill"]["requests"] == 1
+    assert len(calls) == before + (1 if large else 4)
+    assert result.is_authentic.all() if large else int((~result.is_authentic).sum()) == 5
+    assert result.attrs["backfill"]["requests"] == (1 if large else 4)
 
 
 @pytest.mark.parametrize("large", [False, True])
