@@ -519,7 +519,13 @@ def repair(
             break
         if not missing:
             break
-        start, end = min(missing), max(missing)
+        # Query each missing contiguous cluster separately. Repeating the same
+        # wide historical request four times cannot recover omitted exchange
+        # bars and needlessly increases Paribu rate-limit pressure.
+        gap_clusters = spans(missing, interval)
+        if attempt > len(gap_clusters):
+            break
+        start, end = gap_clusters[attempt - 1]
         report["requests"] += 1
         detail = {
             "market": label,
