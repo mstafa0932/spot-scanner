@@ -514,7 +514,8 @@ def repair(
         }))
 
     fatal_recovery_error = None
-    for attempt in range(1, MAX_REQUESTS + 1):
+    recovery_clusters = spans(missing, interval)
+    for attempt in range(1, min(MAX_REQUESTS, len(recovery_clusters)) + 1):
         if same_unrecovered_gap:
             break
         if not missing:
@@ -522,10 +523,9 @@ def repair(
         # Query each missing contiguous cluster separately. Repeating the same
         # wide historical request four times cannot recover omitted exchange
         # bars and needlessly increases Paribu rate-limit pressure.
-        gap_clusters = spans(missing, interval)
-        if attempt > len(gap_clusters):
-            break
-        start, end = gap_clusters[attempt - 1]
+        start, end = recovery_clusters[attempt - 1]
+        if not any(start <= ts <= end for ts in missing):
+            continue
         report["requests"] += 1
         detail = {
             "market": label,
