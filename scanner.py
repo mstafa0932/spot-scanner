@@ -2084,7 +2084,7 @@ def run_scanner() -> None:
             placed_at = int(time.time())
             # Delivery cooldowns track confirmed Telegram acceptance, not paper entries.
             # A failed delivery is retried only after a fresh full READY scan.
-            if telegram_alert_sent:
+            if telegram_alert_sent or not TELEGRAM_READY_ALERTS:
                 state["shadow_last_alert_at"] = placed_at
                 state.setdefault("shadow_daily_alerts", []).append(placed_at)
                 state.setdefault("shadow_sent_signals", {})[candidate.symbol] = placed_at
