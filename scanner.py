@@ -452,6 +452,7 @@ def _empty_state() -> dict[str, Any]:
         "last_alert_at": 0,
         "candle_gap_history": {},
         "shadow_sent_signals": {},
+        "shadow_paper_signals": {},
         "shadow_daily_alerts": [],
         "shadow_last_alert_at": 0,
         "coverage_scheduler": {},
@@ -475,7 +476,7 @@ def load_state() -> dict[str, Any]:
                               ("near_misses", list), ("near_miss_queue", dict),
                               ("active_signals", list),
                               ("daily_alerts", list), ("candle_gap_history", dict),
-                              ("shadow_sent_signals", dict), ("shadow_daily_alerts", list),
+                              ("shadow_sent_signals", dict), ("shadow_paper_signals", dict), ("shadow_daily_alerts", list),
                               ("coverage_scheduler", dict), ("ticker_radar", dict),
                               ("research_cohort", dict),
                               ("research_cohort_history", list), ("candidate_lifecycle", dict),
@@ -505,6 +506,8 @@ def load_state() -> dict[str, Any]:
             state["candle_gap_history"] = raw["candle_gap_history"]
         if isinstance(raw.get("shadow_sent_signals"), dict):
             state["shadow_sent_signals"] = raw["shadow_sent_signals"]
+        if isinstance(raw.get("shadow_paper_signals"), dict):
+            state["shadow_paper_signals"] = raw["shadow_paper_signals"]
         if isinstance(raw.get("shadow_daily_alerts"), list):
             state["shadow_daily_alerts"] = raw["shadow_daily_alerts"]
         if isinstance(raw.get("coverage_scheduler"), dict):
