@@ -280,7 +280,7 @@ def test_failed_shadow_ready_delivery_does_not_consume_alert_cooldown(monkeypatc
     assert first_ready["shadow_sent_signals"] == {}
     assert first_ready["shadow_last_alert_at"] == 0
     assert first_ready["shadow_daily_alerts"] == []
-    assert first_ready["shadow_paper_signals"][SYMBOL] == NOW + 1800
+    assert first_ready["shadow_paper_signals"][SYMBOL] == NOW + 900
     assert len(first_ready["active_signals"]) == 1
 
     # Fresh subsequent scan, not a blind resend of the previous opportunity.
