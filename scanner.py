@@ -576,6 +576,12 @@ def send_telegram(message: str) -> bool:
         if not isinstance(payload, dict) or payload.get("ok") is not True:
             LOGGER.error("Telegram did not confirm delivery")
             return False
+        result = payload.get("result")
+        message_id = result.get("message_id") if isinstance(result, dict) else None
+        if type(message_id) is not int or message_id <= 0:
+            LOGGER.error("Telegram confirmation missing valid message_id")
+            return False
+        LOGGER.info("Telegram accepted message_id=%s", message_id)
         return True
     except requests.RequestException as exc:
         # Request exceptions can include the bot token in their URL.
