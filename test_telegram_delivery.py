@@ -13,8 +13,12 @@ def credentials(monkeypatch):
 
 
 @pytest.mark.parametrize("payload,expected", [
-    ({"ok": True}, True), ({"ok": False}, False),
-    ({}, False), ([], False), ({"ok": "true"}, False),
+    ({"ok": True, "result": {"message_id": 123}}, True),
+    ({"ok": True}, False), ({"ok": True, "result": {}}, False),
+    ({"ok": True, "result": {"message_id": 0}}, False),
+    ({"ok": True, "result": {"message_id": "123"}}, False),
+    ({"ok": True, "result": {"message_id": True}}, False),
+    ({"ok": False}, False), ({}, False), ([], False), ({"ok": "true"}, False),
 ])
 def test_requires_explicit_confirmation(monkeypatch, payload, expected):
     response = Mock(status_code=200)
