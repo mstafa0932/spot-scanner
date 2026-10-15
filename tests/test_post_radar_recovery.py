@@ -283,7 +283,12 @@ def test_failed_shadow_ready_delivery_does_not_consume_alert_cooldown(monkeypatc
     assert first_ready["shadow_paper_signals"][SYMBOL] == NOW + 900
     assert len(first_ready["active_signals"]) == 1
 
-    # Fresh subsequent scan, not a blind resend of the previous opportunity.
-    clock["now"] = NOW + 2700
-    scan()
+    # No blind replay: a new scan must pass the full READY pipeline again.
+    # The already-recorded paper signal prevents another paper entry.
+    clock["now"] = NOW + 1800
+    second = scan()
+    assert len(second["active_signals"]) == 1
+    assert second["shadow_sent_signals"] == {}
+    assert second["shadow_last_alert_at"] == 0
+    assert second["shadow_paper_signals"][SYMBOL] == NOW + 900
     assert len(attempts) >= 1
