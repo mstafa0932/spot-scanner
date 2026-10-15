@@ -2082,15 +2082,28 @@ def run_scanner() -> None:
                     LOGGER.error("SHADOW READY Telegram alert failed: %s", candidate.symbol)
             sent = True
             placed_at = int(time.time())
-            state["shadow_last_alert_at"] = placed_at
-            state.setdefault("shadow_daily_alerts", []).append(placed_at)
-            state.setdefault("shadow_sent_signals", {})[candidate.symbol] = placed_at
+            # Delivery cooldowns track confirmed Telegram acceptance, not paper entries.
+            # A failed delivery is retried only after a fresh full READY scan.
+            if telegram_alert_sent:
+                state["shadow_last_alert_at"] = placed_at
+                state.setdefault("shadow_daily_alerts", []).append(placed_at)
+                state.setdefault("shadow_sent_signals", {})[candidate.symbol] = placed_at
+            elif TELEGRAM_READY_ALERTS:
+                note(candidate.symbol, "notification", "shadow_telegram_failed")
             funnel["limit_simulated"] += 1
-            register_signal(
-                state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
-                tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
-                setup=opp.setup, now=placed_at, evidence=evidence,
-            )
+            # Keep paper research independent, without duplicating paper entries.
+            paper_history = state.setdefault("shadow_paper_signals", {})
+            try:
+                last_paper = int(paper_history.get(candidate.symbol, 0) or 0)
+            except (TypeError, ValueError):
+                last_paper = 0
+            if placed_at - last_paper >= SYMBOL_ALERT_COOLDOWN_SECONDS:
+                register_signal(
+                    state, symbol=opp.symbol, entry=opp.entry, stop=opp.stop,
+                    tp1=opp.tp1, tp2=opp.tp2, score=opp.score,
+                    setup=opp.setup, now=placed_at, evidence=evidence,
+                )
+                paper_history[candidate.symbol] = placed_at
             LOGGER.info(
                 "SHADOW signal: %s score=%d confirmations=%d entry=%s stop=%s tp1=%s",
                 candidate.symbol, candidate.score, confirmations,
