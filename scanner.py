@@ -409,6 +409,22 @@ def _hot_radar_order(
     # Keep excluded symbols for the normal universe-rejection diagnostics.
     ordered.extend(ticker for ticker in base_order if not universe_eligible(ticker))
 
+    # Diagnostics only: show whether tracked follow-ups reached the priority
+    # budget. No trading gate, quota, or market ordering is changed.
+    priority_selected_set = set(selected_priority)
+    tracked_followup_symbols = list(dict.fromkeys(
+        confirmation_symbols + early_watch_symbols + execution_followup_symbols
+    ))
+    followup_scheduling = {
+        name: {
+            "selected_priority": name in priority_selected_set,
+            "priority_rank": priorities.index(name) + 1,
+            "priority_budget": MAX_ORDERBOOK_MARKETS // 2,
+        }
+        for name in tracked_followup_symbols
+        if name in priorities
+    }
+
     state["ticker_radar"] = {
         "version": 2,
         "observed_at": int(now),
@@ -417,6 +433,7 @@ def _hot_radar_order(
         "volume_basis": "rolling_24h_difference_not_trade_flow",
         "markets": current_markets,
         "hot_symbols": hot_symbols,
+        "followup_scheduling": followup_scheduling,
         "hot_metrics": {
             row[4].symbol: {
                 "price_delta_pct": str(row[1]),
