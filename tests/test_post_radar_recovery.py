@@ -263,3 +263,32 @@ def test_early_watch_followup_survives_low_score_trigger_rejection(monkeypatch, 
     assert SYMBOL in rejected["early_watch_followups"]
     assert rejected["early_watch_followups"][SYMBOL]["last_seen"] == original_seen
     assert not rejected["active_signals"]
+
+def test_failed_shadow_ready_delivery_does_not_consume_alert_cooldown(monkeypatch, tmp_path):
+    clock, calls, scan = pipeline(monkeypatch, tmp_path)
+    attempts = []
+    monkeypatch.setattr(scanner, "TELEGRAM_READY_ALERTS", True)
+    monkeypatch.setattr(scanner, "send_shadow_ready_alert",
+                        lambda opportunity: attempts.append(opportunity.symbol) or False)
+
+    scan()  # First watch candle is not READY.
+    clock.update(now=NOW + 900, rsi=D("60"))
+    scan()  # Second distinct candle confirms the watch.
+    clock["now"] = NOW + 1800
+    first_ready = scan()
+    assert attempts == [SYMBOL, SYMBOL]  # Fresh READY requalification after failure.
+    assert first_ready["shadow_sent_signals"] == {}
+    assert first_ready["shadow_last_alert_at"] == 0
+    assert first_ready["shadow_daily_alerts"] == []
+    assert first_ready["shadow_paper_signals"][SYMBOL] == NOW + 900
+    assert len(first_ready["active_signals"]) == 1
+
+    # No blind replay: a new scan must pass the full READY pipeline again.
+    # The already-recorded paper signal prevents another paper entry.
+    clock["now"] = NOW + 1800
+    second = scan()
+    assert len(second["active_signals"]) == 1
+    assert second["shadow_sent_signals"] == {}
+    assert second["shadow_last_alert_at"] == 0
+    assert second["shadow_paper_signals"][SYMBOL] == NOW + 900
+    assert attempts == [SYMBOL, SYMBOL, SYMBOL]
