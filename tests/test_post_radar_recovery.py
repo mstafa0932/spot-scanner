@@ -276,7 +276,7 @@ def test_failed_shadow_ready_delivery_does_not_consume_alert_cooldown(monkeypatc
     scan()  # Second distinct candle confirms the watch.
     clock["now"] = NOW + 1800
     first_ready = scan()
-    assert attempts == [SYMBOL]
+    assert attempts == [SYMBOL, SYMBOL]  # Fresh READY requalification after failure.
     assert first_ready["shadow_sent_signals"] == {}
     assert first_ready["shadow_last_alert_at"] == 0
     assert first_ready["shadow_daily_alerts"] == []
@@ -291,4 +291,4 @@ def test_failed_shadow_ready_delivery_does_not_consume_alert_cooldown(monkeypatc
     assert second["shadow_sent_signals"] == {}
     assert second["shadow_last_alert_at"] == 0
     assert second["shadow_paper_signals"][SYMBOL] == NOW + 900
-    assert len(attempts) >= 1
+    assert attempts == [SYMBOL, SYMBOL, SYMBOL]
