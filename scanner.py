@@ -2025,12 +2025,14 @@ def run_scanner() -> None:
             )
             note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason)
             continue
-        _execution_followups(state).pop(candidate.symbol, None)
+        # Keep any bounded execution follow-up until READY delivery is
+        # confirmed. Dropping it here can starve a Telegram retry.
         funnel["confirmed"] += 1
         _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
                                     lifecycle_state="confirmation_2_of_2", reason="READY", now=now)
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
+            _execution_followups(state).pop(candidate.symbol, None)
             risk_result = build_risk_plan_result(
                 book=candidate.book,
                 tech=candidate.tech_15,
@@ -2088,11 +2090,22 @@ def run_scanner() -> None:
             # Delivery cooldowns track confirmed Telegram acceptance, not paper entries.
             # A failed delivery is retried only after a fresh full READY scan.
             if telegram_alert_sent or not TELEGRAM_READY_ALERTS:
+                _execution_followups(state).pop(candidate.symbol, None)
                 state["shadow_last_alert_at"] = placed_at
                 state.setdefault("shadow_daily_alerts", []).append(placed_at)
                 state.setdefault("shadow_sent_signals", {})[candidate.symbol] = placed_at
             elif TELEGRAM_READY_ALERTS:
                 note(candidate.symbol, "notification", "shadow_telegram_failed")
+                # Reserve a bounded fair scheduling slot for another *fresh*
+                # scan. The normal candle/BTC/score/book/trigger/risk gates
+                # must pass again; this is not a queued blind resend.
+                _record_execution_followup(
+                    state, symbol=candidate.symbol, now=placed_at,
+                    reason="shadow_telegram_failed",
+                    spread_pct=candidate.book.spread_percent,
+                    imbalance=candidate.book.imbalance_ratio,
+                    best_ask=candidate.book.best_ask,
+                )
             funnel["limit_simulated"] += 1
             # Keep paper research independent, without duplicating paper entries.
             paper_history = state.setdefault("shadow_paper_signals", {})
@@ -2115,6 +2128,7 @@ def run_scanner() -> None:
             break
 
         if send_telegram(format_opportunity(opp)):
+            _execution_followups(state).pop(candidate.symbol, None)
             note(candidate.symbol, "notification", "entry_alert_sent")
             telegram_alert_sent = True
             sent = True
