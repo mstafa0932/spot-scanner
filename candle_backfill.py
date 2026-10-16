@@ -514,7 +514,13 @@ def repair(
         }))
 
     fatal_recovery_error = None
-    recovery_clusters = spans(missing, interval)
+    # Spend the bounded request budget on the newest gaps first. The scanner
+    # needs a current, authentic contiguous tail for closed-candle indicators;
+    # older isolated gaps must not consume all recovery attempts before recent
+    # candles are checked. Keep every request scoped to one exact missing span.
+    recovery_clusters = sorted(
+        spans(missing, interval), key=lambda span: span[1], reverse=True
+    )
     for attempt in range(1, min(MAX_REQUESTS, len(recovery_clusters)) + 1):
         if same_unrecovered_gap:
             break
