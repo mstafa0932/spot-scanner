@@ -344,3 +344,35 @@ def test_backfill_429_blocks_later_http_requests_in_same_process(monkeypatch):
     assert len(calls) == 1
     assert md._BACKFILL_RETRY_AFTER == "9"
 
+
+
+def test_recovery_budget_prioritizes_newest_gap_before_old_historical_gaps():
+    """A full request budget must not leave the newest gap untried."""
+    full = frame()
+    missing_indices = [10, 30, 50, 70, 100]
+    missing_timestamps = [
+        int(full.iloc[index]["timestamp"]) for index in missing_indices
+    ]
+    calls = []
+
+    def request(start, end):
+        calls.append((start, end))
+        # The latest gap is recoverable; older gaps are deliberately absent.
+        if len(calls) == 1:
+            return authentic_rows(full[full["timestamp"].isin([missing_timestamps[-1]])])
+        return authentic_rows(full.iloc[:0])
+
+    result = repair(
+        full.drop(missing_indices), 900, NOW, request, "PRIORITY_TEST"
+    )
+
+    assert len(calls) == MAX_REQUESTS
+    # The first request targets the newest gap, with one bar of context.
+    assert calls[0] == (
+        missing_timestamps[-1] - 900,
+        missing_timestamps[-1] + 900,
+    )
+    row = result[result["timestamp"].astype(int).eq(missing_timestamps[-1])]
+    assert len(row) == 1
+    assert bool(row["is_authentic"].iloc[0])
+    assert result.attrs["backfill"]["recovered"] == 1
