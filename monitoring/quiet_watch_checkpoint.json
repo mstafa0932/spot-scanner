@@ -26,7 +26,11 @@
     "existing_controller_job": 117456816684,
     "controller_status_observed": "in_progress",
     "scanner_target_seconds": 600,
-    "duplicate_controller_created": false
+    "duplicate_controller_created": false,
+    "controller_status_checked_at_utc": "2026-10-17T20:20:21Z",
+    "latest_persisted_state_commit": "683a70a9aa5056417743be6b97c034fa9705c155",
+    "latest_persisted_state_blob": "2eb45f49ca78a878d182cf235598307a67e1cc48",
+    "latest_persisted_state_bytes": 2255298
   },
   "last_verified_production_run": {
     "run_id": 39065811298,
@@ -405,6 +409,14 @@
       "source": "current_interactive_review",
       "run_id": 39065811298,
       "conclusion": "Cadence and persistence are healthy in this sample. Legacy candle blockers remain on production because the native fix is unmerged. The sampled market rejections do not prove a new code defect. No additional bot patch was made."
+    },
+    {
+      "source": "scheduled_quiet_watch",
+      "checked_at_utc": "2026-10-17T20:20:21Z",
+      "inspected_run_ids": [
+        39065811298
+      ],
+      "conclusion": "Fresh GitHub check found no scanner cycle newer than 39065811298 yet. Its persisted scanner_state commit 683a70a9 is valid JSON (2,255,298 bytes), SHADOW remains active, and the existing controller job 117456816684 remains in progress. PRs #45 and #46 remain open drafts, unmerged, with zero independent reviews. No new defect, critical interruption, READY evidence, or user-action blocker was established."
     }
   ],
   "scheduler_confirmation": {
@@ -414,6 +426,11 @@
     "timing_mode": "condition_watch",
     "updated_at": "2026-10-17T20:18:25.087212+00:00",
     "last_run_before_reactivation": "2026-10-16T20:22:25.902392+00:00",
-    "first_post_reactivation_execution_verified": false
-  }
+    "first_post_reactivation_execution_verified": true,
+    "first_post_reactivation_check_utc": "2026-10-17T20:20:21Z"
+  },
+  "last_check_utc": "2026-10-17T20:20:21Z",
+  "inspected_run_ids": [
+    39065811298
+  ]
 }
