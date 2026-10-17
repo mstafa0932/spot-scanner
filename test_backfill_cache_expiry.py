@@ -28,7 +28,7 @@ def growing_frame(now):
 def test_negative_cache_expires_without_sliding_on_a_cache_hit(large):
     state = {}
     calls = []
-    missing = list(range(100, 230)) if large else list(range(100, 108, 2))
+    missing = list(range(100, 230)) if large else [239, 240, 241, 244, 247, 249]
     for now, expected_calls in ((NOW, 1 if large else 4),
                                 (NOW + 600, 1 if large else 4)):
         bind_history(state)
