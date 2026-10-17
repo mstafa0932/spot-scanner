@@ -1,0 +1,410 @@
+{
+  "schema_version": 1,
+  "repository": "mstafa0932/spot-scanner",
+  "monitor_branch": "monitor/quiet-engineering-20261017",
+  "checkpoint_path": "monitoring/quiet_watch_checkpoint.json",
+  "automation_id": "6ad0f106fa608191a823826728c80f35",
+  "user_request_received_utc": "2026-10-17T20:13:40Z",
+  "monitoring_policy": {
+    "engineering_review": "hourly",
+    "routine_notifications": false,
+    "notify_only": [
+      "proven_technical_readiness_once",
+      "new_critical_blocker_requiring_user_action",
+      "safety_or_state_integrity_incident"
+    ],
+    "shadow_mode_required": true,
+    "live_trading_allowed": false,
+    "threshold_changes_allowed": false,
+    "synthetic_as_real_allowed": false,
+    "merge_requires_current_ci_and_independent_security_review": true
+  },
+  "runtime_source": {
+    "platform": "GitHub Actions",
+    "render_bot_service_found": false,
+    "existing_controller_run": 39053545655,
+    "existing_controller_job": 117456816684,
+    "controller_status_observed": "in_progress",
+    "scanner_target_seconds": 600,
+    "duplicate_controller_created": false
+  },
+  "last_verified_production_run": {
+    "run_id": 39065811298,
+    "job_id": 117493119006,
+    "head_sha": "6a2313a5d96352600ab13149dde81406f5bde8a9",
+    "run_scanner_step": "success",
+    "persist_state_step": "success",
+    "finished_at_utc": "2026-10-17T20:15:12Z",
+    "infra": {
+      "btc_ok": false,
+      "btc_reason": "synthetic_candles_present",
+      "candles_complete": 3,
+      "candles_synthetic": 36,
+      "candles_error": 23,
+      "cadence_gap_seconds": 570,
+      "cadence_status": "ok",
+      "state_saved": "OK"
+    },
+    "funnel": {
+      "universe": 234,
+      "books": 37,
+      "tech": 3,
+      "data_valid": 3,
+      "score": 0,
+      "candidates": 0,
+      "confirmed": 0,
+      "exec": 0,
+      "limit": 0
+    }
+  },
+  "latest_loaded_state": {
+    "commit_sha": "6a2313a5d96352600ab13149dde81406f5bde8a9",
+    "bytes": 2251567,
+    "runs": [
+      {
+        "id": "39061534140",
+        "start": 1792264460,
+        "finish": 1792264497,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": null,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792264461,
+            "imbalance": "0.4256373176309603844549041191"
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792264476,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError",
+            "error_detail": "Synthetic candle limit exceeded: 19>8"
+          },
+          "SAND_TL": {
+            "stage": "data",
+            "reason": "candle_error:backfill_gap_limit_exceeded",
+            "observed_at": 1792264476,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError",
+            "error_detail": "Backfill gap limit exceeded: {\"market\": \"sand_tl:15m\", \"requests\": 0, \"errors\": [\"ValueError: Recent window incomplete: 71 missing\"], \"missing_before\": 109, \"missing_after\": 109, \"status\": \"gap_limit_exceeded\", \"window_utc\": [\"2026-10-14T16"
+          },
+          "MINA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792264460
+          },
+          "RAD_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792264467,
+            "spread_pct": "0.8462623413258110014104372355"
+          }
+        }
+      },
+      {
+        "id": "39062270529",
+        "start": 1792265062,
+        "finish": 1792265115,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": null,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792265064,
+            "imbalance": "0.5301324200098665264248466086"
+          },
+          "ALT_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792265081,
+            "spread_pct": "0.4531722054380664652567975831"
+          },
+          "SAND_TL": {
+            "stage": "data",
+            "reason": "candle_error:backfill_gap_limit_exceeded",
+            "observed_at": 1792265115,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError",
+            "error_detail": "Backfill gap limit exceeded: {\"market\": \"sand_tl:15m\", \"requests\": 1, \"errors\": [\"ValueError: Recent window incomplete: 71 missing\"], \"missing_before\": 109, \"missing_after\": 109, \"status\": \"gap_limit_exceeded\", \"window_utc\": [\"2026-10-14T16"
+          },
+          "MINA_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792265065,
+            "imbalance": "0.8277998922000083711458745135"
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792265062
+          }
+        }
+      },
+      {
+        "id": "39062990375",
+        "start": 1792265656,
+        "finish": 1792265703,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": null,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792265657,
+            "imbalance": "0.3311481185447540492524259988"
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792265676,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError",
+            "error_detail": "Synthetic candle limit exceeded: 19>8"
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792265672,
+            "imbalance": "0.5450807810370355047558044935"
+          },
+          "MINA_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792265660,
+            "spread_pct": "0.5420054200542005420054200542"
+          },
+          "RAD_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792265664,
+            "spread_pct": "0.7762879322512350035285815102"
+          }
+        }
+      },
+      {
+        "id": "39063698176",
+        "start": 1792266258,
+        "finish": 1792266293,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": null,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792266260,
+            "imbalance": "0.5140140080435168153807254693"
+          },
+          "ALT_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792266273,
+            "spread_pct": "0.5529561888558060399829859634"
+          },
+          "SAND_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792266258
+          },
+          "MINA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792266258
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792266258
+          }
+        }
+      },
+      {
+        "id": "39064406435",
+        "start": 1792266855,
+        "finish": 1792266895,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": null,
+        "cases": {
+          "NMR_TL": {
+            "stage": "discovery",
+            "reason": "15m momentum not constructive",
+            "observed_at": 1792266870,
+            "score": 43,
+            "rsi": "48.604430476919426",
+            "return_3": "-1.321261756990210506110435730",
+            "volume_ratio": "0.8032705275237225",
+            "atr_pct": "1.048177312393678473010212352",
+            "macd_histogram": "-0.9655093903940504",
+            "closed_candle_at": 1792265400,
+            "authentic_only": true
+          },
+          "ALT_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792266855
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792266856,
+            "imbalance": "0.1753707971182085975638929501"
+          },
+          "MINA_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792266864,
+            "imbalance": "0.6369255114868886319055858453"
+          },
+          "RAD_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792266864,
+            "spread_pct": "0.8534850640113798008534850640"
+          }
+        }
+      },
+      {
+        "id": "39065107085",
+        "start": 1792267488,
+        "finish": 1792267523,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": null,
+        "cases": {
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792267513,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError",
+            "error_detail": "Synthetic candle limit exceeded: 18>8"
+          },
+          "NMR_TL": {
+            "stage": "discovery",
+            "reason": "15m momentum not constructive",
+            "observed_at": 1792267502,
+            "score": 58,
+            "rsi": "47.035116336504025",
+            "return_3": "-0.5496459633353810339810533800",
+            "volume_ratio": "1.120048633851338",
+            "atr_pct": "1.025956120617263727689456744",
+            "macd_histogram": "-1.1975114975436725",
+            "closed_candle_at": 1792266300,
+            "authentic_only": true
+          },
+          "SAND_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792267488
+          },
+          "MINA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792267488
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792267488
+          }
+        }
+      }
+    ],
+    "watchlist_count": 2,
+    "early_followups": 2,
+    "execution_followups": 72
+  },
+  "fixes": {
+    "native_candles": {
+      "pr": 45,
+      "head": "e26b0f8d8b8c0e238eea813458b6f16f5699b180",
+      "reader_code_commit": "d0281f8802d222af003c66ae9404be42463528c9",
+      "draft": true,
+      "merged": false,
+      "ci_run": 39065246812,
+      "ci_tests_per_version": 305,
+      "ci_python_versions": [
+        "3.10",
+        "3.12"
+      ],
+      "pinned_live_validation_run": 39065124576,
+      "native_cases_passed": 12,
+      "independent_reviews_observed": 0,
+      "production_native_reader_active": false
+    },
+    "episode_expiry": {
+      "pr": 46,
+      "head": "43c41dbdc97177798b17d1a30b73343a233dcd90",
+      "draft": true,
+      "merged": false
+    }
+  },
+  "already_reported_blockers": [
+    "pr45_independent_security_review_pending",
+    "native_reader_not_merged_or_deployed",
+    "pr46_episode_expiry_not_merged"
+  ],
+  "readiness": {
+    "accepted": false,
+    "post_material_fix_verified_production_cycles": 0,
+    "required_consecutive_cycles": 24,
+    "qualified_ready_delivery_verified_after_fix": false
+  },
+  "known_access_caveats": [
+    "GitHub contents API returned empty content for the 2.25 MB scanner_state.json; this does not mean state is missing. Use a blob/raw/git read pinned to a known commit.",
+    "Direct Paribu reads from the coding host previously returned an HTML Site Unavailable page with HTTP 200; validate JSON and distinguish host access problems from exchange candle availability.",
+    "Native provider-published zero-volume records are explicitly distinguished from locally synthesized rows and do not imply a trade occurred."
+  ],
+  "primary_cases": [
+    "NMR_TL",
+    "MINA_TL",
+    "SAND_TL",
+    "BTC_TL"
+  ],
+  "additional_cases": [
+    "RAD_TL",
+    "ALT_TL",
+    "ARB_TL",
+    "ETHFI_TL",
+    "WLD_TL",
+    "ZRO_TL",
+    "INJ_TL",
+    "VVV_TL",
+    "RLC_TL",
+    "TIA_TL",
+    "CTSI_TL",
+    "OGN_TL"
+  ],
+  "event_log": [
+    {
+      "source": "current_interactive_review",
+      "run_id": 39065811298,
+      "conclusion": "Cadence and persistence are healthy in this sample. Legacy candle blockers remain on production because the native fix is unmerged. The sampled market rejections do not prove a new code defect. No additional bot patch was made."
+    }
+  ]
+}
