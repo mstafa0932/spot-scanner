@@ -1,0 +1,131 @@
+name: Read-only radar case feed diagnostic
+
+on:
+  push:
+    branches: ['diagnostic/radar-cases-20261017']
+    paths: ['.github/workflows/radar-case-feed-diagnostic.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-public-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SHADOW_MODE: 'true'
+    steps:
+      - name: Read public Paribu data without running scanner or sending messages
+        shell: python
+        run: |
+          import json
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timezone
+
+          # This one-off diagnostic has no credentials, checkout, trading,
+          # Telegram, repository writes, schedules, or automatic continuation.
+          SYMBOLS = ('nmr_tl', 'rad_tl', 'alt_tl', 'sand_tl')
+          HEADERS = {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0.0.0 Safari/537.36',
+              'Accept': 'application/json',
+              'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.8',
+          }
+          TICKER = 'https://api.paribu.com/market/ticker'
+          BOOK = 'https://api.paribu.com/orderbook'
+          CHART = 'https://web.paribu.com/chart/history'
+          now = int(time.time())
+          calls = 0
+          rate_limited = False
+          transport_failures = 0
+          print('DIAGNOSTIC_MODE public_read_only SHADOW_MODE=true no_orders no_messages')
+          print('CAPTURED_AT', datetime.fromtimestamp(now, timezone.utc).isoformat())
+
+          def read(label, url, params=None, emit_raw=False):
+              global calls, rate_limited, transport_failures
+              if rate_limited:
+                  print('SKIPPED_AFTER_429', label)
+                  return None
+              if calls >= 14:
+                  raise RuntimeError('Diagnostic request cap reached')
+              calls += 1
+              if params:
+                  url += '?' + urllib.parse.urlencode(params)
+              request = urllib.request.Request(url, headers=HEADERS)
+              status, content_type, raw = None, '', b''
+              try:
+                  with urllib.request.urlopen(request, timeout=12) as response:
+                      status = response.status
+                      content_type = response.headers.get('Content-Type', '')
+                      raw = response.read(2_000_001)
+              except urllib.error.HTTPError as exc:
+                  status = exc.code
+                  raw = exc.read(1000)
+                  if status == 429:
+                      rate_limited = True
+              except Exception as exc:
+                  print('FETCH_ERROR', json.dumps({'label': label, 'type': type(exc).__name__}))
+              try:
+                  if len(raw) > 2_000_000:
+                      raise ValueError('Oversized public response')
+                  data = json.loads(raw)
+              except (ValueError, UnicodeDecodeError):
+                  data = None
+              ok = status == 200 and isinstance(data, (dict, list))
+              if not ok:
+                  transport_failures += 1
+              print('FETCH', json.dumps({'label': label, 'status': status,
+                    'content_type': content_type, 'bytes': len(raw), 'json_valid': ok,
+                    'params': params}, separators=(',', ':')))
+              if ok and emit_raw:
+                  print('RAW', json.dumps({'label': label, 'payload': data}, separators=(',', ':')))
+              time.sleep(0.3)
+              return data if ok else None
+
+          # Public ticker values are summarized; no account endpoints are read.
+          ticker = read('ticker', TICKER)
+          print('TICKER_SHAPE', type(ticker).__name__)
+          for symbol in SYMBOLS:
+              read('book:' + symbol, BOOK, {'market': symbol, 'limit': 20}, emit_raw=True)
+
+          def chart(symbol, start, end, window):
+              label = 'candles:' + symbol + ':' + window
+              data = read(label, CHART, {'type': 'advanced', 'symbol': symbol,
+                          'resolution': '15', 'from': start, 'to': end}, emit_raw=True)
+              value = data
+              if isinstance(value, dict):
+                  for key in ('data', 'result', 'payload'):
+                      if isinstance(value.get(key), dict):
+                          value = value[key]
+                          break
+              timestamps = value.get('t', []) if isinstance(value, dict) else []
+              if not isinstance(timestamps, list):
+                  timestamps = []
+              stamps = sorted(set(int(t) for t in timestamps
+                                  if isinstance(t, (int, float)) and t % 1 == 0))
+              closed = [t for t in stamps if t + 900 <= now]
+              last = ((now - 60) // 900 - 1) * 900 if window == 'current' else min(end, (now // 900 - 1) * 900)
+              first = max((start // 900) * 900, last - 204 * 900)
+              missing = sorted(set(range(first, last + 900, 900)) - set(closed))
+              print('CANDLE_WINDOW', json.dumps({'label': label, 'count': len(stamps),
+                    'closed_count': len(closed), 'recent_missing': missing,
+                    'scope_start': first, 'scope_last_open': last,
+                    'note': 'Timestamp coverage only; raw OHLCV must still be validated'}, separators=(',', ':')))
+
+          for symbol in (*SYMBOLS, 'btc_tl'):
+              chart(symbol, now - 300 * 900, now, 'current')
+
+          # Re-read exactly the historical gaps seen by the running scanner.
+          for symbol, start, end in (
+              ('btc_tl', 1792198800, 1792203300),
+              ('alt_tl', 1792161900, 1792163700),
+              ('rad_tl', 1792102500, 1792104300),
+              ('sand_tl', 1792062000, 1792246500),
+          ):
+              chart(symbol, start, end, 'recorded_gap')
+          print('DIAGNOSTIC_FINISHED', json.dumps({'calls': calls,
+                'transport_failures': transport_failures, 'rate_limited': rate_limited,
+                'data_readiness_claimed': False}, separators=(',', ':')))
+          raise SystemExit(1 if transport_failures else 0)
