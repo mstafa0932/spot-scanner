@@ -252,14 +252,16 @@ def test_failed_closed_state_is_persisted_and_identical_gap_is_negative_cached()
     state = {}
     bind_history(state)
     full = frame()
-    missing = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+    # One contiguous cluster fits within the request budget, so the negative
+    # cache is valid after the complete cluster was actually queried.
+    missing = [10, 11, 12]
     calls = []
 
     def request(*args):
         calls.append(args)
         return full.iloc[:0]
 
-    with pytest.raises(ValueError, match="Synthetic candle limit exceeded"):
+    with pytest.raises(ValueError, match="Consecutive synthetic candle limit exceeded"):
         repair(full.drop(missing), 900, NOW, request, "BTC")
 
     first_calls = len(calls)
@@ -268,13 +270,40 @@ def test_failed_closed_state_is_persisted_and_identical_gap_is_negative_cached()
     assert saved["report"]["failure_type"] == "ValueError"
     assert set(saved["missing_timestamps"])
 
-    with pytest.raises(ValueError, match="Synthetic candle limit exceeded"):
+    with pytest.raises(ValueError, match="Consecutive synthetic candle limit exceeded"):
         repair(full.drop(missing), 900, NOW + 600, request, "BTC")
 
     assert len(calls) == first_calls
     report = state["candle_gap_history"]["BTC"]["report"]
     assert report["classification"] == "continuing"
     assert report["recovery_skipped_reason"] == "unchanged_gap_fingerprint"
+
+
+def test_untried_gap_clusters_are_not_negative_cached_and_newest_are_retried():
+    state = {}
+    bind_history(state)
+    full = frame()
+    missing_indices = [10, 30, 50, 70, 100]
+    missing_timestamps = [int(full.iloc[index]["timestamp"]) for index in missing_indices]
+    calls = []
+
+    def request(start, end):
+        calls.append((start, end))
+        return authentic_rows(full.iloc[:0])
+
+    result = repair(full.drop(missing_indices), 900, NOW, request, "MULTI_GAP")
+    assert len(calls) == MAX_REQUESTS
+    assert calls[0] == (
+        missing_timestamps[-1] - 900,
+        missing_timestamps[-1] + 900,
+    )
+    assert "negative_cache_expires_at" not in result.attrs["backfill"]
+
+    # The same fingerprint still has one cluster that was not tried. A repeat
+    # run must make a fresh bounded attempt, starting with the newest cluster.
+    repair(full.drop(missing_indices), 900, NOW + 600, request, "MULTI_GAP")
+    assert len(calls) == 2 * MAX_REQUESTS
+    assert calls[MAX_REQUESTS] == calls[0]
 
 
 def test_targeted_recovery_rejects_unproven_provenance_and_persists_failure():
