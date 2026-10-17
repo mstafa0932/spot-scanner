@@ -21,18 +21,17 @@ jobs:
           import json, time, urllib.error, urllib.parse, urllib.request
           url = 'https://web.paribu.com/v1/chart/ohlc'
           blocked = False
-          for symbol, to_s, label in (
-              ('btc_tl', 1792249326, 'recorded_window'),
-              ('sand_tl', 1792249326, 'recorded_window'),
-              ('alt_tl', 1792249326, 'recorded_window'),
-              ('rad_tl', 1792104300 + 900, 'recorded_gap'),
-              ('nmr_tl', 1792249326, 'recorded_window'),
-              ('mina_tl', 1792249326, 'recorded_window'),
-          ):
+          now = int(time.time())
+          requests = [(symbol, '15m', 1792249326, 'recorded_300')
+                      for symbol in ('btc_tl', 'nmr_tl', 'mina_tl', 'sand_tl', 'alt_tl', 'rad_tl')]
+          requests += [(symbol, interval, now, 'current_300')
+                       for symbol in ('btc_tl', 'nmr_tl', 'mina_tl', 'sand_tl')
+                       for interval in ('15m', '1h', '4h')]
+          for symbol, interval, to_s, label in requests:
               if blocked:
                   break
-              params = {'marketType': 'crypto', 'symbol': symbol, 'interval': '15m',
-                        'limit': 120, 'to': to_s * 1000 - 1}
+              params = {'marketType': 'crypto', 'symbol': symbol, 'interval': interval,
+                        'limit': 300, 'to': to_s * 1000 - 1}
               req = urllib.request.Request(url + '?' + urllib.parse.urlencode(params),
                       headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'})
               status = None
