@@ -1255,7 +1255,7 @@ def _expire_candidate_lifecycles(state: dict[str, Any], now: int) -> list[str]:
     active_states = {"early_watch", "discovery", "confirmation_1_of_2", "confirmation_2_of_2"}
     expired = []
     for symbol, episode in list(lifecycles.items()):
-        if not isinstance(episode, dict) or episode.get("current_state") not in active_states:
+        if not isinstance(episode, dict) or str(episode.get("current_state")) not in active_states:
             continue
         anchored = False
         for field in ("watchlist", "early_watch_followups"):

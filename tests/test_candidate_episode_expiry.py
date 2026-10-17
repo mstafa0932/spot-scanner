@@ -80,6 +80,7 @@ def test_old_episode_with_live_or_future_strategy_anchor_is_preserved(field, off
 def test_recent_unknown_future_and_terminal_records_are_not_expired():
     now = harness.NOW
     episodes = {name: stale_episode(now, name) for name in ("rejected", "expired", "shadow_entry")}
+    episodes["malformed"] = stale_episode(now, {"unknown": "legacy value"})
     for name, timestamp in (
         ("recent", datetime.fromtimestamp(now-600, timezone.utc).isoformat()),
         ("future", datetime.fromtimestamp(now+600, timezone.utc).isoformat()),
@@ -90,6 +91,7 @@ def test_recent_unknown_future_and_terminal_records_are_not_expired():
         episodes[name] = episode
     state = {"candidate_lifecycle": episodes}
     assert scanner._expire_candidate_lifecycles(state, now) == []
+    assert episodes["malformed"]["current_state"] == {"unknown": "legacy value"}
     assert all(episodes[name]["current_state"] == "early_watch" for name in ("recent", "future", "unknown"))
 
 
