@@ -51,14 +51,21 @@ jobs:
                   print('SOURCE_ERROR', json.dumps({'url': url, 'type': type(exc).__name__}))
               return ''
 
-          for url in ('https://docs.paribu.com/api/llms.txt', 'https://docs.paribu.com/api',
-                      'https://www.paribu.com', 'https://web.paribu.com'):
+          for url in ('https://docs.paribu.com/api/market-data/recent-trades.md',
+                      'https://docs.paribu.com/api/streams-v2/public-streams.md',
+                      'https://docs.paribu.com/api/api-reference/market-data.md',
+                      'https://www.paribu.com/_app/index-J3LAJMOg.js'):
               body = read(url)
-              if 'llms.txt' in url:
-                  print('DOC_INDEX', json.dumps({'url': url, 'content': body[:24000]}))
+              if 'docs.paribu.com' in url:
+                  print('DOC_PAGE', json.dumps({'url': url, 'content': body[:45000]}))
+              if '_app/' in url:
+                  for pattern in ('const Fr=new Map', 'CHART_', 'chart/history', 'apiBase', 'baseURL', 'web.paribu.com', 'getRuntimeEnv'):
+                      at = body.find(pattern)
+                      if at >= 0:
+                          print('API_CONTRACT', json.dumps({'pattern': pattern, 'content': body[max(0, at-400):at+6500]}))
               links = sorted(set(re.findall(r'(?:href|src)=[\"\x27]([^\"\x27]+)', body)))
               print('LINKS', json.dumps({'url': url, 'links': links[:180]}))
-              if 'docs.paribu.com' not in url:
+              if False:
                   assets = [urllib.parse.urljoin(url, x) for x in links
                             if '.js' in x and not x.startswith('data:')]
                   for asset in assets[:4]:
