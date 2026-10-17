@@ -1822,6 +1822,11 @@ def run_scanner() -> None:
             "macd_histogram": str(getattr(tech_15, "macd_histogram", "")),
             "closed_candle_at": int(df_15["timestamp"].iloc[-1]),
             "authentic_only": True,
+            "candle_endpoint": df_15.attrs.get("candle_endpoint"),
+            "exchange_zero_volume_bars": {
+                timeframe: int(frame.attrs.get("published_zero_volume_count", 0))
+                for timeframe, frame in candle_frames.items()
+            },
         }
         ok, discovery_reason = discovery_ok(
             ticker, book, tech_15, tech_1h, tech_4h, score

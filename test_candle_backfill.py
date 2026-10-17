@@ -30,9 +30,19 @@ def frame():
 
 
 def payload(df):
-    return {"s": "ok", **{k: df[v].tolist() for k, v in
-            [("t", "timestamp"), ("o", "open"), ("h", "high"),
-             ("l", "low"), ("c", "close"), ("v", "volume")]}}
+    """Deterministic native-HTTP fixture; these are not recorded market bars."""
+    candles = [{"date": int(row.timestamp) * 1000,
+                **{key: str(getattr(row, key)) for key in ("open", "high", "low", "close", "volume")}}
+               for row in df.itertuples()]
+    return {"message": {"severity": "success"},
+            "payload": {"candles": candles,
+                        "nextTime": candles[0]["date"] if candles else None}}
+
+
+def requested_span(params):
+    """Inclusive UTC opens represented by native limit + millisecond to."""
+    last = (params["to"] + 1) // 1000 - 900
+    return last - (params["limit"] - 1) * 900, last
 
 
 def authentic_rows(df):
@@ -59,7 +69,9 @@ def test_real_backfill_preserves_prices_and_provenance(monkeypatch):
     assert result.attrs["backfill"]["status"] == "complete_real"
     assert result.attrs["backfill"]["missing_before"] == 1
     assert result.attrs["backfill"]["missing_after_real_recovery"] == 0
-    assert calls[1][1]["from"] == int(full.timestamp.iloc[100]) - 900
+    assert requested_span(calls[1][1]) == (
+        int(full.timestamp.iloc[100]) - 900, int(full.timestamp.iloc[100]) + 900
+    )
 
 
 @pytest.mark.parametrize("network_error", [False, True])
@@ -82,6 +94,8 @@ def test_unresolved_old_gap_uses_tagged_synthetic_fallback(monkeypatch, network_
     assert row.open == row.high == row.low == row.close == 10
     assert row.volume == 0
     assert row.data_quality == "SYNTHETIC_FFILL"
+    assert not row.exchange_zero_volume
+    assert result.attrs["published_zero_volume_count"] == 0
     assert result.attrs["backfill"]["status"] == "synthetic_fallback"
 
 

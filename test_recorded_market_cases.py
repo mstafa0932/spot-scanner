@@ -15,7 +15,7 @@ import pytest
 import market_data as md
 import scanner
 from candle_backfill import bind_history, MAX_REQUESTS
-from test_candle_backfill import NOW, frame, payload
+from test_candle_backfill import NOW, frame, payload, requested_span
 
 
 @pytest.fixture(autouse=True)
@@ -63,25 +63,26 @@ def test_mina_nine_observed_gap_clusters_do_not_cache_untested_history(
 
     def get_json(url, params, **kwargs):
         calls.append(dict(params))
-        if params["from"] == now - 300 * 900:
+        if params["limit"] == 300:
             return payload(initial)
         # Return valid context rows, but none of the requested missing bars.
         # An error-free no-recovery result differs from a transport failure.
-        return payload(initial[initial.timestamp.between(params["from"], params["to"])])
+        start, end = requested_span(params)
+        return payload(initial[initial.timestamp.between(start, end)])
 
     monkeypatch.setattr(md, "get_json", get_json)
     for pulse in range(2):
         with pytest.raises(md.CandleUnavailableError, match="Synthetic candle limit exceeded"):
             md.fetch_candles("MINA_TL")
         assert len(calls) == (pulse + 1) * (1 + MAX_REQUESTS)
-        report = state["candle_gap_history"]["mina_tl:15m"]["report"]
+        report = state["candle_gap_history"]["mina_tl:15m:native_v1"]["report"]
         assert report["errors"] == []
         assert report["requests"] == MAX_REQUESTS
         assert report["missing_after"] == 15
         assert report["status"] == "failed_closed"
         assert "negative_cache_expires_at" not in report
         first_recovery = calls[pulse * (1 + MAX_REQUESTS) + 1]
-        assert (first_recovery["from"], first_recovery["to"]) == (
+        assert requested_span(first_recovery) == (
             max(missing) - 900, max(missing) + 900
         )
         # The second pulse must use persisted history, not a fresh cache.
@@ -103,9 +104,10 @@ def test_newest_recovery_restores_authentic_indicator_suffix(monkeypatch):
         calls.append(dict(params))
         if len(calls) == 1:
             return payload(initial)
-        if params["from"] <= newest <= params["to"]:
+        start, end = requested_span(params)
+        if start <= newest <= end:
             return payload(full.iloc[[90]])
-        return payload(initial[initial.timestamp.between(params["from"], params["to"])])
+        return payload(initial[initial.timestamp.between(start, end)])
 
     monkeypatch.setattr(md, "get_json", get_json)
     result = md.fetch_candles("MINA_TL")
@@ -159,7 +161,7 @@ def test_sand_79_missing_recent_bars_remain_unavailable(monkeypatch):
     with pytest.raises(md.CandleUnavailableError, match="Recent window incomplete: 79 missing"):
         md.fetch_candles("SAND_TL")
     assert len(calls) == 2  # One initial fetch and one bounded recent probe.
-    report = state["candle_gap_history"]["sand_tl:15m"]["report"]
+    report = state["candle_gap_history"]["sand_tl:15m:native_v1"]["report"]
     assert report["requests"] == 1
     assert report["missing_before"] == 113
     assert report["returned_window_missing"] == 79
