@@ -1,0 +1,74 @@
+name: Read public Paribu source contract
+
+on:
+  push:
+    branches: ['diagnostic/radar-cases-20261017']
+    paths: ['.github/workflows/paribu-source-contract.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SHADOW_MODE: 'true'
+    steps:
+      - name: Inspect public docs and directly referenced public assets
+        shell: python
+        run: |
+          import hashlib, json, re, time
+          import urllib.error, urllib.parse, urllib.request
+
+          # Finite public GETs only. No scanner, credentials, orders, or messages.
+          calls = 0
+          blocked = False
+          headers = {'User-Agent': 'Mozilla/5.0', 'Accept': '*/*'}
+          allowed = {'www.paribu.com', 'web.paribu.com', 'docs.paribu.com', 'static.paribu.com'}
+          def read(url):
+              global calls, blocked
+              if blocked or calls >= 12:
+                  return ''
+              if urllib.parse.urlparse(url).hostname not in allowed:
+                  return ''
+              calls += 1
+              try:
+                  req = urllib.request.Request(url, headers=headers)
+                  with urllib.request.urlopen(req, timeout=15) as response:
+                      body = response.read(3_000_001)
+                      status = response.status
+                  if len(body) > 3_000_000:
+                      raise ValueError('Response exceeds limit')
+                  value = body.decode('utf-8', 'replace')
+                  print('SOURCE', json.dumps({'url': url, 'status': status, 'bytes': len(body),
+                        'sha256': hashlib.sha256(body).hexdigest()}))
+                  return value
+              except urllib.error.HTTPError as exc:
+                  blocked = exc.code == 429
+                  print('SOURCE_ERROR', json.dumps({'url': url, 'status': exc.code}))
+              except Exception as exc:
+                  print('SOURCE_ERROR', json.dumps({'url': url, 'type': type(exc).__name__}))
+              return ''
+
+          for url in ('https://docs.paribu.com/api/llms.txt', 'https://docs.paribu.com/api',
+                      'https://www.paribu.com', 'https://web.paribu.com'):
+              body = read(url)
+              if 'llms.txt' in url:
+                  print('DOC_INDEX', json.dumps({'url': url, 'content': body[:24000]}))
+              links = sorted(set(re.findall(r'(?:href|src)=[\"\x27]([^\"\x27]+)', body)))
+              print('LINKS', json.dumps({'url': url, 'links': links[:180]}))
+              if 'docs.paribu.com' not in url:
+                  assets = [urllib.parse.urljoin(url, x) for x in links
+                            if '.js' in x and not x.startswith('data:')]
+                  for asset in assets[:4]:
+                      script = read(asset)
+                      matches = []
+                      for match in re.finditer(r'chart/history|latest-matches|/candles|klines|wss://|resolution|chartData|/history', script):
+                          matches.append(script[max(0, match.start()-220):match.end()+360])
+                          if len(matches) >= 24:
+                              break
+                      print('ASSET_EXCERPTS', json.dumps({'url': asset, 'matches': matches,
+                            'imports': re.findall(r'[^\s\"\x27<>]{0,180}\.js', script)[:60]}))
+              time.sleep(.2)
+          print('PUBLIC_SOURCE_INSPECTION_FINISHED', calls)
