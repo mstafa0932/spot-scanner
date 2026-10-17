@@ -254,7 +254,7 @@ def test_failed_closed_state_is_persisted_and_identical_gap_is_negative_cached()
     full = frame()
     # One contiguous cluster fits within the request budget, so the negative
     # cache is valid after the complete cluster was actually queried.
-    missing = [10, 11, 12]
+    missing = [245, 246, 247]
     calls = []
 
     def request(*args):
