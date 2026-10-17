@@ -1,0 +1,54 @@
+name: Read native Paribu OHLC source
+
+on:
+  push:
+    branches: ['diagnostic/radar-cases-20261017']
+    paths: ['.github/workflows/paribu-native-ohlc-probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      SHADOW_MODE: 'true'
+    steps:
+      - name: Compare genuine native candles with recorded missing intervals
+        shell: python
+        run: |
+          import json, time, urllib.error, urllib.parse, urllib.request
+          url = 'https://web.paribu.com/v1/chart/ohlc'
+          blocked = False
+          for symbol, to_s, label in (
+              ('btc_tl', 1792249326, 'recorded_window'),
+              ('sand_tl', 1792249326, 'recorded_window'),
+              ('alt_tl', 1792249326, 'recorded_window'),
+              ('rad_tl', 1792104300 + 900, 'recorded_gap'),
+              ('nmr_tl', 1792249326, 'recorded_window'),
+              ('mina_tl', 1792249326, 'recorded_window'),
+          ):
+              if blocked:
+                  break
+              params = {'marketType': 'crypto', 'symbol': symbol, 'interval': '15m',
+                        'limit': 120, 'to': to_s * 1000 - 1}
+              req = urllib.request.Request(url + '?' + urllib.parse.urlencode(params),
+                      headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'})
+              status = None
+              try:
+                  with urllib.request.urlopen(req, timeout=12) as response:
+                      status, raw = response.status, response.read(1_000_001)
+                  if len(raw) > 1_000_000:
+                      raise ValueError('Oversized response')
+                  payload = json.loads(raw)
+                  print('NATIVE_RAW', json.dumps({'symbol': symbol, 'label': label,
+                        'url': url, 'params': params, 'status': status, 'payload': payload}, separators=(',', ':')))
+              except urllib.error.HTTPError as exc:
+                  blocked = exc.code == 429
+                  print('NATIVE_ERROR', json.dumps({'symbol': symbol, 'status': exc.code,
+                        'body': exc.read(1500).decode('utf-8', 'replace')}))
+              except Exception as exc:
+                  print('NATIVE_ERROR', json.dumps({'symbol': symbol, 'status': status, 'type': type(exc).__name__}))
+              time.sleep(.3)
+          print('FINITE_PUBLIC_READ_FINISHED no_scanner no_orders no_messages')

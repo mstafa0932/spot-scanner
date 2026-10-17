@@ -51,31 +51,18 @@ jobs:
                   print('SOURCE_ERROR', json.dumps({'url': url, 'type': type(exc).__name__}))
               return ''
 
-          for url in ('https://docs.paribu.com/api/market-data/recent-trades.md',
-                      'https://docs.paribu.com/api/streams-v2/public-streams.md',
-                      'https://docs.paribu.com/api/api-reference/market-data.md',
-                      'https://www.paribu.com/_app/index-J3LAJMOg.js'):
-              body = read(url)
-              if 'docs.paribu.com' in url:
-                  print('DOC_PAGE', json.dumps({'url': url, 'content': body[:45000]}))
-              if '_app/' in url:
-                  for pattern in ('const Fr=new Map', 'CHART_', 'chart/history', 'apiBase', 'baseURL', 'web.paribu.com', 'getRuntimeEnv'):
-                      at = body.find(pattern)
-                      if at >= 0:
-                          print('API_CONTRACT', json.dumps({'pattern': pattern, 'content': body[max(0, at-400):at+6500]}))
-              links = sorted(set(re.findall(r'(?:href|src)=[\"\x27]([^\"\x27]+)', body)))
-              print('LINKS', json.dumps({'url': url, 'links': links[:180]}))
-              if False:
-                  assets = [urllib.parse.urljoin(url, x) for x in links
-                            if '.js' in x and not x.startswith('data:')]
-                  for asset in assets[:4]:
-                      script = read(asset)
-                      matches = []
-                      for match in re.finditer(r'chart/history|latest-matches|/candles|klines|wss://|resolution|chartData|/history', script):
-                          matches.append(script[max(0, match.start()-220):match.end()+360])
-                          if len(matches) >= 24:
-                              break
-                      print('ASSET_EXCERPTS', json.dumps({'url': asset, 'matches': matches,
-                            'imports': re.findall(r'[^\s\"\x27<>]{0,180}\.js', script)[:60]}))
-              time.sleep(.2)
+          url = 'https://www.paribu.com'
+          body = read(url)
+          for pattern in ('window.__ENV__', '__PARIBU_RUNTIME__', 'NUXT_API_BASE_URL', 'apiBaseUrl'):
+              at = body.find(pattern)
+              if at >= 0:
+                  print('RUNTIME_CONTRACT', json.dumps({'pattern': pattern, 'content': body[max(0, at-150):at+1000]}))
+          body = read('https://www.paribu.com/_app/index-J3LAJMOg.js')
+          for pattern in ('pairKey:', 'pairKey=', 'marketType:"crypto"', 'const CHART_'):
+              matches = []
+              for match in re.finditer(re.escape(pattern), body):
+                  matches.append(body[max(0, match.start()-300):match.end()+450])
+                  if len(matches) >= 5:
+                      break
+              print('PAIR_CONTRACT', json.dumps({'pattern': pattern, 'matches': matches}))
           print('PUBLIC_SOURCE_INSPECTION_FINISHED', calls)
