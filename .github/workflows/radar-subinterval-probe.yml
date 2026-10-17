@@ -1,0 +1,53 @@
+name: Read-only Paribu subinterval gap probe
+on:
+  push:
+    branches: ['diagnostic/radar-cases-20261017']
+    paths: ['.github/workflows/radar-subinterval-probe.yml']
+permissions:
+  contents: read
+jobs:
+  inspect-subinterval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      SHADOW_MODE: 'true'
+    steps:
+      - name: Probe four public historical windows without scanner or credentials
+        shell: python
+        run: |
+          import json, time, urllib.request, urllib.parse, urllib.error
+          print('MODE public_read_only no_orders no_messages; resolution=1 is an unverified diagnostic probe')
+          windows = (
+              ('btc_tl', 1792198800, 1792203300),
+              ('alt_tl', 1792161900, 1792163700),
+              ('rad_tl', 1792102500, 1792104300),
+              ('sand_tl', 1792219500, 1792221300),
+          )
+          for symbol, start, end in windows:
+              params = {'type':'advanced','symbol':symbol,'resolution':'1','from':start,'to':end}
+              url = 'https://web.paribu.com/chart/history?' + urllib.parse.urlencode(params)
+              request = urllib.request.Request(url, headers={
+                  'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0.0.0 Safari/537.36',
+                  'Accept':'application/json',
+                  'Accept-Language':'tr-TR,tr;q=0.9,en;q=0.8'})
+              status, raw = None, b''
+              try:
+                  with urllib.request.urlopen(request, timeout=12) as response:
+                      status, raw = response.status, response.read(500001)
+              except urllib.error.HTTPError as exc:
+                  status, raw = exc.code, exc.read(1000)
+              except Exception as exc:
+                  print('TRANSPORT_ERROR', symbol, type(exc).__name__)
+              try:
+                  if len(raw) > 500000:
+                      raise ValueError('Oversized public response')
+                  data = json.loads(raw)
+              except (ValueError, UnicodeDecodeError):
+                  data = None
+              print('PROBE', json.dumps({'symbol':symbol,'params':params,
+                    'status':status,'payload':data},separators=(',',':')))
+              if status == 429:
+                  print('STOP_AFTER_429')
+                  break
+              time.sleep(0.3)
+          print('PROBE_FINISHED no_data_readiness_claim')
