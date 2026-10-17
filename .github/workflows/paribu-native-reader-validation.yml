@@ -1,0 +1,83 @@
+name: Validate pinned native candle reader read-only
+
+on:
+  push:
+    branches: ['diagnostic/radar-cases-20261017']
+    paths: ['.github/workflows/paribu-native-reader-validation.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SHADOW_MODE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: d0281f8802d222af003c66ae9404be42463528c9
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install public data reader dependencies
+        run: python -m pip install 'pandas>=2.2,<3' 'requests>=2.32,<3'
+      - name: Verify native reader against public Paribu data
+        shell: python
+        run: |
+          import json, os, time
+          import market_data as md
+          from candle_backfill import bind_history
+          from indicator_engine import analyze_symbol
+
+          # This finite script imports data/indicators only. It has no trading
+          # credentials, scanner run, Telegram, write permissions, or schedule.
+          assert os.environ['SHADOW_MODE'].lower() == 'true'
+          print('PINNED_READER d0281f8802d222af003c66ae9404be42463528c9')
+          print('MODE public_read_only SHADOW_MODE=true no_orders no_messages')
+          bind_history({})
+          frames = {}
+          for symbol in ('BTC_TL', 'NMR_TL', 'MINA_TL', 'SAND_TL'):
+              for interval in ('15m', '1h', '4h'):
+                  frame = md.fetch_candles(symbol, interval, 250)
+                  _, seconds = md._interval_config(interval)
+                  assert len(frame) == 250
+                  assert frame.attrs['candle_endpoint'] == md.PARIBU_NATIVE_OHLC_URL
+                  assert frame.timestamp.diff().iloc[1:].eq(seconds).all()
+                  assert (frame.timestamp + seconds <= int(time.time())).all()
+                  assert frame.is_authentic.all()
+                  assert frame.attrs['candle_quality']['synthetic_count'] == 0
+                  assert frame.exchange_zero_volume.eq(frame.volume.eq(0)).all()
+                  tech = analyze_symbol(frame)
+                  assert tech is not None
+                  frames[symbol, interval] = frame
+                  print('NATIVE_READER_PASS', json.dumps({
+                      'symbol': symbol, 'interval': interval, 'closed_records': len(frame),
+                      'exchange_zero_volume': frame.attrs['published_zero_volume_count'],
+                      'local_synthetic': 0, 'latest_open_s': int(frame.timestamp.iloc[-1]),
+                      'rsi14': str(tech.rsi14), 'atr14': str(tech.atr14),
+                      'backfill_http_requests': frame.attrs['backfill']['requests']
+                  }, separators=(',', ':')))
+                  time.sleep(.3)
+
+          maximum = md.fetch_candles('BTC_TL', '15m', 500)
+          assert len(maximum) == 500 and maximum.is_authentic.all()
+          print('NATIVE_MAXIMUM_PASS', len(maximum))
+          for symbol in ('BTC_TL', 'NMR_TL', 'MINA_TL', 'SAND_TL'):
+              native = frames[symbol, '15m'].set_index('timestamp')
+              params = {'type': 'advanced', 'symbol': symbol.lower(), 'resolution': '15',
+                        'from': int(native.index.min()), 'to': int(native.index.max()) + 900}
+              payload = md.get_json(md.PARIBU_CHART_HISTORY_URL, params, _session=md.BACKFILL_SESSION)
+              legacy = md.validate_candles(md._parse_candle_payload(payload), '15m', require_history=False).set_index('timestamp')
+              common = sorted(set(native.index) & set(legacy.index))
+              columns = ['open', 'high', 'low', 'close', 'volume']
+              assert common and native.loc[common, columns].eq(legacy.loc[common, columns]).all().all()
+              extra = native.loc[sorted(set(native.index) - set(legacy.index))]
+              print('CLOSED_SOURCE_COMPARISON_PASS', json.dumps({'symbol': symbol,
+                    'common_closed_records': len(common), 'ohlcv_mismatches': 0,
+                    'extra_native_records': len(extra),
+                    'extra_native_zero_volume': int(extra.volume.eq(0).sum())}, separators=(',', ':')))
+              time.sleep(.3)
+          print('FINITE_NATIVE_READER_VALIDATION_PASSED no_continuous_monitor_created')
