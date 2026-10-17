@@ -1242,6 +1242,54 @@ def _prune_watchlist(state: dict[str, Any], now: int) -> None:
         watch.pop(symbol, None)
 
 
+def _expire_candidate_lifecycles(state: dict[str, Any], now: int) -> list[str]:
+    """Expire unanchored old episodes without touching scheduling or gates.
+
+    A retained max score is historical evidence, not proof of an active watch.
+    Legacy episodes without a follow-up get the existing watch TTL from their
+    latest known observation. Unknown/future times do not prove expiry.
+    """
+    lifecycles = state.get("candidate_lifecycle", {})
+    if not isinstance(lifecycles, dict):
+        return []
+    active_states = {"early_watch", "discovery", "confirmation_1_of_2", "confirmation_2_of_2"}
+    expired = []
+    for symbol, episode in list(lifecycles.items()):
+        if not isinstance(episode, dict) or episode.get("current_state") not in active_states:
+            continue
+        anchored = False
+        for field in ("watchlist", "early_watch_followups"):
+            anchor = state.get(field, {}).get(symbol, {})
+            try:
+                last_seen = int(anchor.get("last_seen", 0))
+            except (AttributeError, TypeError, ValueError):
+                continue
+            if last_seen > 0 and now - last_seen <= WATCHLIST_TTL_SECONDS:
+                anchored = True
+        if anchored:
+            continue
+        history = episode.get("history", [])
+        timestamps = [episode.get("first_seen_at")]
+        if isinstance(history, list):
+            timestamps.extend(event.get("ts") for event in history if isinstance(event, dict))
+        known_times = []
+        for value in timestamps:
+            try:
+                observed = datetime.fromisoformat(value)
+                if observed.utcoffset() is not None:
+                    known_times.append(observed.timestamp())
+            except (TypeError, ValueError, OverflowError):
+                continue
+        if not known_times or now - max(known_times) <= WATCHLIST_TTL_SECONDS:
+            continue
+        _candidate_lifecycle_update(
+            state, symbol=symbol, score=None, lifecycle_state="expired",
+            reason="watch_window_expired", now=now,
+        )
+        expired.append(symbol)
+    return expired
+
+
 def _update_watchlist(
     state: dict[str, Any],
     candidate: Candidate,
@@ -1618,6 +1666,7 @@ def run_scanner() -> None:
     _prune_watchlist(state, now)
     _prune_early_watch_followups(state, now)
     _prune_execution_followups(state, now)
+    diagnostics["expired_candidates"] = _expire_candidate_lifecycles(state, now)
 
     new_events = update_active_signals(state, now)
     if new_events:
