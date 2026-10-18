@@ -4703,25 +4703,42 @@
   "fixes": {
     "native_candles": {
       "pr": 45,
-      "head": "e26b0f8d8b8c0e238eea813458b6f16f5699b180",
-      "reader_code_commit": "d0281f8802d222af003c66ae9404be42463528c9",
+      "head": "0f0cc5e18ad1d2afd02f6fb36d32de688f1ecdce",
+      "reader_code_commit": "0f0cc5e18ad1d2afd02f6fb36d32de688f1ecdce",
       "draft": false,
       "merged": false,
-      "ci_run": 39065246812,
-      "ci_tests_per_version": 305,
+      "ci_run": 39094757437,
+      "ci_tests_per_version": 321,
       "ci_python_versions": [
         "3.10",
         "3.12"
       ],
-      "pinned_live_validation_run": 39065124576,
+      "pinned_live_validation_run": 39094810864,
       "native_cases_passed": 12,
-      "independent_reviews_observed": 0,
+      "independent_reviews_observed": 1,
       "production_native_reader_active": false,
-      "review_status": "ready_for_independent_review",
+      "review_status": "approved_separate_ai_review",
       "review_handoff_url": "https://github.com/mstafa0932/spot-scanner/pull/45",
       "review_handoff_prepared_at_utc": "2026-10-18T03:39:38.945Z",
-      "independent_approval_verified": false,
-      "independent_review_access": "No independent security-review tool is exposed in the current session and no reviewer is assigned; do not self-approve."
+      "independent_approval_verified": true,
+      "independent_review_access": "Separately delegated AI reviewer requested by user's latest instruction; fresh implementation-independent review, not human/external Codex Security.",
+      "github_formal_approvals": 0,
+      "independent_review": {
+        "kind": "separately_delegated_ai",
+        "identity": "/root/pr45_independent_security_review",
+        "decision": "APPROVE",
+        "head": "0f0cc5e18ad1d2afd02f6fb36d32de688f1ecdce",
+        "tree": "00fb6f46261469796ab621283b89c4a2058695c0",
+        "report_path": "monitoring/reviews/pr45-0f0cc5e-security.md",
+        "original_rejected_head": "e26b0f8d8b8c0e238eea813458b6f16f5699b180",
+        "resolved_findings": [
+          "R1 discarded envelope provenance",
+          "R2 positive-volume underflow misclassified as zero"
+        ],
+        "independent_tests": 321,
+        "additional_rejection_probes": 39,
+        "original_capture_replays": 18
+      }
     },
     "episode_expiry": {
       "pr": 46,
@@ -4877,6 +4894,13 @@
       "inspected_run_ids": [],
       "head": "e26b0f8d8b8c0e238eea813458b6f16f5699b180",
       "conclusion": "Prepared scoped security-review evidence and production acceptance procedure in PR45 body; marked PR45 ready for review without altering its CI-tested head. Reconfirmed green Python3.10/3.12 CI and zero independent reviews. No independent service tool or assigned reviewer is available, so no security approval, merge, deployment, scanner dispatch, or readiness claim occurred. Updated existing quiet automation to prioritize review then authorized conditional merge and prove native source use. Previous production observations are preserved and were not reclassified as native-reader acceptance."
+    },
+    {
+      "source": "interactive_independent_security_review_and_fix",
+      "checked_at_utc": "2026-10-18T03:48:22.494Z",
+      "inspected_run_ids": [],
+      "reviewed_head": "0f0cc5e18ad1d2afd02f6fb36d32de688f1ecdce",
+      "conclusion": "A separately delegated AI reviewer first REQUEST_CHANGES on e26 for discarded envelope provenance (medium blocker) and positive volume underflow classification (low). Implementer added16 regressions and confirmed all fail before patch; applied a two-file narrow parser fix;321 tests passed. Reviewer independently APPROVED exact0f0cc5e after321 isolated tests,39 adverse rejection probes,18 capture replays, and CI verification. CI39094757437 passed321 tests on both Python versions. Fresh bounded public-reader run39094810864 passed12 original-source cases/500bars/four closed-OHLCV comparisons without scanner/messages/orders. This is disclosed separate AI review, not a human or external service/formal author's GitHub approval. Merge and production proof remain next; no source-active/readiness claim yet."
     }
   ],
   "scheduler_confirmation": {
@@ -4884,11 +4908,11 @@
     "schedule": "BEGIN:VEVENT\nDTSTART:20261017T201924Z\nRRULE:FREQ=HOURLY\nEND:VEVENT",
     "default_timezone": "Europe/Istanbul",
     "timing_mode": "condition_watch",
-    "updated_at": "2026-10-18T03:39:05.228171+00:00",
+    "updated_at": "2026-10-18T03:43:36.807717+00:00",
     "last_run_before_reactivation": "2026-10-16T20:22:25.902392+00:00",
     "first_post_reactivation_execution_verified": true,
     "first_post_reactivation_check_utc": "2026-10-17T20:20:21Z",
-    "priority_update": "Independent review, conditional approved merge, then production native-source verification; existing hourly schedule retained."
+    "priority_update": "Repeated evidence/fix/test/independent-AI-review/conditional-merge cycle, important verified fixes included in quiet notification policy."
   },
   "last_check_utc": "2026-10-18T03:23:48Z",
   "inspected_run_ids": [
@@ -4937,15 +4961,15 @@
     39092896535
   ],
   "current_priority": {
-    "updated_at_utc": "2026-10-18T03:39:38.945Z",
+    "updated_at_utc": "2026-10-18T03:48:22.494Z",
     "requested_sequence": [
       "complete independent security review of PR45",
       "merge only after current CI and independent approval",
       "prove native endpoint use in real main scanner run"
     ],
     "conditional_merge_authorized_by_user": true,
-    "merge_gate_satisfied": false,
-    "next_required_external_action": "Make an independent reviewer/service available; Codex Security installation is unconfirmed.",
+    "merge_gate_satisfied": true,
+    "next_required_external_action": null,
     "acceptance_evidence": [
       "actual checked-out reader code",
       "PARIBU_CANDLE_SOURCE native endpoint",
@@ -4953,7 +4977,8 @@
       "SHADOW true",
       "Run scanner and Persist scanner state success",
       "persisted source diagnostics for actually fetched primary cases"
-    ]
+    ],
+    "next_action": "Recheck exact PR45 head/current CI/reviews, merge approved head with lease, then inspect genuine main scanner and persisted native-source evidence."
   },
-  "last_security_gate_check_utc": "2026-10-18T03:39:38.945Z"
+  "last_security_gate_check_utc": "2026-10-18T03:48:22.494Z"
 }
