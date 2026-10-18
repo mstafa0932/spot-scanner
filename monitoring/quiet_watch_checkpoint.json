@@ -27,35 +27,35 @@
     "controller_status_observed": "completed_success",
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
-    "controller_status_checked_at_utc": "2026-10-18T00:28:17Z",
-    "latest_persisted_state_commit": "2f69c63bdad92b91eee26f0f6ebe3050f933029a",
-    "latest_persisted_state_blob": "09f114c084fbd5ec464f678240dcf02e01db0ad8",
-    "latest_persisted_state_bytes": 2228250,
+    "controller_status_checked_at_utc": "2026-10-18T01:39:40Z",
+    "latest_persisted_state_commit": "0c09b915938d2dfe94d1547a01a61edb150473e6",
+    "latest_persisted_state_blob": "7eb71f9e108bf8ba997fe83ae269bf9c6e4a298e",
+    "latest_persisted_state_bytes": 2227728,
     "last_controller_completion_expected_end_of_window": true,
     "last_controller_completion_note": "Previously inspected four-hour controller job completed successfully. Scanner state commits continued every ~10 minutes afterward; no duplicate controller was created or inferred from state commits alone."
   },
   "last_verified_production_run": {
-    "run_id": 39082608423,
-    "job_id": 117542519039,
-    "head_sha": "99d9ba46b01de43744612a4ed71066cdadd5b095",
+    "run_id": 39086970762,
+    "job_id": 117555460078,
+    "head_sha": "b075693b6ef1349e9890bf7d209b6da41224923b",
     "run_scanner_step": "success",
     "persist_state_step": "success",
-    "finished_at_utc": "2026-10-18T00:25:12Z",
+    "finished_at_utc": "2026-10-18T01:35:38Z",
     "infra": {
       "btc_ok": false,
       "btc_reason": "synthetic_candles_present",
-      "candles_complete": 5,
-      "candles_synthetic": 34,
-      "candles_error": 19,
-      "cadence_gap_seconds": 599,
+      "candles_complete": 4,
+      "candles_synthetic": 25,
+      "candles_error": 22,
+      "cadence_gap_seconds": 610,
       "cadence_status": "ok",
       "state_saved": "OK"
     },
     "funnel": {
       "universe": 234,
-      "books": 35,
-      "tech": 5,
-      "data_valid": 5,
+      "books": 33,
+      "tech": 4,
+      "data_valid": 4,
       "score": 0,
       "candidates": 0,
       "confirmed": 0,
@@ -64,8 +64,8 @@
     }
   },
   "latest_loaded_state": {
-    "commit_sha": "2f69c63bdad92b91eee26f0f6ebe3050f933029a",
-    "bytes": 2228250,
+    "commit_sha": "0c09b915938d2dfe94d1547a01a61edb150473e6",
+    "bytes": 2227728,
     "runs": [
       {
         "id": "39061534140",
@@ -2944,11 +2944,743 @@
             "imbalance": "0.3897855983374199544204398508"
           }
         }
+      },
+      {
+        "id": "39083225853",
+        "start": 1792283666,
+        "finish": 1792283708,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 35,
+        "cases": {
+          "NMR_TL": {
+            "stage": "discovery",
+            "reason": "RSI outside watch range",
+            "observed_at": 1792283682,
+            "closed_candle_at": 1792282500,
+            "authentic_only": true
+          },
+          "MINA_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792283697,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792283680,
+            "imbalance": "0.4616502655978237578940429252"
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792283682
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792283666
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792283705,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ARB_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792283705,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ETHFI_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792283666
+          },
+          "WLD_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792283685,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ZRO_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792283698
+          },
+          "INJ_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792283691,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792283682,
+            "quote_volume": "2770562.37"
+          },
+          "RLC_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792283668,
+            "imbalance": "0.1920391684505659010161876917"
+          },
+          "TIA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792283666
+          },
+          "CTSI_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792283679,
+            "imbalance": "0.3273108278531013192106134405"
+          },
+          "OGN_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792283681,
+            "imbalance": "0.5447526003871226428492211212"
+          }
+        }
+      },
+      {
+        "id": "39083844765",
+        "start": 1792284267,
+        "finish": 1792284315,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 32,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284269,
+            "imbalance": "0.7056300701961539191333653256"
+          },
+          "MINA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792284287,
+            "spread_pct": "0.6872852233676975945017182131"
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792284289
+          },
+          "RAD_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792284292
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792284313,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ARB_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "ETHFI_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792284300
+          },
+          "WLD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "ZRO_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "INJ_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792284289,
+            "quote_volume": "2770684.84"
+          },
+          "RLC_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "TIA_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792284301
+          },
+          "CTSI_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284267
+          },
+          "OGN_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284288,
+            "imbalance": "0.4627686021700481763549732237"
+          }
+        }
+      },
+      {
+        "id": "39084464194",
+        "start": 1792284876,
+        "finish": 1792284927,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 32,
+        "cases": {
+          "NMR_TL": {
+            "stage": "discovery",
+            "reason": "RSI outside watch range",
+            "observed_at": 1792284896,
+            "closed_candle_at": 1792283400,
+            "authentic_only": true
+          },
+          "MINA_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284888,
+            "imbalance": "0.7582221801844900439009778676"
+          },
+          "SAND_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284876
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792284896
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284876
+          },
+          "ALT_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284876
+          },
+          "ARB_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792284926,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ETHFI_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284876
+          },
+          "WLD_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792284899,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ZRO_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792284920
+          },
+          "INJ_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284892,
+            "imbalance": "0.6201890473862619078462461827"
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792284896,
+            "quote_volume": "2770314.95"
+          },
+          "RLC_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284878,
+            "imbalance": "0.1557707841416530144323106407"
+          },
+          "TIA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792284876
+          },
+          "CTSI_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284895,
+            "imbalance": "0.3739588963810756579912961644"
+          },
+          "OGN_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792284881,
+            "imbalance": "0.3732726201707789111522604137"
+          }
+        }
+      },
+      {
+        "id": "39085097686",
+        "start": 1792285473,
+        "finish": 1792285515,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 37,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792285475,
+            "imbalance": "0.3001450373004293342994100050"
+          },
+          "MINA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792285473
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792285475,
+            "spread_pct": "0.6920415224913494809688581315"
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792285488
+          },
+          "RAD_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792285511
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792285498,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ARB_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792285473
+          },
+          "ETHFI_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792285507
+          },
+          "WLD_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792285494,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ZRO_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792285473
+          },
+          "INJ_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792285491,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792285488,
+            "quote_volume": "2770478.5"
+          },
+          "RLC_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792285473
+          },
+          "TIA_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792285508
+          },
+          "CTSI_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792285473
+          },
+          "OGN_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792285473
+          }
+        }
+      },
+      {
+        "id": "39085724773",
+        "start": 1792286076,
+        "finish": 1792286113,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 29,
+        "cases": {
+          "NMR_TL": {
+            "stage": "discovery",
+            "reason": "RSI outside watch range",
+            "observed_at": 1792286093,
+            "closed_candle_at": 1792284300,
+            "authentic_only": true
+          },
+          "MINA_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792286085,
+            "spread_pct": "0.5509641873278236914600550964"
+          },
+          "SAND_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286076
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792286092
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286076
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792286113,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ARB_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792286112,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ETHFI_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792286103
+          },
+          "WLD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286076
+          },
+          "ZRO_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792286101
+          },
+          "INJ_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792286105,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792286092,
+            "quote_volume": "2771353.79"
+          },
+          "RLC_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792286084,
+            "imbalance": "0.2369710805442448656149156353"
+          },
+          "TIA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286076
+          },
+          "CTSI_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792286091,
+            "imbalance": "0.4855183232348504646883502791"
+          },
+          "OGN_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792286078,
+            "imbalance": "0.4280297739972060405322419190"
+          }
+        }
+      },
+      {
+        "id": "39086335287",
+        "start": 1792286677,
+        "finish": 1792286721,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 33,
+        "cases": {
+          "NMR_TL": {
+            "stage": "discovery",
+            "reason": "RSI outside watch range",
+            "observed_at": 1792286695,
+            "closed_candle_at": 1792285200,
+            "authentic_only": true
+          },
+          "MINA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286677
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792286686,
+            "spread_pct": "0.6920415224913494809688581315"
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792286694
+          },
+          "RAD_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792286688,
+            "spread_pct": "0.4222378606615059817030260380"
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792286718,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ARB_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286677
+          },
+          "ETHFI_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792286721
+          },
+          "WLD_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792286684,
+            "imbalance": "0.7075684214029594474649001680"
+          },
+          "ZRO_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792286700
+          },
+          "INJ_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792286706,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792286694,
+            "quote_volume": "2771325.7"
+          },
+          "RLC_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286677
+          },
+          "TIA_TL": {
+            "stage": "data",
+            "reason": "synthetic_candles_present",
+            "observed_at": 1792286710
+          },
+          "CTSI_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792286677
+          },
+          "OGN_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792286685,
+            "imbalance": "0.5349341031958131777930232511"
+          }
+        }
+      },
+      {
+        "id": "39086970762",
+        "start": 1792287287,
+        "finish": 1792287337,
+        "status": "completed",
+        "btc_ok": false,
+        "btc_reason": "BTC synthetic candles present",
+        "shadow": true,
+        "books": 80,
+        "technicals": 33,
+        "cases": {
+          "NMR_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792287288,
+            "imbalance": "0.7188984227582389799247507725"
+          },
+          "MINA_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792287296,
+            "imbalance": "0.6355433267771456400943935952"
+          },
+          "SAND_TL": {
+            "stage": "book",
+            "reason": "spread_too_high",
+            "observed_at": 1792287295,
+            "spread_pct": "0.6896551724137931034482758621"
+          },
+          "BTC_TL": {
+            "stage": "universe",
+            "reason": "excluded_base_asset",
+            "observed_at": 1792287308
+          },
+          "RAD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792287287
+          },
+          "ALT_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792287312,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ARB_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792287335,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "ETHFI_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792287287
+          },
+          "WLD_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792287287
+          },
+          "ZRO_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792287287
+          },
+          "INJ_TL": {
+            "stage": "data",
+            "reason": "candle_error:synthetic_candle_limit_exceeded",
+            "observed_at": 1792287320,
+            "timeframe": "15m",
+            "error_type": "CandleUnavailableError"
+          },
+          "VVV_TL": {
+            "stage": "universe",
+            "reason": "quote_volume_below_minimum",
+            "observed_at": 1792287308,
+            "quote_volume": "2775591.83"
+          },
+          "RLC_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792287290,
+            "imbalance": "0.2385908496843672113160427642"
+          },
+          "TIA_TL": {
+            "stage": "coverage",
+            "reason": "not_evaluated_capacity",
+            "observed_at": 1792287287
+          },
+          "CTSI_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792287306,
+            "imbalance": "0.5301791229136183982778511159"
+          },
+          "OGN_TL": {
+            "stage": "book",
+            "reason": "imbalance_too_low",
+            "observed_at": 1792287295,
+            "imbalance": "0.3930636785456751121991048533"
+          }
+        }
       }
     ],
     "watchlist_count": 1,
     "early_followups": 1,
-    "execution_followups": 52
+    "execution_followups": 54
   },
   "fixes": {
     "native_candles": {
@@ -3077,6 +3809,20 @@
         39082608423
       ],
       "conclusion": "Eight new production scanner runs (39078211012–39082608423) completed successfully. Run scanner and Persist scanner state succeeded for each; cadence gaps were 585–616 seconds, SHADOW_MODE remained true, latest state JSON validated at 2,228,250 bytes, cadence_status=ok and state_saved=OK. NMR repeatedly reached discovery on distinct authentic closed candles but failed unchanged RSI or book gates; no READY candidate or delivery appeared. Focus cases continued to show market-gate, capacity, liquidity, and legacy synthetic-candle rejections consistent with unmerged PR #45. PRs #45/#46 and independent-review status are unchanged. No new defect, interruption, or user-action blocker was established."
+    },
+    {
+      "source": "scheduled_quiet_watch",
+      "checked_at_utc": "2026-10-18T01:39:40Z",
+      "inspected_run_ids": [
+        39083225853,
+        39083844765,
+        39084464194,
+        39085097686,
+        39085724773,
+        39086335287,
+        39086970762
+      ],
+      "conclusion": "Seven new production scanner runs (39083225853–39086970762) completed successfully. Run scanner and Persist scanner state succeeded for each; cadence gaps were 591–610 seconds, SHADOW_MODE remained true, latest state JSON validated at 2,227,728 bytes, cadence_status=ok and state_saved=OK. A near-miss calibration commit touched only near_misses_archive.jsonl and scanner_state.json, so it did not reset the post-fix code acceptance window. No READY candidate or delivery appeared. Focus-case outcomes remained consistent with unchanged market gates, capacity limits, and the known legacy candle blocker. PRs #45/#46 and independent-review status are unchanged. No new defect, interruption, or user-action blocker was established."
     }
   ],
   "scheduler_confirmation": {
@@ -3089,7 +3835,7 @@
     "first_post_reactivation_execution_verified": true,
     "first_post_reactivation_check_utc": "2026-10-17T20:20:21Z"
   },
-  "last_check_utc": "2026-10-18T00:28:17Z",
+  "last_check_utc": "2026-10-18T01:39:40Z",
   "inspected_run_ids": [
     39065811298,
     39066518702,
@@ -3116,6 +3862,13 @@
     39080755291,
     39081378237,
     39081996297,
-    39082608423
+    39082608423,
+    39083225853,
+    39083844765,
+    39084464194,
+    39085097686,
+    39085724773,
+    39086335287,
+    39086970762
   ]
 }
