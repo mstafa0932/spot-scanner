@@ -7,12 +7,10 @@ It verifies that the current market-data layer can read BTC_TL candles from
 Paribu for the three intraday timeframes used by the sniper.
 """
 
-import time
 import traceback
 
 from market_data import (
-    PARIBU_CHART_HISTORY_URL,
-    SESSION,
+    PARIBU_NATIVE_OHLC_URL,
     fetch_candles,
     get_market_snapshot,
     normalize_symbol,
@@ -47,34 +45,10 @@ def main() -> int:
         print()
 
         # ------------------------------------------------------------
-        # 2) Test the exact advanced chart/history request shape
-        #    required for intraday candles.
+        # 2) Read the same native OHLC service as the production data layer.
+        #    No legacy endpoint success can substitute for candle integrity.
         # ------------------------------------------------------------
-        end_s = int(time.time())
-
-        request_params = {
-            "type": "advanced",
-            "symbol": "btc_tl",
-            "resolution": "15",
-            "from": end_s - (15 * 60 * 250),
-            "to": end_s,
-        }
-
-        response = SESSION.get(
-            PARIBU_CHART_HISTORY_URL,
-            params=request_params,
-            timeout=12,
-        )
-
-        print(f"[INFO] chart/history HTTP={response.status_code}")
-        print(f"       request={response.url}")
-
-        if response.status_code != 200:
-            print(f"       body={response.text[:500]}")
-            print("[FAIL] Paribu rejected the advanced chart request.")
-            return 1
-
-        print("[PASS] Paribu accepted the advanced chart request shape.")
+        print(f"[INFO] Intraday candle endpoint: {PARIBU_NATIVE_OHLC_URL}")
         print()
 
         # ------------------------------------------------------------
@@ -97,6 +71,12 @@ def main() -> int:
                 )
                 return 1
 
+            if df.attrs.get("candle_endpoint") != PARIBU_NATIVE_OHLC_URL:
+                print(f"[FAIL] {timeframe}: wrong candle endpoint")
+                return 1
+            if "is_authentic" not in df or not df["is_authentic"].all():
+                print(f"[FAIL] {timeframe}: local synthetic candles present")
+                return 1
             if len(df) < 205:
                 print(
                     f"[FAIL] {timeframe}: "
@@ -108,6 +88,7 @@ def main() -> int:
                 f"[PASS] {timeframe}: {len(df)} closed candles | "
                 f"source={source} | "
                 f"provider={provider} | "
+                f"exchange_zero_volume={df.attrs.get('published_zero_volume_count', 0)} | "
                 f"last_close={df['close'].iloc[-1]}"
             )
 

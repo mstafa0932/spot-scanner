@@ -5,7 +5,8 @@ from __future__ import annotations
 All trading decisions are based on Paribu data only:
 - ticker: https://api.paribu.com/market/ticker
 - order book: https://api.paribu.com/orderbook
-- candles: https://web.paribu.com/chart/history
+- intraday candles: https://web.paribu.com/v1/chart/ohlc
+- legacy daily candles: https://web.paribu.com/chart/history
 
 No Binance, KuCoin, Bybit, or other exchange is used by this module.
 """
@@ -27,6 +28,7 @@ LOGGER = logging.getLogger("spot_scanner.market_data")
 PARIBU_TICKER_URL = "https://api.paribu.com/market/ticker"
 PARIBU_ORDERBOOK_URL = "https://api.paribu.com/orderbook"
 PARIBU_CHART_HISTORY_URL = "https://web.paribu.com/chart/history"
+PARIBU_NATIVE_OHLC_URL = "https://web.paribu.com/v1/chart/ohlc"
 
 REQUEST_TIMEOUT = 12
 MIN_VALID_CANDLES = 205
@@ -508,7 +510,7 @@ def validate_candles(df: pd.DataFrame, resolution: str, *, require_history: bool
     return x
 
 
-def _request_backfill_json(params: dict[str, Any]) -> Any:
+def _request_backfill_json(params: dict[str, Any], *, url: str = PARIBU_CHART_HISTORY_URL) -> Any:
     """Abort further targeted backfill HTTP calls for this scanner process after 429."""
     global _BACKFILL_RATE_LIMITED, _BACKFILL_RETRY_AFTER
     if _BACKFILL_RATE_LIMITED:
@@ -519,7 +521,7 @@ def _request_backfill_json(params: dict[str, Any]) -> Any:
         )
     try:
         return get_json(
-            PARIBU_CHART_HISTORY_URL,
+            url,
             _session=BACKFILL_SESSION,
             params=params,
         )
@@ -542,24 +544,91 @@ def _tag_paribu_recovery_rows(rows: pd.DataFrame, resolution: str) -> pd.DataFra
     return tagged
 
 
+def _parse_native_candle_payload(payload: Any) -> pd.DataFrame:
+    """Read the native chart's published OHLCV, without creating any rows.
+
+    Paribu publishes zero-volume records for intervals without trades. Those
+    provider records are retained verbatim and explicitly identified downstream;
+    they must not be confused with local SYNTHETIC_FFILL repair rows.
+    """
+    if (not isinstance(payload, dict)
+            or set(payload) - {"message", "meta", "payload"}
+            or not isinstance(payload.get("payload"), dict)):
+        raise ParibuSchemaError("Invalid native Paribu chart envelope")
+    # The observed native contract has null metadata. Unknown envelope fields
+    # or metadata could declare a different source or synthetic data; never
+    # discard those declarations before assigning provider authenticity.
+    if payload.get("meta") is not None:
+        raise ParibuSchemaError("Unexpected native Paribu chart metadata")
+    message = payload.get("message")
+    if (not isinstance(message, dict)
+            or set(message) - {"severity", "display"}
+            or message.get("severity") != "success"):
+        raise ParibuSchemaError("Native Paribu chart did not report success")
+    if "display" in message:
+        display = message["display"]
+        if (not isinstance(display, dict)
+                or set(display) != {"component", "content"}
+                or not all(isinstance(value, str) for value in display.values())):
+            raise ParibuSchemaError("Unexpected native Paribu chart display metadata")
+    native = payload["payload"]
+    if set(native) - {"candles", "nextTime"}:
+        raise ParibuSchemaError("Unexpected native Paribu chart payload fields")
+    cursor = native.get("nextTime")
+    if (cursor is not None
+            and (type(cursor) is not int or cursor <= 0 or cursor % 1000 != 0)):
+        raise ParibuSchemaError("Invalid native Paribu chart cursor")
+    candles = native.get("candles")
+    if not isinstance(candles, list):
+        raise ParibuSchemaError("Native Paribu chart candles are not an array")
+    if not candles:
+        raise CandleUnavailableError("Paribu returned no native candles")
+    if len(candles) > 500:
+        raise ParibuSchemaError("Native Paribu chart exceeded bounded row limit")
+    fields = {"date", "open", "high", "low", "close", "volume"}
+    rows = []
+    for candle in candles:
+        # Unknown flags may change provenance. Never discard a synthetic/source
+        # flag and then silently assign authenticity to that row.
+        if not isinstance(candle, dict) or set(candle) != fields:
+            raise ParibuSchemaError("Unexpected native Paribu candle fields")
+        values = {key: to_decimal(candle[key]) for key in fields}
+        if any(value is None for value in values.values()):
+            raise ParibuSchemaError("Non-finite native Paribu candle values")
+        timestamp_ms = values["date"]
+        if timestamp_ms <= 0 or timestamp_ms % 1000 != 0:
+            raise ParibuSchemaError("Invalid native Paribu millisecond timestamp")
+        o, h, l, c, v = (values[key] for key in ("open", "high", "low", "close", "volume"))
+        if min(o, h, l, c) <= 0 or v < 0 or h < max(o, c) or l > min(o, c) or h < l:
+            raise ParibuSchemaError("Invalid native Paribu OHLCV relationship")
+        volume = float(v)
+        if v != 0 and volume == 0:
+            raise ParibuSchemaError("Native Paribu volume underflow")
+        rows.append({"timestamp": int(timestamp_ms // 1000),
+                     "open": float(o), "high": float(h), "low": float(l),
+                     "close": float(c), "volume": volume})
+    result = pd.DataFrame(rows)
+    result.attrs.update(source="PARIBU", provider="Paribu", candle_endpoint=PARIBU_NATIVE_OHLC_URL)
+    return result
+
+
 def fetch_candles(
     symbol: str,
     resolution: str = "15m",
     limit: int = DEFAULT_CANDLE_LIMIT,
 ) -> pd.DataFrame:
     normalized = normalize_symbol(symbol).lower()
-    chart_resolution, interval_seconds = _interval_config(resolution)
+    _, interval_seconds = _interval_config(resolution)
     requested_limit = max(MIN_VALID_CANDLES, min(int(limit), 500))
 
-    # Paribu explicitly requires one of these two request shapes:
-    #   advanced -> type, symbol, resolution, from, to
-    #   basic    -> type, symbol, period
-    # Intraday scanner timeframes must use advanced mode. Do not send
-    # period=15/60/240; those values are interpreted as invalid basic periods.
+    # Use the endpoint and millisecond request contract published in Paribu's
+    # own current web chart. Legacy advanced history omits zero-trade intervals.
+    # Native OHLC returns the exchange's published records for those intervals;
+    # do not rebuild them from ticker snapshots or local forward fills.
     end_s = int(time.time())
-    from_s = end_s - interval_seconds * max(requested_limit + 50, 250)
+    native_intraday = str(resolution).strip().lower() != "1d"
 
-    if str(resolution).strip().lower() == "1d":
+    if not native_intraday:
         request_params: dict[str, Any] = {
             "type": "basic",
             "symbol": normalized,
@@ -567,40 +636,44 @@ def fetch_candles(
         }
     else:
         request_params = {
-            "type": "advanced",
+            "marketType": "crypto",
             "symbol": normalized,
-            "resolution": chart_resolution,
-            "from": from_s,
-            "to": end_s,
+            "interval": str(resolution).strip().lower(),
+            "limit": min(max(requested_limit + 50, 250), 500),
+            # Only request completed intervals. Paribu's web client subtracts
+            # one millisecond when passing an exclusive 'to' boundary.
+            "to": (end_s // interval_seconds) * interval_seconds * 1000 - 1,
         }
 
     try:
-        payload = get_json(
-            PARIBU_CHART_HISTORY_URL,
-            params=request_params,
-        )
+        if native_intraday:
+            payload = _request_backfill_json(request_params, url=PARIBU_NATIVE_OHLC_URL)
+        else:
+            payload = get_json(PARIBU_CHART_HISTORY_URL, params=request_params)
     except ParibuDataError as exc:
         raise CandleUnavailableError(
             f"Paribu chart unavailable for {normalized} {resolution}: {exc}"
         ) from exc
 
-    raw = _parse_candle_payload(payload)
+    raw = _parse_native_candle_payload(payload) if native_intraday else _parse_candle_payload(payload)
     prepared = validate_candles(raw, resolution, require_history=False)
-    if str(resolution).strip().lower() != "1d":
+    if native_intraday:
         def request_range(start, end):
             recovered_payload = _request_backfill_json({
-                "type": "advanced", "symbol": normalized, "resolution": chart_resolution,
-                "from": start, "to": end,
-            })
+                "marketType": "crypto", "symbol": normalized,
+                "interval": str(resolution).strip().lower(),
+                "limit": min((end - start) // interval_seconds + 1, 500),
+                "to": (end + interval_seconds) * 1000 - 1,
+            }, url=PARIBU_NATIVE_OHLC_URL)
             recovered = validate_candles(
-                _parse_candle_payload(recovered_payload),
+                _parse_native_candle_payload(recovered_payload),
                 resolution,
                 require_history=False,
             )
             return _tag_paribu_recovery_rows(recovered, resolution)
         try:
             prepared = repair(prepared, interval_seconds, end_s, request_range,
-                              normalized + ":" + resolution,
+                              normalized + ":" + resolution + ":native_v1",
                               minimum_contiguous=MIN_VALID_CANDLES)
         except ValueError as exc:
             raise CandleUnavailableError(str(exc)) from exc
@@ -612,6 +685,24 @@ def fetch_candles(
             source="PARIBU",
             provider="Paribu",
             resolution=resolution.lower(),
+        )
+
+    if native_intraday:
+        # Authenticity denotes an original provider record, not an executed
+        # trade. Keep native zero-volume intervals distinguishable from local
+        # synthetic rows, including after slicing or bounded repair.
+        df["exchange_zero_volume"] = df["is_authentic"] & df["volume"].eq(0)
+        df.attrs.update(
+            candle_endpoint=PARIBU_NATIVE_OHLC_URL,
+            published_zero_volume_count=int(df["exchange_zero_volume"].sum()),
+            zero_volume_semantics="exchange_published_no_trade_interval",
+        )
+        LOGGER.info(
+            "PARIBU_CANDLE_SOURCE market=%s interval=%s endpoint=%s closed=%d "
+            "published_zero_volume=%d local_synthetic=%d latest_open=%d",
+            normalized, str(resolution).lower(), PARIBU_NATIVE_OHLC_URL,
+            len(df), df.attrs["published_zero_volume_count"],
+            int((~df["is_authentic"]).sum()), int(df["timestamp"].iloc[-1]),
         )
 
     return df
