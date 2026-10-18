@@ -1,0 +1,1100 @@
+{
+  "repository": "mstafa0932/spot-scanner",
+  "case": "XCN_TL",
+  "date_local": "2026-10-18",
+  "timezone": "Europe/Istanbul",
+  "event": {
+    "run": 39148681303,
+    "job": 117737693648,
+    "scan_started_at_utc": "2026-10-18T17:15:30Z",
+    "decision_at_utc": "2026-10-18T17:15:50.962Z",
+    "sent_true_log_at_utc": "2026-10-18T17:15:51.326Z",
+    "sent_true_log_at_local": "2026-10-18T20:15:51.326+03:00",
+    "server_message_timestamp_not_recorded": true,
+    "score": 78,
+    "ask_at_rejection": "0.2037",
+    "btc_ok": true,
+    "reason": "4h clearly weak"
+  },
+  "source": {
+    "endpoint": "https://web.paribu.com/v1/chart/ohlc",
+    "diagnostic_run": 39157732366,
+    "job": 117764341306,
+    "reads": 6,
+    "original_closed_before_event": true,
+    "local_synthetic": 0,
+    "limits": "Retrospective retrieval of native provider history; exact match to recorded indicators corroborates replay. No historical order-book interpolation or future bars used."
+  },
+  "verified_replay": {
+    "capture_hashes_verified": 6,
+    "logged_indicators_exactly_matched": [
+      "RSI",
+      "volume_ratio",
+      "return_3",
+      "ATR_pct"
+    ],
+    "last_closed_4h": {
+      "open": 1792324800,
+      "close_at": 1792339200,
+      "close": "0.1978",
+      "ema50": "0.20846163078557214",
+      "discovery_threshold": "0.2022077818620049758",
+      "ready_threshold": "0.2042923981698606972",
+      "weak": true
+    },
+    "unchanged_closed_4h_after_alert": true,
+    "peak_15m": {
+      "timestamp": 1792340100,
+      "open": 0.2004,
+      "high": 0.2195,
+      "low": 0.2004,
+      "close": 0.2069,
+      "volume": 9288150
+    },
+    "replayed_15m": [
+      {
+        "as_of": 1792343750,
+        "latest_open": 1792342800,
+        "close": "0.2034",
+        "rsi": "56.26498187300615",
+        "volume_ratio": "2.3225034503039534",
+        "return_3": "-1.691638472692121797970033830"
+      },
+      {
+        "as_of": 1792344968,
+        "latest_open": 1792343700,
+        "close": "0.2023",
+        "rsi": "53.04043098177243",
+        "volume_ratio": "1.1219973136409214",
+        "return_3": "-3.528850739151168335717691940"
+      },
+      {
+        "as_of": 1792345565,
+        "latest_open": 1792344600,
+        "close": "0.203",
+        "rsi": "54.81508820398302",
+        "volume_ratio": "0.6356820380390616",
+        "return_3": "-0.3925417075564278704612365100"
+      },
+      {
+        "as_of": 1792346170,
+        "latest_open": 1792344600,
+        "close": "0.203",
+        "rsi": "54.81508820398302",
+        "volume_ratio": "0.6356820380390616",
+        "return_3": "-0.3925417075564278704612365100"
+      },
+      {
+        "as_of": 1792346768,
+        "latest_open": 1792345500,
+        "close": "0.2051",
+        "rsi": "59.73163538340549",
+        "volume_ratio": "0.7378768062054702",
+        "return_3": "0.835791543756145526057030500"
+      },
+      {
+        "as_of": 1792350795,
+        "latest_open": 1792349100,
+        "close": "0.213",
+        "rsi": "71.52792736114094",
+        "volume_ratio": "1.193793962665266",
+        "return_3": "0.471698113207547169811320800"
+      }
+    ],
+    "early_leg_4h_weak_also_verified": true,
+    "open_4h_never_used": true
+  },
+  "source_analysis": [
+    {
+      "label": "decision",
+      "as_of": 1792343750,
+      "interval": "15m",
+      "count": 250,
+      "latest_open": 1792342800,
+      "last_close_time": 1792343700,
+      "current_close": "0.2034",
+      "ema21": "0.20144747716796743",
+      "ema50": "0.200631364277433",
+      "rsi14": "56.26498187300615",
+      "volume_ratio": "2.3225034503039534",
+      "return_3": "-1.691638472692121797970033830",
+      "atr14": "0.002991789752488687",
+      "discovery_4h_weak": null,
+      "ready_4h_weak": null,
+      "local_synthetic": 0,
+      "provider_zero_volume": 3,
+      "tail": [
+        {
+          "timestamp": 1792331100,
+          "open": 0.1996,
+          "high": 0.1997,
+          "low": 0.1996,
+          "close": 0.1996,
+          "volume": 967676
+        },
+        {
+          "timestamp": 1792332000,
+          "open": 0.1996,
+          "high": 0.1996,
+          "low": 0.1994,
+          "close": 0.1994,
+          "volume": 782536
+        },
+        {
+          "timestamp": 1792332900,
+          "open": 0.1996,
+          "high": 0.2082,
+          "low": 0.1996,
+          "close": 0.2011,
+          "volume": 1162050
+        },
+        {
+          "timestamp": 1792333800,
+          "open": 0.2012,
+          "high": 0.2012,
+          "low": 0.1995,
+          "close": 0.1998,
+          "volume": 1255609
+        },
+        {
+          "timestamp": 1792334700,
+          "open": 0.1995,
+          "high": 0.1999,
+          "low": 0.1995,
+          "close": 0.1999,
+          "volume": 1151372
+        },
+        {
+          "timestamp": 1792335600,
+          "open": 0.2,
+          "high": 0.2,
+          "low": 0.1997,
+          "close": 0.1997,
+          "volume": 733066
+        },
+        {
+          "timestamp": 1792336500,
+          "open": 0.1994,
+          "high": 0.1994,
+          "low": 0.1981,
+          "close": 0.1981,
+          "volume": 1537008
+        },
+        {
+          "timestamp": 1792337400,
+          "open": 0.1983,
+          "high": 0.1983,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 1118210
+        },
+        {
+          "timestamp": 1792338300,
+          "open": 0.1975,
+          "high": 0.1978,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 776167
+        },
+        {
+          "timestamp": 1792339200,
+          "open": 0.1976,
+          "high": 0.1999,
+          "low": 0.1976,
+          "close": 0.1999,
+          "volume": 1572323
+        },
+        {
+          "timestamp": 1792340100,
+          "open": 0.2004,
+          "high": 0.2195,
+          "low": 0.2004,
+          "close": 0.2069,
+          "volume": 9288150
+        },
+        {
+          "timestamp": 1792341000,
+          "open": 0.2107,
+          "high": 0.2107,
+          "low": 0.2044,
+          "close": 0.2097,
+          "volume": 11425414
+        },
+        {
+          "timestamp": 1792341900,
+          "open": 0.2066,
+          "high": 0.212,
+          "low": 0.2038,
+          "close": 0.2038,
+          "volume": 13652249
+        },
+        {
+          "timestamp": 1792342800,
+          "open": 0.2035,
+          "high": 0.2044,
+          "low": 0.2019,
+          "close": 0.2034,
+          "volume": 6716997
+        }
+      ]
+    },
+    {
+      "label": "decision",
+      "as_of": 1792343750,
+      "interval": "1h",
+      "count": 250,
+      "latest_open": 1792339200,
+      "last_close_time": 1792342800,
+      "current_close": "0.2038",
+      "ema21": "0.20041011536262837",
+      "ema50": "0.20178907527843465",
+      "rsi14": "60.161987420767204",
+      "volume_ratio": "6.754148070613901",
+      "return_3": "2.104208416833667334669338700",
+      "atr14": "0.003309397715992859",
+      "discovery_4h_weak": null,
+      "ready_4h_weak": null,
+      "local_synthetic": 0,
+      "provider_zero_volume": 0,
+      "tail": [
+        {
+          "timestamp": 1792332000,
+          "open": 0.1996,
+          "high": 0.2082,
+          "low": 0.1994,
+          "close": 0.1999,
+          "volume": 4351567
+        },
+        {
+          "timestamp": 1792335600,
+          "open": 0.2,
+          "high": 0.2,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 4164451
+        },
+        {
+          "timestamp": 1792339200,
+          "open": 0.1976,
+          "high": 0.2195,
+          "low": 0.1976,
+          "close": 0.2038,
+          "volume": 35938136
+        }
+      ]
+    },
+    {
+      "label": "decision",
+      "as_of": 1792343750,
+      "interval": "4h",
+      "count": 250,
+      "latest_open": 1792324800,
+      "last_close_time": 1792339200,
+      "current_close": "0.1978",
+      "ema21": "0.20307006523247803",
+      "ema50": "0.20846163078557214",
+      "rsi14": "38.61855375350592",
+      "volume_ratio": "1.0403774633944975",
+      "return_3": "-1.494023904382470119521912350",
+      "atr14": "0.005450034801698525",
+      "discovery_4h_weak": true,
+      "ready_4h_weak": true,
+      "local_synthetic": 0,
+      "provider_zero_volume": 0,
+      "tail": [
+        {
+          "timestamp": 1792296000,
+          "open": 0.2003,
+          "high": 0.2006,
+          "low": 0.1978,
+          "close": 0.1987,
+          "volume": 13970926
+        },
+        {
+          "timestamp": 1792310400,
+          "open": 0.1985,
+          "high": 0.2011,
+          "low": 0.1983,
+          "close": 0.2002,
+          "volume": 14379277
+        },
+        {
+          "timestamp": 1792324800,
+          "open": 0.2004,
+          "high": 0.2082,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 16199468
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "as_of": 1792350795,
+      "interval": "15m",
+      "count": 500,
+      "latest_open": 1792349100,
+      "last_close_time": 1792350000,
+      "current_close": "0.213",
+      "ema21": "0.20538657446377506",
+      "ema50": "0.20269564264384748",
+      "rsi14": "71.52792783586686",
+      "volume_ratio": "1.193793962665266",
+      "return_3": "0.471698113207547169811320800",
+      "atr14": "0.003941322796204197",
+      "discovery_4h_weak": null,
+      "ready_4h_weak": null,
+      "local_synthetic": 0,
+      "provider_zero_volume": 3,
+      "tail": [
+        {
+          "timestamp": 1792337400,
+          "open": 0.1983,
+          "high": 0.1983,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 1118210
+        },
+        {
+          "timestamp": 1792338300,
+          "open": 0.1975,
+          "high": 0.1978,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 776167
+        },
+        {
+          "timestamp": 1792339200,
+          "open": 0.1976,
+          "high": 0.1999,
+          "low": 0.1976,
+          "close": 0.1999,
+          "volume": 1572323
+        },
+        {
+          "timestamp": 1792340100,
+          "open": 0.2004,
+          "high": 0.2195,
+          "low": 0.2004,
+          "close": 0.2069,
+          "volume": 9288150
+        },
+        {
+          "timestamp": 1792341000,
+          "open": 0.2107,
+          "high": 0.2107,
+          "low": 0.2044,
+          "close": 0.2097,
+          "volume": 11425414
+        },
+        {
+          "timestamp": 1792341900,
+          "open": 0.2066,
+          "high": 0.212,
+          "low": 0.2038,
+          "close": 0.2038,
+          "volume": 13652249
+        },
+        {
+          "timestamp": 1792342800,
+          "open": 0.2035,
+          "high": 0.2044,
+          "low": 0.2019,
+          "close": 0.2034,
+          "volume": 6716997
+        },
+        {
+          "timestamp": 1792343700,
+          "open": 0.2033,
+          "high": 0.2038,
+          "low": 0.2017,
+          "close": 0.2023,
+          "volume": 3376276
+        },
+        {
+          "timestamp": 1792344600,
+          "open": 0.2012,
+          "high": 0.203,
+          "low": 0.2012,
+          "close": 0.203,
+          "volume": 1944229
+        },
+        {
+          "timestamp": 1792345500,
+          "open": 0.2029,
+          "high": 0.2052,
+          "low": 0.2027,
+          "close": 0.2051,
+          "volume": 2306767
+        },
+        {
+          "timestamp": 1792346400,
+          "open": 0.2052,
+          "high": 0.2134,
+          "low": 0.205,
+          "close": 0.212,
+          "volume": 12362350
+        },
+        {
+          "timestamp": 1792347300,
+          "open": 0.21,
+          "high": 0.2185,
+          "low": 0.2084,
+          "close": 0.2125,
+          "volume": 15269383
+        },
+        {
+          "timestamp": 1792348200,
+          "open": 0.2111,
+          "high": 0.2158,
+          "low": 0.2111,
+          "close": 0.2133,
+          "volume": 10145525
+        },
+        {
+          "timestamp": 1792349100,
+          "open": 0.2133,
+          "high": 0.215,
+          "low": 0.209,
+          "close": 0.213,
+          "volume": 6130501
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "as_of": 1792350795,
+      "interval": "4h",
+      "count": 250,
+      "latest_open": 1792324800,
+      "last_close_time": 1792339200,
+      "current_close": "0.1978",
+      "ema21": "0.20307006523247803",
+      "ema50": "0.20846163078557214",
+      "rsi14": "38.61855375350592",
+      "volume_ratio": "1.0403774633944975",
+      "return_3": "-1.494023904382470119521912350",
+      "atr14": "0.005450034801698525",
+      "discovery_4h_weak": true,
+      "ready_4h_weak": true,
+      "local_synthetic": 0,
+      "provider_zero_volume": 0,
+      "tail": [
+        {
+          "timestamp": 1792296000,
+          "open": 0.2003,
+          "high": 0.2006,
+          "low": 0.1978,
+          "close": 0.1987,
+          "volume": 13970926
+        },
+        {
+          "timestamp": 1792310400,
+          "open": 0.1985,
+          "high": 0.2011,
+          "low": 0.1983,
+          "close": 0.2002,
+          "volume": 14379277
+        },
+        {
+          "timestamp": 1792324800,
+          "open": 0.2004,
+          "high": 0.2082,
+          "low": 0.1975,
+          "close": 0.1978,
+          "volume": 16199468
+        }
+      ]
+    }
+  ],
+  "open_context_only": {
+    "as_of": 1792350795,
+    "must_not_use_for_decision": true,
+    "closes_at": 1792353600,
+    "rows": [
+      {
+        "timestamp": 1792339200,
+        "open": 0.1976,
+        "high": 0.2195,
+        "low": 0.1976,
+        "close": 0.2116,
+        "volume": 98189632
+      }
+    ]
+  },
+  "followup": {
+    "symbol": "XCN_TL",
+    "first_seen": 1792343730,
+    "max_score": 78,
+    "last_seen": 1792343730,
+    "last_candle_at": 1792342800,
+    "last_score": 78,
+    "last_reason": "4h clearly weak"
+  },
+  "execution_followup": {
+    "symbol": "XCN_TL",
+    "first_seen": 1792347349,
+    "checks": 6,
+    "reason_counts": {
+      "spread_too_high": 5,
+      "imbalance_too_low": 1
+    },
+    "history": [
+      {
+        "at": 1792347349,
+        "reason": "spread_too_high",
+        "spread_pct": "1.095238095238095238095238095",
+        "imbalance": "0.2271272955356895694060816973",
+        "best_ask": "0.2123"
+      },
+      {
+        "at": 1792347948,
+        "reason": "spread_too_high",
+        "spread_pct": "0.6086142322097378277153558052",
+        "imbalance": "1.182029763692434958066261500",
+        "best_ask": "0.2149"
+      },
+      {
+        "at": 1792348545,
+        "reason": "imbalance_too_low",
+        "spread_pct": "0.2325581395348837209302325581",
+        "imbalance": "0.6799046112400904260203179999",
+        "best_ask": "0.2155"
+      },
+      {
+        "at": 1792349749,
+        "reason": "spread_too_high",
+        "spread_pct": "1.847465656087162482235907153",
+        "imbalance": "1.009284985984392433296427762",
+        "best_ask": "0.215"
+      },
+      {
+        "at": 1792350344,
+        "reason": "spread_too_high",
+        "spread_pct": "1.143946615824594852240228789",
+        "imbalance": "1.063979128071413338045729950",
+        "best_ask": "0.2122"
+      },
+      {
+        "at": 1792350587,
+        "reason": "spread_too_high",
+        "spread_pct": "0.7508212106992022524636320976",
+        "imbalance": "2.047109697384390975948167850",
+        "best_ask": "0.2147"
+      }
+    ],
+    "last_seen": 1792350587,
+    "last_reason": "spread_too_high"
+  },
+  "watch_ttl_seconds": 28800,
+  "watch_expiry_if_not_refreshed": 1792372530,
+  "execution_ttl_seconds": 7200,
+  "execution_expiry": 1792354549,
+  "scheduling_replay": [
+    {
+      "run_id": "39149467165",
+      "now": 1792344330,
+      "latest_closed_15m_open": 1792342800,
+      "followup_exists": true,
+      "due_rank": null,
+      "due_count": 29,
+      "early_watch_quota": 10,
+      "selected_followups": [
+        "SHIB_TL",
+        "WLD_TL",
+        "JTO_TL",
+        "MORPHO_TL",
+        "RLC_TL",
+        "ENA_TL",
+        "AVAX_TL",
+        "BAR_TL",
+        "S_TL",
+        "KITE_TL"
+      ],
+      "XCN_selected_priority": false,
+      "exact_priority_list_reproduced": true
+    },
+    {
+      "run_id": "39155587187",
+      "now": 1792349149,
+      "latest_closed_15m_open": 1792348200,
+      "followup_exists": true,
+      "due_rank": 11,
+      "due_count": 15,
+      "early_watch_quota": 10,
+      "selected_followups": [
+        "JTO_TL",
+        "S_TL",
+        "BAR_TL",
+        "PENGU_TL",
+        "BELG_TL",
+        "XLM_TL",
+        "XRP_TL",
+        "ADA_TL",
+        "PEPE_TL",
+        "UNI_TL"
+      ],
+      "XCN_selected_priority": false,
+      "exact_priority_list_reproduced": true
+    }
+  ],
+  "diagnostic_metadata_note": "Persisted hot_radar omits early_watch_symbols/execution_followup_symbols; these were not treated as false. Separate offline exact-priority-list replay establishes the quota explanation.",
+  "decisions": [
+    {
+      "run_id": "39139604013",
+      "start": 1792336527,
+      "case": {
+        "stage": "book",
+        "reason": "imbalance_too_low",
+        "observed_at": 1792336532,
+        "imbalance": "0.2007838532558528904440769450"
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39140361363",
+      "start": 1792337135,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792337135
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39141120133",
+      "start": 1792337729,
+      "case": {
+        "stage": "book",
+        "reason": "imbalance_too_low",
+        "observed_at": 1792337734,
+        "imbalance": "0.3961079172584574078836023975"
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39141863729",
+      "start": 1792338322,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792338322
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39142611122",
+      "start": 1792338925,
+      "case": {
+        "stage": "book",
+        "reason": "imbalance_too_low",
+        "observed_at": 1792338930,
+        "imbalance": "0.4007117043889563093881202600"
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39143369318",
+      "start": 1792339531,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792339531
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39144124948",
+      "start": 1792340130,
+      "case": {
+        "stage": "book",
+        "reason": "imbalance_too_low",
+        "observed_at": 1792340134,
+        "imbalance": "0.4569080318820402633571027208"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39144878477",
+      "start": 1792340728,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792340733,
+        "spread_pct": "4.326923076923076923076923077"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39145643593",
+      "start": 1792341329,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792341329
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39146406026",
+      "start": 1792341922,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792341926,
+        "spread_pct": "1.500484027105517909002904163"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39147162962",
+      "start": 1792342528,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792342528
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39147917805",
+      "start": 1792343131,
+      "case": {
+        "stage": "book",
+        "reason": "imbalance_too_low",
+        "observed_at": 1792343135,
+        "imbalance": "0.4952279181036496106373953629"
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39148681303",
+      "start": 1792343730,
+      "case": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "score": 78
+      }
+    },
+    {
+      "run_id": "39149467165",
+      "start": 1792344330,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792344330
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39150258568",
+      "start": 1792344949,
+      "case": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1792344968,
+        "score": 60,
+        "rsi": "53.04043098177243",
+        "return_3": "-3.528850739151168335717691940",
+        "volume_ratio": "1.1219973136409214",
+        "atr_pct": "1.447400145054483638161146812",
+        "macd_histogram": "0.00043285897485293324",
+        "closed_candle_at": 1792343700,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 3,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39151009904",
+      "start": 1792345547,
+      "case": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1792345565,
+        "score": 62,
+        "rsi": "54.81508820398302",
+        "return_3": "-0.3925417075564278704612365100",
+        "volume_ratio": "0.6356820380390616",
+        "atr_pct": "1.402715559084164729064039409",
+        "macd_histogram": "0.00032548808448598014",
+        "closed_candle_at": 1792344600,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 3,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39151759182",
+      "start": 1792346144,
+      "case": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1792346170,
+        "score": 65,
+        "rsi": "54.81508820398302",
+        "return_3": "-0.3925417075564278704612365100",
+        "volume_ratio": "0.6356820380390616",
+        "atr_pct": "1.402715559084164729064039409",
+        "macd_histogram": "0.00032548808448598014",
+        "closed_candle_at": 1792344600,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 3,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39152526652",
+      "start": 1792346746,
+      "case": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1792346768,
+        "score": 68,
+        "rsi": "59.73163538340549",
+        "return_3": "0.835791543756145526057030500",
+        "volume_ratio": "0.7378768062054702",
+        "atr_pct": "1.376250738049286201852754754",
+        "macd_histogram": "0.00036858173447226414",
+        "closed_candle_at": 1792345500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 3,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39153293224",
+      "start": 1792347349,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792347352,
+        "spread_pct": "1.095238095238095238095238095"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39154056465",
+      "start": 1792347948,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792347954,
+        "spread_pct": "0.6086142322097378277153558052"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39154817386",
+      "start": 1792348545,
+      "case": {
+        "stage": "book",
+        "reason": "imbalance_too_low",
+        "observed_at": 1792348549,
+        "imbalance": "0.6799046112400904260203179999"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39155587187",
+      "start": 1792349149,
+      "case": {
+        "stage": "coverage",
+        "reason": "not_evaluated_capacity",
+        "observed_at": 1792349149
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": false
+      }
+    },
+    {
+      "run_id": "39156352252",
+      "start": 1792349749,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792349751,
+        "spread_pct": "1.847465656087162482235907153"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39157119966",
+      "start": 1792350344,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792350347,
+        "spread_pct": "1.143946615824594852240228789"
+      },
+      "priority": {
+        "hot": false,
+        "selected_priority": true
+      }
+    },
+    {
+      "run_id": "39157435501",
+      "start": 1792350587,
+      "case": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792350590,
+        "spread_pct": "0.7508212106992022524636320976"
+      },
+      "priority": {
+        "hot": true,
+        "selected_priority": true
+      }
+    }
+  ],
+  "classification": {
+    "original_4h_rejection": "correct_market_gate_at_decision",
+    "ready_missed_due_to_proven_software_fault": false,
+    "score_also_below_ready": true,
+    "followup_lost": false,
+    "ttl_expired_in_observed_window": false,
+    "bounded_capacity_skips": true,
+    "notification_policy_violation_before_fix": true
+  },
+  "policy_fix": {
+    "pr": 48,
+    "reviewed_head": "e4a6617099475407169d2d9593ab06e06c22e48a",
+    "merge": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
+    "merged_at_utc": "2026-10-18T19:09:05Z",
+    "tests_per_python": 349,
+    "ci_run": 39133896737,
+    "review_report_commit": "ac5c02e003b42da56b5fa2a5de16481b7bbd704c",
+    "production_run": 39157435501,
+    "production_generic_watch_sent": false,
+    "production_internal_watch": "PEPE_TL, score68, 4h clearly weak, sent=False"
+  },
+  "pending": {
+    "first_new_closed_4h_after_alert_utc": "2026-10-18T20:00:00Z",
+    "local": "2026-10-18T23:00:00+03:00",
+    "reason": "This 4h bar was still open at the retrospective capture; closed-after comparison cannot be claimed yet.",
+    "mechanism": "Existing hourly engineering watch and 10-minute Actions scanner; no duplicate service/task created."
+  },
+  "latest_after_policy_run": {
+    "run_id": 39157896971,
+    "job": 117764840305,
+    "event": "workflow_dispatch",
+    "run_scanner": "success",
+    "persist": "success",
+    "tests": "intentionally_skipped_on_dispatch",
+    "shadow": true,
+    "native": true,
+    "candles_complete": 30,
+    "local_synthetic": 0,
+    "candle_errors": 0,
+    "watch_alerts": 0,
+    "near_ready_alerts": 0,
+    "xcn": {
+      "observed_at_utc": "2026-10-18T19:16:03.298Z",
+      "reason": "RSI outside watch range",
+      "rsi": "73.53089288356117",
+      "score": 63,
+      "volume_ratio": "0.7992835555674278",
+      "closed_15m_open": 1792350000,
+      "closed_4h_open": 1792324800
+    }
+  },
+  "latest_persisted_state": {
+    "commit": "d087b22ec60fa95c79c5ce5391e9d780cec09931",
+    "bytes": 2843911,
+    "xcn_followup": {
+      "symbol": "XCN_TL",
+      "first_seen": 1792343730,
+      "max_score": 78,
+      "last_seen": 1792343730,
+      "last_candle_at": 1792342800,
+      "last_score": 78,
+      "last_reason": "4h clearly weak"
+    },
+    "xcn_execution_followup": null,
+    "scanner_blob": "f6acb320f49baf979c771a53cdf3ba71beefbc53"
+  }
+}

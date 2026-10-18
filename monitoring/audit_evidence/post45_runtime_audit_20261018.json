@@ -1,0 +1,2301 @@
+{
+  "repository": "mstafa0932/spot-scanner",
+  "checked_at_utc": "2026-10-18T19:10:43.700Z",
+  "production_run": 39157119966,
+  "job_id": 117762521882,
+  "run_event": "workflow_dispatch",
+  "state_commit": "3518441b8b030102f230f45b7f4af2d4d80360d4",
+  "code_baseline": "ec8eb22d55af892717ae830913afca56636c4573",
+  "source_changed_since_baseline": false,
+  "non_source_changes": [
+    "scanner_state.json",
+    "near_misses_archive.jsonl"
+  ],
+  "lifecycle_step": {
+    "condition": "github.event_name == 'push'",
+    "conclusion": "skipped",
+    "classification": "intended"
+  },
+  "production_log_excerpt": [
+    "2026-10-18 19:05:45,722 | INFO | PARIBU_CANDLE_SOURCE market=btc_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=3 local_synthetic=0 latest_open=1792349100",
+    "2026-10-18 19:05:45,946 | INFO | PARIBU_CANDLE_SOURCE market=btc_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792346400",
+    "2026-10-18 19:05:50,799 | INFO | Scan decision | RAD_TL | book | spread_too_high",
+    "2026-10-18 19:05:50,799 | INFO | Scan metrics | RAD_TL | book | {\"spread_pct\":\"0.5602240896358543417366946779\"}",
+    "2026-10-18 19:05:53,619 | INFO | Scan decision | SAND_TL | book | spread_too_high",
+    "2026-10-18 19:05:53,619 | INFO | Scan metrics | SAND_TL | book | {\"spread_pct\":\"0.6896551724137931034482758621\"}",
+    "2026-10-18 19:05:56,281 | INFO | Scan decision | MINA_TL | book | imbalance_too_low",
+    "2026-10-18 19:05:56,281 | INFO | Scan metrics | MINA_TL | book | {\"imbalance\":\"0.6938316964826324910985825498\"}",
+    "2026-10-18 19:06:20,605 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792349100",
+    "2026-10-18 19:06:20,825 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=1 local_synthetic=0 latest_open=1792346400",
+    "2026-10-18 19:06:21,045 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792324800",
+    "2026-10-18 19:06:21,077 | INFO | Scan decision | ALT_TL | discovery | 15m momentum not constructive",
+    "2026-10-18 19:06:21,077 | INFO | Scan metrics | ALT_TL | discovery | {\"atr_pct\":\"0.7978773937122185514918190568\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792349100,\"exchange_zero_volume_bars\":{\"15m\":4,\"1h\":1,\"4h\":0},\"macd_histogram\":\"0.00007884962389967913\",\"return_3\":\"-0.2879078694817658349328215000\",\"rsi\":\"48.22206961282353\",\"score\":45,\"volume_ratio\":\"0.6424835486779894\"}",
+    "2026-10-18 19:06:21,294 | INFO | PARIBU_CANDLE_SOURCE market=nmr_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792349100",
+    "2026-10-18 19:06:21,512 | INFO | PARIBU_CANDLE_SOURCE market=nmr_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792346400",
+    "2026-10-18 19:06:21,735 | INFO | PARIBU_CANDLE_SOURCE market=nmr_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792324800",
+    "2026-10-18 19:06:21,767 | INFO | Scan decision | NMR_TL | discovery | RSI outside watch range",
+    "2026-10-18 19:06:21,767 | INFO | Scan metrics | NMR_TL | discovery | {\"atr_pct\":\"0.4623082842029861536797317275\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792349100,\"exchange_zero_volume_bars\":{\"15m\":0,\"1h\":0,\"4h\":0},\"macd_histogram\":\"0.18695942539152455\",\"return_3\":\"-0.2176767949340673178980696900\",\"rsi\":\"30.513339613980477\",\"score\":28,\"volume_ratio\":\"0.9554629926821295\"}",
+    "2026-10-18 19:06:25,291 | INFO | Run complete | markets=234 | discovered=0 | watchlist=4 | btc_ok=True | shadow=True | signal=False",
+    "[INFRA_HEALTH] run_id=39157119966 btc_ok=True btc_reason=regime_neutral candles_complete=27 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=595 cadence_status=ok state_saved=OK",
+    "[FUNNEL_BEHAVIOR] run_id=39157119966 universe=234 liq=80 spread=57 book=27 tech=27 data_valid=27 score=0 early_watch=0 watch_alerts=0 candidates=0 confirmed=0 exec=0 limit=0 stage_drops={\"book:imbalance_too_low\":30,\"book:spread_too_high\":23,\"coverage:not_evaluated_capacity\":52,\"discovery:15m momentum not constructive\":1,\"discovery:1h clearly weak\":1,\"discovery:4h clearly weak\":4,\"discovery:RSI outside watch range\":21,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":99}"
+  ],
+  "directive_window": [
+    {
+      "run_id": "39133633852",
+      "started_at": 1792331729,
+      "finished_at": 1792331771,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 28,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 169,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 9,
+      "hot_radar_selected": 9,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 54,
+        "book": 28,
+        "tech": 28,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 26,
+        "book:imbalance_too_low": 26,
+        "book:spread_too_high": 26,
+        "discovery:1h clearly weak": 1,
+        "coverage:not_evaluated_capacity": 57,
+        "discovery:15m momentum not constructive": 1,
+        "universe:quote_volume_below_minimum": 94
+      }
+    },
+    {
+      "run_id": "39134374224",
+      "started_at": 1792332329,
+      "finished_at": 1792332367,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 32,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 600,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 8,
+      "hot_radar_selected": 8,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 61,
+        "book": 32,
+        "tech": 32,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 30,
+        "book:imbalance_too_low": 29,
+        "book:spread_too_high": 19,
+        "discovery:1h clearly weak": 1,
+        "coverage:not_evaluated_capacity": 58,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 93
+      }
+    },
+    {
+      "run_id": "39135122841",
+      "started_at": 1792332928,
+      "finished_at": 1792332957,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 28,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 599,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 35,
+      "hot_radar_selected": 25,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 58,
+        "book": 28,
+        "tech": 28,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 27,
+        "book:imbalance_too_low": 30,
+        "discovery:volume not expanding": 1,
+        "coverage:not_evaluated_capacity": 58,
+        "book:spread_too_high": 22,
+        "universe:quote_volume_below_minimum": 93
+      }
+    },
+    {
+      "run_id": "39135871352",
+      "started_at": 1792333525,
+      "finished_at": 1792333568,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 597,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 62,
+      "hot_radar_selected": 42,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 58,
+        "book": 30,
+        "tech": 30,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 30,
+        "book:imbalance_too_low": 28,
+        "book:spread_too_high": 22,
+        "coverage:not_evaluated_capacity": 58,
+        "universe:quote_volume_below_minimum": 93
+      }
+    },
+    {
+      "run_id": "39136630862",
+      "started_at": 1792334117,
+      "finished_at": 1792334158,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 31,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 592,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 9,
+      "hot_radar_selected": 9,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 58,
+        "book": 31,
+        "tech": 31,
+        "score": 1,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 1,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:1h clearly weak": 2,
+        "discovery:RSI outside watch range": 28,
+        "book:imbalance_too_low": 27,
+        "book:spread_too_high": 22,
+        "coverage:not_evaluated_capacity": 58,
+        "trigger:BTC blocked: BTC confirmed weakness RSI=29.4 | 3C=-0.15%": 1,
+        "universe:quote_volume_below_minimum": 93
+      }
+    },
+    {
+      "run_id": "39137368537",
+      "started_at": 1792334725,
+      "finished_at": 1792334752,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 24,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 608,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 23,
+      "hot_radar_selected": 23,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 54,
+        "book": 24,
+        "tech": 24,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 24,
+        "book:imbalance_too_low": 30,
+        "book:spread_too_high": 26,
+        "coverage:not_evaluated_capacity": 58,
+        "universe:quote_volume_below_minimum": 93
+      }
+    },
+    {
+      "run_id": "39138109939",
+      "started_at": 1792335328,
+      "finished_at": 1792335367,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 29,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 603,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 40,
+      "hot_radar_selected": 33,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 57,
+        "book": 29,
+        "tech": 29,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 29,
+        "book:imbalance_too_low": 28,
+        "coverage:not_evaluated_capacity": 58,
+        "book:spread_too_high": 23,
+        "universe:quote_volume_below_minimum": 93
+      }
+    },
+    {
+      "run_id": "39138852634",
+      "started_at": 1792335921,
+      "finished_at": 1792335956,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 32,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 593,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 44,
+      "hot_radar_selected": 36,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 59,
+        "book": 32,
+        "tech": 32,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 32,
+        "book:imbalance_too_low": 27,
+        "coverage:not_evaluated_capacity": 56,
+        "book:spread_too_high": 21,
+        "universe:quote_volume_below_minimum": 95
+      }
+    },
+    {
+      "run_id": "39139604013",
+      "started_at": 1792336527,
+      "finished_at": 1792336569,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 28,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 606,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 20,
+      "hot_radar_selected": 20,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 57,
+        "book": 28,
+        "tech": 28,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 25,
+        "book:imbalance_too_low": 29,
+        "book:spread_too_high": 23,
+        "coverage:not_evaluated_capacity": 56,
+        "discovery:1h clearly weak": 2,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 95
+      }
+    },
+    {
+      "run_id": "39140361363",
+      "started_at": 1792337135,
+      "finished_at": 1792337178,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 608,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 13,
+      "hot_radar_selected": 13,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 59,
+        "book": 30,
+        "tech": 30,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 26,
+        "book:imbalance_too_low": 29,
+        "book:spread_too_high": 21,
+        "coverage:not_evaluated_capacity": 55,
+        "discovery:volume not expanding": 1,
+        "discovery:15m momentum not constructive": 1,
+        "discovery:4h clearly weak": 2,
+        "universe:quote_volume_below_minimum": 96
+      }
+    },
+    {
+      "run_id": "39141120133",
+      "started_at": 1792337729,
+      "finished_at": 1792337772,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 594,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 21,
+      "hot_radar_selected": 21,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 55,
+        "book": 30,
+        "tech": 30,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:1h clearly weak": 1,
+        "discovery:RSI outside watch range": 26,
+        "book:imbalance_too_low": 25,
+        "discovery:15m momentum not constructive": 1,
+        "book:spread_too_high": 25,
+        "coverage:not_evaluated_capacity": 55,
+        "discovery:ATR outside range": 1,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 96
+      }
+    },
+    {
+      "run_id": "39141863729",
+      "started_at": 1792338322,
+      "finished_at": 1792338355,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 593,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 14,
+      "hot_radar_selected": 14,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 63,
+        "book": 30,
+        "tech": 30,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:1h clearly weak": 2,
+        "book:imbalance_too_low": 33,
+        "discovery:RSI outside watch range": 26,
+        "book:spread_too_high": 17,
+        "coverage:not_evaluated_capacity": 54,
+        "discovery:15m momentum not constructive": 2,
+        "universe:quote_volume_below_minimum": 97
+      }
+    },
+    {
+      "run_id": "39142611122",
+      "started_at": 1792338925,
+      "finished_at": 1792338963,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 26,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 603,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 25,
+      "hot_radar_selected": 25,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 59,
+        "book": 26,
+        "tech": 26,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:1h clearly weak": 1,
+        "book:imbalance_too_low": 33,
+        "discovery:RSI outside watch range": 24,
+        "book:spread_too_high": 21,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39143369318",
+      "started_at": 1792339531,
+      "finished_at": 1792339584,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 34,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 606,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 12,
+      "hot_radar_selected": 12,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 59,
+        "book": 34,
+        "tech": 34,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "discovery:RSI outside watch range": 31,
+        "book:imbalance_too_low": 25,
+        "book:spread_too_high": 21,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:15m momentum not constructive": 1,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39144124948",
+      "started_at": 1792340130,
+      "finished_at": 1792340160,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 29,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 599,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 29,
+      "hot_radar_selected": 28,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 60,
+        "book": 29,
+        "tech": 29,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "discovery:RSI outside watch range": 26,
+        "book:imbalance_too_low": 31,
+        "book:spread_too_high": 20,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:1h clearly weak": 1,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39144878477",
+      "started_at": 1792340728,
+      "finished_at": 1792340767,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 28,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 598,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 41,
+      "hot_radar_selected": 35,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 60,
+        "book": 28,
+        "tech": 28,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "book:imbalance_too_low": 32,
+        "discovery:RSI outside watch range": 26,
+        "book:spread_too_high": 20,
+        "coverage:not_evaluated_capacity": 54,
+        "discovery:discovery score 63 < 66": 1,
+        "universe:quote_volume_below_minimum": 97
+      }
+    },
+    {
+      "run_id": "39145643593",
+      "started_at": 1792341329,
+      "finished_at": 1792341374,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 32,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 601,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 13,
+      "hot_radar_selected": 13,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 57,
+        "book": 32,
+        "tech": 32,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 2,
+        "discovery:RSI outside watch range": 26,
+        "book:imbalance_too_low": 25,
+        "book:spread_too_high": 23,
+        "discovery:ATR outside range": 2,
+        "discovery:discovery score 58 < 66": 1,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:1h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39146406026",
+      "started_at": 1792341922,
+      "finished_at": 1792341958,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 33,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 593,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 26,
+      "hot_radar_selected": 26,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 62,
+        "book": 33,
+        "tech": 33,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "book:imbalance_too_low": 29,
+        "discovery:RSI outside watch range": 28,
+        "book:spread_too_high": 18,
+        "discovery:ATR outside range": 1,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:15m momentum not constructive": 2,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39147162962",
+      "started_at": 1792342528,
+      "finished_at": 1792342556,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 606,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 27,
+      "hot_radar_selected": 27,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 56,
+        "book": 30,
+        "tech": 30,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "discovery:RSI outside watch range": 27,
+        "book:imbalance_too_low": 26,
+        "book:spread_too_high": 24,
+        "discovery:ATR outside range": 2,
+        "coverage:not_evaluated_capacity": 53,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39147917805",
+      "started_at": 1792343131,
+      "finished_at": 1792343187,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 32,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 603,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 33,
+      "hot_radar_selected": 30,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 64,
+        "book": 32,
+        "tech": 32,
+        "score": 1,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "book:imbalance_too_low": 32,
+        "discovery:RSI outside watch range": 28,
+        "book:spread_too_high": 16,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:4h clearly weak": 1,
+        "discovery:15m momentum not constructive": 1,
+        "discovery:1h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39148681303",
+      "started_at": 1792343730,
+      "finished_at": 1792343762,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 599,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 26,
+      "hot_radar_selected": 25,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 59,
+        "book": 30,
+        "tech": 30,
+        "score": 2,
+        "early_watch": 1,
+        "early_watch_alerts": 1,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:volume not expanding": 1,
+        "discovery:RSI outside watch range": 22,
+        "book:imbalance_too_low": 29,
+        "book:spread_too_high": 21,
+        "discovery:ATR outside range": 2,
+        "discovery:4h clearly weak": 2,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:1h clearly weak": 2,
+        "discovery:anti-FOMO: 3C already +4.40%": 1,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39149467165",
+      "started_at": 1792344330,
+      "finished_at": 1792344360,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 28,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 600,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 23,
+      "hot_radar_selected": 23,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 61,
+        "book": 28,
+        "tech": 28,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 23,
+        "discovery:volume not expanding": 1,
+        "book:imbalance_too_low": 33,
+        "book:spread_too_high": 19,
+        "coverage:not_evaluated_capacity": 53,
+        "discovery:4h clearly weak": 1,
+        "discovery:1h clearly weak": 3,
+        "universe:quote_volume_below_minimum": 98
+      }
+    },
+    {
+      "run_id": "39150258568",
+      "started_at": 1792344949,
+      "finished_at": 1792344991,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 34,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 619,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 11,
+      "hot_radar_selected": 11,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 58,
+        "book": 34,
+        "tech": 34,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 26,
+        "discovery:volume not expanding": 1,
+        "book:imbalance_too_low": 24,
+        "book:spread_too_high": 22,
+        "discovery:ATR outside range": 2,
+        "discovery:1h clearly weak": 2,
+        "discovery:4h clearly weak": 2,
+        "coverage:not_evaluated_capacity": 54,
+        "discovery:15m momentum not constructive": 1,
+        "universe:quote_volume_below_minimum": 97
+      }
+    },
+    {
+      "run_id": "39151009904",
+      "started_at": 1792345547,
+      "finished_at": 1792345579,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 33,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 598,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 22,
+      "hot_radar_selected": 22,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 58,
+        "book": 33,
+        "tech": 33,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 27,
+        "discovery:15m momentum not constructive": 2,
+        "book:imbalance_too_low": 25,
+        "book:spread_too_high": 22,
+        "coverage:not_evaluated_capacity": 52,
+        "discovery:1h clearly weak": 1,
+        "discovery:4h clearly weak": 3,
+        "universe:quote_volume_below_minimum": 99
+      }
+    },
+    {
+      "run_id": "39151759182",
+      "started_at": 1792346144,
+      "finished_at": 1792346189,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 32,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 597,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 10,
+      "hot_radar_selected": 10,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 62,
+        "book": 32,
+        "tech": 32,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:imbalance_too_low": 30,
+        "discovery:15m momentum not constructive": 1,
+        "discovery:RSI outside watch range": 27,
+        "book:spread_too_high": 18,
+        "discovery:4h clearly weak": 3,
+        "discovery:ATR outside range": 1,
+        "coverage:not_evaluated_capacity": 52,
+        "universe:quote_volume_below_minimum": 99
+      }
+    },
+    {
+      "run_id": "39152526652",
+      "started_at": 1792346746,
+      "finished_at": 1792346787,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 33,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 602,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 37,
+      "hot_radar_selected": 32,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 61,
+        "book": 33,
+        "tech": 33,
+        "score": 1,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 27,
+        "discovery:15m momentum not constructive": 1,
+        "book:imbalance_too_low": 28,
+        "book:spread_too_high": 19,
+        "discovery:ATR outside range": 1,
+        "coverage:not_evaluated_capacity": 51,
+        "discovery:4h clearly weak": 4,
+        "universe:quote_volume_below_minimum": 100
+      }
+    },
+    {
+      "run_id": "39153293224",
+      "started_at": 1792347349,
+      "finished_at": 1792347379,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 30,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 603,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 11,
+      "hot_radar_selected": 11,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 65,
+        "book": 30,
+        "tech": 30,
+        "score": 1,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 24,
+        "discovery:volume not expanding": 1,
+        "book:imbalance_too_low": 35,
+        "book:spread_too_high": 15,
+        "discovery:1h clearly weak": 1,
+        "discovery:4h clearly weak": 3,
+        "discovery:ATR outside range": 1,
+        "coverage:not_evaluated_capacity": 51,
+        "universe:quote_volume_below_minimum": 100
+      }
+    },
+    {
+      "run_id": "39154056465",
+      "started_at": 1792347948,
+      "finished_at": 1792347993,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 32,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 599,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 26,
+      "hot_radar_selected": 26,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 58,
+        "book": 32,
+        "tech": 32,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:imbalance_too_low": 26,
+        "discovery:volume not expanding": 1,
+        "discovery:RSI outside watch range": 27,
+        "book:spread_too_high": 22,
+        "discovery:ATR outside range": 1,
+        "coverage:not_evaluated_capacity": 51,
+        "discovery:1h clearly weak": 1,
+        "discovery:4h clearly weak": 2,
+        "universe:quote_volume_below_minimum": 100
+      }
+    },
+    {
+      "run_id": "39154817386",
+      "started_at": 1792348545,
+      "finished_at": 1792348574,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 28,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 597,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 13,
+      "hot_radar_selected": 13,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 64,
+        "book": 28,
+        "tech": 28,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:imbalance_too_low": 36,
+        "discovery:RSI outside watch range": 23,
+        "book:spread_too_high": 16,
+        "discovery:ATR outside range": 2,
+        "discovery:1h clearly weak": 1,
+        "discovery:4h clearly weak": 1,
+        "coverage:not_evaluated_capacity": 51,
+        "discovery:volume not expanding": 1,
+        "universe:quote_volume_below_minimum": 100
+      }
+    },
+    {
+      "run_id": "39155587187",
+      "started_at": 1792349149,
+      "finished_at": 1792349191,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 29,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 604,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 17,
+      "hot_radar_selected": 17,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 60,
+        "book": 29,
+        "tech": 29,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:imbalance_too_low": 31,
+        "discovery:RSI outside watch range": 25,
+        "discovery:15m momentum not constructive": 2,
+        "book:spread_too_high": 20,
+        "coverage:not_evaluated_capacity": 51,
+        "discovery:ATR outside range": 1,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 100
+      }
+    },
+    {
+      "run_id": "39156352252",
+      "started_at": 1792349749,
+      "finished_at": 1792349796,
+      "btc_ok": false,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 37,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 600,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 27,
+      "hot_radar_selected": 26,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 65,
+        "book": 37,
+        "tech": 37,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "discovery:RSI outside watch range": 31,
+        "book:imbalance_too_low": 28,
+        "discovery:15m momentum not constructive": 1,
+        "book:spread_too_high": 15,
+        "discovery:ATR outside range": 2,
+        "coverage:not_evaluated_capacity": 51,
+        "discovery:1h clearly weak": 2,
+        "discovery:4h clearly weak": 1,
+        "universe:quote_volume_below_minimum": 100
+      }
+    },
+    {
+      "run_id": "39157119966",
+      "started_at": 1792350344,
+      "finished_at": 1792350385,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 27,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 595,
+      "cadence_status": "ok",
+      "hot_radar_eligible": 10,
+      "hot_radar_selected": 10,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 57,
+        "book": 27,
+        "tech": 27,
+        "score": 0,
+        "early_watch": 0,
+        "early_watch_alerts": 0,
+        "candidates": 0,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:imbalance_too_low": 30,
+        "discovery:15m momentum not constructive": 1,
+        "discovery:RSI outside watch range": 21,
+        "book:spread_too_high": 23,
+        "discovery:1h clearly weak": 1,
+        "discovery:4h clearly weak": 4,
+        "coverage:not_evaluated_capacity": 52,
+        "universe:quote_volume_below_minimum": 99
+      }
+    }
+  ],
+  "diagnostic_cases": [
+    {
+      "run_id": "39148681303",
+      "started_at": 1792343730,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792343760,
+          "score": 28,
+          "rsi": "33.90677732125512",
+          "return_3": "0.132426628489620615604867600",
+          "volume_ratio": "1.0380058803701617",
+          "atr_pct": "0.5710868849144823605104192730",
+          "macd_histogram": "-0.40638170122975126",
+          "closed_candle_at": 1792342800,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792343735,
+          "imbalance": "0.4586194457666367020586157804"
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792343737,
+          "imbalance": "0.1589618193868344093102807652"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792343734,
+          "spread_pct": "0.9312320916905444126074498567"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792343747,
+          "score": 58,
+          "rsi": "56.54106771751125",
+          "return_3": "0.694112015318334131163236000",
+          "volume_ratio": "0.5442417885542071",
+          "atr_pct": "0.9040299091319278345614452104",
+          "macd_histogram": "0.0007836451634633859",
+          "closed_candle_at": 1792342800,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 5,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792343743
+        }
+      }
+    },
+    {
+      "run_id": "39149467165",
+      "started_at": 1792344330,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792344342,
+          "imbalance": "0.5787864754212665815218022904"
+        },
+        "MINA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792344330
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792344343,
+          "spread_pct": "0.6920415224913494809688581315"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792344335,
+          "spread_pct": "0.7142857142857142857142857143"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792344359,
+          "score": 61,
+          "rsi": "56.54106771751125",
+          "return_3": "0.694112015318334131163236000",
+          "volume_ratio": "0.5442417885542071",
+          "atr_pct": "0.9040299091319278345614452104",
+          "macd_histogram": "0.0007836451634633859",
+          "closed_candle_at": 1792342800,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 5,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792344343
+        }
+      }
+    },
+    {
+      "run_id": "39150258568",
+      "started_at": 1792344949,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792344986,
+          "score": 21,
+          "rsi": "30.607749897135164",
+          "return_3": "-0.5929312592645509260086082200",
+          "volume_ratio": "1.0082773564906633",
+          "atr_pct": "0.5706865039045631591239826809",
+          "macd_histogram": "-0.3279841280564213",
+          "closed_candle_at": 1792343700,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792344954,
+          "spread_pct": "0.5714285714285714285714285714"
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792344965,
+          "imbalance": "0.1613005030919765069721311551"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792344954,
+          "spread_pct": "0.7730147575544624033731553057"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792344989,
+          "score": 57,
+          "rsi": "50.23571737032753",
+          "return_3": "0.096061479346781940441882800",
+          "volume_ratio": "0.22222845832238913",
+          "atr_pct": "0.9329980129191559500959692898",
+          "macd_histogram": "0.0006344367146428465",
+          "closed_candle_at": 1792343700,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 5,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792344967
+        }
+      }
+    },
+    {
+      "run_id": "39151009904",
+      "started_at": 1792345547,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792345578,
+          "score": 17,
+          "rsi": "29.912434075573557",
+          "return_3": "-0.2350745599081235307840005700",
+          "volume_ratio": "0.7379859991565294",
+          "atr_pct": "0.5517415938747879343837686164",
+          "macd_histogram": "-0.2526881113229926",
+          "closed_candle_at": 1792344600,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792345547
+        },
+        "SAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792345547
+        },
+        "RAD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792345547
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792345577,
+          "score": 48,
+          "rsi": "48.445522450806614",
+          "return_3": "-0.0961538461538461538461538500",
+          "volume_ratio": "0.9025146679845076",
+          "atr_pct": "0.9324481651740548604427333975",
+          "macd_histogram": "0.00043627583882387366",
+          "closed_candle_at": 1792344600,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 5,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792345560
+        }
+      }
+    },
+    {
+      "run_id": "39151759182",
+      "started_at": 1792346144,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792346161,
+          "imbalance": "0.6285534401118279248173689772"
+        },
+        "MINA_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792346169,
+          "score": 18,
+          "rsi": "33.202008044872315",
+          "return_3": "-0.5681818181818181818181818200",
+          "volume_ratio": "1.2206782867046344",
+          "atr_pct": "0.6185597482389794285714285714",
+          "macd_histogram": "-0.004054630162168293",
+          "closed_candle_at": 1792344600,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 10,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792346153,
+          "spread_pct": "0.6896551724137931034482758621"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792346149,
+          "spread_pct": "0.9964412811387900355871886121"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792346186,
+          "score": 48,
+          "rsi": "48.445522450806614",
+          "return_3": "-0.0961538461538461538461538500",
+          "volume_ratio": "0.9025146679845076",
+          "atr_pct": "0.9324481651740548604427333975",
+          "macd_histogram": "0.00043627583882387366",
+          "closed_candle_at": 1792344600,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 5,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792346164
+        }
+      }
+    },
+    {
+      "run_id": "39152526652",
+      "started_at": 1792346746,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792346784,
+          "score": 24,
+          "rsi": "29.666787549486955",
+          "return_3": "-0.6791292847696321978768273900",
+          "volume_ratio": "1.043367966250416",
+          "atr_pct": "0.5260298244720797495231583114",
+          "macd_histogram": "-0.155265720275108",
+          "closed_candle_at": 1792345500,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792346767,
+          "score": 26,
+          "rsi": "31.556904258440554",
+          "return_3": "-0.8522727272727272727272727300",
+          "volume_ratio": "7.016876377678084",
+          "atr_pct": "0.6169559687274110315186246418",
+          "macd_histogram": "-0.005042320102927465",
+          "closed_candle_at": 1792345500,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 9,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "SAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792346746
+        },
+        "RAD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792346746
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792346786,
+          "score": 52,
+          "rsi": "49.416154965173995",
+          "return_3": "-1.069645828381269313049679110",
+          "volume_ratio": "1.0741205751440444",
+          "atr_pct": "0.8834748002124774147044690053",
+          "macd_histogram": "0.0003316978786502978",
+          "closed_candle_at": 1792345500,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 4,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792346764
+        }
+      }
+    },
+    {
+      "run_id": "39153293224",
+      "started_at": 1792347349,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792347360,
+          "imbalance": "0.4927484025563556612696743030"
+        },
+        "MINA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792347349
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792347355,
+          "imbalance": "0.2264426620879899316284581922"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792347353,
+          "spread_pct": "0.6333567909922589725545390570"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792347377,
+          "score": 57,
+          "rsi": "50.42138751203444",
+          "return_3": "0",
+          "volume_ratio": "0.7868265922154962",
+          "atr_pct": "0.8534632520663272552783109405",
+          "macd_histogram": "0.000290502039087717",
+          "closed_candle_at": 1792346400,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 4,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792347362
+        }
+      }
+    },
+    {
+      "run_id": "39154056465",
+      "started_at": 1792347948,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792347990,
+          "score": 21,
+          "rsi": "30.03243561104196",
+          "return_3": "-0.1329476653312013797811753300",
+          "volume_ratio": "1.055546872986829",
+          "atr_pct": "0.5130137743250394876499901056",
+          "macd_histogram": "-0.026391895465122772",
+          "closed_candle_at": 1792346400,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792347960,
+          "imbalance": "0.5927176535203647885868890266"
+        },
+        "SAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792347948
+        },
+        "RAD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792347948
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792347991,
+          "score": 57,
+          "rsi": "50.42138751203444",
+          "return_3": "0",
+          "volume_ratio": "0.7868265922154962",
+          "atr_pct": "0.8534632520663272552783109405",
+          "macd_histogram": "0.000290502039087717",
+          "closed_candle_at": 1792346400,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 4,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792347967
+        }
+      }
+    },
+    {
+      "run_id": "39154817386",
+      "started_at": 1792348545,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792348556,
+          "imbalance": "0.7696378691801145755250093016"
+        },
+        "MINA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792348545
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792348551,
+          "imbalance": "0.1675122819149264499221677521"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792348549,
+          "spread_pct": "1.055594651653764954257565095"
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792348556,
+          "imbalance": "0.8307910885550563416656229343"
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792348558
+        }
+      }
+    },
+    {
+      "run_id": "39155587187",
+      "started_at": 1792349149,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792349166,
+          "imbalance": "0.7848531340931861456804569670"
+        },
+        "MINA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792349160,
+          "imbalance": "0.5508782507632892380479805148"
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792349168,
+          "imbalance": "0.1642854952716065695884300588"
+        },
+        "RAD_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792349149
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792349187,
+          "score": 48,
+          "rsi": "48.03151109328968",
+          "return_3": "-0.1681883709754925516578568000",
+          "volume_ratio": "0.5384807195247451",
+          "atr_pct": "0.8224326279501419013237063779",
+          "macd_histogram": "0.00017079275250025087",
+          "closed_candle_at": 1792348200,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 4,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792349169
+        }
+      }
+    },
+    {
+      "run_id": "39156352252",
+      "started_at": 1792349749,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792349787,
+          "score": 28,
+          "rsi": "27.23949175005491",
+          "return_3": "-0.3814733508475186238168927900",
+          "volume_ratio": "1.054048203127161",
+          "atr_pct": "0.4796312376488219356237130161",
+          "macd_histogram": "0.07284014051038135",
+          "closed_candle_at": 1792348200,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792349749
+        },
+        "SAND_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792349749
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792349762,
+          "spread_pct": "0.8474576271186440677966101695"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792349794,
+          "score": 36,
+          "rsi": "48.03151109328968",
+          "return_3": "-0.1681883709754925516578568000",
+          "volume_ratio": "0.5384807195247451",
+          "atr_pct": "0.8224326279501419013237063779",
+          "macd_histogram": "0.00017079275250025087",
+          "closed_candle_at": 1792348200,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 4,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792349768
+        }
+      }
+    },
+    {
+      "run_id": "39157119966",
+      "started_at": 1792350344,
+      "shadow_mode": true,
+      "status": "completed",
+      "cases": {
+        "NMR_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792350381,
+          "score": 28,
+          "rsi": "30.513339613980477",
+          "return_3": "-0.2176767949340673178980696900",
+          "volume_ratio": "0.9554629926821295",
+          "atr_pct": "0.4623082842029861536797317275",
+          "macd_histogram": "0.18695942539152455",
+          "closed_candle_at": 1792349100,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "MINA_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792350356,
+          "imbalance": "0.6938316964826324910985825498"
+        },
+        "SAND_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792350353,
+          "spread_pct": "0.6896551724137931034482758621"
+        },
+        "RAD_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792350350,
+          "spread_pct": "0.5602240896358543417366946779"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792350381,
+          "score": 45,
+          "rsi": "48.22206961282353",
+          "return_3": "-0.2879078694817658349328215000",
+          "volume_ratio": "0.6424835486779894",
+          "atr_pct": "0.7978773937122185514918190568",
+          "macd_histogram": "0.00007884962389967913",
+          "closed_candle_at": 1792349100,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 4,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "BTC_TL": {
+          "stage": "universe",
+          "reason": "excluded_base_asset",
+          "observed_at": 1792350365
+        }
+      }
+    }
+  ],
+  "lifecycle": {
+    "NMR_TL": {
+      "candidate_id": "NMR_TL:39055012478",
+      "symbol": "NMR_TL",
+      "first_seen_run": "39055012478",
+      "first_seen_at": "2026-10-17T17:44:17+00:00",
+      "max_score": 87,
+      "current_state": "rejected",
+      "history": [
+        {
+          "run_id": "39055012478",
+          "ts": "2026-10-17T17:44:17+00:00",
+          "score": 87,
+          "state": "discovery"
+        },
+        {
+          "run_id": "39055012478",
+          "ts": "2026-10-17T17:44:17+00:00",
+          "score": 87,
+          "state": "rejected",
+          "reason": "BTC blocked: BTC synthetic candles present"
+        }
+      ]
+    },
+    "MINA_TL": {
+      "candidate_id": "MINA_TL:37929377931",
+      "symbol": "MINA_TL",
+      "first_seen_run": "37929377931",
+      "first_seen_at": "2026-10-09T12:20:59+00:00",
+      "max_score": 75,
+      "current_state": "expired",
+      "history": [
+        {
+          "run_id": "37929377931",
+          "ts": "2026-10-09T12:20:59+00:00",
+          "score": 66,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "37988617072",
+          "ts": "2026-10-09T20:41:40+00:00",
+          "score": 70,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "37995912192",
+          "ts": "2026-10-09T21:51:50+00:00",
+          "score": 75,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "37997822843",
+          "ts": "2026-10-09T22:11:49+00:00",
+          "score": 72,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "39133438850",
+          "ts": "2026-10-18T13:52:40+00:00",
+          "score": null,
+          "state": "expired",
+          "reason": "watch_window_expired"
+        }
+      ]
+    },
+    "SAND_TL": {
+      "candidate_id": "SAND_TL:39132164869",
+      "symbol": "SAND_TL",
+      "first_seen_run": "39132164869",
+      "first_seen_at": "2026-10-18T13:35:25+00:00",
+      "max_score": 71,
+      "current_state": "rejected",
+      "history": [
+        {
+          "run_id": "39132164869",
+          "ts": "2026-10-18T13:35:25+00:00",
+          "score": 71,
+          "state": "discovery"
+        },
+        {
+          "run_id": "39132164869",
+          "ts": "2026-10-18T13:35:25+00:00",
+          "score": 71,
+          "state": "rejected",
+          "reason": "BTC blocked: BTC confirmed weakness RSI=34.5 | 3C=-0.42%"
+        }
+      ]
+    },
+    "RAD_TL": {
+      "candidate_id": "RAD_TL:38763797295",
+      "symbol": "RAD_TL",
+      "first_seen_run": "38763797295",
+      "first_seen_at": "2026-10-15T15:50:47+00:00",
+      "max_score": 73,
+      "current_state": "expired",
+      "history": [
+        {
+          "run_id": "38763797295",
+          "ts": "2026-10-15T15:50:47+00:00",
+          "score": 73,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "38776454352",
+          "ts": "2026-10-15T17:20:49+00:00",
+          "score": 73,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "39133438850",
+          "ts": "2026-10-18T13:52:40+00:00",
+          "score": null,
+          "state": "expired",
+          "reason": "watch_window_expired"
+        }
+      ]
+    },
+    "ALT_TL": {
+      "candidate_id": "ALT_TL:39115876058",
+      "symbol": "ALT_TL",
+      "first_seen_run": "39115876058",
+      "first_seen_at": "2026-10-18T09:35:16+00:00",
+      "max_score": 77,
+      "current_state": "expired",
+      "history": [
+        {
+          "run_id": "39115876058",
+          "ts": "2026-10-18T09:35:16+00:00",
+          "score": 77,
+          "state": "early_watch",
+          "reason": "1h clearly weak"
+        },
+        {
+          "run_id": "39150258568",
+          "ts": "2026-10-18T17:35:49+00:00",
+          "score": null,
+          "state": "expired",
+          "reason": "watch_window_expired"
+        }
+      ]
+    },
+    "BTC_TL": null
+  },
+  "coverage": {
+    "generation": 3216,
+    "book_generations": {
+      "NMR_TL": 3216,
+      "MINA_TL": 3216,
+      "SAND_TL": 3216,
+      "RAD_TL": 3216,
+      "ALT_TL": 3216,
+      "BTC_TL": null
+    },
+    "technical_generations": {
+      "NMR_TL": 3216,
+      "MINA_TL": 3210,
+      "SAND_TL": 3194,
+      "RAD_TL": 3189,
+      "ALT_TL": 3216,
+      "BTC_TL": null
+    }
+  },
+  "radar": {
+    "observed_at": 1792350344,
+    "volume_basis": "rolling_24h_difference_not_trade_flow",
+    "hot": {
+      "NMR_TL": null,
+      "MINA_TL": null,
+      "SAND_TL": null,
+      "RAD_TL": {
+        "price_delta_pct": "1.198026779422128259337561700",
+        "quote_volume_delta_pct": "0.4599084604003992071949746252",
+        "heat": "0.5509826516424796703533875172"
+      },
+      "ALT_TL": null,
+      "BTC_TL": null
+    }
+  },
+  "limits": [
+    "Logs show decisions for their observation times; a later price increase is not proof of an incorrect rejection.",
+    "Book-stage rejections did not fetch that market's candles in that scan. Capacity skips are not market or data rejection.",
+    "Original Paribu-published zero-volume bars are not local synthetic data and are not evidence of trades.",
+    "Offline generated regression fixtures exercise transitions, not market profitability or historical READY qualification."
+  ]
+}
