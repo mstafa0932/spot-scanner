@@ -1,0 +1,26 @@
+{
+  "observed_date_utc": "2026-10-17",
+  "production_origin_source": "https://www.paribu.com",
+  "production_origin": "https://web.paribu.com",
+  "client_source": "https://www.paribu.com/_app/index-J3LAJMOg.js",
+  "client_sha256": "791674cc9c777eca9ca2c1525343d1b048bb80fc7bb2caf9be91ab4ba8be10a0",
+  "source_inspection_run": "https://github.com/mstafa0932/spot-scanner/actions/runs/39064425012",
+  "production_origin_inspection_run": "https://github.com/mstafa0932/spot-scanner/actions/runs/39064472146",
+  "native_capture_run": "https://github.com/mstafa0932/spot-scanner/actions/runs/39064544854",
+  "http_method": "GET",
+  "endpoint": "https://web.paribu.com/v1/chart/ohlc",
+  "parameters": {
+    "marketType": "crypto",
+    "symbol": "lowercase Paribu market id, for example btc_tl",
+    "interval": "15m, 1h, or 4h, verified against original responses",
+    "limit": "300 verified in the recorded probes; 500 verified by the pinned reader in live validation run 39065124576; production reader caps every request at 500",
+    "to": "Unix milliseconds; the client subtracts one millisecond from an exclusive boundary"
+  },
+  "response_path": "payload.candles",
+  "row_fields": ["date", "open", "high", "low", "close", "volume"],
+  "date_units": "Unix milliseconds",
+  "native_zero_volume_semantics": "Record published directly by Paribu for a no-trade interval; no execution is inferred and no local OHLCV row is created.",
+  "local_synthetic_policy": "SYNTHETIC_FFILL remains is_authentic=false and remains blocked by the existing scanner and BTC gates.",
+  "contract_limitations": "The endpoint is used by Paribu's own current web chart. Its availability and schema can change. Unsupported or malformed replies fail closed; there is no claim of a documented permanent availability guarantee.",
+  "monitoring": "Finite diagnostic runs only; no continuous monitor was created."
+}

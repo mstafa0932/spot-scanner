@@ -504,7 +504,18 @@ def repair(
     }
     LOGGER.info("CANDLE_REPAIR_START %s", json.dumps(report))
 
-    same_unrecovered_gap = _reuse_negative_cache(previous, missing, now, report)
+    # Determine the full recovery workload before consulting the negative
+    # cache. If there are more clusters than the bounded request budget, a
+    # previous run could only have tested a subset; caching the entire missing
+    # fingerprint would incorrectly suppress retries for untested clusters.
+    recovery_clusters = sorted(
+        spans(missing, interval), key=lambda span: span[1], reverse=True
+    )
+    all_clusters_fit_budget = len(recovery_clusters) <= MAX_REQUESTS
+    same_unrecovered_gap = (
+        all_clusters_fit_budget
+        and _reuse_negative_cache(previous, missing, now, report)
+    )
     if same_unrecovered_gap:
         report["recovery_skipped_reason"] = "unchanged_gap_fingerprint"
         LOGGER.info("CANDLE_REPAIR_NEGATIVE_CACHE %s", json.dumps({
@@ -514,7 +525,10 @@ def repair(
         }))
 
     fatal_recovery_error = None
-    recovery_clusters = spans(missing, interval)
+    # Spend the bounded request budget on the newest gaps first. The scanner
+    # needs a current, authentic contiguous tail for closed-candle indicators;
+    # older isolated gaps must not consume all recovery attempts before recent
+    # candles are checked. Keep every request scoped to one exact missing span.
     for attempt in range(1, min(MAX_REQUESTS, len(recovery_clusters)) + 1):
         if same_unrecovered_gap:
             break
@@ -589,8 +603,15 @@ def repair(
         _persist_failure(label, now, missing, report, fatal_recovery_error)
         raise ValueError(str(fatal_recovery_error)) from fatal_recovery_error
 
-    if (report["requests"] > 0 and not report["errors"]
-            and missing and len(missing) == report["missing_before"]):
+    if (
+        report["requests"] > 0
+        and not report["errors"]
+        and missing
+        and len(missing) == report["missing_before"]
+        and all_clusters_fit_budget
+        and report["requests"] == len(recovery_clusters)
+    ):
+        # Only cache a negative result when every missing cluster was tested.
         _cache_no_recovery(report, now)
 
     # If historical gaps remain but the newest contiguous suffix is fully
