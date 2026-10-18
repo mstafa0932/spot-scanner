@@ -4705,7 +4705,7 @@
       "pr": 45,
       "head": "e26b0f8d8b8c0e238eea813458b6f16f5699b180",
       "reader_code_commit": "d0281f8802d222af003c66ae9404be42463528c9",
-      "draft": true,
+      "draft": false,
       "merged": false,
       "ci_run": 39065246812,
       "ci_tests_per_version": 305,
@@ -4716,7 +4716,12 @@
       "pinned_live_validation_run": 39065124576,
       "native_cases_passed": 12,
       "independent_reviews_observed": 0,
-      "production_native_reader_active": false
+      "production_native_reader_active": false,
+      "review_status": "ready_for_independent_review",
+      "review_handoff_url": "https://github.com/mstafa0932/spot-scanner/pull/45",
+      "review_handoff_prepared_at_utc": "2026-10-18T03:39:38.945Z",
+      "independent_approval_verified": false,
+      "independent_review_access": "No independent security-review tool is exposed in the current session and no reviewer is assigned; do not self-approve."
     },
     "episode_expiry": {
       "pr": 46,
@@ -4865,6 +4870,13 @@
         39092896535
       ],
       "conclusion": "Eight new production scanner runs (39088747809–39092896535) completed successfully. Run scanner and Persist scanner state succeeded for each; cadence gaps were 595–609 seconds, SHADOW_MODE remained true, latest state JSON validated at 2,234,923 bytes, cadence_status=ok and state_saved=OK. A separate near-miss calibration commit changed state/archive files only, not executable strategy code. NMR reached discovery once on a fresh authentic closed candle and was rejected by the unchanged RSI gate; other focus cases remained subject to book, liquidity, capacity, and known legacy candle gates. No READY candidate or delivery appeared. PRs #45/#46 and independent-review status are unchanged. No new defect, interruption, or user-action blocker was established."
+    },
+    {
+      "source": "interactive_security_review_handoff",
+      "checked_at_utc": "2026-10-18T03:39:38.945Z",
+      "inspected_run_ids": [],
+      "head": "e26b0f8d8b8c0e238eea813458b6f16f5699b180",
+      "conclusion": "Prepared scoped security-review evidence and production acceptance procedure in PR45 body; marked PR45 ready for review without altering its CI-tested head. Reconfirmed green Python3.10/3.12 CI and zero independent reviews. No independent service tool or assigned reviewer is available, so no security approval, merge, deployment, scanner dispatch, or readiness claim occurred. Updated existing quiet automation to prioritize review then authorized conditional merge and prove native source use. Previous production observations are preserved and were not reclassified as native-reader acceptance."
     }
   ],
   "scheduler_confirmation": {
@@ -4872,10 +4884,11 @@
     "schedule": "BEGIN:VEVENT\nDTSTART:20261017T201924Z\nRRULE:FREQ=HOURLY\nEND:VEVENT",
     "default_timezone": "Europe/Istanbul",
     "timing_mode": "condition_watch",
-    "updated_at": "2026-10-17T20:18:25.087212+00:00",
+    "updated_at": "2026-10-18T03:39:05.228171+00:00",
     "last_run_before_reactivation": "2026-10-16T20:22:25.902392+00:00",
     "first_post_reactivation_execution_verified": true,
-    "first_post_reactivation_check_utc": "2026-10-17T20:20:21Z"
+    "first_post_reactivation_check_utc": "2026-10-17T20:20:21Z",
+    "priority_update": "Independent review, conditional approved merge, then production native-source verification; existing hourly schedule retained."
   },
   "last_check_utc": "2026-10-18T03:23:48Z",
   "inspected_run_ids": [
@@ -4922,5 +4935,25 @@
     39091716672,
     39092307184,
     39092896535
-  ]
+  ],
+  "current_priority": {
+    "updated_at_utc": "2026-10-18T03:39:38.945Z",
+    "requested_sequence": [
+      "complete independent security review of PR45",
+      "merge only after current CI and independent approval",
+      "prove native endpoint use in real main scanner run"
+    ],
+    "conditional_merge_authorized_by_user": true,
+    "merge_gate_satisfied": false,
+    "next_required_external_action": "Make an independent reviewer/service available; Codex Security installation is unconfirmed.",
+    "acceptance_evidence": [
+      "actual checked-out reader code",
+      "PARIBU_CANDLE_SOURCE native endpoint",
+      "closed/fresh/contiguous history and explicit empty/synthetic counts",
+      "SHADOW true",
+      "Run scanner and Persist scanner state success",
+      "persisted source diagnostics for actually fetched primary cases"
+    ]
+  },
+  "last_security_gate_check_utc": "2026-10-18T03:39:38.945Z"
 }
