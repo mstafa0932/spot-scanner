@@ -551,12 +551,34 @@ def _parse_native_candle_payload(payload: Any) -> pd.DataFrame:
     provider records are retained verbatim and explicitly identified downstream;
     they must not be confused with local SYNTHETIC_FFILL repair rows.
     """
-    if not isinstance(payload, dict) or not isinstance(payload.get("payload"), dict):
+    if (not isinstance(payload, dict)
+            or set(payload) - {"message", "meta", "payload"}
+            or not isinstance(payload.get("payload"), dict)):
         raise ParibuSchemaError("Invalid native Paribu chart envelope")
+    # The observed native contract has null metadata. Unknown envelope fields
+    # or metadata could declare a different source or synthetic data; never
+    # discard those declarations before assigning provider authenticity.
+    if payload.get("meta") is not None:
+        raise ParibuSchemaError("Unexpected native Paribu chart metadata")
     message = payload.get("message")
-    if (not isinstance(message, dict) or message.get("severity") != "success"):
+    if (not isinstance(message, dict)
+            or set(message) - {"severity", "display"}
+            or message.get("severity") != "success"):
         raise ParibuSchemaError("Native Paribu chart did not report success")
-    candles = payload["payload"].get("candles")
+    if "display" in message:
+        display = message["display"]
+        if (not isinstance(display, dict)
+                or set(display) != {"component", "content"}
+                or not all(isinstance(value, str) for value in display.values())):
+            raise ParibuSchemaError("Unexpected native Paribu chart display metadata")
+    native = payload["payload"]
+    if set(native) - {"candles", "nextTime"}:
+        raise ParibuSchemaError("Unexpected native Paribu chart payload fields")
+    cursor = native.get("nextTime")
+    if (cursor is not None
+            and (type(cursor) is not int or cursor <= 0 or cursor % 1000 != 0)):
+        raise ParibuSchemaError("Invalid native Paribu chart cursor")
+    candles = native.get("candles")
     if not isinstance(candles, list):
         raise ParibuSchemaError("Native Paribu chart candles are not an array")
     if not candles:
@@ -579,9 +601,12 @@ def _parse_native_candle_payload(payload: Any) -> pd.DataFrame:
         o, h, l, c, v = (values[key] for key in ("open", "high", "low", "close", "volume"))
         if min(o, h, l, c) <= 0 or v < 0 or h < max(o, c) or l > min(o, c) or h < l:
             raise ParibuSchemaError("Invalid native Paribu OHLCV relationship")
+        volume = float(v)
+        if v != 0 and volume == 0:
+            raise ParibuSchemaError("Native Paribu volume underflow")
         rows.append({"timestamp": int(timestamp_ms // 1000),
                      "open": float(o), "high": float(h), "low": float(l),
-                     "close": float(c), "volume": float(v)})
+                     "close": float(c), "volume": volume})
     result = pd.DataFrame(rows)
     result.attrs.update(source="PARIBU", provider="Paribu", candle_endpoint=PARIBU_NATIVE_OHLC_URL)
     return result

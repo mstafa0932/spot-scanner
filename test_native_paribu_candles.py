@@ -193,3 +193,41 @@ def test_source_change_does_not_reuse_legacy_negative_cache(monkeypatch):
     assert result.attrs["backfill"]["recovered"] == 1
     assert result.attrs["candle_quality"]["synthetic_count"] == 0
     assert state["candle_gap_history"]["btc_tl:15m:native_v1"]["report"]["requests"] == 1
+
+
+@pytest.mark.parametrize("location", ["root", "payload", "message", "display", "meta"])
+@pytest.mark.parametrize("field,value", [
+    ("source", "OTHER_EXCHANGE"),
+    ("is_authentic", False),
+    ("data_quality", "SYNTHETIC_FFILL"),
+])
+def test_native_provenance_metadata_cannot_be_discarded(monkeypatch, location, field, value):
+    """A source/synthetic declaration outside a row must block promotion too."""
+    recorded = capture("btc_tl")
+    data = copy.deepcopy(recorded["payload"])
+    if location == "root":
+        target = data
+    elif location == "display":
+        target = data["message"]["display"]
+    elif location == "meta":
+        data["meta"] = {}
+        target = data["meta"]
+    else:
+        target = data[location]
+    target[field] = value
+    monkeypatch.setattr(md.time, "time", lambda: (recorded["params"]["to"] + 1) // 1000)
+    calls = []
+    monkeypatch.setattr(md, "get_json", lambda *args, **kwargs: calls.append(args) or data)
+    with pytest.raises(md.ParibuSchemaError):
+        md.fetch_candles("BTC_TL")
+    assert len(calls) == 1
+
+
+def test_positive_native_volume_cannot_underflow_into_a_no_trade_record(monkeypatch):
+    recorded = capture("btc_tl")
+    data = copy.deepcopy(recorded["payload"])
+    data["payload"]["candles"][100]["volume"] = "1e-400"
+    monkeypatch.setattr(md.time, "time", lambda: (recorded["params"]["to"] + 1) // 1000)
+    monkeypatch.setattr(md, "get_json", lambda *args, **kwargs: data)
+    with pytest.raises(md.ParibuSchemaError, match="underflow"):
+        md.fetch_candles("BTC_TL")
