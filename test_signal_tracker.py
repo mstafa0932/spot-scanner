@@ -100,3 +100,27 @@ def test_shadow_events_never_deliver_to_telegram():
     assert signal_tracker.deliver_pending_events(
         state, lambda _msg: (_ for _ in ()).throw(AssertionError("must not send")), str
     ) == 0
+
+
+def test_open_signal_ignores_published_zero_volume_candle(monkeypatch):
+    state = {"active_signals": []}
+    signal_tracker.register_signal(
+        state, symbol="TEST_TL", entry=Decimal("100"), stop=Decimal("98"),
+        tp1=Decimal("103"), tp2=Decimal("105"), score=90, setup="BREAKOUT",
+        now=1000,
+    )
+    frame = pd.DataFrame([{
+        "timestamp": 1900,
+        "low": 97,
+        "high": 97,
+        "is_authentic": True,
+        "exchange_zero_volume": True,
+        "volume": 0,
+    }])
+    monkeypatch.setattr(signal_tracker, "fetch_candles", lambda *a, **k: frame)
+    monkeypatch.setattr(signal_tracker, "get_order_book", lambda *a, **k: None)
+
+    assert signal_tracker.update_active_signals(state, now=3000) == []
+    signal = state["active_signals"][0]
+    assert signal["status"] == "OPEN"
+    assert signal["skipped_tracking_candles"]["1900"] == "no_positive_trade_volume"
