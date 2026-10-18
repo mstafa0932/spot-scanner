@@ -65,6 +65,10 @@ TELEGRAM_CHAT_ENV = "TELEGRAM_CHAT_ID"
 SHADOW_MODE = os.getenv("SHADOW_MODE", "true").strip().lower() == "true"
 TELEGRAM_READY_ALERTS = os.getenv("TELEGRAM_READY_ALERTS", "false").strip().lower() == "true"
 TELEGRAM_EARLY_WATCH_ALERTS = os.getenv("TELEGRAM_EARLY_WATCH_ALERTS", "false").strip().lower() == "true"
+TELEGRAM_NEAR_READY_ALERTS = os.getenv(
+    "TELEGRAM_NEAR_READY_ALERTS", os.getenv("TELEGRAM_EARLY_WATCH_ALERTS", "false")
+).strip().lower() == "true"
+NEAR_READY_COOLDOWN_SECONDS = 15 * 60
 EXPECTED_RUN_INTERVAL_SECONDS = max(
     300, int(os.getenv("EXPECTED_RUN_INTERVAL_SECONDS", "600"))
 )
@@ -455,6 +459,7 @@ def _empty_state() -> dict[str, Any]:
         "shadow_paper_signals": {},
         "shadow_daily_alerts": [],
         "shadow_last_alert_at": 0,
+        "near_ready_last_attempt_at": 0,
         "coverage_scheduler": {},
         "ticker_radar": {},
         "candidate_lifecycle": {},
@@ -526,7 +531,9 @@ def load_state() -> dict[str, Any]:
 
         state["last_alert_at"] = int(raw.get("last_alert_at", 0) or 0)
         state["shadow_last_alert_at"] = int(raw.get("shadow_last_alert_at", 0) or 0)
-        if state["last_alert_at"] < 0 or state["shadow_last_alert_at"] < 0:
+        state["near_ready_last_attempt_at"] = int(raw.get("near_ready_last_attempt_at", 0) or 0)
+        if any(state[key] < 0 for key in (
+            "last_alert_at", "shadow_last_alert_at", "near_ready_last_attempt_at")):
             raise ValueError("Invalid last alert time")
 
         return state
@@ -663,16 +670,9 @@ def send_early_watch_alert(
     tech_15: IndicatorResult,
     btc_reason: str,
 ) -> bool:
-    if not TELEGRAM_EARLY_WATCH_ALERTS:
-        return False
-    return send_telegram(format_early_watch(
-        symbol=symbol,
-        score=score,
-        reason=reason,
-        book=book,
-        tech_15=tech_15,
-        btc_reason=btc_reason,
-    ))
+    # Broad EARLY WATCH remains an internal observation, even when an older
+    # deployment still supplies its former Telegram opt-in environment flag.
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -1558,6 +1558,73 @@ def build_opportunity(
         reasons=reasons,
     )
 
+def _send_near_ready(
+    state: dict[str, Any], candidate: Candidate, item: dict[str, Any],
+    btc_ok: bool, btc_reason: str, now: int,
+) -> bool:
+    """Notify only one confirmation short, without writing READY state."""
+    if (not TELEGRAM_NEAR_READY_ALERTS or not SHADOW_MODE
+            or os.getenv("SHADOW_MODE", "true").strip().lower() != "true"
+            or item.get("near_ready_notified_at") or item.get("near_ready_attempted_at")):
+        return False
+    try:
+        last_near = int(state.get("near_ready_last_attempt_at", 0) or 0)
+    except (TypeError, ValueError):
+        return False
+    if now - last_near < NEAR_READY_COOLDOWN_SECONDS:
+        return False
+    # Preparation is useful only if the existing READY delivery limits could
+    # permit this symbol. Its helper may prune counters; use a shallow copy.
+    if (not _global_alert_allowed(state.copy(), now, True)
+            or not _symbol_alert_allowed(state, candidate.symbol, now, True)):
+        return False
+    if not 0 <= now - (candidate.candle_at + 900) <= 960:
+        return False
+    try:
+        candidate = replace(candidate, book=get_order_book(candidate.symbol))
+    except ParibuDataError:
+        return False
+    checked_at = int(time.time())
+    if not 0 <= checked_at - (candidate.candle_at + 900) <= 960:
+        return False
+    ready, reason, avg_imbalance, confirmations = trigger_check(
+        candidate, item, btc_ok, btc_reason, checked_at
+    )
+    if (ready or confirmations <= 0 or confirmations != MIN_CONFIRMATIONS - 1
+            or not reason.startswith("watching: confirmations ")):
+        return False
+    # trigger_check returns at the missing confirmation. Its subsequent flow
+    # persistence gates must also pass before any preparation notification.
+    observations = _recent_observations(item, checked_at)
+    if avg_imbalance < MIN_AVG_IMBALANCE:
+        return False
+    if (_avg_decimal(observations, "volume_ratio") < Decimal("1.15")
+            and candidate.tech_15.volume_ratio < Decimal("1.60")):
+        return False
+    opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
+    if opp is None:
+        return False
+    message = (
+        "👀 <b>NEAR READY — استعد للمراجعة</b>\n"
+        f"🪙 <b>{html.escape(opp.symbol)}</b> | الدرجة {opp.score}/100\n"
+        f"التأكيدات على شموع مغلقة: {confirmations}/{MIN_CONFIRMATIONS}\n"
+        f"السعر المرجعي وقت الفحص: <code>{fmt(candidate.book.best_ask)}</code>\n\n"
+        "اجتازت شروط السوق والمخاطرة الحالية، وبقي تأكيد جديد.\n"
+        "انتظر READY بعد إعادة الفحص؛ قد تتغير الشروط."
+    )
+    # Persist the optional preparation attempt before its POST. An ambiguous
+    # response or process stop must not replay it; READY remains independent.
+    item["near_ready_attempted_at"] = checked_at
+    state["near_ready_last_attempt_at"] = checked_at
+    save_state(state)
+    if not send_telegram(message):
+        return False
+    item["near_ready_notified_at"] = checked_at
+    LOGGER.info("NEAR_READY sent market=%s closed_candle=%d confirmations=%d/%d",
+                candidate.symbol, candidate.candle_at, confirmations, MIN_CONFIRMATIONS)
+    return True
+
+
 def format_opportunity(opp: TriggeredOpportunity) -> str:
     return (
         "🚨 <b>PARIBU — فرصة أصبحت جاهزة للمراجعة</b>\n"
@@ -1633,7 +1700,7 @@ def run_scanner() -> None:
                    "research_cohort": cohort["id"], "code_sha": os.getenv("GITHUB_SHA"),
                    "run_id": os.getenv("GITHUB_RUN_ID"), "transitions": []}
     funnel = {"book_approved": 0, "data_valid": 0, "discovery_passed": 0,
-              "early_watch": 0, "early_watch_alerts": 0,
+              "early_watch": 0, "early_watch_alerts": 0, "near_ready_alerts": 0,
               "confirmed": 0, "limit_simulated": 0}
     obs = {"liq": 0, "spread": 0, "book": 0, "tech": 0, "score": 0, "exec": 0}
     candle_stats = {"complete": 0, "synthetic": 0, "error": 0}
@@ -1987,6 +2054,7 @@ def run_scanner() -> None:
 
     sent = False
     telegram_alert_sent = False
+    near_ready_candidate = None
 
     for candidate in discovered:
         item = _watchlist(state).get(candidate.symbol)
@@ -1998,6 +2066,12 @@ def run_scanner() -> None:
         )
 
         if not ready:
+            if (near_ready_candidate is None
+                    and trigger_reason.startswith("watching: confirmations ")
+                    and confirmations > 0 and confirmations == MIN_CONFIRMATIONS - 1
+                    and not item.get("near_ready_attempted_at")
+                    and not item.get("near_ready_notified_at")):
+                near_ready_candidate = (candidate, item)
             note(candidate.symbol, "trigger", trigger_reason, score=candidate.score)
             lifecycle_state = ("confirmation_1_of_2" if trigger_reason.startswith("watching: confirmations 1/")
                                else "rejected")
@@ -2206,6 +2280,13 @@ def run_scanner() -> None:
         else:
             note(candidate.symbol, "notification", "telegram_failed")
 
+    # READY and its retry take priority. At most one extra book read and one
+    # preparation attempt per run; no preparation cooldown touches READY keys.
+    if not sent and near_ready_candidate is not None:
+        candidate, item = near_ready_candidate
+        if _send_near_ready(state, candidate, item, btc_ok, btc_reason, int(time.time())):
+            funnel["near_ready_alerts"] += 1
+
     if os.getenv("SHADOW_RADAR_ENABLED", "true").lower() == "true":
         try:
             from accumulation_radar import advance
@@ -2289,6 +2370,7 @@ def run_scanner() -> None:
             "book": obs["book"], "tech": obs["tech"], "score": obs["score"],
             "early_watch": funnel["early_watch"],
             "early_watch_alerts": funnel["early_watch_alerts"],
+            "near_ready_alerts": funnel["near_ready_alerts"],
             "candidates": len(discovered), "confirmed": funnel["confirmed"],
             "exec": obs["exec"], "limit": funnel["limit_simulated"],
         },
@@ -2317,6 +2399,7 @@ def run_scanner() -> None:
         f"score={obs['score']} early_watch={funnel['early_watch']} "
         f"watch_alerts={funnel['early_watch_alerts']} candidates={len(discovered)} "
         f"confirmed={funnel['confirmed']} exec={obs['exec']} limit={funnel['limit_simulated']} "
+        f"near_ready_alerts={funnel['near_ready_alerts']} "
         f"stage_drops={json.dumps(stage_drops, sort_keys=True, separators=(',', ':'))}",
         flush=True,
     )
