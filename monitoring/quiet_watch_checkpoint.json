@@ -35,40 +35,40 @@
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
     "controller_status_checked_at_utc": "2026-10-18T13:50:59.426Z",
-    "latest_persisted_state_commit": "acb6f5890a5b0e28223eb600fea278937bdb0764",
-    "latest_persisted_state_blob": "8e99437936d0a4cce8ae519be8ad6e7cea1f6738",
-    "latest_persisted_state_bytes": 2863255,
+    "latest_persisted_state_commit": "def715485b728b2011db29e95b229d157e08a5ff",
+    "latest_persisted_state_blob": "0b42dde5b19f0f03f034f17e7e76ef608ae49959",
+    "latest_persisted_state_bytes": 2829025,
     "last_controller_completion_expected_end_of_window": true,
     "last_controller_completion_note": "Previously inspected four-hour controller job completed successfully. Scanner state commits continued every ~10 minutes afterward; no duplicate controller was created or inferred from state commits alone."
   },
   "last_verified_production_run": {
-    "run_id": 39157896971,
-    "job_id": 117764840305,
-    "head_sha": "c6ef6f479cd8a222a7c89890e07722e5c33d8260",
-    "refreshed_main_sha": "c6ef6f479cd8a222a7c89890e07722e5c33d8260",
+    "run_id": 39159431196,
+    "job_id": 117769424467,
+    "head_sha": "73ea172be816924a31a03fb14574b1a97071e049",
+    "refreshed_main_sha": "73ea172be816924a31a03fb14574b1a97071e049",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "d087b22ec60fa95c79c5ce5391e9d780cec09931",
+    "resulting_state_commit": "def715485b728b2011db29e95b229d157e08a5ff",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-18T19:16:22Z",
+    "finished_at_utc": "2026-10-18T19:36:20Z",
     "infra": {
       "btc_ok": true,
       "btc_reason": "regime_neutral",
-      "candles_complete": 30,
+      "candles_complete": 26,
       "candles_synthetic": 0,
       "candles_error": 0,
-      "cadence_gap_seconds": 356,
+      "cadence_gap_seconds": 594,
       "cadence_status": "ok",
       "state_saved": "OK"
     },
     "funnel": {
       "universe": 234,
       "liq": 80,
-      "spread": 58,
-      "book": 30,
-      "tech": 30,
+      "spread": 53,
+      "book": 26,
+      "tech": 26,
       "score": 0,
       "early_watch": 0,
       "early_watch_alerts": 0,
@@ -80,8 +80,8 @@
     }
   },
   "latest_loaded_state": {
-    "commit_sha": "d087b22ec60fa95c79c5ce5391e9d780cec09931",
-    "bytes": 2843911,
+    "commit_sha": "def715485b728b2011db29e95b229d157e08a5ff",
+    "bytes": 2829025,
     "json_valid": true,
     "observed_at_utc": "2026-10-18T19:18:29.331Z",
     "runs": [
@@ -496,7 +496,7 @@
   ],
   "readiness": {
     "accepted": false,
-    "post_material_fix_verified_production_cycles": 2,
+    "post_material_fix_verified_production_cycles": 4,
     "required_consecutive_cycles": 24,
     "qualified_ready_delivery_verified_after_fix": false,
     "stable_executable_and_settings_since_merge": true,
@@ -507,7 +507,7 @@
     ],
     "acceptance_code_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change.",
-    "cycle_count_basis": "Actual main push39157435501 and subsequent scheduled dispatch39157896971 with successful scanner/persistence, no source changes, native data, zero candle errors/synthetic, SHADOW true.",
+    "cycle_count_basis": "Actual main push run39157435501 and scheduled dispatches39157896971,39158671950,39159431196: scanner/persistence successful, native source, SHADOW true, zero synthetic/candle errors, generic watch_alerts=0.",
     "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48."
   },
   "known_access_caveats": [
@@ -781,6 +781,15 @@
       "case_run": 39148681303,
       "diagnostic_run": 39157732366,
       "classification": "correct_market_gate; prior notification policy violation fixed48"
+    },
+    {
+      "source": "scheduled_quiet_watch",
+      "checked_at_utc": "2026-10-18T19:37:42.422Z",
+      "inspected_run_ids": [
+        39158671950,
+        39159431196
+      ],
+      "conclusion": "Two new post-PR48 production cycles completed and persisted state. Latest run refreshed main state descendant of bf5ef22, remained SHADOW=true, used native /v1/chart/ohlc with250 closed BTC15m bars,3 provider-zero-volume and0 local synthetic, cadence594s/state_savedOK, generic watch_alerts=0, near_ready_alerts=0, confirmed=0. XCN retained its strategy followup and gained execution followup slots in both cycles but was rejected by actual book spread1.0619% then1.7453%; no READY or delivery was lost. The first new closed4h after the alert is still unavailable until20:00Z/23:00 Turkey, so no future-close claim was made."
     }
   ],
   "scheduler_confirmation": {
@@ -798,10 +807,8 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-18T19:18:29.331Z",
+  "last_check_utc": "2026-10-18T19:37:42.422Z",
   "inspected_run_ids": [
-    39072849034,
-    39073523976,
     39074209991,
     39074905185,
     39075588449,
@@ -899,7 +906,9 @@
     39131416162,
     39132164869,
     39133438850,
-    39113158022
+    39113158022,
+    39158671950,
+    39159431196
   ],
   "current_priority": {
     "updated_at_utc": "2026-10-18T19:18:29.331Z",
@@ -979,11 +988,12 @@
     "peak_0_2195_15m_local": "2026-10-18 19:15–19:30 Europe/Istanbul, before20:15 alert",
     "followup_lost": false,
     "strategy_ttl_expires_if_not_refreshed_utc": "2026-10-19T01:15:30Z",
-    "latest_scan": 39157896971,
-    "latest_rejection": "RSI outside watch range; RSI73.53089288356117; score63",
+    "latest_scan": 39159431196,
+    "latest_rejection": "spread_too_high; spread_pct=1.745283018867924528301886792",
     "latest_strategy_followup_persisted": true,
     "latest_execution_followup_cleared_after_data_and_book_recovery": true,
     "pending_new_closed_4h_after_utc": "2026-10-18T20:00:00Z",
-    "automation_prompt_updated_for_pending_case": true
+    "automation_prompt_updated_for_pending_case": true,
+    "latest_execution_followup_persisted": true
   }
 }
