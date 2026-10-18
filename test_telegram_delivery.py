@@ -110,7 +110,7 @@ def test_early_watch_keeps_existing_short_term_guards():
     assert not scanner._early_watch_mtf_ok(book, tech, scanner.DISCOVERY_MIN_SCORE, True, "1h clearly weak")
 
 
-def test_early_watch_alert_requires_explicit_opt_in(monkeypatch):
+def test_general_early_watch_never_sends_with_either_legacy_flag_value(monkeypatch):
     book, tech = _watch_book(), _watch_tech()
     sender = Mock(return_value=True)
     monkeypatch.setattr(scanner, "send_telegram", sender)
@@ -126,9 +126,6 @@ def test_early_watch_alert_requires_explicit_opt_in(monkeypatch):
     assert scanner.send_early_watch_alert(
         symbol="TEST_TL", score=70, reason="1h clearly weak",
         book=book, tech_15=tech, btc_reason="BTC neutral/acceptable"
-    ) is True
-    message = sender.call_args.args[0]
-    assert "EARLY WATCH" in message
-    assert "ليست توصية دخول" in message
-    assert "TEST_TL" in message
+    ) is False
+    sender.assert_not_called()
 
