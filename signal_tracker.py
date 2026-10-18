@@ -149,16 +149,21 @@ def update_active_signals(state: dict[str, Any], now: Optional[int] = None) -> l
                     _skip_candle(signal, candle_open, "inauthentic_or_unverified_candle")
                     continue
 
+                # Provider-published zero-volume bars are authentic market data,
+                # but they do not prove that a trade occurred in this interval.
+                # Never use their carried OHLC values as new fill/stop/target or
+                # breakeven evidence for any signal lifecycle state.
+                volume = _d(getattr(row, "volume", None))
+                if volume is None or volume <= 0:
+                    _skip_candle(signal, candle_open, "no_positive_trade_volume")
+                    continue
+
                 low, high = _d(row.low), _d(row.high)
                 if low is None or high is None or low <= 0 or high < low:
                     _skip_candle(signal, candle_open, "invalid_candle_prices")
                     continue
 
                 if signal.get("status") == "PENDING_ENTRY":
-                    volume = _d(getattr(row, "volume", None))
-                    if volume is None or volume <= 0:
-                        _skip_candle(signal, candle_open, "no_positive_trade_volume")
-                        continue
                     signal["last_processed_candle"] = candle_open
                     # Candle volume is NOT volume at/below the order. Even a
                     # large volume cannot make a touch-only bar a valid fill.
