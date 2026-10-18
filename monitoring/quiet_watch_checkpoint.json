@@ -35,36 +35,48 @@
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
     "controller_status_checked_at_utc": "2026-10-18T13:50:59.426Z",
-    "latest_persisted_state_commit": "92486750163f53b167dcbfbbf845fb5af21c0cc2",
-    "latest_persisted_state_blob": "9c9a7827871ff1e73f5252bbb2271d78e39e2f0f",
-    "latest_persisted_state_bytes": 2234923,
+    "latest_persisted_state_commit": "acb6f5890a5b0e28223eb600fea278937bdb0764",
+    "latest_persisted_state_blob": "8e99437936d0a4cce8ae519be8ad6e7cea1f6738",
+    "latest_persisted_state_bytes": 2863255,
     "last_controller_completion_expected_end_of_window": true,
     "last_controller_completion_note": "Previously inspected four-hour controller job completed successfully. Scanner state commits continued every ~10 minutes afterward; no duplicate controller was created or inferred from state commits alone."
   },
   "last_verified_production_run": {
-    "run_id": 39132892095,
-    "job_id": 117691501823,
-    "head_sha": "e243afb380c2bb5ca0d8253072a6b62fc8908389",
+    "run_id": 39133438850,
+    "job_id": 117693083282,
+    "head_sha": "ec8eb22d55af892717ae830913afca56636c4573",
+    "refreshed_main_sha": "ec8eb22d55af892717ae830913afca56636c4573",
+    "resulting_state_commit": "acb6f5890a5b0e28223eb600fea278937bdb0764",
     "run_scanner_step": "success",
     "persist_state_step": "success",
-    "finished_at_utc": "2026-10-18T13:45:56Z",
-    "source": "https://web.paribu.com/v1/chart/ohlc",
-    "shadow_mode": true,
+    "finished_at_utc": "2026-10-18T13:53:31Z",
     "infra": {
       "btc_ok": false,
       "btc_reason": "regime_bearish",
-      "candles_complete": 27,
+      "candles_complete": 38,
       "candles_synthetic": 0,
       "candles_error": 0,
-      "cadence_gap_seconds": 601,
+      "cadence_gap_seconds": 434,
       "cadence_status": "ok",
       "state_saved": "OK"
     },
-    "json_validated_bytes": 2839601
+    "funnel": {
+      "universe": 234,
+      "books": 80,
+      "tech": 38,
+      "data_valid": 38,
+      "score": 0,
+      "early_watch": 0,
+      "watch_alerts": 0,
+      "candidates": 0,
+      "confirmed": 0,
+      "exec": 0,
+      "limit": 0
+    }
   },
   "latest_loaded_state": {
-    "commit_sha": "7875e4e0407554f30b1f2a7382fc7cb7704efd6d",
-    "bytes": 2761470,
+    "commit_sha": "acb6f5890a5b0e28223eb600fea278937bdb0764",
+    "bytes": 2863255,
     "runs": [
       {
         "id": "39110678277",
@@ -836,6 +848,59 @@
         "full_suite": 337,
         "additional_assertions": 37,
         "report_path": "monitoring/reviews/pr46-91c8745-security.md"
+      },
+      "pr_state": "closed",
+      "pr_merged_flag": false,
+      "integrated_to_main": true,
+      "integration_commit": "ec8eb22d55af892717ae830913afca56636c4573",
+      "integrated_at_utc": "2026-10-18T13:52:05Z",
+      "additional_independent_review": {
+        "identity": "/root/independent_pr45_review",
+        "decision": "ACCEPT",
+        "head": "91c874504531132b44de92d28023d1348a28eb16",
+        "base": "22bec9772e33c037ce56963dc23e4b997857120b",
+        "comment_id": 6250732530,
+        "targeted_tests": 24,
+        "full_suite": 337,
+        "additional_probes": 33,
+        "blob_hashes_matched": 50
+      },
+      "production_verification": {
+        "first_run": 39133438850,
+        "job_id": 117693083282,
+        "checkout_sha": "ec8eb22d55af892717ae830913afca56636c4573",
+        "state_commit": "acb6f5890a5b0e28223eb600fea278937bdb0764",
+        "state_blob": "8e99437936d0a4cce8ae519be8ad6e7cea1f6738",
+        "state_bytes": 2863255,
+        "shadow_mode": true,
+        "native_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "btc_15m_closed": 250,
+        "published_zero_volume": 3,
+        "local_synthetic": 0,
+        "candles_complete": 38,
+        "candles_synthetic": 0,
+        "candles_error": 0,
+        "cadence_gap_seconds": 434,
+        "cadence_status": "ok",
+        "state_saved": "OK",
+        "expired_candidates": [
+          "HOT_TL",
+          "CHZ_TL",
+          "XCN_TL",
+          "HNT_TL",
+          "ATH_TL",
+          "COMP_TL",
+          "ALICE_TL",
+          "MINA_TL",
+          "BEAM_TL",
+          "RAD_TL",
+          "ZRO_TL",
+          "H_TL",
+          "STX_TL",
+          "TRUMP_TL"
+        ],
+        "alert_sent": false,
+        "confirmed": 0
       }
     },
     "zero_volume_lifecycle": {
@@ -848,22 +913,42 @@
       "tests": 322,
       "independent_review": {
         "kind": "separately_delegated_ai",
-        "identity": "/root/pr47_independent_security_review",
-        "decision": "APPROVE",
-        "timing": "additional_post_merge_review",
-        "completed_at_utc": "2026-10-18T08:52:23Z",
-        "report_path": "monitoring/reviews/pr47-0549a7c-security.md",
-        "additional_cases": 171
+        "identity": "/root/independent_pr45_review",
+        "decision": "ACCEPT",
+        "timing": "pre_merge_exact_head",
+        "head": "0549a7c05c9a6187f178627c507447d7b9be6071",
+        "comment_id": 6247852639,
+        "targeted_suite": 42,
+        "full_suite": 322,
+        "additional_probes": 21,
+        "limitations": "bounded automated review; no live-provider, Telegram, account, order, profitability or external audit"
       },
-      "premerge_independent_approval_not_verified": true,
-      "executor_of_concurrent_merge_not_established": true,
-      "historical_sample_limit": "Preexisting terminal records were not rewritten. At22bec active_signals retained two ENTRY_EXPIRED records predating native45 merge; this bounded snapshot did not show zero-volume STOP/TP contamination."
+      "premerge_independent_approval_not_verified": false,
+      "executor_of_concurrent_merge_not_established": false,
+      "historical_sample_limit": "Preexisting terminal records were not rewritten. At22bec active_signals retained two ENTRY_EXPIRED records predating native45 merge; this bounded snapshot did not show zero-volume STOP/TP contamination.",
+      "test_only_commit": "0df69169a23087e806289c10cc47467e5ae29e05",
+      "ci_tests_per_version": 322,
+      "regression_before_fix": "FAILED test_open_signal_ignores_published_zero_volume_candle: OPEN signal emitted false STOP from authentic exchange_zero_volume row",
+      "targeted_after_fix": 1,
+      "local_full_suite_after_fix": 322,
+      "production_verification": {
+        "first_run": 39112935726,
+        "first_state_commit": "8644d1cb8ba14d6a12ea8c037e1bb4bceaabe60f",
+        "first_checkout_sha": "22bec9772e33c037ce56963dc23e4b997857120b",
+        "latest_run_before_next_material_fix": 39132892095,
+        "latest_state_commit_before_next_material_fix": "92486750163f53b167dcbfbbf845fb5af21c0cc2",
+        "post_merge_cycles_before_pr46": 31,
+        "shadow_mode": true,
+        "native_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "local_synthetic": 0
+      }
     }
   },
   "already_reported_blockers": [
     "pr45_independent_security_review_pending",
     "native_reader_not_merged_or_deployed",
-    "pr46_episode_expiry_not_merged"
+    "pr46_episode_expiry_not_merged",
+    "telegram_near_ready_policy_not_implemented"
   ],
   "readiness": {
     "accepted": false,
@@ -872,11 +957,11 @@
     "qualified_ready_delivery_verified_after_fix": false,
     "stable_executable_and_settings_since_merge": true,
     "remaining_blockers": [
-      "PR46 independent review/merge/runtime expiry proof pending.",
-      "Telegram policy NEAR_READY/READY-only not implemented in current production.",
-      "Organic qualified READY delivery/deduplication after final changes not yet verified."
+      "Telegram policy NEAR_READY/READY-only is not implemented in current production.",
+      "Only 1 production cycle has been verified after the latest material lifecycle change; 24 consecutive cycles are required.",
+      "No organic qualified READY delivery/deduplication has been verified after the final material changes."
     ],
-    "acceptance_code_baseline": "22bec9772e33c037ce56963dc23e4b997857120b",
+    "acceptance_code_baseline": "ec8eb22d55af892717ae830913afca56636c4573",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change."
   },
   "known_access_caveats": [
@@ -1075,6 +1160,52 @@
       "checked_at_utc": "2026-10-18T13:51:37.433Z",
       "head": "91c874504531132b44de92d28023d1348a28eb16",
       "conclusion": "Separate AI reviewer approved all five authored files after337 network-denied tests and37 targeted expiry/state assertions. Exact-head CI39113158022 passed on3.10/3.12. Approval stored before any merge; merge still requires fresh head/check/review revalidation."
+    },
+    {
+      "source": "scheduled_quiet_watch",
+      "checked_at_utc": "2026-10-18T13:55:58.208Z",
+      "inspected_run_ids": [
+        39112607322,
+        39112935726,
+        39113254486,
+        39113899933,
+        39114548046,
+        39115201975,
+        39115876058,
+        39116534415,
+        39117184233,
+        39117825334,
+        39118469168,
+        39119131641,
+        39119798246,
+        39120450628,
+        39121104199,
+        39121771548,
+        39122438834,
+        39123115775,
+        39123794751,
+        39124460894,
+        39125121462,
+        39125794096,
+        39126470989,
+        39127156598,
+        39127855830,
+        39128558537,
+        39129256962,
+        39129962181,
+        39130681668,
+        39131416162,
+        39132164869,
+        39132892095,
+        39133438850,
+        39112604315,
+        39113158022
+      ],
+      "reviewed_heads": {
+        "pr47": "0549a7c05c9a6187f178627c507447d7b9be6071",
+        "pr46": "91c874504531132b44de92d28023d1348a28eb16"
+      },
+      "conclusion": "Completed a real evidence→root-cause→regression→minimal-fix→CI→independent-review→deployment cycle. PR47 prevents authentic Paribu zero-volume bars from creating false OPEN/TP1 lifecycle price events; fail-first regression reproduced the false STOP, then322 tests per CI version and exact-head independent review passed. It merged as22bec97 and ran31 persisted SHADOW cycles before the next material change. PR46 exact head passed337 tests per CI version and two bounded separate-AI reviews, then was integrated as ec8eb22. Production run39133438850 checked out ec8eb22, passed lifecycle validation, Run scanner and Persist state, used native /v1/chart/ohlc with250 closed BTC15m bars,3 published-zero-volume and0 local synthetic, kept SHADOW=true, expired14 stale episodes including RAD/MINA/HOT, and persisted valid2,863,255-byte JSON. No READY delivery occurred. Acceptance restarts at1/24 after ec8eb22; NEAR_READY-only Telegram policy is still pending."
     }
   ],
   "scheduler_confirmation": {
@@ -1088,18 +1219,8 @@
     "first_post_reactivation_check_utc": "2026-10-17T20:20:21Z",
     "priority_update": "Repeated evidence/fix/test/independent-AI-review/conditional-merge cycle, important verified fixes included in quiet notification policy."
   },
-  "last_check_utc": "2026-10-18T13:50:59.426Z",
+  "last_check_utc": "2026-10-18T13:55:58.208Z",
   "inspected_run_ids": [
-    39065811298,
-    39066518702,
-    39067232751,
-    39067934092,
-    39068634097,
-    39069332742,
-    39070040099,
-    39070750332,
-    39071475134,
-    39072169953,
     39072849034,
     39073523976,
     39074209991,
@@ -1167,17 +1288,49 @@
     39094810864,
     39112607322,
     39112935726,
-    39132892095
+    39132892095,
+    39112604315,
+    39113254486,
+    39113899933,
+    39114548046,
+    39115201975,
+    39115876058,
+    39116534415,
+    39117184233,
+    39117825334,
+    39118469168,
+    39119131641,
+    39119798246,
+    39120450628,
+    39121104199,
+    39121771548,
+    39122438834,
+    39123115775,
+    39123794751,
+    39124460894,
+    39125121462,
+    39125794096,
+    39126470989,
+    39127156598,
+    39127855830,
+    39128558537,
+    39129256962,
+    39129962181,
+    39130681668,
+    39131416162,
+    39132164869,
+    39133438850,
+    39113158022
   ],
   "current_priority": {
-    "updated_at_utc": "2026-10-18T13:50:59.426Z",
+    "updated_at_utc": "2026-10-18T13:55:58.208Z",
     "requested_sequence": [
       "complete independent security review of PR45",
       "merge only after current CI and independent approval",
       "prove native endpoint use in real main scanner run"
     ],
     "conditional_merge_authorized_by_user": true,
-    "merge_gate_satisfied": false,
+    "merge_gate_satisfied": true,
     "next_required_external_action": null,
     "acceptance_evidence": [
       "actual checked-out reader code",
@@ -1187,16 +1340,19 @@
       "Run scanner and Persist scanner state success",
       "persisted source diagnostics for actually fetched primary cases"
     ],
-    "next_action": "Complete independent PR46 review on91c8745 and check unchanged head/CI before conditional merge; implement generic-EARLY-WATCH suppression and narrowly qualified NEAR_READY alerts on a separate branch with tests/CI/review; verify new production run and save checkpoint.",
+    "next_action": "Implement generic EARLY WATCH suppression and narrowly qualified NEAR_READY alerts on a separate branch with regression tests, CI and independent review; meanwhile accumulate and verify 24 stable production cycles after ec8eb22 and wait for an organic qualified READY delivery.",
     "completed": [
       "PR45 exact head independently reviewed and approved by separate AI reviewer.",
       "PR45 merged as d327ed5 after green CI.",
-      "30 consecutive production scanner cycles persisted on native Paribu candles in SHADOW mode."
+      "30 consecutive production scanner cycles persisted on native Paribu candles in SHADOW mode.",
+      "PR47 zero-volume lifecycle fix independently reviewed before merge, merged as 22bec97, and verified across 31 production cycles before the next material change.",
+      "PR46 exact head independently reviewed, integrated as ec8eb22, and verified in production run 39133438850 with persisted expiry evidence."
     ]
   },
   "last_security_gate_check_utc": "2026-10-18T13:50:59.426Z",
   "notification_fingerprints": [
-    "important_fix:pr45_native_reader_merged_prod_verified_30_cycles"
+    "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
+    "important_fix:pr47_zero_volume_and_pr46_expiry_deployed_runtime_verified"
   ],
   "user_annex": {
     "received_at_utc": "2026-10-18T13:47:25Z",
