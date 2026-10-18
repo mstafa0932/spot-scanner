@@ -1,4 +1,4 @@
-name: XCN original closed-candle decision audit read-only
+name: XCN original closed-candle follow-up evidence
 
 on:
   push:
@@ -23,69 +23,38 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install public data reader dependencies
+      - name: Install public reader dependencies
         run: python -m pip install 'pandas>=2.2,<3' 'requests>=2.32,<3'
-      - name: Reconstruct XCN decision from original closed candles
+      - name: Collect original closed XCN candles for as-of audit
         shell: python
         run: |
           import base64, hashlib, json, os, time, zlib
-          from types import SimpleNamespace
           from unittest.mock import patch
-          from decimal import Decimal
           import market_data as md
           from candle_backfill import bind_history
-          from indicator_engine import analyze_symbol
           
-          assert os.environ["SHADOW_MODE"].lower() == "true"
-          print("MODE finite_public_read_only SHADOW_MODE=true no_scanner no_orders no_messages")
-          EVENT = 1792343750
-          NOW = int(time.time())
-          original_request = md._request_backfill_json
-          captures = []
-          def request(params, *, url=md.PARIBU_CHART_HISTORY_URL):
-              assert url == md.PARIBU_NATIVE_OHLC_URL
-              assert params["symbol"] == "xcn_tl" and len(captures) < 8
-              payload = original_request(params, url=url)
-              capture = {"endpoint":url,"params":params,"retrieved_at":int(time.time()),"payload":payload}
-              packed = json.dumps(capture,separators=(",",":"),ensure_ascii=False).encode()
-              print("XCN_CAPTURE",json.dumps({"index":len(captures),"sha256":hashlib.sha256(packed).hexdigest(),"encoding":"base64_zlib_json","data":base64.b64encode(zlib.compress(packed)).decode()},separators=(",",":")),flush=True)
-              captures.append(capture)
+          assert os.environ["SHADOW_MODE"].lower()=="true"
+          print("MODE finite_public_original_candles no_scanner no_orders no_messages")
+          original=md._request_backfill_json
+          captures=[]
+          def capture(params, *, url=md.PARIBU_CHART_HISTORY_URL):
+              assert url==md.PARIBU_NATIVE_OHLC_URL and params["symbol"]=="xcn_tl"
+              assert len(captures)<8
+              payload=original(params,url=url)
+              row={"endpoint":url,"params":params,"retrieved_at":int(time.time()),"payload":payload}
+              raw=json.dumps(row,separators=(",",":"),ensure_ascii=False).encode()
+              print("XCN_CAPTURE",json.dumps({"index":len(captures),"sha256":hashlib.sha256(raw).hexdigest(),"encoding":"base64_zlib_json","data":base64.b64encode(zlib.compress(raw)).decode()},separators=(",",":")),flush=True)
+              captures.append(row)
               return payload
-          frames = {}
-          with patch.object(md,"_request_backfill_json",request):
-              for label, cutoff, interval, limit in (
-                  ("decision",EVENT,"15m",250),
-                  ("decision",EVENT,"1h",250),
-                  ("decision",EVENT,"4h",250),
-                  ("after",NOW,"15m",500),
-                  ("after",NOW,"4h",250),
-              ):
+          with patch.object(md,"_request_backfill_json",capture):
+              for interval,limit in (("15m",500),("1h",250),("4h",250)):
                   bind_history({})
-                  with patch.object(md,"time",SimpleNamespace(time=lambda:cutoff)):
-                      frame = md.fetch_candles("XCN_TL",interval,limit)
-                  seconds = md._interval_config(interval)[1]
-                  assert frame.is_authentic.all() and frame.attrs["candle_quality"]["synthetic_count"] == 0
-                  assert (frame.timestamp + seconds <= cutoff).all()
+                  frame=md.fetch_candles("XCN_TL",interval,limit)
+                  seconds=md._interval_config(interval)[1]
+                  assert frame.is_authentic.all()
+                  assert frame.attrs["candle_quality"]["synthetic_count"]==0
+                  assert (frame.timestamp+seconds<=int(time.time())).all()
                   assert frame.timestamp.diff().iloc[1:].eq(seconds).all()
-                  tech = analyze_symbol(frame)
-                  assert tech is not None
-                  frames[label,interval] = frame
-                  out = {"label":label,"as_of":cutoff,"interval":interval,"count":len(frame),
-                    "latest_open":int(frame.timestamp.iloc[-1]),"last_close_time":int(frame.timestamp.iloc[-1])+seconds,
-                    "current_close":str(tech.current_close),"ema21":str(tech.ema21),"ema50":str(tech.ema50),
-                    "rsi14":str(tech.rsi14),"volume_ratio":str(tech.volume_ratio),
-                    "return_3":str(tech.recent_return_3),"atr14":str(tech.atr14),
-                    "discovery_4h_weak":bool(tech.current_close < tech.ema50*Decimal("0.97")) if interval=="4h" else None,
-                    "ready_4h_weak":bool(tech.current_close < tech.ema50*Decimal("0.98")) if interval=="4h" else None,
-                    "local_synthetic":0,"provider_zero_volume":int(frame.volume.eq(0).sum()),
-                    "tail":frame[["timestamp","open","high","low","close","volume"]].tail(14 if interval=="15m" else 3).to_dict("records")}
-                  print("XCN_CLOSED_ANALYSIS",json.dumps(out,separators=(",",":")),flush=True)
+                  print("XCN_CLOSED_FOLLOWUP",json.dumps({"interval":interval,"count":len(frame),"latest_open":int(frame.timestamp.iloc[-1]),"latest_close":int(frame.timestamp.iloc[-1])+seconds,"local_synthetic":0,"published_zero_volume":int(frame.volume.eq(0).sum()),"source":frame.attrs["candle_endpoint"]},separators=(",",":")),flush=True)
                   time.sleep(.3)
-              # Context only: the current 4h candle is never fed to indicators or a gate.
-              interval_s=14400
-              start=(NOW//interval_s)*interval_s
-              payload=request({"marketType":"crypto","symbol":"xcn_tl","interval":"4h","limit":2,"to":(start+interval_s)*1000-1},url=md.PARIBU_NATIVE_OHLC_URL)
-              rows=md._parse_native_candle_payload(payload)
-              context=rows.loc[rows.timestamp.eq(start),["timestamp","open","high","low","close","volume"]].to_dict("records")
-              print("XCN_OPEN_CONTEXT_ONLY",json.dumps({"as_of":NOW,"must_not_use_for_decision":True,"closes_at":start+interval_s,"rows":context},separators=(",",":")),flush=True)
-          print("XCN_FINITE_AUDIT_COMPLETE",len(captures),"no_continuous_monitor_created")
+          print("FINITE_XCN_ORIGINAL_CAPTURE_COMPLETE",len(captures),"not_a_scanner_or_monitor")
