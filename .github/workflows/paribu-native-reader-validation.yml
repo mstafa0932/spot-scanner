@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: d0281f8802d222af003c66ae9404be42463528c9
+          ref: 0f0cc5e18ad1d2afd02f6fb36d32de688f1ecdce
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -36,7 +36,7 @@ jobs:
           # This finite script imports data/indicators only. It has no trading
           # credentials, scanner run, Telegram, write permissions, or schedule.
           assert os.environ['SHADOW_MODE'].lower() == 'true'
-          print('PINNED_READER d0281f8802d222af003c66ae9404be42463528c9')
+          print('PINNED_READER 0f0cc5e18ad1d2afd02f6fb36d32de688f1ecdce')
           print('MODE public_read_only SHADOW_MODE=true no_orders no_messages')
           bind_history({})
           frames = {}
