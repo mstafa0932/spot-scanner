@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "case": "INJ_TL_20261019",
+  "observed_at_utc": "2026-10-19T16:39:16Z",
+  "mode": "SHADOW",
+  "production_code_changed": false,
+  "near_ready": {
+    "run_id": 39285439873,
+    "job_id": 118169928714,
+    "refreshed_main_sha": "fe673eebcaa2a1a5c9af53c6df31b3e6917b3799",
+    "resulting_state_commit": "0a610dcb6ce4158868555e0555ae4a7db411de51",
+    "first_seen_at_utc": "2026-10-19T16:26:58Z",
+    "notified_at_utc": "2026-10-19T16:27:36Z",
+    "notified_at_local": "2026-10-19T19:27:36+03:00",
+    "score": 87,
+    "setup": "PULLBACK",
+    "confirmations": "1/2",
+    "candidate_state": "confirmation_1_of_2",
+    "candle_open_utc": "2026-10-19T16:00:00Z",
+    "state_price": "428.87",
+    "state_metrics": {
+      "rsi": "56.907050113629275",
+      "return_3_pct": "-0.6928943452380952380952381000",
+      "volume_ratio": "2.731378485036192",
+      "atr_pct": "0.8234049640535224303441816905",
+      "macd_histogram": "0.6506894935618435",
+      "imbalance": "2.503140150150202931392664650",
+      "spread_pct": "0.2126366950182260024301336574",
+      "bid_wall": "0.1421789486164843589881835665",
+      "ask_wall": "0.2606039069385285603996031844"
+    },
+    "gate_reason": "strong buy-side order book | volume expansion >=2x | 15m uptrend | 15m MACD positive | healthy RSI | 1h uptrend | 4h above EMA50 | 1h momentum stable",
+    "native_candles": {
+      "endpoint": "https://web.paribu.com/v1/chart/ohlc",
+      "authentic_only": true,
+      "frames": {
+        "15m": {
+          "status": "complete_real",
+          "missing_after": 0,
+          "synthetic_count": 0,
+          "authentic_tail": 300,
+          "exchange_zero_volume_bars": 7
+        },
+        "1h": {
+          "status": "complete_real",
+          "missing_after": 0,
+          "synthetic_count": 0,
+          "authentic_tail": 300,
+          "exchange_zero_volume_bars": 2
+        },
+        "4h": {
+          "status": "complete_real",
+          "missing_after": 0,
+          "synthetic_count": 0,
+          "authentic_tail": 300,
+          "exchange_zero_volume_bars": 0
+        }
+      }
+    },
+    "workflow": {
+      "conclusion": "success",
+      "run_scanner": "success",
+      "persist_state": "success",
+      "validate_signal_lifecycle": "skipped_by_intended_workflow_dispatch_guard"
+    },
+    "funnel": {
+      "data_valid": 34,
+      "early_watch_alerts": 0,
+      "near_ready_alerts": 1,
+      "confirmed": 0,
+      "limit_simulated": 0
+    }
+  },
+  "next_existing_cycle": {
+    "run_id": 39286812808,
+    "resulting_state_commit": "0341a2f2e26333283e781273f92d5285e44684e7",
+    "started_at_utc": "2026-10-19T16:37:08Z",
+    "finished_at_utc": "2026-10-19T16:37:45Z",
+    "result": "INJ_TL rejected at order-book gate",
+    "reason": "imbalance_too_low",
+    "imbalance": "0.7091721813305981893459834778",
+    "near_ready_alerts": 0,
+    "ready_confirmed": 0,
+    "signal_recorded": false,
+    "alert_sent": false
+  },
+  "user_observations": [
+    {
+      "kind": "Telegram screenshot",
+      "local_time": "2026-10-19T19:27:00+03:00",
+      "displayed_reference_price": "429.57",
+      "note": "NEAR READY 87/100, 1/2 confirmations; user-provided screenshot, not raw exchange execution evidence."
+    },
+    {
+      "kind": "Paribu screenshot",
+      "local_time": "2026-10-19T19:31:00+03:00",
+      "displayed_price": "429.24",
+      "note": "Later displayed market price only; no execution or candle-order inference."
+    }
+  ],
+  "classification": "Organic NEAR READY delivery verified. It was correctly not READY with only one confirmation; the next cycle failed the unchanged order-book imbalance gate. No lost qualified READY or production defect is established.",
+  "limits": [
+    "No Telegram message ID is retained in the saved state for this NEAR READY attempt.",
+    "The user screenshots are observations, not raw order-book/OHLCV or execution evidence.",
+    "One later rejection does not prove all durable dedupe paths."
+  ]
+}
