@@ -34,42 +34,40 @@
     "controller_status_observed": "in_progress",
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
-    "controller_status_checked_at_utc": "2026-10-18T13:50:59.426Z",
-    "latest_persisted_state_commit": "def715485b728b2011db29e95b229d157e08a5ff",
-    "latest_persisted_state_blob": "0b42dde5b19f0f03f034f17e7e76ef608ae49959",
-    "latest_persisted_state_bytes": 2829025,
+    "controller_status_checked_at_utc": "2026-10-19T01:28:36Z",
+    "latest_persisted_state_commit": "60acb7d9fa7ce7848dcae625e6dc0212b5fd43f2",
+    "latest_persisted_state_blob": "d1cbd4613d5077c5c064eb16a6458dfc4af92141",
+    "latest_persisted_state_bytes": 2889106,
     "last_controller_completion_expected_end_of_window": true,
     "last_controller_completion_note": "Previously inspected four-hour controller job completed successfully. Scanner state commits continued every ~10 minutes afterward; no duplicate controller was created or inferred from state commits alone."
   },
   "last_verified_production_run": {
-    "run_id": 39159431196,
-    "job_id": 117769424467,
-    "head_sha": "73ea172be816924a31a03fb14574b1a97071e049",
-    "refreshed_main_sha": "73ea172be816924a31a03fb14574b1a97071e049",
+    "run_id": 39185274211,
+    "job_id": 117846278247,
+    "head_sha": "e08f36da53a646a21f21bcd130618abaad9f2b10",
+    "refreshed_main_sha": "e08f36da53a646a21f21bcd130618abaad9f2b10",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "def715485b728b2011db29e95b229d157e08a5ff",
+    "resulting_state_commit": "60acb7d9fa7ce7848dcae625e6dc0212b5fd43f2",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-18T19:36:20Z",
+    "finished_at_utc": "2026-10-19T01:26:48Z",
     "infra": {
       "btc_ok": true,
-      "btc_reason": "regime_neutral",
-      "candles_complete": 26,
+      "btc_reason": "BTC neutral/acceptable | RSI=78.1",
+      "candles_complete": 33,
       "candles_synthetic": 0,
       "candles_error": 0,
-      "cadence_gap_seconds": 594,
+      "cadence_gap_seconds": 600,
       "cadence_status": "ok",
       "state_saved": "OK"
     },
     "funnel": {
       "universe": 234,
-      "liq": 80,
-      "spread": 53,
-      "book": 26,
-      "tech": 26,
-      "score": 0,
+      "book": 33,
+      "tech": 33,
+      "score": 1,
       "early_watch": 0,
       "early_watch_alerts": 0,
       "near_ready_alerts": 0,
@@ -80,163 +78,24 @@
     }
   },
   "latest_loaded_state": {
-    "commit_sha": "def715485b728b2011db29e95b229d157e08a5ff",
-    "bytes": 2829025,
+    "commit_sha": "60acb7d9fa7ce7848dcae625e6dc0212b5fd43f2",
+    "blob_sha": "d1cbd4613d5077c5c064eb16a6458dfc4af92141",
+    "bytes": 2889106,
     "json_valid": true,
-    "observed_at_utc": "2026-10-18T19:18:29.331Z",
+    "observed_at_utc": "2026-10-19T01:28:36Z",
     "runs": [
       {
-        "started_at": 1792350943,
-        "finished_at": 1792350981,
+        "started_at": 1792373161,
+        "finished_at": 1792373208,
         "status": "completed",
         "shadow_mode": true,
-        "code_sha": "c6ef6f479cd8a222a7c89890e07722e5c33d8260",
-        "run_id": "39157896971",
-        "cases": {
-          "XCN_TL": {
-            "stage": "discovery",
-            "reason": "RSI outside watch range",
-            "observed_at": 1792350963,
-            "score": 63,
-            "rsi": "73.53089288356117",
-            "return_3": "0.941176470588235294117647100",
-            "volume_ratio": "0.7992835555674278",
-            "atr_pct": "1.899340538066761305361305361",
-            "macd_histogram": "0.0012146007166030873",
-            "closed_candle_at": 1792350000,
-            "authentic_only": true,
-            "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-            "exchange_zero_volume_bars": {
-              "15m": 3,
-              "1h": 0,
-              "4h": 0
-            }
-          },
-          "NMR_TL": {
-            "stage": "discovery",
-            "reason": "RSI outside watch range",
-            "observed_at": 1792350976,
-            "score": 27,
-            "rsi": "29.246083179018797",
-            "return_3": "-0.2863214002737160556075776100",
-            "volume_ratio": "0.9605705348794754",
-            "atr_pct": "0.4447127237497297419319885143",
-            "macd_histogram": "0.24001547133597523",
-            "closed_candle_at": 1792350000,
-            "authentic_only": true,
-            "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-            "exchange_zero_volume_bars": {
-              "15m": 0,
-              "1h": 0,
-              "4h": 0
-            }
-          },
-          "MINA_TL": {
-            "stage": "coverage",
-            "reason": "not_evaluated_capacity",
-            "observed_at": 1792350943
-          },
-          "SAND_TL": {
-            "stage": "book",
-            "reason": "imbalance_too_low",
-            "observed_at": 1792350950,
-            "imbalance": "0.2330995292960849654989697923"
-          },
-          "RAD_TL": {
-            "stage": "book",
-            "reason": "spread_too_high",
-            "observed_at": 1792350948,
-            "spread_pct": "0.9655172413793103448275862069"
-          },
-          "ALT_TL": {
-            "stage": "book",
-            "reason": "imbalance_too_low",
-            "observed_at": 1792350957,
-            "imbalance": "0.7851353264512564600347131253"
-          },
-          "BTC_TL": {
-            "stage": "universe",
-            "reason": "excluded_base_asset",
-            "observed_at": 1792350960
-          }
-        }
+        "code_sha": "e08f36da53a646a21f21bcd130618abaad9f2b10",
+        "run_id": "39185274211"
       }
     ],
-    "latest_run_focus": {
-      "XCN_TL": {
-        "stage": "discovery",
-        "reason": "RSI outside watch range",
-        "observed_at": 1792350963,
-        "score": 63,
-        "rsi": "73.53089288356117",
-        "return_3": "0.941176470588235294117647100",
-        "volume_ratio": "0.7992835555674278",
-        "atr_pct": "1.899340538066761305361305361",
-        "macd_histogram": "0.0012146007166030873",
-        "closed_candle_at": 1792350000,
-        "authentic_only": true,
-        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-        "exchange_zero_volume_bars": {
-          "15m": 3,
-          "1h": 0,
-          "4h": 0
-        }
-      },
-      "NMR_TL": {
-        "stage": "discovery",
-        "reason": "RSI outside watch range",
-        "observed_at": 1792350976,
-        "score": 27,
-        "rsi": "29.246083179018797",
-        "return_3": "-0.2863214002737160556075776100",
-        "volume_ratio": "0.9605705348794754",
-        "atr_pct": "0.4447127237497297419319885143",
-        "macd_histogram": "0.24001547133597523",
-        "closed_candle_at": 1792350000,
-        "authentic_only": true,
-        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-        "exchange_zero_volume_bars": {
-          "15m": 0,
-          "1h": 0,
-          "4h": 0
-        }
-      },
-      "MINA_TL": {
-        "stage": "coverage",
-        "reason": "not_evaluated_capacity",
-        "observed_at": 1792350943
-      },
-      "SAND_TL": {
-        "stage": "book",
-        "reason": "imbalance_too_low",
-        "observed_at": 1792350950,
-        "imbalance": "0.2330995292960849654989697923"
-      },
-      "RAD_TL": {
-        "stage": "book",
-        "reason": "spread_too_high",
-        "observed_at": 1792350948,
-        "spread_pct": "0.9655172413793103448275862069"
-      },
-      "ALT_TL": {
-        "stage": "book",
-        "reason": "imbalance_too_low",
-        "observed_at": 1792350957,
-        "imbalance": "0.7851353264512564600347131253"
-      },
-      "BTC_TL": {
-        "stage": "universe",
-        "reason": "excluded_base_asset",
-        "observed_at": 1792350960
-      }
-    },
-    "watchlist_count": 4,
-    "early_followups": 13,
-    "execution_followups": 42,
-    "stable_source_from_reviewed_head": [
-      "near_misses_archive.jsonl",
-      "scanner_state.json"
-    ],
+    "watchlist_count": 6,
+    "early_followups": 12,
+    "execution_followups": "retained; XCN absent after TTL expiry",
     "older_detail_retained_in_git_history": true
   },
   "fixes": {
@@ -468,23 +327,39 @@
         "first_run": 39157435501,
         "first_job": 117763459110,
         "first_main_tests": 349,
-        "latest_run": 39157896971,
-        "latest_job": 117764840305,
-        "latest_state_commit": "d087b22ec60fa95c79c5ce5391e9d780cec09931",
+        "latest_run": 39185274211,
+        "latest_job": 117846278247,
+        "latest_state_commit": "60acb7d9fa7ce7848dcae625e6dc0212b5fd43f2",
         "scanner_blob": "f6acb320f49baf979c771a53cdf3ba71beefbc53",
         "reviewed_scanner_blob": "f6acb320f49baf979c771a53cdf3ba71beefbc53",
-        "post_merge_verified_cycles": 2,
+        "post_merge_verified_cycles": 39,
         "run_scanner": "success",
         "persist_state": "success",
         "shadow_mode": true,
         "native_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-        "candles_complete": 30,
+        "candles_complete": 33,
         "local_synthetic": 0,
         "candles_error": 0,
         "generic_early_watch_alerts": 0,
         "near_ready_alerts": 0,
         "internal_early_watch_example": "PEPE_TL score68 4h clearly weak sent=False in39157435501",
-        "organic_ready_delivery_verified": false
+        "organic_ready_delivery_verified": true,
+        "organic_ready": {
+          "symbol": "ALT_TL",
+          "run_id": 39169946881,
+          "job_id": 117800726487,
+          "state_commit": "0ee2c12f7bc57d8a6d2b740094bf279777b505a1",
+          "score": 89,
+          "confirmations": 2,
+          "telegram_message_id": 1104,
+          "entry": "0.422200",
+          "status": "ENTRY_EXPIRED",
+          "fill_confirmed": false,
+          "fill_estimated": false,
+          "report": "monitoring/cases/ALT_TL_20261019.md"
+        },
+        "observed_duplicate_delivery": false,
+        "duplicate_evidence_limit": "Immediate rediscovery was blocked by global cooldown; one organic case does not exhaustively prove all future dedupe/loss paths."
       }
     }
   },
@@ -496,18 +371,17 @@
   ],
   "readiness": {
     "accepted": false,
-    "post_material_fix_verified_production_cycles": 4,
+    "post_material_fix_verified_production_cycles": 39,
     "required_consecutive_cycles": 24,
-    "qualified_ready_delivery_verified_after_fix": false,
+    "qualified_ready_delivery_verified_after_fix": true,
     "stable_executable_and_settings_since_merge": true,
     "remaining_blockers": [
-      "Need24 stable cycles after the final material notification change; two actual cycles verified.",
-      "No organic fully qualified READY delivery/deduplication after final material changes.",
-      "XCN first new closed4h after its alert does not close until20:00Z/23:00Turkey; do not use open-bar evidence."
+      "One organic READY was delivered and not duplicated, but the immediate rediscovery was blocked by global cooldown; keep observing additional organic READY cases to independently exercise durable duplicate/loss paths.",
+      "ALT_TL's SHADOW limit entry was not confirmed or estimated filled and expired with an ambiguous boundary candle; delivery is proven, not execution or profitability."
     ],
     "acceptance_code_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change.",
-    "cycle_count_basis": "Actual main push run39157435501 and scheduled dispatches39157896971,39158671950,39159431196: scanner/persistence successful, native source, SHADOW true, zero synthetic/candle errors, generic watch_alerts=0.",
+    "cycle_count_basis": "39 consecutive actual post-PR48 production cycles through39185274211; all completed SHADOW with persisted valid state, native source, no executable/config change, and zero generic EARLY WATCH alerts.",
     "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48."
   },
   "known_access_caveats": [
@@ -790,6 +664,48 @@
         39159431196
       ],
       "conclusion": "Two new post-PR48 production cycles completed and persisted state. Latest run refreshed main state descendant of bf5ef22, remained SHADOW=true, used native /v1/chart/ohlc with250 closed BTC15m bars,3 provider-zero-volume and0 local synthetic, cadence594s/state_savedOK, generic watch_alerts=0, near_ready_alerts=0, confirmed=0. XCN retained its strategy followup and gained execution followup slots in both cycles but was rejected by actual book spread1.0619% then1.7453%; no READY or delivery was lost. The first new closed4h after the alert is still unavailable until20:00Z/23:00 Turkey, so no future-close claim was made."
+    },
+    {
+      "source": "scheduled_quiet_watch",
+      "checked_at_utc": "2026-10-19T01:28:36Z",
+      "inspected_run_ids": [
+        39160181278,
+        39160921621,
+        39161682650,
+        39162441412,
+        39163201445,
+        39163967573,
+        39164728819,
+        39165484238,
+        39166241344,
+        39166994287,
+        39167740177,
+        39168500300,
+        39169224660,
+        39169946881,
+        39170688806,
+        39171417503,
+        39172144684,
+        39172887099,
+        39173600510,
+        39174304681,
+        39175018721,
+        39175731364,
+        39176442456,
+        39177146052,
+        39177829547,
+        39178496176,
+        39179179886,
+        39179943129,
+        39180697521,
+        39181445118,
+        39182195059,
+        39182936608,
+        39183704844,
+        39184510216,
+        39185274211
+      ],
+      "conclusion": "Verified 35 new production cycles (39 total after PR48), all completed SHADOW with persisted valid state and 588–623s new-window cadence. Organic ALT_TL READY in39169946881 passed two confirmations on native complete Paribu candles and Telegram accepted message1104; generic watch alerts remained0 and no duplicate delivery was observed. ALT limit fill was not confirmed and expired conservatively. XCN remained tracked through post-close market/book checks and expired by TTL in39184510216; no software defect established."
     }
   ],
   "scheduler_confirmation": {
@@ -807,43 +723,8 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-18T19:37:42.422Z",
+  "last_check_utc": "2026-10-19T01:28:36Z",
   "inspected_run_ids": [
-    39074209991,
-    39074905185,
-    39075588449,
-    39076250808,
-    39076903886,
-    39077554065,
-    39078211012,
-    39078867242,
-    39079515035,
-    39080138840,
-    39080755291,
-    39081378237,
-    39081996297,
-    39082608423,
-    39083225853,
-    39083844765,
-    39084464194,
-    39085097686,
-    39085724773,
-    39086335287,
-    39086970762,
-    39087555294,
-    39088140327,
-    39088747809,
-    39089357222,
-    39089949732,
-    39090555150,
-    39091141964,
-    39091716672,
-    39092307184,
-    39092896535,
-    39094953117,
-    39095234573,
-    39095807441,
-    39096386060,
     39096960446,
     39097547942,
     39098117683,
@@ -908,40 +789,49 @@
     39133438850,
     39113158022,
     39158671950,
-    39159431196
+    39159431196,
+    39160181278,
+    39160921621,
+    39161682650,
+    39162441412,
+    39163201445,
+    39163967573,
+    39164728819,
+    39165484238,
+    39166241344,
+    39166994287,
+    39167740177,
+    39168500300,
+    39169224660,
+    39169946881,
+    39170688806,
+    39171417503,
+    39172144684,
+    39172887099,
+    39173600510,
+    39174304681,
+    39175018721,
+    39175731364,
+    39176442456,
+    39177146052,
+    39177829547,
+    39178496176,
+    39179179886,
+    39179943129,
+    39180697521,
+    39181445118,
+    39182195059,
+    39182936608,
+    39183704844,
+    39184510216,
+    39185274211
   ],
-  "current_priority": {
-    "updated_at_utc": "2026-10-18T19:18:29.331Z",
-    "requested_sequence": [
-      "Inspect XCN actual alert and original as-of candles",
-      "Verify XCN strategy followup and fixed execution TTL, bounded fair capacity",
-      "After20:00Z inspect first newly closed4h and actual full requalification; never use open4h",
-      "Accumulate stable post-PR48 cycles and organic READY/dedup evidence"
-    ],
-    "conditional_merge_authorized_by_user": true,
-    "merge_gate_satisfied": true,
-    "next_required_external_action": null,
-    "acceptance_evidence": [
-      "actual checked-out reader code",
-      "PARIBU_CANDLE_SOURCE native endpoint",
-      "closed/fresh/contiguous history and explicit empty/synthetic counts",
-      "SHADOW true",
-      "Run scanner and Persist scanner state success",
-      "persisted source diagnostics for actually fetched primary cases"
-    ],
-    "next_action": "Read monitoring/cases/XCN_TL_20261018.md and pending follow-up in checkpoint. Reuse historical captures/349-test CI; inspect only new cycles. After20:00Z verify newly closed4h and XCN re-evaluation if its book qualifies. Keep internal EARLY_WATCH labels distinct from Telegram sends; watch_alerts must stay0.",
-    "completed": [
-      "PR45 exact head independently reviewed and approved by separate AI reviewer.",
-      "PR45 merged as d327ed5 after green CI.",
-      "30 consecutive production scanner cycles persisted on native Paribu candles in SHADOW mode.",
-      "PR47 zero-volume lifecycle fix independently reviewed before merge, merged as 22bec97, and verified across 31 production cycles before the next material change.",
-      "PR46 exact head independently reviewed, integrated as ec8eb22, and verified in production run 39133438850 with persisted expiry evidence."
-    ]
-  },
+  "current_priority": "Continue quiet observation for another organic READY/NEAR READY case that independently exercises durable notification dedupe/loss behavior; do not alter gates or generate test alerts.",
   "last_security_gate_check_utc": "2026-10-18T19:09:05Z",
   "notification_fingerprints": [
     "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
-    "important_fix:pr47_zero_volume_and_pr46_expiry_deployed_runtime_verified"
+    "important_fix:pr47_zero_volume_and_pr46_expiry_deployed_runtime_verified",
+    "milestone:pr48_39_cycles_alt_ready_delivery_verified_unfilled"
   ],
   "user_annex": {
     "received_at_utc": "2026-10-18T13:47:25Z",
@@ -988,12 +878,14 @@
     "peak_0_2195_15m_local": "2026-10-18 19:15–19:30 Europe/Istanbul, before20:15 alert",
     "followup_lost": false,
     "strategy_ttl_expires_if_not_refreshed_utc": "2026-10-19T01:15:30Z",
-    "latest_scan": 39159431196,
-    "latest_rejection": "spread_too_high; spread_pct=1.745283018867924528301886792",
-    "latest_strategy_followup_persisted": true,
+    "latest_scan": 39184510216,
+    "latest_rejection": "watch_window_expired",
+    "latest_strategy_followup_persisted": false,
     "latest_execution_followup_cleared_after_data_and_book_recovery": true,
-    "pending_new_closed_4h_after_utc": "2026-10-18T20:00:00Z",
+    "pending_new_closed_4h_after_utc": null,
     "automation_prompt_updated_for_pending_case": true,
-    "latest_execution_followup_persisted": true
+    "latest_execution_followup_persisted": false,
+    "post_close_followup_checked": true,
+    "post_close_result": "Pipeline order-book gate rejected observed XCN checks before candle analysis; other cycles were capacity selections. Candidate expired durably at2026-10-19T01:16:01Z. No READY or defect established."
   }
 }
