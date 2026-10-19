@@ -42,59 +42,96 @@
     "last_controller_completion_note": "Previously inspected four-hour controller job completed successfully. Scanner state commits continued every ~10 minutes afterward; no duplicate controller was created or inferred from state commits alone."
   },
   "last_verified_production_run": {
-    "run_id": 39206223183,
-    "job_id": 117909533932,
-    "head_sha": "c649e0a0bac73535ab28a346d433d0b9c46dd7f8",
-    "refreshed_main_sha": "c649e0a0bac73535ab28a346d433d0b9c46dd7f8",
+    "run_id": 39218091008,
+    "job_id": 117946612833,
+    "head_sha": "b504971b858bd2e9c13bc56f996d4fcc358368d7",
+    "refreshed_main_sha": "b504971b858bd2e9c13bc56f996d4fcc358368d7",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "afb9f5fa23aad3ac23d1004b1cbac33d4686c325",
+    "resulting_state_commit": "04934e660dc1d375dd1fb7cece948f1892073e28",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-19T05:47:18Z",
+    "finished_at_utc": "2026-10-19T07:47:23Z",
     "infra": {
+      "run_id": "39218091008",
+      "started_at": 1792396001,
+      "finished_at": 1792396043,
       "btc_ok": true,
-      "candles_complete": 27,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 30,
       "candles_synthetic": 0,
       "candles_error": 0,
-      "cadence_gap_seconds": 602,
+      "cadence_expected_seconds": 600,
+      "cadence_late_after_seconds": 1200,
+      "cadence_gap_seconds": 611,
       "cadence_status": "ok",
-      "state_saved": "OK"
+      "hot_radar_eligible": 30,
+      "hot_radar_selected": 27,
+      "funnel": {
+        "universe": 234,
+        "liq": 80,
+        "spread": 60,
+        "book": 30,
+        "tech": 30,
+        "score": 4,
+        "early_watch": 2,
+        "early_watch_alerts": 0,
+        "near_ready_alerts": 0,
+        "candidates": 1,
+        "confirmed": 0,
+        "exec": 0,
+        "limit": 0
+      },
+      "stage_drops": {
+        "universe:excluded_base_asset": 3,
+        "book:imbalance_too_low": 30,
+        "discovery:15m momentum not constructive": 6,
+        "discovery:4h clearly weak": 16,
+        "discovery:1h clearly weak": 2,
+        "coverage:not_evaluated_capacity": 59,
+        "trigger:buy flow not strong enough: 0.87": 1,
+        "book:spread_too_high": 20,
+        "discovery:ATR outside range": 3,
+        "discovery:RSI outside watch range": 2,
+        "universe:quote_volume_below_minimum": 92
+      }
     },
-    "funnel": {
-      "universe": 234,
-      "book": 27,
-      "tech": 27,
-      "score": 0,
-      "early_watch": 1,
-      "early_watch_alerts": 0,
-      "near_ready_alerts": 0,
-      "candidates": 0,
-      "confirmed": 0,
-      "exec": 0,
-      "limit": 0
-    }
+    "evidence": "monitoring/audit_evidence/calibration_20261019_latest_health.json"
   },
   "latest_loaded_state": {
-    "commit_sha": "afb9f5fa23aad3ac23d1004b1cbac33d4686c325",
-    "blob_sha": "b141ec5dcef8e0e566f88ae1f1808794c36ce04e",
-    "bytes": 2930339,
+    "commit_sha": "04934e660dc1d375dd1fb7cece948f1892073e28",
+    "blob_sha": "5288d942dc0291fc6d6d86e8a7b91684bbddd800",
+    "bytes": 2944380,
     "json_valid": true,
-    "observed_at_utc": "2026-10-19T05:47:53Z",
+    "observed_at_utc": "2026-10-19T08:14:12+00:00",
     "runs": [
       {
-        "started_at": 1792388795,
-        "finished_at": 1792388838,
+        "run_id": "39218091008",
+        "code_sha": "b504971b858bd2e9c13bc56f996d4fcc358368d7",
         "status": "completed",
+        "started_at": 1792396001,
+        "finished_at": 1792396043,
         "shadow_mode": true,
-        "code_sha": "c649e0a0bac73535ab28a346d433d0b9c46dd7f8",
-        "run_id": "39206223183"
+        "btc_ok": true,
+        "btc_reason": "BTC neutral/acceptable | RSI=63.9",
+        "funnel": {
+          "book_approved": 30,
+          "data_valid": 30,
+          "discovery_passed": 1,
+          "early_watch": 2,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 234,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 30,
+          "universe_excluded": 95
+        },
+        "seconds_since_previous_run": 611
       }
     ],
-    "watchlist_count": 6,
-    "early_followups": 12,
-    "execution_followups": "retained; XCN absent after TTL expiry",
     "older_detail_retained_in_git_history": true
   },
   "fixes": {
@@ -381,7 +418,15 @@
     "acceptance_code_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change.",
     "cycle_count_basis": "65 consecutive actual post-PR48 production cycles through39206223183; all completed SHADOW with persisted valid state, native source, no executable/config change, and zero generic EARLY WATCH alerts.",
-    "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48."
+    "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48.",
+    "blockers": [
+      "One organic ALT READY delivery is proven; immediate rediscovery was blocked by the existing global cooldown. This alone does not independently exercise every durable dedupe/loss branch.",
+      "ALT limit fill was neither confirmed nor estimated. ENTRY_EXPIRED is not a successful trade. Raw ALT OHLCV/L2 were not retained, limiting independent numeric gate/stop replay and exact entry/TP/STOP ordering."
+    ],
+    "consecutive_count_lower_bound_from_previous_checkpoint": 65,
+    "previous_count_verified_through_run": 39206223183,
+    "latest_separate_health_run": 39218091008,
+    "executable_and_settings_unchanged_since": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0"
   },
   "known_access_caveats": [
     "GitHub contents API returned empty content for the 2.25 MB scanner_state.json; this does not mean state is missing. Use a blob/raw/git read pinned to a known commit.",
@@ -759,6 +804,16 @@
         39206223183
       ],
       "conclusion": "Eight new production cycles completed in SHADOW mode with scanner and persistence successful, cadence590–630s, BTC acceptable,27–41 valid candle evaluations, internal EARLY WATCH observations but zero generic alerts, zero NEAR READY/READY deliveries, and no executable/config change. ALT remained ENTRY_EXPIRED without confirmed/estimated fill. No new defect or notification condition."
+    },
+    {
+      "at_utc": "2026-10-19T08:14:12+00:00",
+      "type": "calibration_completed_evidence_only",
+      "report": "monitoring/cases/CALIBRATION_20261019.md",
+      "xcn_result": "No lost qualified READY proved; original post23candle analysis confirmed; prior audit narrative corrected.",
+      "alt_result": "Organic READY accepted00:56:27.989 local; reference targets later exceeded but limit fill/order not established; expired.",
+      "checks_passed": 32,
+      "main_or_production_code_changed": false,
+      "settings_decision": "Keep unchanged; no new proven production bug."
     }
   ],
   "scheduler_confirmation": {
@@ -776,7 +831,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-19T05:47:53Z",
+  "last_check_utc": "2026-10-19T08:14:12+00:00",
   "inspected_run_ids": [
     39094757437,
     39094810864,
@@ -879,7 +934,7 @@
     39205379519,
     39206223183
   ],
-  "current_priority": "Continue quiet observation for another organic READY/NEAR READY case that independently exercises durable notification dedupe/loss behavior; do not alter gates or generate test alerts.",
+  "current_priority": "Calibration complete within retained-evidence limits. Keep current settings and SHADOW mode; observe only the existing organic production cycles and save evidence on this branch. No main/production edits, merge or deploy in this phase. Any proven critical defect requires user approval before production code changes. Do not re-run completed XCN capture/replay or create another scanner/controller/task.",
   "last_security_gate_check_utc": "2026-10-18T19:09:05Z",
   "notification_fingerprints": [
     "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
@@ -939,7 +994,24 @@
     "automation_prompt_updated_for_pending_case": true,
     "latest_execution_followup_persisted": false,
     "post_close_followup_checked": true,
-    "post_close_result": "Pipeline order-book gate rejected observed XCN checks before candle analysis; other cycles were capacity selections. Candidate expired durably at2026-10-19T01:16:01Z. No READY or defect established."
+    "post_close_result": "Pipeline order-book gate rejected observed XCN checks before candle analysis; other cycles were capacity selections. Candidate expired durably at2026-10-19T01:16:01Z. No READY or defect established.",
+    "decisive_timeline": "monitoring/cases/XCN_TL_20261018_timeline.md",
+    "decisive_evidence": "monitoring/audit_evidence/xcn_decisive_20261018_gate_matrix.json",
+    "window_completion_evidence": "monitoring/audit_evidence/xcn_20261018_window_completion.json",
+    "saved_completed_evidence_commit": "e79af3f65d2f0f0ff7e3cee0ca7925554d97ff2b",
+    "retained_window_cycles": 23,
+    "previously_completed_cycles_reused_without_rerun": 19,
+    "pending_new_4h_check": null,
+    "post_close_candle_analysis_proven": true,
+    "post_close_4h_last_open": 1792339200,
+    "post_close_native_evaluation_runs": [
+      39161682650,
+      39162441412
+    ],
+    "post_close_rejections": "15m momentum not constructive; BTC false, scores60/57, volume0.7971/0.8683. Exact new4h OHLC/EMA not persisted.",
+    "later_peak_evidence": "Original15m22:15–22:30 local has high0.2242; exact peak timestamp unknown. This later wave does follow the20:15 alert.",
+    "earlier_postclose_report_corrected": true,
+    "result": "No lost qualifying READY established across23 retained cycles. Before23:00 the fixed closed4h fails; later native4h analysis occurred with independent failed BTC/score/volume/momentum gates. Three bounded capacity skips followed by rechecks. Strategy follow-up expired durably at04:16:01 local under8h TTL. Corrected an older audit narrative, not production code."
   },
   "alt_case": {
     "report": "monitoring/cases/ALT_TL_20261019.md",
@@ -967,6 +1039,138 @@
     "execution_status": "ENTRY_EXPIRED",
     "fill_confirmed": false,
     "fill_estimated": false,
-    "classification": "Qualified READY delivery; later price exceeded both targets, but no entry fill or exact event order is established."
+    "classification": "Recorded READY pipeline pass and accepted organic delivery; both targets exceeded in later sparse samples after the entry TTL. No confirmed/estimated fill or exact entry/TP/STOP event order. No new production defect established.",
+    "evidence": "monitoring/audit_evidence/alt_20261019_calibration.json",
+    "final_comparison_report": "monitoring/cases/CALIBRATION_20261019.md",
+    "source_sha": "3a8a66216c038bd0ca052dfb55dea7e925046c0b",
+    "resulting_state_commit": "0ee2c12f7bc57d8a6d2b740094bf279777b505a1",
+    "issued_accept_log_local": "2026-10-19T00:56:27.989+03:00",
+    "closed_candles_used": [
+      {
+        "frame": "15m",
+        "last_open": 1792359000,
+        "last_close": 1792359900,
+        "open_local": "2026-10-19T00:30:00+03:00",
+        "close_local": "2026-10-19T00:45:00+03:00",
+        "count": 250,
+        "provider_zero_volume": 4,
+        "local_synthetic": 0
+      },
+      {
+        "frame": "1h",
+        "last_open": 1792353600,
+        "last_close": 1792357200,
+        "open_local": "2026-10-18T23:00:00+03:00",
+        "close_local": "2026-10-19T00:00:00+03:00",
+        "count": 250,
+        "provider_zero_volume": 1,
+        "local_synthetic": 0
+      },
+      {
+        "frame": "4h",
+        "last_open": 1792339200,
+        "last_close": 1792353600,
+        "open_local": "2026-10-18T19:00:00+03:00",
+        "close_local": "2026-10-18T23:00:00+03:00",
+        "count": 250,
+        "provider_zero_volume": 0,
+        "local_synthetic": 0
+      }
+    ],
+    "confirmations": {
+      "count": 2,
+      "basis": "Two distinct closed-candle identities within the existing 120-minute observation window, not two independent complete READY decisions.",
+      "first_candle_open_local": "2026-10-19T00:00:00+03:00",
+      "first_candle_close_local": "2026-10-19T00:15:00+03:00",
+      "second_candle_open_local": "2026-10-19T00:30:00+03:00",
+      "second_candle_close_local": "2026-10-19T00:45:00+03:00",
+      "first_observed_run": 39166994287,
+      "first_replaced_same_candle_run": 39167740177,
+      "second_first_observed_run": 39169224660,
+      "second_replaced_same_candle_issue_run": 39169946881,
+      "first_observation_score": 72,
+      "first_observation_setup": "WATCHING",
+      "current_setup": "RECOVERY",
+      "avg_imbalance": "1.553770689082805294675918386",
+      "avg_volume_ratio": "3.1578636605777172",
+      "nonconsecutive_candles_are_allowed_by_existing_code": true
+    },
+    "independent_full_numeric_replay": false,
+    "entry_deadline_local": "2026-10-19T02:26:27+03:00",
+    "first_entry_expired_state_run": "39177146052",
+    "first_expired_scan_start_local": "2026-10-19T02:35:57+03:00",
+    "first_tp1_price_sample": {
+      "run_id": "39178496176",
+      "snapshot_at": 1792367758,
+      "snapshot_local": "2026-10-19T02:55:58+03:00",
+      "ticker": {
+        "last": "0.4379",
+        "quote_volume": "94800225.0445"
+      }
+    },
+    "first_tp2_price_sample": {
+      "run_id": "39179943129",
+      "snapshot_at": 1792368958,
+      "snapshot_local": "2026-10-19T03:15:58+03:00",
+      "ticker": {
+        "last": "0.4492",
+        "quote_volume": "95818453.563"
+      }
+    },
+    "tp1_then_tp2_before_stop_proven": false,
+    "raw_input_limits": "Raw ALT OHLCV arrays, exact 1h/4h EMA/close and full historical L2 were not retained in the saved runtime state. Code path and available metrics support eligibility; these absent inputs cannot be independently reconstructed or filled with synthetic values."
+  },
+  "calibration_mode": {
+    "effective_user_instruction_date": "2026-10-19",
+    "production_writes_allowed": false,
+    "main_merge_or_deploy_allowed": false,
+    "evidence_branch_only": true,
+    "production_fix_requires_explicit_user_approval": true,
+    "strategy_and_risk_settings_frozen": true,
+    "new_scanner_controller_or_schedule_allowed": false,
+    "test_telegram_allowed": false,
+    "SHADOW_MODE": true,
+    "existing_hourly_task_prompt_updated_at_utc": "2026-10-19T07:59:22.613376Z",
+    "existing_hourly_task_id": "6ad0f106fa608191a823826728c80f35",
+    "report": "monitoring/cases/CALIBRATION_20261019.md"
+  },
+  "calibration_validation": {
+    "checks_passed": 32,
+    "checks_failed": 0,
+    "result": "monitoring/audit_evidence/calibration_20261019_checks.json",
+    "script": "monitoring/diagnostics/verify_calibration_20261019.py",
+    "scope": "Offline evidence consistency checks; not new production test results or a full independent ALT numeric replay.",
+    "production_code_changed": false,
+    "main_written_by_this_task": false,
+    "new_CI_or_security_review_needed_for_production_change": false,
+    "existing_CI_reused": {
+      "head": "e4a6617099475407169d2d9593ab06e06c22e48a",
+      "run_id": 39133896737,
+      "tests_per_python": 349,
+      "python_versions": [
+        "3.10",
+        "3.12"
+      ],
+      "review": "monitoring/reviews/pr48-e4a6617-security.md",
+      "review_type": "separate non-implementing AI review, not human/formal GitHub approval"
+    }
+  },
+  "calibration_evidence_coverage": {
+    "ALT_saved_state_cycles": 39,
+    "ALT_selected_log_runs": [
+      39166994287,
+      39167740177,
+      39169224660,
+      39169946881,
+      39177146052
+    ],
+    "XCN_reused_decisive_rows": 19,
+    "XCN_added_saved_state_rows": 4,
+    "XCN_original_post23_log_runs": [
+      39161682650,
+      39162441412
+    ],
+    "new_raw_XCN_capture_requests": 0,
+    "new_scanner_or_diagnostic_workflow_dispatches": 0
   }
 }

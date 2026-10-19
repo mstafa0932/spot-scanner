@@ -1,0 +1,495 @@
+{
+  "provenance": "Existing immutable GitHub scanner_state commits only; no new market download or replay",
+  "rows": [
+    {
+      "state_commit": "0725fdc904970a46017342d17db50b7d63484733",
+      "checkout_sha": "def715485b728b2011db29e95b229d157e08a5ff",
+      "run_id": "39160181278",
+      "scan_start": 1792352744,
+      "scan_finish": 1792352786,
+      "code_sha": "def715485b728b2011db29e95b229d157e08a5ff",
+      "shadow": true,
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=32.5 | 3C=-0.37%",
+      "price": {
+        "last": "0.2089",
+        "quote_volume": "41260542.7509"
+      },
+      "decisions": [
+        {
+          "symbol": "XCN_TL",
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792352746,
+          "imbalance": "0.6348529995333769451060029033"
+        }
+      ],
+      "early_followup": {
+        "symbol": "XCN_TL",
+        "first_seen": 1792343730,
+        "max_score": 78,
+        "last_seen": 1792343730,
+        "last_candle_at": 1792342800,
+        "last_score": 78,
+        "last_reason": "4h clearly weak"
+      },
+      "watch": null,
+      "execution_followup": {
+        "symbol": "XCN_TL",
+        "first_seen": 1792351546,
+        "checks": 3,
+        "reason_counts": {
+          "spread_too_high": 2,
+          "imbalance_too_low": 1
+        },
+        "history": [
+          {
+            "at": 1792351546,
+            "reason": "spread_too_high",
+            "spread_pct": "1.061865189289012003693444137",
+            "imbalance": "0.5753636529472399319722384632",
+            "best_ask": "0.2189"
+          },
+          {
+            "at": 1792352140,
+            "reason": "spread_too_high",
+            "spread_pct": "1.745283018867924528301886792",
+            "imbalance": "0.7322373642905457310066201298",
+            "best_ask": "0.2157"
+          },
+          {
+            "at": 1792352744,
+            "reason": "imbalance_too_low",
+            "spread_pct": "0.1930501930501930501930501931",
+            "imbalance": "0.6348529995333769451060029033",
+            "best_ask": "0.2076"
+          }
+        ],
+        "last_seen": 1792352744,
+        "last_reason": "imbalance_too_low"
+      },
+      "lifecycle": {
+        "candidate_id": "XCN_TL:39148681303",
+        "symbol": "XCN_TL",
+        "first_seen_run": "39148681303",
+        "first_seen_at": "2026-10-18T17:15:30+00:00",
+        "max_score": 78,
+        "current_state": "early_watch",
+        "history": [
+          {
+            "run_id": "39148681303",
+            "ts": "2026-10-18T17:15:30+00:00",
+            "score": 78,
+            "state": "early_watch",
+            "reason": "4h clearly weak"
+          }
+        ]
+      },
+      "book_slot": true,
+      "technical_slot": false,
+      "infra": {
+        "run_id": "39160181278",
+        "started_at": 1792352744,
+        "finished_at": 1792352786,
+        "btc_ok": false,
+        "btc_reason": "regime_bearish",
+        "candles_complete": 30,
+        "candles_synthetic": 0,
+        "candles_error": 0,
+        "cadence_expected_seconds": 600,
+        "cadence_late_after_seconds": 1200,
+        "cadence_gap_seconds": 604,
+        "cadence_status": "ok",
+        "hot_radar_eligible": 6,
+        "hot_radar_selected": 6,
+        "funnel": {
+          "universe": 234,
+          "liq": 80,
+          "spread": 58,
+          "book": 30,
+          "tech": 30,
+          "score": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "candidates": 0,
+          "confirmed": 0,
+          "exec": 0,
+          "limit": 0
+        },
+        "stage_drops": {
+          "universe:excluded_base_asset": 3,
+          "discovery:RSI outside watch range": 28,
+          "discovery:15m momentum not constructive": 1,
+          "book:spread_too_high": 22,
+          "book:imbalance_too_low": 28,
+          "coverage:not_evaluated_capacity": 52,
+          "discovery:ATR outside range": 1,
+          "universe:quote_volume_below_minimum": 99
+        }
+      }
+    },
+    {
+      "state_commit": "137f0864076f41342bd3f4d7a0345896ec852708",
+      "checkout_sha": "0725fdc904970a46017342d17db50b7d63484733",
+      "run_id": "39160921621",
+      "scan_start": 1792353342,
+      "scan_finish": 1792353383,
+      "code_sha": "0725fdc904970a46017342d17db50b7d63484733",
+      "shadow": true,
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=32.5 | 3C=-0.37%",
+      "price": {
+        "last": "0.2064",
+        "quote_volume": "41565019.0162"
+      },
+      "decisions": [
+        {
+          "symbol": "XCN_TL",
+          "stage": "discovery",
+          "reason": "4h clearly weak",
+          "observed_at": 1792353364,
+          "score": 57,
+          "rsi": "56.84857892843398",
+          "return_3": "-1.690140845070422535211267610",
+          "volume_ratio": "1.4926845044906385",
+          "atr_pct": "2.213127008116228748806112703",
+          "macd_histogram": "0.0007189761975243897",
+          "closed_candle_at": 1792351800,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 3,
+            "1h": 0,
+            "4h": 0
+          }
+        }
+      ],
+      "early_followup": {
+        "symbol": "XCN_TL",
+        "first_seen": 1792343730,
+        "max_score": 78,
+        "last_seen": 1792343730,
+        "last_candle_at": 1792342800,
+        "last_score": 78,
+        "last_reason": "4h clearly weak"
+      },
+      "watch": null,
+      "execution_followup": null,
+      "lifecycle": {
+        "candidate_id": "XCN_TL:39148681303",
+        "symbol": "XCN_TL",
+        "first_seen_run": "39148681303",
+        "first_seen_at": "2026-10-18T17:15:30+00:00",
+        "max_score": 78,
+        "current_state": "early_watch",
+        "history": [
+          {
+            "run_id": "39148681303",
+            "ts": "2026-10-18T17:15:30+00:00",
+            "score": 78,
+            "state": "early_watch",
+            "reason": "4h clearly weak"
+          }
+        ]
+      },
+      "book_slot": true,
+      "technical_slot": true,
+      "infra": {
+        "run_id": "39160921621",
+        "started_at": 1792353342,
+        "finished_at": 1792353383,
+        "btc_ok": false,
+        "btc_reason": "regime_bearish",
+        "candles_complete": 27,
+        "candles_synthetic": 0,
+        "candles_error": 0,
+        "cadence_expected_seconds": 600,
+        "cadence_late_after_seconds": 1200,
+        "cadence_gap_seconds": 598,
+        "cadence_status": "ok",
+        "hot_radar_eligible": 36,
+        "hot_radar_selected": 30,
+        "funnel": {
+          "universe": 234,
+          "liq": 80,
+          "spread": 57,
+          "book": 27,
+          "tech": 27,
+          "score": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "candidates": 0,
+          "confirmed": 0,
+          "exec": 0,
+          "limit": 0
+        },
+        "stage_drops": {
+          "universe:excluded_base_asset": 3,
+          "discovery:RSI outside watch range": 25,
+          "discovery:15m momentum not constructive": 1,
+          "book:imbalance_too_low": 30,
+          "book:spread_too_high": 23,
+          "coverage:not_evaluated_capacity": 52,
+          "discovery:4h clearly weak": 1,
+          "universe:quote_volume_below_minimum": 99
+        }
+      }
+    },
+    {
+      "state_commit": "af4a97df22d8b64c99dc36763e466226e601558e",
+      "checkout_sha": "5a46d63da8f0e19f5de9c11932a6d0dce745c1ae",
+      "run_id": "39161682650",
+      "scan_start": 1792353945,
+      "scan_finish": 1792353975,
+      "code_sha": "5a46d63da8f0e19f5de9c11932a6d0dce745c1ae",
+      "shadow": true,
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=31.4 | 3C=-0.34%",
+      "price": {
+        "last": "0.2054",
+        "quote_volume": "42732469.1296"
+      },
+      "decisions": [
+        {
+          "symbol": "XCN_TL",
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792353960,
+          "score": 60,
+          "rsi": "48.43370490724706",
+          "return_3": "-4.289044289044289044289044290",
+          "volume_ratio": "0.7971162047831293",
+          "atr_pct": "2.280486517655975645396980029",
+          "macd_histogram": "0.00009261862063105787",
+          "closed_candle_at": 1792352700,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 3,
+            "1h": 0,
+            "4h": 0
+          }
+        }
+      ],
+      "early_followup": {
+        "symbol": "XCN_TL",
+        "first_seen": 1792343730,
+        "max_score": 78,
+        "last_seen": 1792343730,
+        "last_candle_at": 1792342800,
+        "last_score": 78,
+        "last_reason": "4h clearly weak"
+      },
+      "watch": null,
+      "execution_followup": null,
+      "lifecycle": {
+        "candidate_id": "XCN_TL:39148681303",
+        "symbol": "XCN_TL",
+        "first_seen_run": "39148681303",
+        "first_seen_at": "2026-10-18T17:15:30+00:00",
+        "max_score": 78,
+        "current_state": "early_watch",
+        "history": [
+          {
+            "run_id": "39148681303",
+            "ts": "2026-10-18T17:15:30+00:00",
+            "score": 78,
+            "state": "early_watch",
+            "reason": "4h clearly weak"
+          }
+        ]
+      },
+      "book_slot": true,
+      "technical_slot": true,
+      "infra": {
+        "run_id": "39161682650",
+        "started_at": 1792353945,
+        "finished_at": 1792353975,
+        "btc_ok": false,
+        "btc_reason": "regime_bearish",
+        "candles_complete": 28,
+        "candles_synthetic": 0,
+        "candles_error": 0,
+        "cadence_expected_seconds": 600,
+        "cadence_late_after_seconds": 1200,
+        "cadence_gap_seconds": 603,
+        "cadence_status": "ok",
+        "hot_radar_eligible": 29,
+        "hot_radar_selected": 28,
+        "funnel": {
+          "universe": 234,
+          "liq": 80,
+          "spread": 58,
+          "book": 28,
+          "tech": 28,
+          "score": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "candidates": 0,
+          "confirmed": 0,
+          "exec": 0,
+          "limit": 0
+        },
+        "stage_drops": {
+          "universe:excluded_base_asset": 3,
+          "discovery:RSI outside watch range": 25,
+          "discovery:volume not expanding": 1,
+          "book:spread_too_high": 22,
+          "book:imbalance_too_low": 30,
+          "coverage:not_evaluated_capacity": 52,
+          "discovery:15m momentum not constructive": 1,
+          "discovery:ATR outside range": 1,
+          "universe:quote_volume_below_minimum": 99
+        }
+      }
+    },
+    {
+      "state_commit": "430e91c1078b82901838c6982c7f30ba328811bb",
+      "checkout_sha": "af4a97df22d8b64c99dc36763e466226e601558e",
+      "run_id": "39162441412",
+      "scan_start": 1792354541,
+      "scan_finish": 1792354580,
+      "code_sha": "af4a97df22d8b64c99dc36763e466226e601558e",
+      "shadow": true,
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=31.3 | 3C=-0.25%",
+      "price": {
+        "last": "0.2074",
+        "quote_volume": "43168533.7061"
+      },
+      "decisions": [
+        {
+          "symbol": "XCN_TL",
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792354559,
+          "score": 57,
+          "rsi": "51.980986323271914",
+          "return_3": "-3.851508120649651972157772620",
+          "volume_ratio": "0.8683241870840199",
+          "atr_pct": "2.187806972326912644787644788",
+          "macd_histogram": "-0.0002081053673752371",
+          "closed_candle_at": 1792353600,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 3,
+            "1h": 0,
+            "4h": 0
+          }
+        }
+      ],
+      "early_followup": {
+        "symbol": "XCN_TL",
+        "first_seen": 1792343730,
+        "max_score": 78,
+        "last_seen": 1792343730,
+        "last_candle_at": 1792342800,
+        "last_score": 78,
+        "last_reason": "4h clearly weak"
+      },
+      "watch": null,
+      "execution_followup": null,
+      "lifecycle": {
+        "candidate_id": "XCN_TL:39148681303",
+        "symbol": "XCN_TL",
+        "first_seen_run": "39148681303",
+        "first_seen_at": "2026-10-18T17:15:30+00:00",
+        "max_score": 78,
+        "current_state": "early_watch",
+        "history": [
+          {
+            "run_id": "39148681303",
+            "ts": "2026-10-18T17:15:30+00:00",
+            "score": 78,
+            "state": "early_watch",
+            "reason": "4h clearly weak"
+          }
+        ]
+      },
+      "book_slot": true,
+      "technical_slot": true,
+      "infra": {
+        "run_id": "39162441412",
+        "started_at": 1792354541,
+        "finished_at": 1792354580,
+        "btc_ok": false,
+        "btc_reason": "regime_bearish",
+        "candles_complete": 35,
+        "candles_synthetic": 0,
+        "candles_error": 0,
+        "cadence_expected_seconds": 600,
+        "cadence_late_after_seconds": 1200,
+        "cadence_gap_seconds": 596,
+        "cadence_status": "ok",
+        "hot_radar_eligible": 30,
+        "hot_radar_selected": 30,
+        "funnel": {
+          "universe": 234,
+          "liq": 80,
+          "spread": 58,
+          "book": 35,
+          "tech": 35,
+          "score": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "candidates": 0,
+          "confirmed": 0,
+          "exec": 0,
+          "limit": 0
+        },
+        "stage_drops": {
+          "universe:excluded_base_asset": 3,
+          "discovery:RSI outside watch range": 31,
+          "discovery:15m momentum not constructive": 2,
+          "book:spread_too_high": 22,
+          "book:imbalance_too_low": 23,
+          "coverage:not_evaluated_capacity": 53,
+          "discovery:ATR outside range": 1,
+          "discovery:4h clearly weak": 1,
+          "universe:quote_volume_below_minimum": 98
+        }
+      }
+    }
+  ],
+  "runtime_extract_run_ids": [
+    39161682650,
+    39162441412
+  ],
+  "correction_to_older_report": "23:06:00.658 and23:15:59.744 local decisions DID fetch/analyze native 4h last_open1792339200 (19:00–23:00 closed). They were rejected for15m momentum, with BTC false, score60/57 and volume ratios below1.30; no qualified READY follows from the later4h close.",
+  "ttl_end": {
+    "run_id": 39184510216,
+    "state_commit": "e08f36da53a646a21f21bcd130618abaad9f2b10",
+    "lifecycle": {
+      "candidate_id": "XCN_TL:39148681303",
+      "symbol": "XCN_TL",
+      "first_seen_run": "39148681303",
+      "first_seen_at": "2026-10-18T17:15:30+00:00",
+      "max_score": 78,
+      "current_state": "expired",
+      "history": [
+        {
+          "run_id": "39148681303",
+          "ts": "2026-10-18T17:15:30+00:00",
+          "score": 78,
+          "state": "early_watch",
+          "reason": "4h clearly weak"
+        },
+        {
+          "run_id": "39184510216",
+          "ts": "2026-10-19T01:16:01+00:00",
+          "score": null,
+          "state": "expired",
+          "reason": "watch_window_expired"
+        }
+      ]
+    },
+    "early_followup": null,
+    "watch": null
+  },
+  "provenance_limit": "Existing GitHub state/logs only; old19-cycle replay is reused unchanged. No later market rows were added to any earlier decision."
+}

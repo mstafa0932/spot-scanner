@@ -1,0 +1,318 @@
+{
+  "repository": "mstafa0932/spot-scanner",
+  "provenance": "Selected original GitHub Actions log lines and job-step results; no full environment dump; actual source SHA corroborated against immutable state parent.",
+  "runs": [
+    {
+      "run_id": 39169946881,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39169946881",
+      "job_id": 117800726487,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T21:55:51.3930437Z 2026-10-18 21:55:51,392 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=3a8a66216c038bd0ca052dfb55dea7e925046c0b | shadow=True",
+        "2026-10-18T21:56:27.0040528Z 2026-10-18 21:56:27,003 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:15m:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-15T18:45:00+00:00\", \"2026-10-18T21:30:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:56:27.0088401Z 2026-10-18 21:56:27,008 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792359000",
+        "2026-10-18T21:56:27.1817152Z 2026-10-18 21:56:27,181 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:1h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-06T09:00:00+00:00\", \"2026-10-18T20:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:56:27.1865125Z 2026-10-18 21:56:27,186 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=1 local_synthetic=0 latest_open=1792353600",
+        "2026-10-18T21:56:27.3591032Z 2026-10-18 21:56:27,358 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:4h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-08-29T20:00:00+00:00\", \"2026-10-18T16:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:56:27.3638374Z 2026-10-18 21:56:27,363 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T21:56:27.3857663Z 2026-10-18 21:56:27,385 | INFO | Scan decision | ALT_TL | discovery | passed_pending_trigger",
+        "2026-10-18T21:56:27.3859014Z 2026-10-18 21:56:27,385 | INFO | Scan metrics | ALT_TL | discovery | {\"atr_pct\":\"1.129611807418421089713480507\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792359000,\"exchange_zero_volume_bars\":{\"15m\":4,\"1h\":1,\"4h\":0},\"macd_histogram\":\"0.0012338797724840355\",\"return_3\":\"1.866028708133971291866028700\",\"rsi\":\"62.752266581528964\",\"score\":89,\"volume_ratio\":\"3.862719723145194\"}",
+        "2026-10-18T21:56:27.5756828Z 2026-10-18 21:56:27,575 | INFO | Scan decision | ALT_TL | shadow | paper_signal_recorded",
+        "2026-10-18T21:56:27.9892061Z 2026-10-18 21:56:27,989 | INFO | Telegram accepted message_id=1104",
+        "2026-10-18T21:56:27.9896027Z 2026-10-18 21:56:27,989 | INFO | SHADOW READY Telegram alert sent: ALT_TL score=89 confirmations=2",
+        "2026-10-18T21:56:27.9896807Z 2026-10-18 21:56:27,989 | INFO | SHADOW signal: ALT_TL score=89 confirmations=2 entry=0.422200 stop=0.4119253080568720379146919431 tp1=0.4376120379146919431279620854",
+        "2026-10-18T21:56:28.0712123Z [INFRA_HEALTH] run_id=39169946881 btc_ok=True btc_reason=regime_neutral candles_complete=31 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=593 cadence_status=ok state_saved=OK",
+        "2026-10-18T21:56:28.0713385Z [FUNNEL_BEHAVIOR] run_id=39169946881 universe=234 liq=80 spread=56 book=31 tech=31 data_valid=31 score=2 early_watch=1 watch_alerts=0 candidates=1 confirmed=1 exec=1 limit=1 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":25,\"book:spread_too_high\":24,\"coverage:not_evaluated_capacity\":53,\"discovery:1h clearly weak\":10,\"discovery:4h clearly weak\":2,\"discovery:RSI outside watch range\":18,\"shadow:paper_signal_recorded\":1,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":98}"
+      ]
+    },
+    {
+      "run_id": 39166994287,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39166994287",
+      "job_id": 117791908476,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T21:15:51.0767290Z 2026-10-18 21:15:51,076 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=7df5e3c4e0227a65e241ab39969cea77f89f6d2c | shadow=True",
+        "2026-10-18T21:16:35.6229115Z 2026-10-18 21:16:35,622 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:15m:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-15T18:15:00+00:00\", \"2026-10-18T21:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:16:35.6329890Z 2026-10-18 21:16:35,632 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792357200",
+        "2026-10-18T21:16:35.8546920Z 2026-10-18 21:16:35,854 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:1h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-06T09:00:00+00:00\", \"2026-10-18T20:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:16:35.8646926Z 2026-10-18 21:16:35,864 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=1 local_synthetic=0 latest_open=1792353600",
+        "2026-10-18T21:16:36.0934839Z 2026-10-18 21:16:36,092 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:4h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-08-29T20:00:00+00:00\", \"2026-10-18T16:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:16:36.1043734Z 2026-10-18 21:16:36,103 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T21:16:36.1509055Z 2026-10-18 21:16:36,150 | INFO | Scan decision | ALT_TL | discovery | passed_pending_trigger",
+        "2026-10-18T21:16:36.1513134Z 2026-10-18 21:16:36,150 | INFO | Scan metrics | ALT_TL | discovery | {\"atr_pct\":\"0.8561079528548567080309061110\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792357200,\"exchange_zero_volume_bars\":{\"15m\":4,\"1h\":1,\"4h\":0},\"macd_histogram\":\"0.0007736109016527328\",\"return_3\":\"2.299401197604790419161676600\",\"rsi\":\"66.69298300427171\",\"score\":72,\"volume_ratio\":\"2.4530075980102404\"}",
+        "2026-10-18T21:16:36.1516794Z 2026-10-18 21:16:36,150 | INFO | Scan decision | ALT_TL | trigger | score 72 < 80",
+        "2026-10-18T21:16:36.1517979Z 2026-10-18 21:16:36,150 | INFO | Scan metrics | ALT_TL | trigger | {\"score\":72}",
+        "2026-10-18T21:16:36.3017222Z [INFRA_HEALTH] run_id=39166994287 btc_ok=True btc_reason=regime_neutral candles_complete=32 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=606 cadence_status=ok state_saved=OK",
+        "2026-10-18T21:16:36.3021834Z [FUNNEL_BEHAVIOR] run_id=39166994287 universe=234 liq=80 spread=56 book=32 tech=32 data_valid=32 score=1 early_watch=0 watch_alerts=0 candidates=1 confirmed=0 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":24,\"book:spread_too_high\":24,\"coverage:not_evaluated_capacity\":55,\"discovery:1h clearly weak\":3,\"discovery:4h clearly weak\":1,\"discovery:ATR outside range\":1,\"discovery:RSI outside watch range\":26,\"trigger:score 72 < 80\":1,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":96}"
+      ]
+    },
+    {
+      "run_id": 39167740177,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39167740177",
+      "job_id": 117794144552,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T21:25:39.1502771Z 2026-10-18 21:25:39,149 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=6d0d29c02b7addb4311034ff1c3607fba1bcc478 | shadow=True",
+        "2026-10-18T21:26:16.6837149Z 2026-10-18 21:26:16,683 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:15m:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-15T18:15:00+00:00\", \"2026-10-18T21:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:26:16.6888125Z 2026-10-18 21:26:16,688 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792357200",
+        "2026-10-18T21:26:16.8985418Z 2026-10-18 21:26:16,898 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:1h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-06T09:00:00+00:00\", \"2026-10-18T20:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:26:16.9036049Z 2026-10-18 21:26:16,903 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=1 local_synthetic=0 latest_open=1792353600",
+        "2026-10-18T21:26:17.1260834Z 2026-10-18 21:26:17,125 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:4h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-08-29T20:00:00+00:00\", \"2026-10-18T16:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:26:17.1311957Z 2026-10-18 21:26:17,131 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T21:26:17.1547221Z 2026-10-18 21:26:17,154 | INFO | Scan decision | ALT_TL | discovery | passed_pending_trigger",
+        "2026-10-18T21:26:17.1548644Z 2026-10-18 21:26:17,154 | INFO | Scan metrics | ALT_TL | discovery | {\"atr_pct\":\"0.8561079528548567080309061110\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792357200,\"exchange_zero_volume_bars\":{\"15m\":4,\"1h\":1,\"4h\":0},\"macd_histogram\":\"0.0007736109016527328\",\"return_3\":\"2.299401197604790419161676600\",\"rsi\":\"66.69298300427171\",\"score\":72,\"volume_ratio\":\"2.4530075980102404\"}",
+        "2026-10-18T21:26:17.8544642Z 2026-10-18 21:26:17,854 | INFO | Scan decision | ALT_TL | trigger | score 72 < 80",
+        "2026-10-18T21:26:17.8544914Z 2026-10-18 21:26:17,854 | INFO | Scan metrics | ALT_TL | trigger | {\"score\":72}",
+        "2026-10-18T21:26:17.9387532Z [INFRA_HEALTH] run_id=39167740177 btc_ok=True btc_reason=regime_neutral candles_complete=28 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=588 cadence_status=ok state_saved=OK",
+        "2026-10-18T21:26:17.9388713Z [FUNNEL_BEHAVIOR] run_id=39167740177 universe=234 liq=80 spread=51 book=28 tech=28 data_valid=28 score=1 early_watch=0 watch_alerts=0 candidates=1 confirmed=0 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":23,\"book:spread_too_high\":29,\"coverage:not_evaluated_capacity\":55,\"discovery:1h clearly weak\":2,\"discovery:RSI outside watch range\":25,\"trigger:score 72 < 80\":1,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":96}"
+      ]
+    },
+    {
+      "run_id": 39169224660,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39169224660",
+      "job_id": 117798605880,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T21:45:58.0722046Z 2026-10-18 21:45:58,071 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=5615f78de6d50a19ef25c7b48356e56ddf83a913 | shadow=True",
+        "2026-10-18T21:46:39.6278199Z 2026-10-18 21:46:39,627 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:15m:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-15T18:45:00+00:00\", \"2026-10-18T21:30:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:46:39.6381657Z 2026-10-18 21:46:39,637 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792359000",
+        "2026-10-18T21:46:39.8527760Z 2026-10-18 21:46:39,852 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:1h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-06T09:00:00+00:00\", \"2026-10-18T20:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:46:39.8628417Z 2026-10-18 21:46:39,862 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=1 local_synthetic=0 latest_open=1792353600",
+        "2026-10-18T21:46:40.0862127Z 2026-10-18 21:46:40,085 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:4h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-08-29T20:00:00+00:00\", \"2026-10-18T16:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T21:46:40.0962554Z 2026-10-18 21:46:40,095 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T21:46:40.1421764Z 2026-10-18 21:46:40,141 | INFO | Scan decision | ALT_TL | discovery | passed_pending_trigger",
+        "2026-10-18T21:46:40.1424684Z 2026-10-18 21:46:40,142 | INFO | Scan metrics | ALT_TL | discovery | {\"atr_pct\":\"1.129611807418421089713480507\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792359000,\"exchange_zero_volume_bars\":{\"15m\":4,\"1h\":1,\"4h\":0},\"macd_histogram\":\"0.0012338797724840355\",\"return_3\":\"1.866028708133971291866028700\",\"rsi\":\"62.752266581528964\",\"score\":90,\"volume_ratio\":\"3.862719723145194\"}",
+        "2026-10-18T21:46:43.2606426Z 2026-10-18 21:46:43,260 | INFO | Scan decision | ALT_TL | risk | rr_below_min",
+        "2026-10-18T21:46:43.4125481Z [INFRA_HEALTH] run_id=39169224660 btc_ok=True btc_reason=regime_neutral candles_complete=32 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=596 cadence_status=ok state_saved=OK",
+        "2026-10-18T21:46:43.4128427Z [FUNNEL_BEHAVIOR] run_id=39169224660 universe=234 liq=80 spread=58 book=32 tech=32 data_valid=32 score=3 early_watch=1 watch_alerts=0 candidates=2 confirmed=1 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":26,\"book:spread_too_high\":22,\"coverage:not_evaluated_capacity\":52,\"discovery:1h clearly weak\":12,\"discovery:RSI outside watch range\":18,\"risk:rr_below_min\":1,\"trigger:score 77 < 80\":1,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":99}"
+      ]
+    },
+    {
+      "run_id": 39177146052,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39177146052",
+      "job_id": 117822046928,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T23:35:57.8165228Z 2026-10-18 23:35:57,816 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=8aecd6246763bb898fdd25bd407b83b8e8cc7af0 | shadow=True",
+        "2026-10-18T23:35:58.2158817Z 2026-10-18 23:35:58,215 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:15m:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-15T20:30:00+00:00\", \"2026-10-18T23:15:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T23:35:58.2248447Z 2026-10-18 23:35:58,224 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792365300",
+        "2026-10-18T23:36:41.0576877Z 2026-10-18 23:36:41,057 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:15m:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-15T20:30:00+00:00\", \"2026-10-18T23:15:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T23:36:41.0667880Z 2026-10-18 23:36:41,066 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=4 local_synthetic=0 latest_open=1792365300",
+        "2026-10-18T23:36:41.2800431Z 2026-10-18 23:36:41,279 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:1h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-10-06T11:00:00+00:00\", \"2026-10-18T22:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T23:36:41.2891471Z 2026-10-18 23:36:41,288 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=1 local_synthetic=0 latest_open=1792360800",
+        "2026-10-18T23:36:41.5116064Z 2026-10-18 23:36:41,511 | INFO | CANDLE_REPAIR_RESULT {\"market\": \"alt_tl:4h:native_v1\", \"requests\": 0, \"errors\": [], \"recovered\": 0, \"missing_before\": 0, \"classification\": \"clear\", \"continuing_count\": 0, \"new_count\": 0, \"window_utc\": [\"2026-08-29T20:00:00+00:00\", \"2026-10-18T16:00:00+00:00\"], \"gaps_before_utc\": [], \"missing_after_real_recovery\": 0, \"missing_after\": 0, \"gaps_after_utc\": [], \"synthetic_count\": 0, \"synthetic_timestamps\": [], \"max_consecutive_synthetic\": 0, \"authentic_tail\": 300, \"status\": \"complete_real\"}",
+        "2026-10-18T23:36:41.5208844Z 2026-10-18 23:36:41,520 | INFO | PARIBU_CANDLE_SOURCE market=alt_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T23:36:41.5614579Z 2026-10-18 23:36:41,561 | INFO | Scan decision | ALT_TL | discovery | volume not expanding",
+        "2026-10-18T23:36:41.5616247Z 2026-10-18 23:36:41,561 | INFO | Scan metrics | ALT_TL | discovery | {\"atr_pct\":\"0.9752801785972701322812717568\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792365300,\"exchange_zero_volume_bars\":{\"15m\":4,\"1h\":1,\"4h\":0},\"macd_histogram\":\"0.0009270515149066337\",\"return_3\":\"-0.2546296296296296296296296300\",\"rsi\":\"64.35072174010209\",\"score\":72,\"volume_ratio\":\"0.5560974744276518\"}",
+        "2026-10-18T23:36:41.6992977Z [INFRA_HEALTH] run_id=39177146052 btc_ok=True btc_reason=regime_neutral candles_complete=29 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=599 cadence_status=ok state_saved=OK",
+        "2026-10-18T23:36:41.6997303Z [FUNNEL_BEHAVIOR] run_id=39177146052 universe=234 liq=80 spread=55 book=29 tech=29 data_valid=29 score=4 early_watch=0 watch_alerts=0 candidates=0 confirmed=0 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":26,\"book:spread_too_high\":25,\"coverage:not_evaluated_capacity\":53,\"discovery:1h clearly weak\":2,\"discovery:4h clearly weak\":17,\"discovery:ATR outside range\":1,\"discovery:RSI outside watch range\":7,\"discovery:volume not expanding\":2,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":98}"
+      ]
+    },
+    {
+      "run_id": 39161682650,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39161682650",
+      "job_id": 117776117199,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T20:05:45.5581646Z 2026-10-18 20:05:45,557 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=5a46d63da8f0e19f5de9c11932a6d0dce745c1ae | shadow=True",
+        "2026-10-18T20:06:00.2219902Z 2026-10-18 20:06:00,221 | INFO | PARIBU_CANDLE_SOURCE market=xcn_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=3 local_synthetic=0 latest_open=1792352700",
+        "2026-10-18T20:06:00.4095088Z 2026-10-18 20:06:00,409 | INFO | PARIBU_CANDLE_SOURCE market=xcn_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792350000",
+        "2026-10-18T20:06:00.6123503Z 2026-10-18 20:06:00,612 | INFO | PARIBU_CANDLE_SOURCE market=xcn_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T20:06:00.6583363Z 2026-10-18 20:06:00,658 | INFO | Scan decision | XCN_TL | discovery | 15m momentum not constructive",
+        "2026-10-18T20:06:00.6586909Z 2026-10-18 20:06:00,658 | INFO | Scan metrics | XCN_TL | discovery | {\"atr_pct\":\"2.280486517655975645396980029\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792352700,\"exchange_zero_volume_bars\":{\"15m\":3,\"1h\":0,\"4h\":0},\"macd_histogram\":\"0.00009261862063105787\",\"return_3\":\"-4.289044289044289044289044290\",\"rsi\":\"48.43370490724706\",\"score\":60,\"volume_ratio\":\"0.7971162047831293\"}",
+        "2026-10-18T20:06:16.0118238Z [INFRA_HEALTH] run_id=39161682650 btc_ok=False btc_reason=regime_bearish candles_complete=28 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=603 cadence_status=ok state_saved=OK",
+        "2026-10-18T20:06:16.0122575Z [FUNNEL_BEHAVIOR] run_id=39161682650 universe=234 liq=80 spread=58 book=28 tech=28 data_valid=28 score=0 early_watch=0 watch_alerts=0 candidates=0 confirmed=0 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":30,\"book:spread_too_high\":22,\"coverage:not_evaluated_capacity\":52,\"discovery:15m momentum not constructive\":1,\"discovery:ATR outside range\":1,\"discovery:RSI outside watch range\":25,\"discovery:volume not expanding\":1,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":99}"
+      ]
+    },
+    {
+      "run_id": 39162441412,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39162441412",
+      "job_id": 117778392865,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-18T20:15:41.6875506Z 2026-10-18 20:15:41,687 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=af4a97df22d8b64c99dc36763e466226e601558e | shadow=True",
+        "2026-10-18T20:15:59.3181276Z 2026-10-18 20:15:59,317 | INFO | PARIBU_CANDLE_SOURCE market=xcn_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=3 local_synthetic=0 latest_open=1792353600",
+        "2026-10-18T20:15:59.5164602Z 2026-10-18 20:15:59,516 | INFO | PARIBU_CANDLE_SOURCE market=xcn_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792350000",
+        "2026-10-18T20:15:59.7158187Z 2026-10-18 20:15:59,715 | INFO | PARIBU_CANDLE_SOURCE market=xcn_tl interval=4h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792339200",
+        "2026-10-18T20:15:59.7451617Z 2026-10-18 20:15:59,744 | INFO | Scan decision | XCN_TL | discovery | 15m momentum not constructive",
+        "2026-10-18T20:15:59.7453201Z 2026-10-18 20:15:59,745 | INFO | Scan metrics | XCN_TL | discovery | {\"atr_pct\":\"2.187806972326912644787644788\",\"authentic_only\":true,\"candle_endpoint\":\"https://web.paribu.com/v1/chart/ohlc\",\"closed_candle_at\":1792353600,\"exchange_zero_volume_bars\":{\"15m\":3,\"1h\":0,\"4h\":0},\"macd_histogram\":\"-0.0002081053673752371\",\"return_3\":\"-3.851508120649651972157772620\",\"rsi\":\"51.980986323271914\",\"score\":57,\"volume_ratio\":\"0.8683241870840199\"}",
+        "2026-10-18T20:16:20.7428495Z [INFRA_HEALTH] run_id=39162441412 btc_ok=False btc_reason=regime_bearish candles_complete=35 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=596 cadence_status=ok state_saved=OK",
+        "2026-10-18T20:16:20.7431390Z [FUNNEL_BEHAVIOR] run_id=39162441412 universe=234 liq=80 spread=58 book=35 tech=35 data_valid=35 score=0 early_watch=0 watch_alerts=0 candidates=0 confirmed=0 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":23,\"book:spread_too_high\":22,\"coverage:not_evaluated_capacity\":53,\"discovery:15m momentum not constructive\":2,\"discovery:4h clearly weak\":1,\"discovery:ATR outside range\":1,\"discovery:RSI outside watch range\":31,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":98}"
+      ]
+    },
+    {
+      "run_id": 39218091008,
+      "run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/39218091008",
+      "job_id": 117946612833,
+      "job_conclusion": "success",
+      "steps": [
+        {
+          "name": "Validate signal lifecycle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Run scanner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Persist scanner state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        }
+      ],
+      "lines": [
+        "2026-10-19T07:46:41.7174568Z 2026-10-19 07:46:41,717 | INFO | RESEARCH_COHORT | id=shadow_integrity_v2:1790082787 | code=b504971b858bd2e9c13bc56f996d4fcc358368d7 | shadow=True",
+        "2026-10-19T07:46:42.5844990Z 2026-10-19 07:46:42,584 | INFO | PARIBU_CANDLE_SOURCE market=btc_tl interval=15m endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=3 local_synthetic=0 latest_open=1792395000",
+        "2026-10-19T07:46:42.8211888Z 2026-10-19 07:46:42,820 | INFO | PARIBU_CANDLE_SOURCE market=btc_tl interval=1h endpoint=https://web.paribu.com/v1/chart/ohlc closed=250 published_zero_volume=0 local_synthetic=0 latest_open=1792389600",
+        "2026-10-19T07:47:23.8073815Z [INFRA_HEALTH] run_id=39218091008 btc_ok=True btc_reason=regime_neutral candles_complete=30 candles_synthetic=0 candles_error=0 cadence_expected_seconds=600 cadence_gap_seconds=611 cadence_status=ok state_saved=OK",
+        "2026-10-19T07:47:23.8076678Z [FUNNEL_BEHAVIOR] run_id=39218091008 universe=234 liq=80 spread=60 book=30 tech=30 data_valid=30 score=4 early_watch=2 watch_alerts=0 candidates=1 confirmed=0 exec=0 limit=0 near_ready_alerts=0 stage_drops={\"book:imbalance_too_low\":30,\"book:spread_too_high\":20,\"coverage:not_evaluated_capacity\":59,\"discovery:15m momentum not constructive\":6,\"discovery:1h clearly weak\":2,\"discovery:4h clearly weak\":16,\"discovery:ATR outside range\":3,\"discovery:RSI outside watch range\":2,\"trigger:buy flow not strong enough: 0.87\":1,\"universe:excluded_base_asset\":3,\"universe:quote_volume_below_minimum\":92}"
+      ]
+    }
+  ]
+}
+
