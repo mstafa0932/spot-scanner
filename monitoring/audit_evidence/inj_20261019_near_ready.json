@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "case": "INJ_TL_20261019",
-  "observed_at_utc": "2026-10-19T16:50:27Z",
+  "observed_at_utc": "2026-10-19T18:03:36Z",
   "mode": "SHADOW",
   "production_code_changed": false,
   "near_ready": {
@@ -98,7 +98,7 @@
       "note": "Later displayed market price only; no execution or candle-order inference."
     }
   ],
-  "classification": "Organic NEAR READY delivery verified. It was correctly not READY with only one confirmation; the next cycle failed the unchanged order-book imbalance gate, and the following new closed candle failed volume expansion. No lost qualified READY or production defect is established.",
+  "classification": "Organic NEAR READY delivery verified. A later distinct candle supplied confirmation 2/2, but the mandatory fresh order-book recheck failed at imbalance 1.04, so READY was correctly withheld. Subsequent authentic candles failed momentum. No duplicate notice, lost qualified READY, or production defect is established.",
   "limits": [
     "No Telegram message ID is retained in the saved state for this NEAR READY attempt.",
     "The user screenshots are observations, not raw order-book/OHLCV or execution evidence.",
@@ -122,6 +122,59 @@
       "ready_confirmed": 0,
       "signal_recorded": false,
       "alert_sent": false
+    }
+  ],
+  "second_confirmation": {
+    "run_id": 39291282840,
+    "job_id": 118192277937,
+    "refreshed_main_sha": "d6351082259354da05cafbce8ce9f35b6735704c",
+    "resulting_state_commit": "0ace13f5de5d5a6bf83f137a89d77eb719721c16",
+    "observed_at_utc": "2026-10-19T17:06:57Z",
+    "observed_at_local": "2026-10-19T20:06:57+03:00",
+    "candle_open_utc": "2026-10-19T16:45:00Z",
+    "distinct_from_first_candle": true,
+    "score": 92,
+    "confirmations_reached": "2/2",
+    "state_price": "424.85",
+    "state_metrics": {
+      "rsi": "56.261130977814865",
+      "return_3_pct": "0.215406228049637087333177200",
+      "volume_ratio": "2.062066225659977",
+      "atr_pct": "0.8106414428629755618896313256",
+      "macd_histogram": "0.790708777749741",
+      "imbalance": "2.148452095356495535529139880",
+      "spread_pct": "0.1957454837035988868449601434"
+    },
+    "trigger_result": "passed_pending_trigger",
+    "final_fresh_book_recheck": {
+      "accepted": false,
+      "reason": "buy flow not strong enough",
+      "imbalance": "1.04"
+    },
+    "ready_delivered": false,
+    "signal_recorded": false,
+    "alert_sent": false,
+    "near_ready_alerts": 0,
+    "classification": "Two distinct candle confirmations were present, but the mandatory fresh order-book recheck failed. READY was correctly withheld."
+  },
+  "later_followups": [
+    {
+      "run_id": 39294124187,
+      "closed_candle_open_utc": "2026-10-19T17:00:00Z",
+      "reason": "15m momentum not constructive",
+      "score": 52,
+      "volume_ratio": "0.13222194852561406",
+      "near_ready_alerts": 0,
+      "ready": false
+    },
+    {
+      "run_id": 39297022651,
+      "closed_candle_open_utc": "2026-10-19T17:30:00Z",
+      "reason": "15m momentum not constructive",
+      "score": 55,
+      "volume_ratio": "0.12166486136530585",
+      "near_ready_alerts": 0,
+      "ready": false
     }
   ]
 }
