@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "case": "ARB_TL organic NEAR READY",
+  "local_date": "2026-10-20",
+  "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
+  "near_ready": {
+    "run_id": 39337315395,
+    "job_id": 118349931991,
+    "refreshed_main_sha": "ea8e314fd80758b6f22fe5869e851f8945e7927e",
+    "resulting_state_commit": "08a8b3f163f6accade2731ff0c5c5e3fc0654c85",
+    "observed_at_utc": 1792450101,
+    "observed_at_turkey": "2026-10-20T01:48:21+03:00",
+    "score": 92,
+    "confirmations": "1/2",
+    "setup": "PULLBACK",
+    "state_price": "9.76",
+    "closed_candle_at": 1792449000,
+    "authentic_only": true,
+    "endpoint": "https://web.paribu.com/v1/chart/ohlc",
+    "rsi": "58.76322429056021",
+    "return_3": "0.411522633744855967078189300",
+    "volume_ratio": "3.736113478811628",
+    "atr_pct": "0.9033725721036241803278688525",
+    "fresh_book_imbalance": "1.423876415990215572427745769",
+    "spread_pct": "0.1025641025641025641025641026",
+    "notification_evidence": {
+      "funnel_near_ready_alerts": 1,
+      "near_ready_attempted_at": 1792450101,
+      "near_ready_notified_at": 1792450101
+    },
+    "shadow_mode": true
+  },
+  "followup": [
+    {
+      "run_id": 39338414050,
+      "result": "same candle remained confirmation 1/2; near_ready_alerts=0; no duplicate notification"
+    },
+    {
+      "run_id": 39339515730,
+      "closed_candle_at": 1792449900,
+      "result": "newer authentic closed candle failed volume expansion",
+      "volume_ratio": "0.06513155590272947",
+      "score": 64
+    },
+    {
+      "run_id": 39340583562,
+      "closed_candle_at": 1792450800,
+      "result": "later authentic closed candle failed volume expansion",
+      "volume_ratio": "0.4079374258814679",
+      "score": 71
+    }
+  ],
+  "conclusion": "Organic NEAR READY delivery and same-candle dedupe are proven for ARB_TL. No second confirmation or READY was eligible; later closed candles failed unchanged volume gates. No production defect established.",
+  "limitations": [
+    "Telegram message identifier is not present in persisted scanner_state.json; delivery is evidenced by send success state and near_ready_alerts=1.",
+    "This case does not prove READY delivery or execution."
+  ]
+}
