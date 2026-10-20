@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "mstafa0932/spot-scanner",
   "case": "XTZ_TL",
-  "classification": "organic_ready_delivered_shadow_estimated_fill_open_breakeven_armed_no_tp",
+  "classification": "organic_ready_delivered_shadow_estimated_fill_tp1_model_event_no_live_execution",
   "ready": {
     "run_id": 39413932212,
     "job_id": 118598224172,
@@ -49,7 +49,7 @@
     }
   },
   "current": {
-    "status": "OPEN",
+    "status": "TP1",
     "fill_confirmed": false,
     "fill_estimated": true,
     "filled_at": 1792499400,
@@ -65,8 +65,18 @@
       "time_basis": "bar_close_upper_bound_not_exact_fill_time",
       "quantity_basis": "unknown_no_queue_or_partial_fill_model"
     },
-    "tp1_notified": false,
-    "events": [],
+    "tp1_notified": true,
+    "events": [
+      {
+        "kind": "TP1",
+        "price": "15.88093193803559657218193803",
+        "at": 1792511100,
+        "local_at": "2026-10-20T18:45:00+03:00",
+        "delivered": false,
+        "simulation_version": "ohlc_penetration_v2",
+        "execution_basis": "estimated_not_exchange_confirmed"
+      }
+    ],
     "tracking_data_error": null,
     "tracking_incomplete": true,
     "skipped_tracking_candles": {
@@ -75,7 +85,7 @@
       "1792503900": "no_positive_trade_volume",
       "1792504800": "no_positive_trade_volume"
     },
-    "last_processed_candle": 1792509300,
+    "last_processed_candle": 1792512000,
     "durable_sent_timestamp": 1792495145,
     "observed_duplicate_delivery": false,
     "breakeven_armed": true,
@@ -123,14 +133,14 @@
     "refreshed_main_sha": "be01fa714d4352662be07efb513b7e81ca6c7f40",
     "resulting_state_commit": "1d503c13879cc1dac3535102f07ce8c559b439e9",
     "resulting_state_blob": "8f796ef67074079c36a00c32265f6beb9738e4f6",
-    "latest_run_id": 39450225508,
-    "latest_job_id": 118722772983,
-    "latest_state_commit": "799e6016d8ea6ac487a4f6a250d659dcfaa9e7d3",
-    "latest_state_blob": "c144dc4e50091cbe45dfdd980da42d3cfa1247d2",
-    "new_cycles": 8,
+    "latest_run_id": 39456212095,
+    "latest_job_id": 118744190255,
+    "latest_state_commit": "79fa54388de6d462d58555b0b78489c3d33cfccf",
+    "latest_state_blob": "c2e996111e6ceadd7b4dd96e441164143daf74c8",
+    "new_cycles": 4,
     "cadence_seconds": {
       "min": 592,
-      "max": 608
+      "max": 659
     },
     "shadow_all": true,
     "synthetic_errors_zero": true,
@@ -146,5 +156,17 @@
     "armed_at": 1792506600,
     "stop": "15.26594269973632168754119974",
     "classification": "shadow_model_state_not_exchange_order"
+  },
+  "tp1_delta": {
+    "run_id": 39451745883,
+    "job_id": 118728079263,
+    "refreshed_main_sha": "799e6016d8ea6ac487a4f6a250d659dcfaa9e7d3",
+    "resulting_state_commit": "a8b040fa07576a692a9509d8e73f24a196d99c5b",
+    "resulting_state_blob": "e9940b0e3b6fc9d836abdc30b3fe32f5f81fd9b1",
+    "event_at": 1792511100,
+    "local_at": "2026-10-20T18:45:00+03:00",
+    "price": "15.88093193803559657218193803",
+    "delivered": false,
+    "classification": "post_estimated_entry_shadow_tp1_not_exchange_confirmed"
   }
 }
