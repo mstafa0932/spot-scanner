@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "mstafa0932/spot-scanner",
   "case": "XTZ_TL",
-  "classification": "organic_ready_delivered_shadow_estimated_fill_open_no_tp",
+  "classification": "organic_ready_delivered_shadow_estimated_fill_open_breakeven_armed_no_tp",
   "ready": {
     "run_id": 39413932212,
     "job_id": 118598224172,
@@ -67,14 +67,20 @@
     },
     "tp1_notified": false,
     "events": [],
-    "tracking_data_error": "no_positive_trade_volume",
+    "tracking_data_error": null,
     "tracking_incomplete": true,
     "skipped_tracking_candles": {
-      "1792502100": "no_positive_trade_volume"
+      "1792502100": "no_positive_trade_volume",
+      "1792503000": "no_positive_trade_volume",
+      "1792503900": "no_positive_trade_volume",
+      "1792504800": "no_positive_trade_volume"
     },
-    "last_processed_candle": 1792501200,
+    "last_processed_candle": 1792509300,
     "durable_sent_timestamp": 1792495145,
-    "observed_duplicate_delivery": false
+    "observed_duplicate_delivery": false,
+    "breakeven_armed": true,
+    "breakeven_armed_at": 1792506600,
+    "breakeven_stop": "15.26594269973632168754119974"
   },
   "user_observation": {
     "observed_local": "2026-10-20T14:21:00+03:00",
@@ -117,18 +123,28 @@
     "refreshed_main_sha": "be01fa714d4352662be07efb513b7e81ca6c7f40",
     "resulting_state_commit": "1d503c13879cc1dac3535102f07ce8c559b439e9",
     "resulting_state_blob": "8f796ef67074079c36a00c32265f6beb9738e4f6",
-    "latest_run_id": 39432094681,
-    "latest_job_id": 118659462058,
-    "latest_state_commit": "a64c8048b7041f9245b5a06ef37204cc1ae00ba1",
-    "latest_state_blob": "f5a60a723d5a6d5c8b12da87957516a227978eba",
+    "latest_run_id": 39450225508,
+    "latest_job_id": 118722772983,
+    "latest_state_commit": "799e6016d8ea6ac487a4f6a250d659dcfaa9e7d3",
+    "latest_state_blob": "c144dc4e50091cbe45dfdd980da42d3cfa1247d2",
     "new_cycles": 8,
     "cadence_seconds": {
-      "min": 594,
-      "max": 620
+      "min": 592,
+      "max": 608
     },
     "shadow_all": true,
     "synthetic_errors_zero": true,
     "generic_early_watch_alerts": 0,
     "duplicate_ready_observed": false
+  },
+  "breakeven_delta": {
+    "run_id": 39441016097,
+    "job_id": 118690555364,
+    "refreshed_main_sha": "5a5b375424b017dab5d873fed48caa5179b1c211",
+    "resulting_state_commit": "f27fc9f12cebadbba1b6ce65dcba42cab6a8b353",
+    "resulting_state_blob": "7a73ed856fa3553cad3784c013c13f1f2935a98b",
+    "armed_at": 1792506600,
+    "stop": "15.26594269973632168754119974",
+    "classification": "shadow_model_state_not_exchange_order"
   }
 }
