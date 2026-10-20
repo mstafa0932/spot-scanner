@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "mstafa0932/spot-scanner",
   "case": "XTZ_TL",
-  "classification": "organic_ready_delivered_shadow_pending_entry_order_unresolved",
+  "classification": "organic_ready_delivered_shadow_estimated_fill_open_no_tp",
   "ready": {
     "run_id": 39413932212,
     "job_id": 118598224172,
@@ -49,9 +49,30 @@
     }
   },
   "current": {
-    "status": "PENDING_ENTRY",
+    "status": "OPEN",
     "fill_confirmed": false,
-    "fill_estimated": false,
+    "fill_estimated": true,
+    "filled_at": 1792499400,
+    "fill_evidence": {
+      "model": "ohlc_penetration_v2",
+      "basis": "authentic_positive_volume_price_penetration",
+      "candle_open": 1792498500,
+      "candle_close": 1792499400,
+      "local_window": "2026-10-20 15:15–15:30 Europe/Istanbul",
+      "low": "15.17",
+      "high": "15.25",
+      "volume": "14904.47",
+      "time_basis": "bar_close_upper_bound_not_exact_fill_time",
+      "quantity_basis": "unknown_no_queue_or_partial_fill_model"
+    },
+    "tp1_notified": false,
+    "events": [],
+    "tracking_data_error": "no_positive_trade_volume",
+    "tracking_incomplete": true,
+    "skipped_tracking_candles": {
+      "1792502100": "no_positive_trade_volume"
+    },
+    "last_processed_candle": 1792501200,
     "durable_sent_timestamp": 1792495145,
     "observed_duplicate_delivery": false
   },
@@ -62,7 +83,16 @@
     "classification": "time_overlapping_visual_only",
     "tp1_after_delivery_proven": false,
     "entry_fill_before_high_proven": false,
-    "reason": "Hourly OHLC overlaps issuance; intrabar order and fill are unknown."
+    "reason": "The 15.89 high was in the 14:15–14:30 candle overlapping issuance. The later estimated entry is based on the distinct 15:15–15:30 native positive-volume candle, so the earlier high cannot be counted as TP1 after the modelled fill.",
+    "fifteen_minute_candle": {
+      "open_at": 1792494900,
+      "local_window": "2026-10-20 14:15–14:30 Europe/Istanbul",
+      "open": "15.20",
+      "high": "15.89",
+      "low": "15.19",
+      "close": "15.19"
+    },
+    "tp1_after_estimated_fill_proven": false
   },
   "stability_delta": {
     "new_cycles_since_previous_checkpoint": 7,
@@ -80,5 +110,25 @@
     "synthetic_errors_zero": true
   },
   "production_code_changed": false,
-  "main_written_by_monitor": false
+  "main_written_by_monitor": false,
+  "lifecycle_delta": {
+    "fill_run_id": 39423740033,
+    "fill_job_id": 118630922988,
+    "refreshed_main_sha": "be01fa714d4352662be07efb513b7e81ca6c7f40",
+    "resulting_state_commit": "1d503c13879cc1dac3535102f07ce8c559b439e9",
+    "resulting_state_blob": "8f796ef67074079c36a00c32265f6beb9738e4f6",
+    "latest_run_id": 39432094681,
+    "latest_job_id": 118659462058,
+    "latest_state_commit": "a64c8048b7041f9245b5a06ef37204cc1ae00ba1",
+    "latest_state_blob": "f5a60a723d5a6d5c8b12da87957516a227978eba",
+    "new_cycles": 8,
+    "cadence_seconds": {
+      "min": 594,
+      "max": 620
+    },
+    "shadow_all": true,
+    "synthetic_errors_zero": true,
+    "generic_early_watch_alerts": 0,
+    "duplicate_ready_observed": false
+  }
 }
