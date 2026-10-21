@@ -1252,7 +1252,8 @@ def _expire_candidate_lifecycles(state: dict[str, Any], now: int) -> list[str]:
     lifecycles = state.get("candidate_lifecycle", {})
     if not isinstance(lifecycles, dict):
         return []
-    active_states = {"early_watch", "discovery", "confirmation_1_of_2", "confirmation_2_of_2"}
+    active_states = {"early_watch", "discovery", "confirmation_1_of_2", "confirmation_2_of_2",
+                     "confirmation_explosive"}
     expired = []
     for symbol, episode in list(lifecycles.items()):
         if not isinstance(episode, dict) or str(episode.get("current_state")) not in active_states:
@@ -2156,8 +2157,19 @@ def run_scanner() -> None:
         # Keep any bounded execution follow-up until READY delivery is
         # confirmed. Dropping it here can starve a Telegram retry.
         funnel["confirmed"] += 1
-        _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
-                                    lifecycle_state="confirmation_2_of_2", reason="READY", now=now)
+        # The existing explosive breakout exception may pass with one closed
+        # observation. Do not label it as the normal two-confirmation path.
+        explosive_confirmation = confirmations < MIN_CONFIRMATIONS
+        episode = _candidate_lifecycle_update(
+            state, symbol=candidate.symbol, score=candidate.score,
+            lifecycle_state="confirmation_explosive" if explosive_confirmation else "confirmation_2_of_2",
+            reason="READY", now=now,
+        )
+        episode["history"][-1].update(
+            confirmations=confirmations,
+            confirmation_target=MIN_CONFIRMATIONS,
+            confirmation_mode="explosive_breakout" if explosive_confirmation else "closed_candle_persistence",
+        )
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
             _execution_followups(state).pop(candidate.symbol, None)
