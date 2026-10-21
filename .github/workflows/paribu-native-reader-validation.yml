@@ -1,4 +1,4 @@
-name: Paribu original candles - 21 October calibration audit
+name: ONDO original entry-window evidence
 
 on:
   push:
@@ -37,14 +37,14 @@ jobs:
           assert os.environ["SHADOW_MODE"].lower() == "true"
           wallclock = time.time
           day_end = 1792616400  # 2026-10-22 00:00 Europe/Istanbul
-          markets = ("ALT_TL", "GRASS_TL", "LIT_TL", "ATH_TL", "W_TL", "DYM_TL", "BTC_TL")
+          markets = ("ONDO_TL",)
           session = requests.Session()  # No HTTP retries or account credentials.
           captures = []
           def capture(params, *, url=md.PARIBU_CHART_HISTORY_URL):
               assert url == md.PARIBU_NATIVE_OHLC_URL
               assert params["symbol"] in {s.lower() for s in markets}
               assert params["interval"] in {"15m", "1h", "4h"}
-              assert len(captures) < 24
+              assert len(captures) < 2
               response = session.get(url, params=params, timeout=(10, 35))
               response.raise_for_status()  # Includes429: stop, never bypass.
               payload = response.json()
@@ -62,7 +62,7 @@ jobs:
           print("FINITE_PUBLIC_READ_ONLY no_scanner no_orders no_messages no_schedule")
           with patch.object(md, "_request_backfill_json", capture):
               for symbol in markets:
-                  intervals = ("15m", "1h") if symbol == "BTC_TL" else ("15m", "1h", "4h")
+                  intervals = ("15m",)
                   for interval in intervals:
                       bind_history({})
                       with patch.object(md.time, "time", return_value=day_end):
@@ -81,14 +81,4 @@ jobs:
                           "endpoint": frame.attrs["candle_endpoint"]
                       }, separators=(",", ":")), flush=True)
                       time.sleep(.3)
-          # Current public ticker schema only; not misrepresented as a21October snapshot.
-          response = session.get(md.PARIBU_TICKER_URL, timeout=(10, 35))
-          response.raise_for_status()
-          records = md._extract_ticker_records(response.json())
-          selected = [r for r in records if md.normalize_symbol(md._first(
-              r, ("market", "symbol", "pair", "market_symbol", "instrument")) or "") in markets]
-          print("PARIBU_TICKER_SCHEMA_CURRENT", json.dumps({
-              "endpoint": md.PARIBU_TICKER_URL, "retrieved_at": int(wallclock()),
-              "historical_21oct_snapshot": False, "records": selected
-          }, separators=(",", ":")), flush=True)
           print("FINITE_PARIBU_AUDIT_COMPLETE", len(captures))
