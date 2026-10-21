@@ -35,88 +35,63 @@
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
     "controller_status_checked_at_utc": "2026-10-20T11:26:08Z",
-    "latest_persisted_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
-    "latest_persisted_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
-    "latest_persisted_state_bytes": 3295083,
+    "latest_persisted_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
+    "latest_persisted_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
+    "latest_persisted_state_bytes": 3310517,
     "last_controller_completion_expected_end_of_window": true,
     "last_controller_completion_note": "Previously inspected four-hour controller job completed successfully. Scanner state commits continued every ~10 minutes afterward; no duplicate controller was created or inferred from state commits alone."
   },
   "last_verified_production_run": {
-    "run_id": 39593557388,
-    "job_id": 119200233365,
-    "head_sha": "a62da49f071b434ebf848645e34601e8c3c656c9",
-    "refreshed_main_sha": "a62da49f071b434ebf848645e34601e8c3c656c9",
+    "run_id": 39594808416,
+    "job_id": 119204382720,
+    "head_sha": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
+    "refreshed_main_sha": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
+    "resulting_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-21T11:40:48Z",
+    "finished_at_utc": "2026-10-21T11:50:42Z",
     "infra": {
-      "run_id": "39593557388",
-      "started_at": 1792582810,
-      "finished_at": 1792582848,
+      "run_id": "39594808416",
+      "started_at": 1792583399,
+      "finished_at": 1792583442,
       "btc_ok": true,
       "btc_reason": "regime_bullish",
-      "candles_complete": 25,
+      "candles_complete": 28,
       "candles_synthetic": 0,
-      "candles_error": 0,
+      "candles_error": 1,
       "cadence_expected_seconds": 600,
       "cadence_late_after_seconds": 1200,
-      "cadence_gap_seconds": 602,
+      "cadence_gap_seconds": 589,
       "cadence_status": "ok",
-      "hot_radar_eligible": 25,
-      "hot_radar_selected": 25,
+      "hot_radar_eligible": 29,
+      "hot_radar_selected": 28,
       "funnel": {
-        "book_approved": 25,
-        "data_valid": 25,
-        "discovery_passed": 1,
+        "book_approved": 29,
+        "data_valid": 28,
+        "discovery_passed": 3,
         "early_watch": 0,
         "early_watch_alerts": 0,
         "near_ready_alerts": 0,
-        "confirmed": 0,
+        "confirmed": 1,
         "limit_simulated": 0,
         "universe": 235,
         "orderbooks_attempted": 80,
-        "technicals_attempted": 25,
+        "technicals_attempted": 29,
         "universe_excluded": 91
       }
     },
-    "evidence": "scanner_state.json blob 5a3e937e4f601de76b6959523bffdb610e33c0e2; nine new existing-controller cycles were SHADOW, native /v1/chart/ohlc, authentic-only in persisted diagnostics, cadence 592-605s, zero synthetic/errors, no eligible alert or duplicate READY"
+    "evidence": "scanner_state.json blob ac3cc14d9a14869f160f7415b2df2cc894527c4c; SHADOW and native /v1/chart/ohlc persisted with cadence 589s and zero synthetic. OM_TL was safely excluded at the data gate because only 11 canonical 15m candles were available versus 205 required; state persisted and no eligible alert or duplicate READY occurred. A single bounded data-unavailable observation does not establish a software defect."
   },
   "latest_loaded_state": {
-    "commit_sha": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
-    "blob_sha": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
-    "bytes": 3295083,
+    "commit_sha": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
+    "blob_sha": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
+    "bytes": 3310517,
     "json_valid": true,
-    "observed_at_utc": "2026-10-21T11:49:30Z",
+    "observed_at_utc": "2026-10-21T11:52:18Z",
     "runs": [
-      {
-        "run_id": "39579919557",
-        "code_sha": "b6b66aed0bd264898a5cda29db5d1adb4c62ba11",
-        "status": "completed",
-        "started_at": 1792576205,
-        "finished_at": 1792576231,
-        "shadow_mode": true,
-        "btc_ok": true,
-        "btc_reason": "BTC bullish",
-        "funnel": {
-          "book_approved": 24,
-          "data_valid": 24,
-          "discovery_passed": 4,
-          "early_watch": 0,
-          "early_watch_alerts": 0,
-          "near_ready_alerts": 0,
-          "confirmed": 0,
-          "limit_simulated": 0,
-          "universe": 235,
-          "orderbooks_attempted": 80,
-          "technicals_attempted": 24,
-          "universe_excluded": 89
-        },
-        "seconds_since_previous_run": 595
-      },
       {
         "run_id": "39581196693",
         "code_sha": "0799ac13b3ccd9767625098e76dd886bb9ff710d",
@@ -391,12 +366,37 @@
           "universe_excluded": 91
         },
         "seconds_since_previous_run": 602
+      },
+      {
+        "run_id": "39594808416",
+        "code_sha": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
+        "status": "completed",
+        "started_at": 1792583399,
+        "finished_at": 1792583442,
+        "shadow_mode": true,
+        "btc_ok": true,
+        "btc_reason": "BTC bullish",
+        "funnel": {
+          "book_approved": 29,
+          "data_valid": 28,
+          "discovery_passed": 3,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 1,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 29,
+          "universe_excluded": 91
+        },
+        "seconds_since_previous_run": 589
       }
     ],
     "older_detail_retained_in_git_history": true,
-    "commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
-    "blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
-    "loaded_at_utc": "2026-10-21T11:49:30Z",
+    "commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
+    "blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
+    "loaded_at_utc": "2026-10-21T11:52:18Z",
     "valid_json": true
   },
   "fixes": {
@@ -628,19 +628,19 @@
         "first_run": 39157435501,
         "first_job": 117763459110,
         "first_main_tests": 349,
-        "latest_run": 39593557388,
-        "latest_job": 119200233365,
-        "latest_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
+        "latest_run": 39594808416,
+        "latest_job": 119204382720,
+        "latest_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
         "scanner_blob": "f6acb320f49baf979c771a53cdf3ba71beefbc53",
         "reviewed_scanner_blob": "f6acb320f49baf979c771a53cdf3ba71beefbc53",
-        "post_merge_verified_cycles": 383,
+        "post_merge_verified_cycles": 384,
         "run_scanner": "success",
         "persist_state": "success",
         "shadow_mode": true,
         "native_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-        "candles_complete": 25,
+        "candles_complete": 28,
         "local_synthetic": 0,
-        "candles_error": 0,
+        "candles_error": 1,
         "generic_early_watch_alerts": 0,
         "near_ready_alerts": 0,
         "internal_early_watch_example": "PEPE_TL score68 4h clearly weak sent=False in39157435501",
@@ -747,7 +747,7 @@
           "fill_confirmed": false,
           "fill_estimated": true,
           "report": "monitoring/cases/XTZ_TL_20261020.md",
-          "latest_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
+          "latest_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
           "last_processed_candle": 1792515600,
           "filled_at": 1792499400,
           "fill_run_id": 39423740033,
@@ -774,7 +774,7 @@
           "breakeven_run_id": 39441016097,
           "breakeven_job_id": 118690555364,
           "breakeven_state_commit": "f27fc9f12cebadbba1b6ce65dcba42cab6a8b353",
-          "latest_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
+          "latest_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
           "tp1_event": {
             "kind": "TP1",
             "price": "15.88093193803559657218193803",
@@ -803,7 +803,7 @@
           "expiry_state_commit": "f7742638418e7e8723af5e7e4c2a127c097c5c4e",
           "expiry_state_blob": "bb29c9e17a194757e69f33fe00fd489495dd050d"
         },
-        "latest_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
+        "latest_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
         "fourth_organic_ready_delivery_verified": true,
         "fourth_organic_ready": {
           "symbol": "SOL_TL",
@@ -821,7 +821,7 @@
           "fill_confirmed": false,
           "fill_estimated": true,
           "shadow_mode": true,
-          "latest_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
+          "latest_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
           "fill_run_id": 39505895516,
           "fill_job_id": 118914605074,
           "fill_state_commit": "cf1a471f0c6c843c901a7b7eabc524f54a09ef29",
@@ -834,7 +834,7 @@
           "fill_volume": "47.8",
           "report": "monitoring/cases/SOL_TL_20261021.md",
           "audit": "monitoring/audit_evidence/sol_20261021_ready.json",
-          "latest_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
+          "latest_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
           "tracking_incomplete": true,
           "tracking_data_error": null,
           "skipped_tracking_candles": {
@@ -898,7 +898,7 @@
   ],
   "readiness": {
     "accepted": false,
-    "post_material_fix_verified_production_cycles": 383,
+    "post_material_fix_verified_production_cycles": 384,
     "required_consecutive_cycles": 24,
     "qualified_ready_delivery_verified_after_fix": true,
     "stable_executable_and_settings_since_merge": true,
@@ -908,15 +908,15 @@
     ],
     "acceptance_code_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change.",
-    "cycle_count_basis": "383 consecutive actual post-PR48 production cycles through 39593557388; all completed SHADOW with persisted valid state and native /v1/chart/ohlc source. Nine new cycles had cadence 592-605s and no eligible Telegram alert or duplicate READY. WLD_TL had a routine score91 confirmation 1/2 but no eligible delivery followed; no active shadow signal, production/config change, or defect was established.",
+    "cycle_count_basis": "384 consecutive actual post-PR48 production cycles through 39594808416; all completed SHADOW with persisted valid state and native /v1/chart/ohlc source. The newest cycle had cadence589s and zero synthetic, while OM_TL was safely excluded with one bounded CandleUnavailableError because only 11 canonical 15m candles were available versus 205 required. No eligible Telegram alert, duplicate READY, active shadow signal, production/config change, or software defect was established.",
     "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48.",
     "blockers": [
       "SOL_TL organically exercised NEAR READY then READY with separate accepted message IDs and no observed duplicate, proving the normal transition path. Retry/failure and concurrent-delivery loss or duplication branches remain unexhausted.",
       "SOL_TL completed the six-hour SHADOW horizon as EXPIRED after only an OHLC-model estimated fill; no target or stop event, exchange-confirmed execution, realized gain/loss, live execution, or profitability is established."
     ],
-    "consecutive_count_lower_bound_from_previous_checkpoint": 383,
-    "previous_count_verified_through_run": 39593557388,
-    "latest_separate_health_run": 39593557388,
+    "consecutive_count_lower_bound_from_previous_checkpoint": 384,
+    "previous_count_verified_through_run": 39594808416,
+    "latest_separate_health_run": 39594808416,
     "executable_and_settings_unchanged_since": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0"
   },
   "known_access_caveats": [
@@ -2091,6 +2091,17 @@
       "latest_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
       "latest_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2",
       "result": "9 new existing-controller cycles completed; SHADOW true; cadence592-605s; latest Refresh/maina62da49; native Paribu /v1/chart/ohlc with closed authentic candles, zero synthetic/errors, scanner and JSON persistence succeeded. No Telegram alert, generic EARLY WATCH alert, duplicate READY, or new active signal. WLD_TL recorded a routine score91 confirmation1/2, but no eligible delivery or READY followed. RENDER/SUPER/GAL/XTZ observations were gated by unchanged setup, RSI, or fresh-book conditions. No production/config change or defect established."
+    },
+    {
+      "observed_at_utc": "2026-10-21T11:52:18Z",
+      "kind": "production_cycle_verified_with_bounded_data_unavailable",
+      "run_ids": [
+        39594808416
+      ],
+      "latest_run": 39594808416,
+      "latest_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
+      "latest_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c",
+      "result": "1 new existing-controller cycle completed; SHADOW true; cadence589s; Refresh/main3c1c2a8; native Paribu /v1/chart/ohlc and zero synthetic; scanner and JSON persistence succeeded. OM_TL was safely rejected at the data gate with CandleUnavailableError (11 canonical 15m candles, 205 required), yielding candles_error=1. No Telegram alert, duplicate READY, new active signal, production/config change, or software defect was established; recurrence should be watched without changing strategy."
     }
   ],
   "scheduler_confirmation": {
@@ -2108,7 +2119,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-21T11:49:30Z",
+  "last_check_utc": "2026-10-21T11:52:18Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -2285,9 +2296,10 @@
     39589845451,
     39591085740,
     39592318667,
-    39593557388
+    39593557388,
+    39594808416
   ],
-  "current_priority": "Continue calibration/stability only. Inspect cycles after 39593557388 for new organic eligible NEAR READY/READY cases and delivery integrity. WLD_TL had a routine score91 confirmation1/2 without eligible delivery; preserve unchanged strategy/config and do not claim live execution or profit.",
+  "current_priority": "Continue calibration/stability only. Inspect cycles after 39594808416 for new organic eligible NEAR READY/READY cases and delivery integrity, and watch whether the bounded OM_TL 15m canonical-history shortage recurs. Do not classify a single safely gated data-unavailable observation as a software defect. Preserve unchanged strategy/config and do not claim live execution or profit.",
   "last_security_gate_check_utc": "2026-10-18T19:09:05Z",
   "notification_fingerprints": [
     "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
@@ -2776,8 +2788,8 @@
     "realized_pnl_proven": false,
     "report_finalization_commit": "d3ab14b5e8a09541ba75d74bd34f7803650d5743",
     "audit_finalization_commit": "09f66942fb9771447952c165c85b32a7bf715d72",
-    "latest_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
-    "latest_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2"
+    "latest_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
+    "latest_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c"
   },
   "pepe_case": {
     "symbol": "PEPE_TL",
@@ -2799,7 +2811,7 @@
     "active_signal_created": false,
     "report": "monitoring/cases/PEPE_TL_20261021.md",
     "audit": "monitoring/audit_evidence/pepe_20261021_near_ready.json",
-    "latest_state_commit": "3c1c2a814643b4c9667e9e4101ebd8b6b7b0ed64",
-    "latest_state_blob": "5a3e937e4f601de76b6959523bffdb610e33c0e2"
+    "latest_state_commit": "9021fa48fa06ac5c4666e5957b5a2d926687edfd",
+    "latest_state_blob": "ac3cc14d9a14869f160f7415b2df2cc894527c4c"
   }
 }
