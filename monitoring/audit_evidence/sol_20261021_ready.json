@@ -2,7 +2,7 @@
   "schema_version": 1,
   "case": "SOL_TL_20261021",
   "repository": "mstafa0932/spot-scanner",
-  "evidence_scope": "organic NEAR READY to READY delivery and shadow OHLC fill estimate",
+  "evidence_scope": "organic NEAR READY to READY delivery, shadow OHLC fill estimate, and six-hour horizon expiry",
   "production_code_changed": false,
   "production_configuration_changed": false,
   "shadow_mode": true,
@@ -51,7 +51,7 @@
     "first_open_job": 118914605074,
     "first_open_state_commit": "cf1a471f0c6c843c901a7b7eabc524f54a09ef29",
     "first_open_state_blob": "e1ee10c08438f7405f44bacd9167dc680a757342",
-    "status": "OPEN",
+    "status": "EXPIRED",
     "fill_estimated": true,
     "fill_confirmed": false,
     "filled_at": 1792533600,
@@ -66,31 +66,59 @@
       "volume": "47.8",
       "time_basis": "bar_close_upper_bound_not_exact_fill_time",
       "quantity_basis": "unknown_no_queue_or_partial_fill_model"
+    },
+    "expiry": {
+      "run_id": 39539715841,
+      "job_id": 119024433927,
+      "resulting_state_commit": "0c7f7f0dc7629d271c14e7bb72497cc9b2f0964d",
+      "event": {
+        "kind": "EXPIRED",
+        "price": "5265.01",
+        "at": 1792553990,
+        "local_time": "2026-10-21T06:39:50+03:00",
+        "delivered": false,
+        "simulation_version": "ohlc_penetration_v2",
+        "execution_basis": "estimated_not_exchange_confirmed",
+        "price_basis": "entry_reference_not_current_price"
+      },
+      "tp1_event_observed": false,
+      "tp2_event_observed": false,
+      "stop_event_observed": false,
+      "breakeven_armed": false
     }
   },
   "latest_verification": {
-    "run_id": 39522547011,
-    "job_id": 118969571107,
-    "refreshed_main_sha": "010d2bbce9d7e5d80f55c5fe48f585b78f9f60cd",
-    "state_commit": "6676c34be2304e713a70f5d1af422ee51a644ba2",
-    "state_blob": "4bc466582d02bf3c99f2ecdbf0c1a1e227d08938",
-    "state_bytes": 3176030,
-    "status": "OPEN",
-    "last_processed_candle": 1792541700,
+    "run_id": 39542418926,
+    "job_id": 119032936242,
+    "refreshed_main_sha": "803fbfa22361a4c3d574ef99111aa558ed2914fd",
+    "state_commit": "1a33644c3535a0bcc419218a45cddcfb26533cae",
+    "state_blob": "b2ddafc7dad374ec13feb7491fb0cc4577f7fbe5",
+    "state_bytes": 3193486,
+    "status": "EXPIRED",
+    "last_processed_candle": 1792552500,
     "breakeven_armed": false,
     "tp1_event_observed": false,
     "tp2_event_observed": false,
     "stop_event_observed": false,
+    "expiry_event_observed": true,
     "tracking_incomplete": true,
-    "tracking_data_error": "no_positive_trade_volume",
+    "tracking_data_error": null,
     "skipped_tracking_candles": {
       "1792536300": "no_positive_trade_volume",
       "1792539000": "no_positive_trade_volume",
-      "1792540800": "no_positive_trade_volume"
+      "1792540800": "no_positive_trade_volume",
+      "1792542600": "no_positive_trade_volume",
+      "1792543500": "no_positive_trade_volume",
+      "1792544400": "no_positive_trade_volume",
+      "1792547100": "no_positive_trade_volume",
+      "1792548000": "no_positive_trade_volume",
+      "1792548900": "no_positive_trade_volume",
+      "1792550700": "no_positive_trade_volume",
+      "1792551600": "no_positive_trade_volume"
     },
     "candles_synthetic": 0,
     "candles_error": 0,
-    "cadence_gap_seconds": 604,
+    "cadence_gap_seconds": 606,
     "state_json_valid": true
   },
   "conclusions": {
@@ -99,6 +127,11 @@
     "exchange_fill_proven": false,
     "live_trade_proven": false,
     "profitability_proven": false,
-    "production_defect": false
+    "production_defect": false,
+    "shadow_horizon_expiry_proven": true,
+    "tp1_proven": false,
+    "tp2_proven": false,
+    "stop_proven": false,
+    "realized_gain_or_loss_proven": false
   }
 }
