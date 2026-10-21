@@ -1,4 +1,4 @@
-name: XCN original closed-candle follow-up evidence
+name: Paribu original candles - 21 October calibration audit
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     env:
       SHADOW_MODE: 'true'
       PYTHONPATH: ${{ github.workspace }}
@@ -25,36 +25,70 @@ jobs:
           python-version: '3.12'
       - name: Install public reader dependencies
         run: python -m pip install 'pandas>=2.2,<3' 'requests>=2.32,<3'
-      - name: Collect original closed XCN candles for as-of audit
+      - name: Capture bounded original Paribu history without scanner or notifications
         shell: python
         run: |
           import base64, hashlib, json, os, time, zlib
           from unittest.mock import patch
+          import requests
           import market_data as md
           from candle_backfill import bind_history
-          
-          assert os.environ["SHADOW_MODE"].lower()=="true"
-          print("MODE finite_public_original_candles no_scanner no_orders no_messages")
-          original=md._request_backfill_json
-          captures=[]
+
+          assert os.environ["SHADOW_MODE"].lower() == "true"
+          wallclock = time.time
+          day_end = 1792616400  # 2026-10-22 00:00 Europe/Istanbul
+          markets = ("ALT_TL", "GRASS_TL", "LIT_TL", "ATH_TL", "W_TL", "DYM_TL", "BTC_TL")
+          session = requests.Session()  # No HTTP retries or account credentials.
+          captures = []
           def capture(params, *, url=md.PARIBU_CHART_HISTORY_URL):
-              assert url==md.PARIBU_NATIVE_OHLC_URL and params["symbol"]=="xcn_tl"
-              assert len(captures)<8
-              payload=original(params,url=url)
-              row={"endpoint":url,"params":params,"retrieved_at":int(time.time()),"payload":payload}
-              raw=json.dumps(row,separators=(",",":"),ensure_ascii=False).encode()
-              print("XCN_CAPTURE",json.dumps({"index":len(captures),"sha256":hashlib.sha256(raw).hexdigest(),"encoding":"base64_zlib_json","data":base64.b64encode(zlib.compress(raw)).decode()},separators=(",",":")),flush=True)
+              assert url == md.PARIBU_NATIVE_OHLC_URL
+              assert params["symbol"] in {s.lower() for s in markets}
+              assert params["interval"] in {"15m", "1h", "4h"}
+              assert len(captures) < 24
+              response = session.get(url, params=params, timeout=(10, 35))
+              response.raise_for_status()  # Includes429: stop, never bypass.
+              payload = response.json()
+              row = {"endpoint": url, "params": dict(params),
+                     "retrieved_at": int(wallclock()), "payload": payload}
+              raw = json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode()
+              print("PARIBU_AUDIT_CAPTURE", json.dumps({
+                  "index": len(captures), "sha256": hashlib.sha256(raw).hexdigest(),
+                  "encoding": "base64_zlib_json",
+                  "data": base64.b64encode(zlib.compress(raw)).decode()
+              }, separators=(",", ":")), flush=True)
               captures.append(row)
               return payload
-          with patch.object(md,"_request_backfill_json",capture):
-              for interval,limit in (("15m",500),("1h",250),("4h",250)):
-                  bind_history({})
-                  frame=md.fetch_candles("XCN_TL",interval,limit)
-                  seconds=md._interval_config(interval)[1]
-                  assert frame.is_authentic.all()
-                  assert frame.attrs["candle_quality"]["synthetic_count"]==0
-                  assert (frame.timestamp+seconds<=int(time.time())).all()
-                  assert frame.timestamp.diff().iloc[1:].eq(seconds).all()
-                  print("XCN_CLOSED_FOLLOWUP",json.dumps({"interval":interval,"count":len(frame),"latest_open":int(frame.timestamp.iloc[-1]),"latest_close":int(frame.timestamp.iloc[-1])+seconds,"local_synthetic":0,"published_zero_volume":int(frame.volume.eq(0).sum()),"source":frame.attrs["candle_endpoint"]},separators=(",",":")),flush=True)
-                  time.sleep(.3)
-          print("FINITE_XCN_ORIGINAL_CAPTURE_COMPLETE",len(captures),"not_a_scanner_or_monitor")
+
+          print("FINITE_PUBLIC_READ_ONLY no_scanner no_orders no_messages no_schedule")
+          with patch.object(md, "_request_backfill_json", capture):
+              for symbol in markets:
+                  intervals = ("15m", "1h") if symbol == "BTC_TL" else ("15m", "1h", "4h")
+                  for interval in intervals:
+                      bind_history({})
+                      with patch.object(md.time, "time", return_value=day_end):
+                          frame = md.fetch_candles(symbol, interval, 500 if interval == "15m" else 250)
+                      seconds = md._interval_config(interval)[1]
+                      assert frame.is_authentic.all()
+                      assert frame.attrs["candle_quality"]["synthetic_count"] == 0
+                      assert (frame.timestamp + seconds <= day_end).all()
+                      assert frame.timestamp.diff().iloc[1:].eq(seconds).all()
+                      print("PARIBU_AUDIT_VALIDATED", json.dumps({
+                          "symbol": symbol, "interval": interval, "count": len(frame),
+                          "first_open": int(frame.timestamp.iloc[0]),
+                          "last_open": int(frame.timestamp.iloc[-1]),
+                          "last_close": int(frame.timestamp.iloc[-1]) + seconds,
+                          "local_synthetic": 0, "published_zero_volume": int(frame.volume.eq(0).sum()),
+                          "endpoint": frame.attrs["candle_endpoint"]
+                      }, separators=(",", ":")), flush=True)
+                      time.sleep(.3)
+          # Current public ticker schema only; not misrepresented as a21October snapshot.
+          response = session.get(md.PARIBU_TICKER_URL, timeout=(10, 35))
+          response.raise_for_status()
+          records = md._extract_ticker_records(response.json())
+          selected = [r for r in records if md.normalize_symbol(md._first(
+              r, ("market", "symbol", "pair", "market_symbol", "instrument")) or "") in markets]
+          print("PARIBU_TICKER_SCHEMA_CURRENT", json.dumps({
+              "endpoint": md.PARIBU_TICKER_URL, "retrieved_at": int(wallclock()),
+              "historical_21oct_snapshot": False, "records": selected
+          }, separators=(",", ":")), flush=True)
+          print("FINITE_PARIBU_AUDIT_COMPLETE", len(captures))
