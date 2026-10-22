@@ -37,41 +37,41 @@
     "controller_status_observed": "in_progress",
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
-    "controller_status_checked_at_utc": "2026-10-22T22:40:18.034Z",
-    "latest_persisted_state_commit": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
-    "latest_persisted_state_blob": "3a90961f6073becee1f943d36977776405f7a8c7",
-    "latest_persisted_state_bytes": 3363931,
+    "controller_status_checked_at_utc": "2026-10-22T22:52:24.660Z",
+    "latest_persisted_state_commit": "1e18e77592333c85dcdc857fb0b0ecac309e0e74",
+    "latest_persisted_state_blob": "156fa410f221c67d47080335c3f7f703e5fffb47",
+    "latest_persisted_state_bytes": 3371825,
     "last_controller_completion_expected_end_of_window": true,
-    "last_controller_completion_note": "Previous Cadence Controller39823448260 completed successfully at21:31:41Z. Existing controller39857976265 then started normally and remained in progress, dispatching scanner cycles through39865624381. Monitoring created no scanner, controller, schedule, repository, or resource."
+    "last_controller_completion_note": "Existing controller39857976265 remained in progress. Completed scanner cycle39866802680 was verified; subsequently dispatched run39867946991 was still in progress and intentionally left for a later checkpoint. Monitoring created no scanner, controller, schedule, repository, or resource."
   },
   "last_verified_production_run": {
-    "run_id": 39865624381,
-    "job_id": 120126977067,
-    "head_sha": "eeae2c85498467fb9f11e65d8720752ef4599013",
-    "refreshed_main_sha": "eeae2c85498467fb9f11e65d8720752ef4599013",
+    "run_id": 39866802680,
+    "job_id": 120130921556,
+    "head_sha": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
+    "refreshed_main_sha": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
+    "resulting_state_commit": "1e18e77592333c85dcdc857fb0b0ecac309e0e74",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-22T22:33:14Z",
+    "finished_at_utc": "2026-10-22T22:43:12Z",
     "infra": {
-      "run_id": "39865624381",
-      "started_at": 1792708357,
-      "finished_at": 1792708389,
+      "run_id": "39866802680",
+      "started_at": 1792708951,
+      "finished_at": 1792708988,
       "btc_ok": true,
       "btc_reason": "regime_neutral",
-      "candles_complete": 36,
+      "candles_complete": 40,
       "candles_synthetic": 0,
       "candles_error": 0,
       "cadence_expected_seconds": 600,
       "cadence_late_after_seconds": 1200,
-      "cadence_gap_seconds": 606,
+      "cadence_gap_seconds": 594,
       "cadence_status": "ok",
       "funnel": {
-        "book_approved": 36,
-        "data_valid": 36,
+        "book_approved": 40,
+        "data_valid": 40,
         "discovery_passed": 0,
         "early_watch": 0,
         "early_watch_alerts": 0,
@@ -80,60 +80,32 @@
         "limit_simulated": 0,
         "universe": 235,
         "orderbooks_attempted": 80,
-        "technicals_attempted": 36,
+        "technicals_attempted": 40,
         "universe_excluded": 100
       },
       "stage_drops": {
-        "book:imbalance_too_low": 25,
-        "book:spread_too_high": 19,
+        "book:imbalance_too_low": 16,
+        "book:spread_too_high": 24,
         "coverage:not_evaluated_capacity": 55,
         "discovery:15m momentum not constructive": 6,
-        "discovery:1h clearly weak": 3,
-        "discovery:4h clearly weak": 10,
+        "discovery:1h clearly weak": 6,
+        "discovery:4h clearly weak": 6,
         "discovery:ATR outside range": 1,
-        "discovery:RSI outside watch range": 12,
-        "discovery:discovery score 47 < 66": 1,
+        "discovery:RSI outside watch range": 18,
         "discovery:volume not expanding": 3,
         "universe:excluded_base_asset": 3,
         "universe:quote_volume_below_minimum": 97
       }
     },
-    "evidence": "scanner_state.json blob 3a90961f6073becee1f943d36977776405f7a8c7; valid3363931-byte JSON. Latest run refreshed exact main eeae2c85498467fb9f11e65d8720752ef4599013, SHADOW true, native closed /v1/chart/ohlc, cadence606s, zero synthetic/errors; no candidate, confirmation, signal, eligible delivery or duplicate; persistence succeeded."
+    "evidence": "scanner_state.json blob156fa410f221c67d47080335c3f7f703e5fffb47; valid3371825-byte JSON. Run39866802680 refreshed exact main e06b2b5f17a6914460c00a99a8847a1ae9019bf4, SHADOW true, native closed /v1/chart/ohlc, cadence594s, zero synthetic/errors; no candidate, confirmation, signal, eligible delivery or duplicate; persistence succeeded. Run39867946991 remained in progress and was not counted."
   },
   "latest_loaded_state": {
-    "commit_sha": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
-    "blob_sha": "3a90961f6073becee1f943d36977776405f7a8c7",
-    "bytes": 3363931,
+    "commit_sha": "1e18e77592333c85dcdc857fb0b0ecac309e0e74",
+    "blob_sha": "156fa410f221c67d47080335c3f7f703e5fffb47",
+    "bytes": 3371825,
     "json_valid": true,
-    "observed_at_utc": "2026-10-22T22:40:18.034Z",
+    "observed_at_utc": "2026-10-22T22:52:24.660Z",
     "runs": [
-      {
-        "run_id": "39851041243",
-        "code_sha": "93f1eb944449484c9df48bb4844321fa19f65085",
-        "status": "completed",
-        "started_at": 1792701739,
-        "finished_at": 1792701780,
-        "shadow_mode": true,
-        "btc_ok": true,
-        "btc_reason": "BTC neutral/acceptable | RSI=45.5",
-        "funnel": {
-          "book_approved": 38,
-          "data_valid": 38,
-          "discovery_passed": 0,
-          "early_watch": 0,
-          "early_watch_alerts": 0,
-          "near_ready_alerts": 0,
-          "confirmed": 0,
-          "limit_simulated": 0,
-          "universe": 235,
-          "orderbooks_attempted": 80,
-          "technicals_attempted": 38,
-          "universe_excluded": 98
-        },
-        "seconds_since_previous_run": 594,
-        "signal_recorded": false,
-        "alert_sent": false
-      },
       {
         "run_id": "39852446352",
         "code_sha": "b37d41311c18dd3e214283f70eb0d5c87437dd3f",
@@ -428,6 +400,33 @@
           "universe_excluded": 100
         },
         "seconds_since_previous_run": 606,
+        "signal_recorded": false,
+        "alert_sent": false
+      },
+      {
+        "run_id": "39866802680",
+        "code_sha": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
+        "status": "completed",
+        "started_at": 1792708951,
+        "finished_at": 1792708988,
+        "shadow_mode": true,
+        "btc_ok": true,
+        "btc_reason": "BTC neutral/acceptable | RSI=47.0",
+        "funnel": {
+          "book_approved": 40,
+          "data_valid": 40,
+          "discovery_passed": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 40,
+          "universe_excluded": 100
+        },
+        "seconds_since_previous_run": 594,
         "signal_recorded": false,
         "alert_sent": false
       }
@@ -1007,7 +1006,7 @@
   ],
   "readiness": {
     "accepted": false,
-    "post_material_fix_verified_production_cycles": 592,
+    "post_material_fix_verified_production_cycles": 593,
     "required_consecutive_cycles": 24,
     "qualified_ready_delivery_verified_after_fix": true,
     "stable_executable_and_settings_since_merge": true,
@@ -1018,16 +1017,16 @@
     ],
     "acceptance_code_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change.",
-    "cycle_count_basis": "592 consecutive actual post-PR48 production cycles through39865624381. Seven new existing main scanner cycles completed successfully with exact Refresh/main matches, SHADOW true, native closed /v1/chart/ohlc, valid JSON persistence, cadence591-627s marked ok, technical checks36-43, and zero synthetic/errors. Generic EARLY WATCH and two below-threshold candidates produced no alerts; no confirmation, execution, limit simulation, NEAR READY/READY delivery or duplicate occurred. No production-setting change, live execution, profitability, or new critical defect was established.",
+    "cycle_count_basis": "593 consecutive actual post-PR48 production cycles through39866802680. One new completed existing main scanner cycle refreshed the exact main SHA, ran SHADOW, used native closed /v1/chart/ohlc, persisted valid JSON, cadence594s ok, technical checks40, and zero synthetic/errors. It produced no candidate, confirmation, execution, limit simulation, NEAR READY/READY delivery or duplicate. A subsequently dispatched cycle remained in progress and was not counted. No production-setting change, live execution, profitability, or new critical defect was established.",
     "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48.",
     "blockers": [
       "SOL_TL organically exercised NEAR READY then READY with separate accepted message IDs and no observed duplicate, proving the normal transition path. Retry/failure and concurrent-delivery loss or duplication branches remain unexhausted.",
       "SOL_TL completed the six-hour SHADOW horizon as EXPIRED after only an OHLC-model estimated fill; no target or stop event, exchange-confirmed execution, realized gain/loss, live execution, or profitability is established.",
       "PR #49 corrects the proven confirmation audit-label mismatch only and remains open/unmerged; independent final review and explicit user merge approval are still required."
     ],
-    "consecutive_count_lower_bound_from_previous_checkpoint": 592,
-    "previous_count_verified_through_run": 39865624381,
-    "latest_separate_health_run": 39865624381,
+    "consecutive_count_lower_bound_from_previous_checkpoint": 593,
+    "previous_count_verified_through_run": 39866802680,
+    "latest_separate_health_run": 39866802680,
     "executable_and_settings_unchanged_since": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0"
   },
   "known_access_caveats": [
@@ -2702,6 +2701,15 @@
       "head": "22a9283d423d0d60bcd0c63e1171c3be3235b2b1",
       "ci_run": 39858433242,
       "result": "Only the new delta from prior head e44c00d was inspected: research measurement now fails closed when candle source provenance is missing or non-Paribu, and offline fixtures/regressions were aligned. Exact-head CI passed365 tests on Python3.10 and3.12. No scanner.py, strategy, settings, workflow, state, Telegram or trading change was introduced. Separate security scan and independent review remain incomplete; PR stays draft/open/unmerged."
+    },
+    {
+      "observed_at_utc": "2026-10-22T22:52:24.660Z",
+      "kind": "production_cycle_verified",
+      "run_id": 39866802680,
+      "in_progress_run_id": 39867946991,
+      "latest_state_commit": "1e18e77592333c85dcdc857fb0b0ecac309e0e74",
+      "latest_state_blob": "156fa410f221c67d47080335c3f7f703e5fffb47",
+      "result": "One new completed existing main scanner cycle refreshed the exact main SHA, ran SHADOW, used native closed Paribu /v1/chart/ohlc, validated and persisted non-empty JSON, cadence594s ok, technical checks40, and zero synthetic/errors. No candidate, confirmation, execution, limit simulation, NEAR READY/READY delivery or duplicate occurred. Run39867946991 was still in progress and was not counted or rerun."
     }
   ],
   "scheduler_confirmation": {
@@ -2719,7 +2727,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-22T22:40:18.034Z",
+  "last_check_utc": "2026-10-22T22:52:24.660Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -3109,9 +3117,10 @@
     39863130035,
     39864388204,
     39865624381,
-    39858433242
+    39858433242,
+    39866802680
   ],
-  "current_priority": "Continue quiet stability monitoring after39865624381. Existing controller39857976265 is within its intended window. PR49 remains open/unmerged at exact head26e76523 and lacks independent approval. Draft PR51 advanced to exact head22a9283 with a fail-closed research provenance correction and365 tests passing per Python version, but no separate security scan or independent approval; keep it unmerged. Draft PR52 remains unmerged and similarly gated. Do not merge, deploy, change thresholds, or create resources.",
+  "current_priority": "Resume with in-progress scanner run39867946991 after it completes; do not rerun it manually. Existing controller39857976265 remains within its intended window. PR49/PR51/PR52 remain open and unmerged with their independent/security gates unchanged. Do not merge, deploy, change thresholds, or create resources.",
   "last_security_gate_check_utc": "2026-10-22T08:07:07Z",
   "notification_fingerprints": [
     "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
@@ -3736,14 +3745,14 @@
     "ai_recheck_report_path": "monitoring/reviews/pr49-26e7652-ai-recheck-20261022.md",
     "ai_recheck_no_new_findings": true,
     "github_reviews": 1,
-    "last_independent_gate_check_utc": "2026-10-22T22:40:18.034Z",
+    "last_independent_gate_check_utc": "2026-10-22T22:52:24.660Z",
     "independent_gate_report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
     "external_review_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md"
   },
   "pr49_independent_gate": {
     "observed_at_utc": "2026-10-22T08:24:38.521Z",
     "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
-    "latest_main_checked": "e06b2b5f17a6914460c00a99a8847a1ae9019bf4",
+    "latest_main_checked": "1e18e77592333c85dcdc857fb0b0ecac309e0e74",
     "decision": "BLOCKED_REVIEW_ENVIRONMENT_CREATION_APPROVAL_AND_VERIFIED_FREE_HEADLESS_AUTH",
     "reviewer": null,
     "formal_approval": false,
