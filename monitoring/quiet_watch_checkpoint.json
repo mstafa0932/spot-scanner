@@ -1248,7 +1248,7 @@
       "tests_python_310": 353,
       "tests_python_312": 353,
       "bandit_status": "no_new_findings_two_preexisting_low_documented",
-      "independent_final_review": "blocked_pending_verified_separate_reviewer",
+      "independent_final_review": "pending_external_review_service_consent",
       "github_formal_approvals": 0,
       "user_merge_approval": false,
       "merged": false,
@@ -1270,7 +1270,8 @@
       },
       "independent_gate_report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
       "independent_gate_evidence_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.json",
-      "last_independent_gate_check_utc": "2026-10-22T08:24:38.521Z"
+      "last_independent_gate_check_utc": "2026-10-22T08:24:38.521Z",
+      "external_review_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md"
     }
   },
   "already_reported_blockers": [
@@ -2809,6 +2810,13 @@
       "latest_main_checked": "a71c00adc6b037d193cd70a197ad1302e06c720b",
       "report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
       "result": "Owner, commit author/committer and connected GitHub identity are mstafa0932; reviews/requested reviewers empty. No verified distinct reviewer or connected independent service identified. Collaborator enumeration unavailable via exposed endpoint, so absence of collaborators is not asserted. Technical compatibility retained: only scanner_state changed since CI main; merge-tree clean and state preserved; CI353 per Python3.10/3.12 and saved zero-new Bandit findings apply to exact unchanged source. No author approval attempted, code change, live scan, Telegram, trade, merge or deployment."
+    },
+    {
+      "observed_at_utc": "2026-10-22T08:38:57.597Z",
+      "kind": "pr49_external_review_proposed_consent_required",
+      "head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+      "proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md",
+      "result": "PR open/unmerged at exact unchanged head; CI39716978157 success and reviews0. Bounded official-source research compared CodeRabbit/Sourcery apps; both ask code/workflow write. Selected lower-repository-privilege CodeRabbit local CLI Free proposal. Publisher verified; OSS training caveat documented. No installation, service login, source submission, purchase, tests, production writes, fake approval, merge or deployment. Await explicit user consent."
     }
   ],
   "scheduler_confirmation": {
@@ -3747,19 +3755,20 @@
     "independent_review_complete": false,
     "source_behavior_change": false,
     "only_audit_label_correction": true,
-    "next_action": "Obtain reviewer GitHub login or a verifiable independently connected review service. Send the prepared exact-head packet only after identity/access/qualification verification.",
+    "next_action": "Ask user to approve temporary official CodeRabbit CLI installation, legitimate service login and submission of constrained published-source review bundle under Free only, acknowledging OSS training caveat. No GitHub App or repository write privileges. Stop on any payment or additional permissions request; no merge.",
     "ai_recheck_observed_at_utc": "2026-10-22T08:07:07Z",
     "ai_recheck_report_path": "monitoring/reviews/pr49-26e7652-ai-recheck-20261022.md",
     "ai_recheck_no_new_findings": true,
     "github_reviews": 0,
     "last_independent_gate_check_utc": "2026-10-22T08:24:38.521Z",
-    "independent_gate_report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md"
+    "independent_gate_report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
+    "external_review_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md"
   },
   "pr49_independent_gate": {
     "observed_at_utc": "2026-10-22T08:24:38.521Z",
     "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
     "latest_main_checked": "a71c00adc6b037d193cd70a197ad1302e06c720b",
-    "decision": "STOPPED_PENDING_INDEPENDENT_APPROVAL",
+    "decision": "AWAITING_USER_APPROVAL_FOR_EXTERNAL_REVIEW",
     "reviewer": null,
     "formal_approval": false,
     "connected_identity": "mstafa0932",
@@ -3770,6 +3779,33 @@
     "report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
     "evidence_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.json",
     "session_complete": true,
-    "next_action": "Obtain reviewer GitHub login or a verifiable independently connected review service. Send the prepared exact-head packet only after identity/access/qualification verification."
+    "next_action": "Ask user to approve temporary official CodeRabbit CLI installation, legitimate service login and submission of constrained published-source review bundle under Free only, acknowledging OSS training caveat. No GitHub App or repository write privileges. Stop on any payment or additional permissions request; no merge.",
+    "external_service_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md"
+  },
+  "pr49_external_review": {
+    "observed_at_utc": "2026-10-22T08:38:57.597Z",
+    "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+    "status": "awaiting_user_approval_before_install_auth_or_source_submission",
+    "selected_service": "CodeRabbit Inc. — local CLI review (not GitHub App)",
+    "vendor_identity_url": "https://github.com/marketplace/coderabbitai",
+    "proposed_cost_cap_usd": 0,
+    "proposed_plan": "Free within available quota; no paid subscription, credits or overage consent",
+    "review_type": "External vendor AI report; not human approval and not GitHub APPROVED",
+    "github_app_installation_proposed": false,
+    "github_repository_write_permission_proposed": false,
+    "installer_executed": false,
+    "account_connected": false,
+    "source_submitted_to_review_service": false,
+    "independent_report_performed": false,
+    "independent_gate_complete": false,
+    "formal_approval": false,
+    "privacy_caveat": "CodeRabbit privacy policy excludes OSS from its no-training representation and permits use of OSS for training. Do not promise no training for this public repository.",
+    "rejected_app_paths": {
+      "CodeRabbit": "App asks write access to code/workflows and other scopes; broader than this task needs.",
+      "Sourcery": "App also asks actions/code/workflows write scopes; not selected."
+    },
+    "proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md",
+    "instructions_path": "monitoring/reviews/pr49-26e7652-external-review-instructions.md",
+    "next_action": "Ask user to approve temporary official CodeRabbit CLI installation, legitimate service login and submission of constrained published-source review bundle under Free only, acknowledging OSS training caveat. No GitHub App or repository write privileges. Stop on any payment or additional permissions request; no merge."
   }
 }
