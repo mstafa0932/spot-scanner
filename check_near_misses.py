@@ -238,18 +238,22 @@ def process_state(
             maturity_at = 0
         if maturity_at <= 0 or maturity_at > now:
             continue
+        # Reconcile a durable archive before applying retry backoff. A crash
+        # after archiving but before saving state must not block new episodes.
+        event_id = _event_id(symbol, record)
+        if event_id in archived:
+            record["processed"] = True
+            record["processed_at"] = now
+            record.pop("measurement_attempts", None)
+            record.pop("next_measurement_attempt_at", None)
+            changed = True
+            continue
+
         try:
             retry_not_before = int(record.get("next_measurement_attempt_at", 0) or 0)
         except (TypeError, ValueError):
             retry_not_before = 0
         if now < retry_not_before:
-            continue
-
-        event_id = _event_id(symbol, record)
-        if event_id in archived:
-            record["processed"] = True
-            record["processed_at"] = now
-            changed = True
             continue
 
         row = _measure_event(symbol, record, fetcher)
