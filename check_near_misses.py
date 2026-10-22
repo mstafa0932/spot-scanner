@@ -118,7 +118,7 @@ def _classify_fetch_error(exc: Exception) -> tuple[str, str]:
     # structural research-data gap, not a transient API outage. Retrying it
     # while near_miss_queue is symbol-keyed can censor later observations.
     if (isinstance(exc, CandleUnavailableError)
-            and re.fullmatch(r"Only \\d+ canonical candles; \\d+ required", message)):
+            and re.fullmatch(r"Only \d+ canonical candles; \d+ required", message)):
         return "insufficient_canonical_history", detail
     if "429" in message:
         return "http_429", detail
