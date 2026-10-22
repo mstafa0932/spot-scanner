@@ -13,6 +13,15 @@ from test_risk_engine import book, tech
 from test_scanner_research import prepare
 
 
+def _authentic_test_frame(frame):
+    """Mark offline OHLC fixtures with the real Paribu provenance contract."""
+    frame = frame.copy()
+    frame["is_authentic"] = True
+    frame["data_quality"] = "PARIBU"
+    frame.attrs["source"] = "PARIBU"
+    return frame
+
+
 def test_near_miss_queue_is_separate_and_first_write_wins():
     legacy = [{"symbol": "LEGACY_TL"}]
     state = {"near_misses": legacy.copy()}
@@ -55,7 +64,7 @@ def test_synthetic_near_miss_mfe_mae_and_archive_idempotency(tmp_path):
     lows = [99.0] * 16
     highs[7] = 103.20
     lows[9] = 98.70
-    frame = pd.DataFrame({"timestamp": timestamps, "high": highs, "low": lows})
+    frame = _authentic_test_frame(pd.DataFrame({"timestamp": timestamps, "high": highs, "low": lows}))
     archive = tmp_path / "near_misses_archive.jsonl"
     lines = []
 
@@ -214,22 +223,22 @@ def test_incomplete_reason_codes_cover_all_measurement_paths():
     insufficient = _measure_event(
         "TEST_TL",
         record,
-        lambda *_: pd.DataFrame({
+        lambda *_: _authentic_test_frame(pd.DataFrame({
             "timestamp": [1800 + i * 900 for i in range(15)],
             "high": [101.0] * 15,
             "low": [99.0] * 15,
-        }),
+        })),
     )
     assert insufficient["incomplete_reason_code"] == "insufficient_window"
 
     invalid_ohlc = _measure_event(
         "TEST_TL",
         record,
-        lambda *_: pd.DataFrame({
+        lambda *_: _authentic_test_frame(pd.DataFrame({
             "timestamp": [1800 + i * 900 for i in range(16)],
             "high": [101.0] * 15 + [None],
             "low": [99.0] * 16,
-        }),
+        })),
     )
     assert invalid_ohlc["incomplete_reason_code"] == "invalid_ohlc"
 
@@ -277,11 +286,11 @@ def test_process_state_paces_after_every_mature_measurement(tmp_path, monkeypatc
     monkeypatch.setattr(check_near_misses.time, "sleep", lambda seconds: sleeps.append(seconds))
 
     timestamps = [1800 + i * 900 for i in range(16)]
-    frame = pd.DataFrame({
+    frame = _authentic_test_frame(pd.DataFrame({
         "timestamp": timestamps,
         "high": [101.0] * 16,
         "low": [99.0] * 16,
-    })
+    }))
 
     process_state(
         state,
