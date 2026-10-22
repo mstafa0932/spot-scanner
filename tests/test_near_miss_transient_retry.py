@@ -23,11 +23,15 @@ def event(rejected_at=NOW - 5 * 3600):
 
 def candles_for(record):
     start = (record["rejected_at"] // 900 + 1) * 900
-    return pd.DataFrame({
+    frame = pd.DataFrame({
         "timestamp": [start + 900 * k for k in range(16)],
         "high": [23.10] * 16,
         "low": [22.20] * 16,
     })
+    frame["is_authentic"] = True
+    frame["data_quality"] = "PARIBU"
+    frame.attrs["source"] = "PARIBU"
+    return frame
 
 
 def test_rate_limit_defers_without_archiving_then_recovers(tmp_path, monkeypatch):
@@ -282,11 +286,7 @@ def test_generic_transient_fetch_error_remains_retryable(tmp_path, monkeypatch):
 
 
 def _provenance_frame(record):
-    frame = candles_for(record)
-    frame["is_authentic"] = True
-    frame["data_quality"] = "PARIBU"
-    frame.attrs["source"] = "PARIBU"
-    return frame
+    return candles_for(record)
 
 
 def test_research_window_accepts_authentic_paribu_candles():
@@ -342,7 +342,7 @@ def test_research_window_rejects_disguised_synthetic_quality():
 
 def test_research_window_fails_closed_when_paribu_provenance_missing():
     record = event()
-    frame = candles_for(record)
+    frame = candles_for(record).drop(columns=["is_authentic", "data_quality"])
     frame.attrs["source"] = "PARIBU"
     result = research._measure_event("MASK_TL", record, lambda *_: frame)
     assert result["outcome"] == "incomplete_data"
@@ -353,6 +353,15 @@ def test_research_window_rejects_non_paribu_source():
     record = event()
     frame = _provenance_frame(record)
     frame.attrs["source"] = "OTHER_EXCHANGE"
+    result = research._measure_event("MASK_TL", record, lambda *_: frame)
+    assert result["outcome"] == "incomplete_data"
+    assert result["incomplete_reason_code"] == "invalid_provenance"
+
+
+def test_research_window_fails_closed_when_source_is_missing():
+    record = event()
+    frame = candles_for(record)
+    frame.attrs.clear()
     result = research._measure_event("MASK_TL", record, lambda *_: frame)
     assert result["outcome"] == "incomplete_data"
     assert result["incomplete_reason_code"] == "invalid_provenance"
