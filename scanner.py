@@ -1710,7 +1710,15 @@ def run_scanner() -> None:
         decision = {"stage": stage, "reason": reason, "observed_at": int(time.time()), **metrics}
         diagnostics["symbols"][symbol] = decision
         diagnostics["transitions"].append({"symbol": symbol, **decision})
-        LOGGER.info("Scan decision | %s | %s | %s", symbol, stage, reason)
+        # Preserve one log line per decision while exposing the actual
+        # quote-turnover value behind universe liquidity rejections.
+        if stage == "universe" and reason == "quote_volume_below_minimum":
+            LOGGER.info(
+                "Scan decision | %s | %s | %s | quote_volume=%s",
+                symbol, stage, reason, metrics.get("quote_volume"),
+            )
+        else:
+            LOGGER.info("Scan decision | %s | %s | %s", symbol, stage, reason)
         if metrics and stage in {"book", "discovery", "trigger", "execution", "risk"}:
             LOGGER.info(
                 "Scan metrics | %s | %s | %s",
