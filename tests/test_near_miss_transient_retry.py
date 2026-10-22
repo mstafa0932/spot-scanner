@@ -170,3 +170,61 @@ def test_durable_archive_reconciles_before_retry_backoff(tmp_path):
     assert "next_measurement_attempt_at" not in record
     assert requested == []
     assert len(archive.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_near_deadline_failure_is_archived_without_late_retry(tmp_path, monkeypatch):
+    monkeypatch.setattr(research.time, "sleep", lambda _: None)
+    record = event()
+    now = record["maturity_at"] + 35 * 3600
+    state = {"near_miss_queue": {"MASK_TL": record}}
+    archive = tmp_path / "archive.jsonl"
+    calls = []
+
+    def limited(*_):
+        calls.append(True)
+        raise RuntimeError("HTTP 429 rate limited")
+
+    assert research.process_state(
+        state, now=now, fetcher=limited, archive_path=archive,
+        output=lambda _: None,
+    )
+    assert calls == [True]
+    assert record["processed"] is True
+    assert "next_measurement_attempt_at" not in record
+    assert json.loads(archive.read_text().strip())["incomplete_reason_code"] == "http_429"
+
+
+def test_late_persisted_retry_expires_without_network_call(tmp_path):
+    # Reproduce a workflow delayed past the 36h retry deadline, with an
+    # already queued attempt that would otherwise fetch at hour 41.
+    record = event()
+    maturity = record["maturity_at"]
+    record["measurement_attempts"] = 1
+    record["next_measurement_attempt_at"] = maturity + 41 * 3600
+    record["incomplete_reason_code"] = "http_429"
+    record["incomplete_reason_detail"] = "RuntimeError: HTTP 429"
+    state = {"near_miss_queue": {"MASK_TL": record}}
+    archive = tmp_path / "archive.jsonl"
+    requests = []
+    logs = []
+
+    def unexpected_fetch(*args):
+        requests.append(args)
+        raise AssertionError("No fetch allowed after the retry deadline")
+
+    assert research.process_state(
+        state, now=maturity + 37 * 3600, fetcher=unexpected_fetch,
+        archive_path=archive, output=logs.append,
+    )
+    row = json.loads(archive.read_text().strip())
+    assert row["outcome"] == "incomplete_data"
+    assert row["incomplete_reason_code"] == "retry_window_expired"
+    assert "http_429" in row["incomplete_reason_detail"]
+    assert record["processed"] is True
+    assert requests == []
+    assert not any("[NEAR_MISS_RATE_LIMIT]" in x for x in logs)
+    assert not research.process_state(
+        state, now=maturity + 42 * 3600, fetcher=unexpected_fetch,
+        archive_path=archive, output=lambda _: None,
+    )
+    assert len(archive.read_text().splitlines()) == 1
