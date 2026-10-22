@@ -279,3 +279,80 @@ def test_generic_transient_fetch_error_remains_retryable(tmp_path, monkeypatch):
     assert record["incomplete_reason_code"] == "fetch_error"
     assert record["next_measurement_attempt_at"] == record["maturity_at"] + 1 + research.TRANSIENT_RETRY_DELAY_SECONDS
     assert not archive.exists()
+
+
+def _provenance_frame(record):
+    frame = candles_for(record)
+    frame["is_authentic"] = True
+    frame["data_quality"] = "PARIBU"
+    frame.attrs["source"] = "PARIBU"
+    return frame
+
+
+def test_research_window_accepts_authentic_paribu_candles():
+    record = event()
+    result = research._measure_event("MASK_TL", record, lambda *_: _provenance_frame(record))
+    assert result["outcome"] == "measured"
+    assert result["candles"] == 16
+
+
+def test_research_window_rejects_local_synthetic_candle(tmp_path, monkeypatch):
+    # A locally forward-filled row can preserve perfect timestamp continuity
+    # while still being ineligible for an authentic market excursion.
+    monkeypatch.setattr(research.time, "sleep", lambda *_: None)
+    record = event()
+    frame = _provenance_frame(record)
+    frame.loc[5, "is_authentic"] = False
+    frame.loc[5, "data_quality"] = "SYNTHETIC_FFILL"
+    state = {"near_miss_queue": {"MASK_TL": record}}
+    archive = tmp_path / "archive.jsonl"
+    calls = []
+
+    def fetcher(*_):
+        calls.append(True)
+        return frame
+
+    assert research.process_state(
+        state, now=record["maturity_at"], fetcher=fetcher,
+        archive_path=archive, output=lambda *_: None,
+    )
+    row = json.loads(archive.read_text(encoding="utf-8").strip())
+    assert row["outcome"] == "incomplete_data"
+    assert row["incomplete_reason_code"] == "inauthentic_window"
+    assert row["mfe_pct"] is None and row["mae_pct"] is None
+    assert row["candles"] == 16
+    assert record["processed"] is True
+    assert "next_measurement_attempt_at" not in record
+    assert not research.process_state(
+        state, now=record["maturity_at"] + 3600, fetcher=fetcher,
+        archive_path=archive, output=lambda *_: None,
+    )
+    assert calls == [True]
+    assert len(archive.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_research_window_rejects_disguised_synthetic_quality():
+    record = event()
+    frame = _provenance_frame(record)
+    frame.loc[4, "data_quality"] = "SYNTHETIC_FFILL"
+    result = research._measure_event("MASK_TL", record, lambda *_: frame)
+    assert result["outcome"] == "incomplete_data"
+    assert result["incomplete_reason_code"] == "inauthentic_window"
+
+
+def test_research_window_fails_closed_when_paribu_provenance_missing():
+    record = event()
+    frame = candles_for(record)
+    frame.attrs["source"] = "PARIBU"
+    result = research._measure_event("MASK_TL", record, lambda *_: frame)
+    assert result["outcome"] == "incomplete_data"
+    assert result["incomplete_reason_code"] == "missing_provenance"
+
+
+def test_research_window_rejects_non_paribu_source():
+    record = event()
+    frame = _provenance_frame(record)
+    frame.attrs["source"] = "OTHER_EXCHANGE"
+    result = research._measure_event("MASK_TL", record, lambda *_: frame)
+    assert result["outcome"] == "incomplete_data"
+    assert result["incomplete_reason_code"] == "invalid_provenance"
