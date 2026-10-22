@@ -250,23 +250,45 @@ def process_state(
             continue
 
         try:
-            retry_not_before = int(record.get("next_measurement_attempt_at", 0) or 0)
-        except (TypeError, ValueError):
-            retry_not_before = 0
-        if now < retry_not_before:
-            continue
-
-        row = _measure_event(symbol, record, fetcher)
-        time.sleep(0.3)
+            previous_attempts = max(0, int(record.get("measurement_attempts", 0) or 0))
+        except (ValueError, TypeError):
+            previous_attempts = 0
+        retry_deadline = maturity_at + TRANSIENT_RETRY_MAX_AGE_SECONDS
+        if previous_attempts and now > retry_deadline:
+            # A delayed workflow must not issue another Paribu request after
+            # the declared retry horizon. Retain the last transient as context.
+            rejected_at = int(record.get("rejected_at", 0) or 0)
+            row = _incomplete(
+                {
+                    "event_id": event_id,
+                    "symbol": symbol,
+                    "rejected_at": rejected_at,
+                    "rejected_price": str(record.get("rejected_price")),
+                    "rejected_stage": str(record.get("rejected_stage", "")),
+                    "first_close": ((rejected_at // INTERVAL_SECONDS) + 1) * INTERVAL_SECONDS,
+                    "maturity_at": maturity_at,
+                },
+                code="retry_window_expired",
+                detail=("last_transient_reason="
+                        + str(record.get("incomplete_reason_code") or "unknown")
+                        + "; last_transient_detail="
+                        + str(record.get("incomplete_reason_detail") or "")),
+            )
+        else:
+            try:
+                retry_not_before = int(record.get("next_measurement_attempt_at", 0) or 0)
+            except (TypeError, ValueError):
+                retry_not_before = 0
+            if now < retry_not_before:
+                continue
+            row = _measure_event(symbol, record, fetcher)
+            time.sleep(0.3)
         failure_code = row.get("incomplete_reason_code")
         if row["outcome"] == "incomplete_data" and failure_code in TRANSIENT_MEASUREMENT_CODES:
-            try:
-                previous_attempts = max(0, int(record.get("measurement_attempts", 0) or 0))
-            except (ValueError, TypeError):
-                previous_attempts = 0
             attempts = previous_attempts + 1
             may_retry = (attempts < TRANSIENT_RETRY_MAX_ATTEMPTS
-                         and 0 <= now - maturity_at <= TRANSIENT_RETRY_MAX_AGE_SECONDS)
+                         and maturity_at <= now
+                         and now + TRANSIENT_RETRY_DELAY_SECONDS <= retry_deadline)
             if may_retry:
                 record["measurement_attempts"] = attempts
                 record["next_measurement_attempt_at"] = now + TRANSIENT_RETRY_DELAY_SECONDS
