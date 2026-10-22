@@ -2157,9 +2157,15 @@ def run_scanner() -> None:
         # Keep any bounded execution follow-up until READY delivery is
         # confirmed. Dropping it here can starve a Telegram retry.
         funnel["confirmed"] += 1
-        # The existing explosive breakout exception may pass with one closed
-        # observation. Do not label it as the normal two-confirmation path.
-        explosive_confirmation = confirmations < MIN_CONFIRMATIONS
+        # Mirror trigger_check's existing exception only for audit labeling.
+        # This path may bypass persistence even with two or more observations.
+        explosive_confirmation = bool(
+            candidate.score >= 88
+            and candidate.setup == "BREAKOUT"
+            and candidate.book.imbalance_ratio >= Decimal("1.25")
+            and candidate.tech_15.volume_ratio >= Decimal("1.80")
+            and candidate.tech_15.recent_return_3 < Decimal("2.80")
+        )
         episode = _candidate_lifecycle_update(
             state, symbol=candidate.symbol, score=candidate.score,
             lifecycle_state="confirmation_explosive" if explosive_confirmation else "confirmation_2_of_2",

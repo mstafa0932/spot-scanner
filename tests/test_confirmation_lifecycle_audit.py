@@ -71,3 +71,44 @@ def test_explosive_confirmation_audit_episode_keeps_existing_expiry():
     assert episode['current_state']=='expired'
     assert episode['history'][-1]['reason']=='watch_window_expired'
     assert episode['history'][0]['confirmations']==1
+
+
+def test_explosive_confirmation_with_two_observations_records_actual_path(monkeypatch, tmp_path):
+    """The explosive path may bypass persistence even after two observations."""
+    clock, calls, scan = harness.pipeline(monkeypatch, tmp_path)
+    clock['rsi'] = harness.D('60')
+    monkeypatch.setattr(scanner, 'score_candidate', lambda *args: (89, []))
+    original_book = scanner.get_order_book
+
+    def book(symbol, *args):
+        result = original_book(symbol, *args)
+        if symbol == harness.SYMBOL:
+            result.imbalance_ratio = harness.D('0.85' if clock['now'] == harness.NOW else '1.25')
+        return result
+
+    monkeypatch.setattr(scanner, 'get_order_book', book)
+    original_indicators = scanner.analyze_symbol
+
+    def indicators(frame):
+        result = original_indicators(frame)
+        if frame.attrs['symbol'] == harness.SYMBOL and clock['now'] > harness.NOW:
+            result.breakout = True
+            result.volume_ratio = harness.D('2')
+        return result
+
+    monkeypatch.setattr(scanner, 'analyze_symbol', indicators)
+    first = scan()
+    assert not first['active_signals']
+    clock['now'] += 900
+    result = scan()
+    observations = scanner._recent_observations(result['watchlist'][harness.SYMBOL], clock['now'])
+    assert len(observations) == 2
+    # Normal persistence cannot authorize this READY: the existing explosive
+    # exception is the actual path, irrespective of the observation count.
+    assert scanner._avg_decimal(observations, 'imbalance') < scanner.MIN_AVG_IMBALANCE
+    assert len(result['active_signals']) == 1
+    confirmed = next(e for e in result['candidate_lifecycle'][harness.SYMBOL]['history']
+                     if e.get('reason') == 'READY')
+    assert confirmed['confirmations'] == 2
+    assert confirmed['state'] == 'confirmation_explosive'
+    assert confirmed['confirmation_mode'] == 'explosive_breakout'
