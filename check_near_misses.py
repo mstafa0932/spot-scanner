@@ -19,6 +19,12 @@ PRUNE_AFTER_SECONDS = 172800
 RESEARCH_FAVORABLE_MFE_PCT = Decimal("1.50")
 RESEARCH_MAE_LIMIT_PCT = Decimal("1.50")
 
+# Research-only retries; no changes to live scanner or trading thresholds.
+TRANSIENT_MEASUREMENT_CODES = frozenset({"http_429", "timeout", "fetch_error"})
+TRANSIENT_RETRY_DELAY_SECONDS = 6 * 60 * 60
+TRANSIENT_RETRY_MAX_ATTEMPTS = 3
+TRANSIENT_RETRY_MAX_AGE_SECONDS = 36 * 60 * 60
+
 
 def _decimal(value: Any) -> Decimal | None:
     try:
@@ -232,6 +238,12 @@ def process_state(
             maturity_at = 0
         if maturity_at <= 0 or maturity_at > now:
             continue
+        try:
+            retry_not_before = int(record.get("next_measurement_attempt_at", 0) or 0)
+        except (TypeError, ValueError):
+            retry_not_before = 0
+        if now < retry_not_before:
+            continue
 
         event_id = _event_id(symbol, record)
         if event_id in archived:
@@ -242,6 +254,28 @@ def process_state(
 
         row = _measure_event(symbol, record, fetcher)
         time.sleep(0.3)
+        failure_code = row.get("incomplete_reason_code")
+        if row["outcome"] == "incomplete_data" and failure_code in TRANSIENT_MEASUREMENT_CODES:
+            try:
+                previous_attempts = max(0, int(record.get("measurement_attempts", 0) or 0))
+            except (ValueError, TypeError):
+                previous_attempts = 0
+            attempts = previous_attempts + 1
+            may_retry = (attempts < TRANSIENT_RETRY_MAX_ATTEMPTS
+                         and 0 <= now - maturity_at <= TRANSIENT_RETRY_MAX_AGE_SECONDS)
+            if may_retry:
+                record["measurement_attempts"] = attempts
+                record["next_measurement_attempt_at"] = now + TRANSIENT_RETRY_DELAY_SECONDS
+                record["incomplete_reason_code"] = failure_code
+                record["incomplete_reason_detail"] = row.get("incomplete_reason_detail")
+                changed = True
+                output(f"[NEAR_MISS_RETRY] {symbol} | {failure_code} | attempt={attempts} | deferred")
+                # Do not flood the exchange with further requests after a 429.
+                if failure_code == "http_429":
+                    output("[NEAR_MISS_RATE_LIMIT] stop remaining measurements for this run")
+                    break
+                continue
+
         row["processed_at"] = now
         append_archive(archive_path, row)
         archived.add(event_id)
@@ -262,7 +296,13 @@ def process_state(
 
         record["processed"] = True
         record["processed_at"] = now
+        record.pop("measurement_attempts", None)
+        record.pop("next_measurement_attempt_at", None)
         changed = True
+        # Even an exhausted 429 means the remaining batch should stop.
+        if failure_code == "http_429":
+            output("[NEAR_MISS_RATE_LIMIT] stop remaining measurements for this run")
+            break
 
     archive_rows = []
     if archive_path.exists():
