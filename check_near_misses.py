@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Callable
+from pandas.api.types import is_bool
 import json
 import os
 import re
@@ -164,6 +165,14 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
             detail=f"missing_columns={missing}",
         )
 
+    # Paribu native 15m frames carry per-row provenance from candle_backfill.
+    # A locally forward-filled row must never become a measured market outcome.
+    source = str(getattr(candles, "attrs", {}).get("source") or "").upper()
+    if source and source != "PARIBU":
+        return _incomplete(base, code="invalid_provenance", detail="non-Paribu measurement source")
+    if source == "PARIBU" and not {"is_authentic", "data_quality"}.issubset(columns):
+        return _incomplete(base, code="missing_provenance", detail="Paribu measurement provenance missing")
+
     window = candles[(candles["timestamp"] >= first_close) & (candles["timestamp"] < maturity_at)].copy()
     window = window.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
     expected = [first_close + i * INTERVAL_SECONDS for i in range(MATURITY_CANDLES)]
@@ -174,6 +183,20 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
             code="insufficient_window",
             detail=f"expected={MATURITY_CANDLES} actual={len(window)} contiguous={actual == expected}",
             candles=len(window),
+        )
+
+    if ("is_authentic" in window.columns
+            and not all(is_bool(value) and bool(value) for value in window["is_authentic"])):
+        return _incomplete(
+            base, code="inauthentic_window",
+            detail="measurement window contains non-authentic candles", candles=len(window),
+        )
+    if ("data_quality" in window.columns
+            and not all(isinstance(value, str) and value == "PARIBU"
+                        for value in window["data_quality"])):
+        return _incomplete(
+            base, code="inauthentic_window",
+            detail="measurement window contains non-Paribu data-quality rows", candles=len(window),
         )
 
     highs = [_decimal(x) for x in window["high"].tolist()]
