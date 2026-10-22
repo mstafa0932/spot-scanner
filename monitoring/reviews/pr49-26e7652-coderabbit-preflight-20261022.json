@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-22T08:51:57.696Z",
+  "repository": "mstafa0932/spot-scanner",
+  "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+  "pr_state": "open_unmerged",
+  "ci_run": 39716978157,
+  "ci_status": "success_same_head",
+  "user_consent": {
+    "accepted": true,
+    "conditional": true,
+    "cost_cap_usd": 0,
+    "requires_enforced_temporary_isolation": true,
+    "requires_actual_payload_scope_verification_before_source_transmission": true,
+    "allows_github_repository_write": false,
+    "allows_production_access": false
+  },
+  "isolation": {
+    "enforced": false,
+    "bubblewrap_all_namespaces": "Failed to create NETLINK_ROUTE socket: Operation not permitted",
+    "user_namespace": "setting up uid map / writing /proc/self/uid_map: Operation not permitted",
+    "mount_pid_namespace_attempt": "Creating new namespace failed: Operation not permitted",
+    "landlock": {
+      "available": false,
+      "errno": 38,
+      "error": "Function not implemented"
+    },
+    "linux_capabilities": {
+      "permitted": "0000000000000000",
+      "effective": "0000000000000000",
+      "bounding": "0000000000000000",
+      "no_new_privs": 1
+    },
+    "alternative_runtimes": {
+      "docker": false,
+      "podman": false,
+      "proot": false,
+      "runsc": false,
+      "nsjail": false,
+      "firejail": false,
+      "qemu": false
+    },
+    "weaker_fallback_used": false
+  },
+  "release_verification": {
+    "official_installer_url": "https://cli.coderabbit.ai/install.sh",
+    "installer_sha256": "a971b226f9f0d94e948372a24ce1eb51f244093542e0597e4d21cfd520ab0cd8",
+    "release": "0.9.1",
+    "manifest_signature_verified": true,
+    "signature_method": "ECDSA/SHA256 via OpenSSL, key embedded in official HTTPS installer",
+    "signing_public_key_sha256": "5414d2ef5372a9f7143c11d22de7ed9225f527e8a8675123f15f8cf717a6d25c",
+    "manifest_sha256": "4911a6f23e2efdb681e3f8d2b8d377954a753b1056891ba8d2048d381a7e96e1",
+    "version_checksum_verified": true,
+    "expected_linux_x64_archive_sha256": "9558e02f1b6570ade33d8191b33e10ffae2472ab2680d4518d03261bcebc80bc",
+    "binary_archive_downloaded": false,
+    "binary_executed": false,
+    "installer_executed": false,
+    "complete_package_integrity_verified": false,
+    "reason_not_executed": "Required OS isolation is unavailable; no fallback that weakens user conditions was used."
+  },
+  "data_scope": {
+    "review_source_bundle_created": false,
+    "source_transmitted_to_coderabbit": false,
+    "production_logs_transmitted": false,
+    "bot_state_transmitted": false,
+    "credentials_transmitted": false,
+    "actual_review_payload_verified": false,
+    "reason": "No vendor executable or review request was run because enforced isolation could not be established. No claim is made that CLI sends only diffs."
+  },
+  "execution": {
+    "installer_executed": false,
+    "CLI_binary_downloaded": false,
+    "CLI_binary_executed": false,
+    "service_login_attempted": false,
+    "review_run": false,
+    "paid_usage_enabled": false,
+    "paid_credits_used": false,
+    "cost_usd": 0,
+    "source_or_project_dependencies_modified": false,
+    "github_app_installed": false,
+    "repository_write_credentials_given_to_external_service": false,
+    "live_scanner_run": false,
+    "telegram_sent": false,
+    "trade": false,
+    "production_modified": false,
+    "merged": false,
+    "deployed": false
+  },
+  "independent_review": {
+    "performed": false,
+    "github_approved": false,
+    "findings_available": false,
+    "gate_complete": false
+  },
+  "decision": "BLOCKED_REQUIRED_ISOLATION_UNAVAILABLE",
+  "next_action": "Resume only in a disposable runner/VM with enforceable filesystem/process isolation and restricted/observable egress, no production credentials or GitHub write capability. Preserve conditional authorization and zero-dollar cap. Verify full archive integrity, sanitized input scope, actual outbound payload and free quota before sending source. Do not ask to relax the user's conditions."
+}

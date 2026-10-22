@@ -1248,7 +1248,7 @@
       "tests_python_310": 353,
       "tests_python_312": 353,
       "bandit_status": "no_new_findings_two_preexisting_low_documented",
-      "independent_final_review": "pending_external_review_service_consent",
+      "independent_final_review": "blocked_required_execution_isolation_unavailable",
       "github_formal_approvals": 0,
       "user_merge_approval": false,
       "merged": false,
@@ -1271,7 +1271,8 @@
       "independent_gate_report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
       "independent_gate_evidence_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.json",
       "last_independent_gate_check_utc": "2026-10-22T08:24:38.521Z",
-      "external_review_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md"
+      "external_review_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md",
+      "external_preflight_report_path": "monitoring/reviews/pr49-26e7652-coderabbit-preflight-20261022.md"
     }
   },
   "already_reported_blockers": [
@@ -2817,6 +2818,13 @@
       "head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
       "proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md",
       "result": "PR open/unmerged at exact unchanged head; CI39716978157 success and reviews0. Bounded official-source research compared CodeRabbit/Sourcery apps; both ask code/workflow write. Selected lower-repository-privilege CodeRabbit local CLI Free proposal. Publisher verified; OSS training caveat documented. No installation, service login, source submission, purchase, tests, production writes, fake approval, merge or deployment. Await explicit user consent."
+    },
+    {
+      "observed_at_utc": "2026-10-22T08:51:57.696Z",
+      "kind": "pr49_coderabbit_preflight_blocked_isolation",
+      "head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+      "report_path": "monitoring/reviews/pr49-26e7652-coderabbit-preflight-20261022.md",
+      "result": "User conditionally authorized Free-only CLI review. Enforced isolation failed: namespaces EPERM, Landlock ENOSYS, no alternative runtime. Official installer and signed0.9.1 metadata downloaded without executing installer; manifest signature and VERSION verified. Binary not downloaded/executed; full package/payload verification incomplete. No source, state, logs or credentials submitted to review service; no login, paid usage, tests, production changes, fake approval, merge or deploy. Preserve consent and resume only in a compliant disposable runner; do not request relaxed conditions."
     }
   ],
   "scheduler_confirmation": {
@@ -3755,7 +3763,7 @@
     "independent_review_complete": false,
     "source_behavior_change": false,
     "only_audit_label_correction": true,
-    "next_action": "Ask user to approve temporary official CodeRabbit CLI installation, legitimate service login and submission of constrained published-source review bundle under Free only, acknowledging OSS training caveat. No GitHub App or repository write privileges. Stop on any payment or additional permissions request; no merge.",
+    "next_action": "Resume only in a disposable runner/VM with enforceable filesystem/process isolation and restricted/observable egress, no production credentials or GitHub write capability. Preserve conditional authorization and zero-dollar cap. Verify full archive integrity, sanitized input scope, actual outbound payload and free quota before sending source. Do not ask to relax the user's conditions.",
     "ai_recheck_observed_at_utc": "2026-10-22T08:07:07Z",
     "ai_recheck_report_path": "monitoring/reviews/pr49-26e7652-ai-recheck-20261022.md",
     "ai_recheck_no_new_findings": true,
@@ -3768,7 +3776,7 @@
     "observed_at_utc": "2026-10-22T08:24:38.521Z",
     "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
     "latest_main_checked": "a71c00adc6b037d193cd70a197ad1302e06c720b",
-    "decision": "AWAITING_USER_APPROVAL_FOR_EXTERNAL_REVIEW",
+    "decision": "BLOCKED_REQUIRED_ISOLATION_UNAVAILABLE",
     "reviewer": null,
     "formal_approval": false,
     "connected_identity": "mstafa0932",
@@ -3779,13 +3787,15 @@
     "report_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.md",
     "evidence_path": "monitoring/reviews/pr49-26e7652-independent-gate-20261022.json",
     "session_complete": true,
-    "next_action": "Ask user to approve temporary official CodeRabbit CLI installation, legitimate service login and submission of constrained published-source review bundle under Free only, acknowledging OSS training caveat. No GitHub App or repository write privileges. Stop on any payment or additional permissions request; no merge.",
-    "external_service_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md"
+    "next_action": "Resume only in a disposable runner/VM with enforceable filesystem/process isolation and restricted/observable egress, no production credentials or GitHub write capability. Preserve conditional authorization and zero-dollar cap. Verify full archive integrity, sanitized input scope, actual outbound payload and free quota before sending source. Do not ask to relax the user's conditions.",
+    "external_service_proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md",
+    "external_service_consent_received": true,
+    "external_execution_blocker": "Current runtime denies namespaces and does not implement Landlock; no approved isolation substitute available."
   },
   "pr49_external_review": {
     "observed_at_utc": "2026-10-22T08:38:57.597Z",
     "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
-    "status": "awaiting_user_approval_before_install_auth_or_source_submission",
+    "status": "blocked_required_enforced_isolation_unavailable",
     "selected_service": "CodeRabbit Inc. — local CLI review (not GitHub App)",
     "vendor_identity_url": "https://github.com/marketplace/coderabbitai",
     "proposed_cost_cap_usd": 0,
@@ -3806,6 +3816,18 @@
     },
     "proposal_path": "monitoring/reviews/pr49-26e7652-external-review-proposal-20261022.md",
     "instructions_path": "monitoring/reviews/pr49-26e7652-external-review-instructions.md",
-    "next_action": "Ask user to approve temporary official CodeRabbit CLI installation, legitimate service login and submission of constrained published-source review bundle under Free only, acknowledging OSS training caveat. No GitHub App or repository write privileges. Stop on any payment or additional permissions request; no merge."
+    "next_action": "Resume only in a disposable runner/VM with enforceable filesystem/process isolation and restricted/observable egress, no production credentials or GitHub write capability. Preserve conditional authorization and zero-dollar cap. Verify full archive integrity, sanitized input scope, actual outbound payload and free quota before sending source. Do not ask to relax the user's conditions.",
+    "user_approved": true,
+    "user_approval_conditional": true,
+    "user_cost_cap_usd": 0,
+    "user_requires_actual_payload_scope_verification": true,
+    "preflight_report_path": "monitoring/reviews/pr49-26e7652-coderabbit-preflight-20261022.md",
+    "preflight_evidence_path": "monitoring/reviews/pr49-26e7652-coderabbit-preflight-20261022.json",
+    "preflight_observed_at_utc": "2026-10-22T08:51:57.696Z",
+    "release": "0.9.1",
+    "release_manifest_signature_verified": true,
+    "complete_binary_integrity_verified": false,
+    "actual_outbound_review_payload_verified": false,
+    "cost_usd": 0
   }
 }
