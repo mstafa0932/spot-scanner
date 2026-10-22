@@ -168,9 +168,9 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
     # Paribu native 15m frames carry per-row provenance from candle_backfill.
     # A locally forward-filled row must never become a measured market outcome.
     source = str(getattr(candles, "attrs", {}).get("source") or "").upper()
-    if source and source != "PARIBU":
-        return _incomplete(base, code="invalid_provenance", detail="non-Paribu measurement source")
-    if source == "PARIBU" and not {"is_authentic", "data_quality"}.issubset(columns):
+    if source != "PARIBU":
+        return _incomplete(base, code="invalid_provenance", detail="missing or non-Paribu measurement source")
+    if not {"is_authentic", "data_quality"}.issubset(columns):
         return _incomplete(base, code="missing_provenance", detail="Paribu measurement provenance missing")
 
     window = candles[(candles["timestamp"] >= first_close) & (candles["timestamp"] < maturity_at)].copy()
