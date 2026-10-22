@@ -241,7 +241,7 @@ def test_incomplete_reason_is_archived_and_retained_in_state(tmp_path, monkeypat
     monkeypatch.setattr(check_near_misses.time, "sleep", lambda *_: None)
 
     def failing_fetcher(*_args):
-        raise RuntimeError("synthetic 429")
+        raise RuntimeError("Synthetic candle limit exceeded")
 
     assert process_state(
         state,
@@ -251,11 +251,11 @@ def test_incomplete_reason_is_archived_and_retained_in_state(tmp_path, monkeypat
         output=lambda *_: None,
     )
     row = json.loads(archive.read_text(encoding="utf-8").strip())
-    assert row["incomplete_reason_code"] == "http_429"
-    assert row["incomplete_reason_detail"] == "RuntimeError: synthetic 429"
+    assert row["incomplete_reason_code"] == "synthetic_candle_limit_exceeded"
+    assert row["incomplete_reason_detail"] == "RuntimeError: Synthetic candle limit exceeded"
     queued = state["near_miss_queue"]["TEST_TL"]
-    assert queued["incomplete_reason_code"] == "http_429"
-    assert queued["incomplete_reason_detail"] == "RuntimeError: synthetic 429"
+    assert queued["incomplete_reason_code"] == "synthetic_candle_limit_exceeded"
+    assert queued["incomplete_reason_detail"] == "RuntimeError: Synthetic candle limit exceeded"
 
 
 def test_process_state_paces_after_every_mature_measurement(tmp_path, monkeypatch):
@@ -356,7 +356,7 @@ def test_incomplete_classification_below_threshold_hides_distribution_but_preser
     lines = []
 
     def failing_fetcher(*_args):
-        raise RuntimeError("synthetic 429")
+        raise RuntimeError("Synthetic candle limit exceeded")
 
     assert process_state(
         state, now=maturity_at, fetcher=failing_fetcher,
@@ -366,9 +366,9 @@ def test_incomplete_classification_below_threshold_hides_distribution_but_preser
     assert any("measurement_completeness=0.0000" in line for line in lines)
     assert not any(line.startswith("[INCOMPLETE_CODES]") for line in lines)
     queued = state["near_miss_queue"]["TEST_TL"]
-    assert queued["incomplete_reason_code"] == "http_429"
+    assert queued["incomplete_reason_code"] == "synthetic_candle_limit_exceeded"
     rows = [json.loads(x) for x in archive.read_text(encoding="utf-8").splitlines()]
-    assert rows[-1]["incomplete_reason_code"] == "http_429"
+    assert rows[-1]["incomplete_reason_code"] == "synthetic_candle_limit_exceeded"
 
 
 def test_cadence_health_uses_two_expected_intervals_as_operational_late_boundary():
