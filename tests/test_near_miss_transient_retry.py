@@ -228,3 +228,54 @@ def test_late_persisted_retry_expires_without_network_call(tmp_path):
         archive_path=archive, output=lambda _: None,
     )
     assert len(archive.read_text().splitlines()) == 1
+
+
+
+def test_insufficient_canonical_history_is_archived_without_retry(tmp_path, monkeypatch):
+    monkeypatch.setattr(research.time, "sleep", lambda _: None)
+    record = event()
+    state = {"near_miss_queue": {"OM_TL": record}}
+    archive = tmp_path / "archive.jsonl"
+    calls = []
+
+    def insufficient(*args):
+        calls.append(args)
+        raise research.CandleUnavailableError("Only 30 canonical candles; 205 required")
+
+    assert research.process_state(
+        state, now=NOW, fetcher=insufficient,
+        archive_path=archive, output=lambda _: None,
+    )
+    row = json.loads(archive.read_text(encoding="utf-8").strip())
+    assert row["incomplete_reason_code"] == "insufficient_canonical_history"
+    assert row["outcome"] == "incomplete_data"
+    assert record["processed"] is True
+    assert "next_measurement_attempt_at" not in record
+    assert len(calls) == 1
+    assert not research.process_state(
+        state, now=NOW + 6 * 3600, fetcher=insufficient,
+        archive_path=archive, output=lambda _: None,
+    )
+    assert len(calls) == 1
+
+
+def test_generic_transient_fetch_error_remains_retryable(tmp_path, monkeypatch):
+    monkeypatch.setattr(research.time, "sleep", lambda _: None)
+    record = event()
+    state = {"near_miss_queue": {"OM_TL": record}}
+    archive = tmp_path / "archive.jsonl"
+    calls = []
+
+    def transient(*args):
+        calls.append(args)
+        raise RuntimeError("temporary provider failure")
+
+    assert research.process_state(
+        state, now=record["maturity_at"] + 1, fetcher=transient,
+        archive_path=archive, output=lambda _: None,
+    )
+    assert len(calls) == 1
+    assert record["processed"] is False
+    assert record["incomplete_reason_code"] == "fetch_error"
+    assert record["next_measurement_attempt_at"] == record["maturity_at"] + 1 + research.TRANSIENT_RETRY_DELAY_SECONDS
+    assert not archive.exists()
