@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-22T08:24:38.521Z",
+  "display_timezone": "Europe/Istanbul",
+  "repository": "mstafa0932/spot-scanner",
+  "pr": 49,
+  "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+  "scope": "Independent approval gate only; no code changes, merge, deployment, live scanner or production writes",
+  "identity": {
+    "pr_author": "mstafa0932",
+    "commit_author": "mstafa0932",
+    "commit_committer": "mstafa0932",
+    "connected_github_login": "mstafa0932",
+    "implementation_agent": "/root (prior implementation session)",
+    "current_agent_is_implementer": true
+  },
+  "reviewer_availability": {
+    "recorded_reviews": 0,
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "codeowners_present_in_current_main": false,
+    "collaborator_enumeration": "Not supported by the exposed GitHub fetch endpoint; this does not establish that no collaborators exist.",
+    "qualified_separate_reviewer_identified": false,
+    "connected_external_review_service_identified": false,
+    "discovery_limit": "Available tool discovery and plugin search did not expose a connected independent review service; catalog search is not exhaustive.",
+    "review_request_sent": false,
+    "reason": "No verified separate reviewer login or independent review-service identity available; do not invent a reviewer or issue author self-approval."
+  },
+  "independent_approval": {
+    "status": "blocked_pending_verified_separate_reviewer",
+    "performed": false,
+    "reviewer": null,
+    "github_review_id": null,
+    "github_approval_recorded": false,
+    "author_approval_attempted": false,
+    "ai_rechecks_counted_as_independent": false
+  },
+  "continuing_validation": {
+    "ci": {
+      "run_id": 39716978157,
+      "head_sha": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+      "tests_python_310": 353,
+      "tests_python_312": 353,
+      "status": "success",
+      "CI_checks_still_successful": true,
+      "reused_saved_results": true
+    },
+    "security": {
+      "scanner_blob": "5e55deeae9bb077fe1e8d0ca63414f739321410e",
+      "exact_blob_matches_saved_scan": true,
+      "bandit": "1.9.4",
+      "new_findings": 0,
+      "preexisting_low_findings": [
+        "B105",
+        "B112"
+      ],
+      "bandit_exit_code": 1,
+      "rerun_performed": false,
+      "independent_security_approval": false
+    },
+    "compatibility": {
+      "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+      "latest_main_checked": "a71c00adc6b037d193cd70a197ad1302e06c720b",
+      "main_commit_utc": "2026-10-22T08:21:44Z",
+      "CI_tested_main": "cbc089186a1dd165d2bf2affcfee04d322f9befd",
+      "changes_since_CI_main": [
+        "scanner_state.json"
+      ],
+      "PR_changed_files": [
+        "scanner.py",
+        "tests/test_confirmation_lifecycle_audit.py"
+      ],
+      "merge_tree": "8bec4c009d1543567c0cb573639fb5c14ba33a7e",
+      "changes_vs_previously_validated_merge_source": [
+        "scanner_state.json"
+      ],
+      "latest_main_state_preserved": true,
+      "executable_dependencies_workflows_tests_identical_to_previously_validated_merge": true,
+      "saved_security_scanner_blob_matches_current_head": true,
+      "new_full_test_run_needed": false,
+      "new_tests_executed": false,
+      "no_live_scanner_or_production_mutation": true
+    },
+    "mergeability": {
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "merged": false,
+      "auto_merge": null,
+      "note": "A brief null/unknown was observed after main advanced; subsequent REST returned true/clean. Non-mutating merge-tree independently verified no conflicts."
+    },
+    "shadow_mode": {
+      "source_default": true,
+      "workflow_value": "true",
+      "public_entrypoint_refuses_false": true,
+      "source_or_config_changed": false
+    }
+  },
+  "remaining_requirements": [
+    "Identify and verify a qualified reviewer distinct from the implementation agent and PR-author GitHub account, with suitable repository access.",
+    "Have that reviewer assess exact head 26e765239ef3a445565ce3291c0a28fa7bcff683 and submit review under their own GitHub identity if permitted.",
+    "Verify exact review commit, result and any findings; independent approval is not supplied by this report.",
+    "Even if approved, require separate explicit user merge decision and fresh head verification before controlled merge."
+  ],
+  "decision": "STOPPED_PENDING_INDEPENDENT_APPROVAL",
+  "next_action": "Obtain reviewer GitHub login or a verifiable independently connected review service. Send the prepared exact-head packet only after identity/access/qualification verification.",
+  "safety": {
+    "source_modified": false,
+    "PR_head_modified": false,
+    "production_state_modified": false,
+    "production_config_modified": false,
+    "live_scanner_run": false,
+    "new_tests_run": false,
+    "test_telegram_sent": false,
+    "real_trade": false,
+    "merged": false,
+    "deployed": false,
+    "new_scanner_or_monitor_created": false
+  }
+}
