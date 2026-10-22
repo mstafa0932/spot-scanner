@@ -1,0 +1,991 @@
+{
+  "schema_version": 1,
+  "task": "quiet shadow calibration: MASK_TL and past cases; diagnostic only",
+  "repository": "mstafa0932/spot-scanner",
+  "written_branch": "monitor/quiet-engineering-20261017",
+  "production_modified": false,
+  "time_zone": "Europe/Istanbul (+03:00)",
+  "configuration_defaults": {
+    "MIN_QUOTE_VOLUME_TL": "5000000",
+    "MAX_ALLOWED_SPREAD_PCT": "0.40",
+    "MAX_ORDERBOOK_MARKETS": 80,
+    "MAX_TECHNICAL_MARKETS": 60,
+    "SHADOW_MODE": true
+  },
+  "config_note": "Defaults verified in scanner.py and workflow's Run scanner env lacks overrides for MIN_QUOTE_VOLUME_TL and MAX_ALLOWED_SPREAD_PCT. Live logs show SHADOW_MODE=true.",
+  "source_provenance": [
+    {
+      "type": "persisted_state",
+      "source_commit": "c1cf8c4",
+      "url": "https://github.com/mstafa0932/spot-scanner/blob/c1cf8c4/scanner_state.json",
+      "window": "2026-10-22T08:51:25Z to 2026-10-22T10:41:46Z",
+      "contains_last_12_scan_diagnostics": true
+    },
+    {
+      "type": "persisted_state",
+      "source_commit": "357ec95",
+      "url": "https://github.com/mstafa0932/spot-scanner/blob/357ec95/scanner_state.json",
+      "window": "2026-10-21T06:59:39Z to 2026-10-21T08:49:50Z",
+      "contains_last_12_scan_diagnostics": true
+    },
+    {
+      "type": "workflow",
+      "url": "https://github.com/mstafa0932/spot-scanner/blob/main/.github/workflows/scanner.yml"
+    },
+    {
+      "type": "code",
+      "url": "https://github.com/mstafa0932/spot-scanner/blob/main/scanner.py"
+    },
+    {
+      "type": "ticker_parser",
+      "url": "https://github.com/mstafa0932/spot-scanner/blob/main/market_data.py"
+    }
+  ],
+  "user_screenshot_observations": {
+    "MASK_TL": {
+      "price_tl": "23.26",
+      "displayed_change_percent": "+10.70%",
+      "chart_4h_displayed_high_tl": "25.85",
+      "day_chart_historical_high_label_tl": "26.11",
+      "note": "Two Paribu screenshots supplied by user. Candle-level wall-clock high time and executable spread cannot be inferred."
+    }
+  },
+  "mask_ticker_snapshots": [
+    {
+      "run_id": "39757308707",
+      "state_commit": "b269b2d",
+      "time_utc": "2026-10-22T09:41:39Z",
+      "last_tl": "22.05",
+      "quote_volume_tl": "848510.19"
+    },
+    {
+      "run_id": "39758579960",
+      "state_commit": "e13bdb7",
+      "time_utc": "2026-10-22T09:51:40Z",
+      "last_tl": "22.32",
+      "quote_volume_tl": "1133958.45"
+    },
+    {
+      "run_id": "39759870362",
+      "state_commit": "1c400ff",
+      "time_utc": "2026-10-22T10:01:46Z",
+      "last_tl": "22.93",
+      "quote_volume_tl": "1179998.85"
+    },
+    {
+      "run_id": "39761166052",
+      "state_commit": "6a5c85c",
+      "time_utc": "2026-10-22T10:11:42Z",
+      "last_tl": "23.92",
+      "quote_volume_tl": "2143953.93"
+    },
+    {
+      "run_id": "39762428050",
+      "state_commit": "5ac032d",
+      "time_utc": "2026-10-22T10:21:45Z",
+      "last_tl": "24.14",
+      "quote_volume_tl": "4085651.91"
+    },
+    {
+      "run_id": "39763681604",
+      "state_commit": "75e89fa",
+      "time_utc": "2026-10-22T10:31:39Z",
+      "last_tl": "24.17",
+      "quote_volume_tl": "4688902.88"
+    },
+    {
+      "run_id": "39764926230",
+      "state_commit": "c1cf8c4",
+      "time_utc": "2026-10-22T10:41:46Z",
+      "last_tl": "22.86",
+      "quote_volume_tl": "5644794.93"
+    }
+  ],
+  "mask_latest_window": [
+    {
+      "run_id": "39750797843",
+      "started_at_utc": "2026-10-22T08:51:25.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=23.4 | 3C=-0.16%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792659097,
+        "quote_volume": "401204.12"
+      }
+    },
+    {
+      "run_id": "39752093289",
+      "started_at_utc": "2026-10-22T09:01:20.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=21.2 | 3C=-0.43%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792659698,
+        "quote_volume": "402441.98"
+      }
+    },
+    {
+      "run_id": "39753386822",
+      "started_at_utc": "2026-10-22T09:11:44.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=21.2 | 3C=-0.43%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792660322,
+        "quote_volume": "404895.02"
+      }
+    },
+    {
+      "run_id": "39754685534",
+      "started_at_utc": "2026-10-22T09:21:32.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=20.3 | 3C=-0.30%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792660910,
+        "quote_volume": "537281.24"
+      }
+    },
+    {
+      "run_id": "39755981476",
+      "started_at_utc": "2026-10-22T09:31:30.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=19.7 | 3C=-0.28%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792661509,
+        "quote_volume": "537593.13"
+      }
+    },
+    {
+      "run_id": "39757308707",
+      "started_at_utc": "2026-10-22T09:41:39.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=19.7 | 3C=-0.28%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792662113,
+        "quote_volume": "848510.19"
+      }
+    },
+    {
+      "run_id": "39758579960",
+      "started_at_utc": "2026-10-22T09:51:40.000Z",
+      "btc_ok": false,
+      "btc_reason": "BTC confirmed weakness RSI=21.3 | 3C=-0.09%",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792662716,
+        "quote_volume": "1133958.45"
+      }
+    },
+    {
+      "run_id": "39759870362",
+      "started_at_utc": "2026-10-22T10:01:46.000Z",
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=26.1",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792663320,
+        "quote_volume": "1179998.85"
+      }
+    },
+    {
+      "run_id": "39761166052",
+      "started_at_utc": "2026-10-22T10:11:42.000Z",
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=26.1",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792663918,
+        "quote_volume": "2143953.93"
+      }
+    },
+    {
+      "run_id": "39762428050",
+      "started_at_utc": "2026-10-22T10:21:45.000Z",
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=39.2",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792664525,
+        "quote_volume": "4085651.91"
+      }
+    },
+    {
+      "run_id": "39763681604",
+      "started_at_utc": "2026-10-22T10:31:39.000Z",
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=37.3",
+      "MASK_TL": {
+        "stage": "universe",
+        "reason": "quote_volume_below_minimum",
+        "observed_at": 1792665115,
+        "quote_volume": "4688902.88"
+      }
+    },
+    {
+      "run_id": "39764926230",
+      "started_at_utc": "2026-10-22T10:41:46.000Z",
+      "btc_ok": true,
+      "btc_reason": "BTC neutral/acceptable | RSI=37.3",
+      "MASK_TL": {
+        "stage": "book",
+        "reason": "spread_too_high",
+        "observed_at": 1792665713,
+        "spread_pct": "0.9666080843585237258347978910"
+      }
+    }
+  ],
+  "peer_window_20261021": [
+    {
+      "run_id": "39558865111",
+      "started_at_utc": "2026-10-21T06:59:39.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792565994,
+          "quote_volume": "511003.05"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792565994,
+          "quote_volume": "4249806.34"
+        },
+        "GRASS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792565979
+        },
+        "ATH_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792565993,
+          "imbalance": "0.4537264978980624360551599403"
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792565982,
+          "imbalance": "0.4111339108415398822027273021"
+        },
+        "DYM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792565992,
+          "spread_pct": "1.136363636363636363636363636"
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792565994,
+          "imbalance": "0.7682090875577381943810583651"
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792565994,
+          "quote_volume": "4868620.13"
+        }
+      }
+    },
+    {
+      "run_id": "39559992808",
+      "started_at_utc": "2026-10-21T07:09:52.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792566614,
+          "quote_volume": "512187.31"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792566614,
+          "quote_volume": "4249806.34"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792566611,
+          "imbalance": "0.5116228103456347864298442517"
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792566592
+        },
+        "W_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792566592
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792566592
+        },
+        "ALT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792566592
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792566614,
+          "quote_volume": "4868620.13"
+        }
+      }
+    },
+    {
+      "run_id": "39561128582",
+      "started_at_utc": "2026-10-21T07:19:49.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792567203,
+          "quote_volume": "512258.54"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792567203,
+          "quote_volume": "4210233.84"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792567195,
+          "imbalance": "0.3503697852782057053198040033"
+        },
+        "ATH_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792567202,
+          "imbalance": "0.5667864187026072985806473883"
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792567191,
+          "imbalance": "0.3579375650148604573771621663"
+        },
+        "DYM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792567201,
+          "spread_pct": "1.136363636363636363636363636"
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792567197,
+          "imbalance": "0.8290185653586745769647530510"
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792567203,
+          "quote_volume": "4913949.65"
+        }
+      }
+    },
+    {
+      "run_id": "39562291795",
+      "started_at_utc": "2026-10-21T07:29:49.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792567805,
+          "quote_volume": "514316.87"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792567805,
+          "quote_volume": "4325922.8"
+        },
+        "GRASS_TL": {
+          "stage": "trigger",
+          "reason": "score 72 < 80",
+          "observed_at": 1792567822,
+          "score": 72
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792567789
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792567794,
+          "spread_pct": "0.4649135551358419293912538137"
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792567789
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792567805,
+          "imbalance": "0.5544894180236087558203561146"
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792567805,
+          "quote_volume": "4847444.31"
+        }
+      }
+    },
+    {
+      "run_id": "39563480746",
+      "started_at_utc": "2026-10-21T07:39:51.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792568405,
+          "quote_volume": "515311.91"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792568405,
+          "quote_volume": "4325922.8"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792568395,
+          "spread_pct": "0.4377736085053158223889931207"
+        },
+        "ATH_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792568415,
+          "score": 61,
+          "rsi": "50.56687800784835",
+          "return_3": "-0.4287245444801714898177920700",
+          "volume_ratio": "0.0",
+          "atr_pct": "0.3772860466638105489773950484",
+          "macd_histogram": "0.000028653673658748642",
+          "closed_candle_at": 1792566900,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 3,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "W_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792568391
+        },
+        "DYM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792568403,
+          "spread_pct": "1.136363636363636363636363636"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792568414,
+          "score": 37,
+          "rsi": "45.56714969740172",
+          "return_3": "0.510412413229889750918742300",
+          "volume_ratio": "0.34462247158931236",
+          "atr_pct": "1.059828656515175807434491164",
+          "macd_histogram": "-0.0011118680337319719",
+          "closed_candle_at": 1792566900,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792568405,
+          "quote_volume": "4861451.35"
+        }
+      }
+    },
+    {
+      "run_id": "39564665540",
+      "started_at_utc": "2026-10-21T07:49:47.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792569009,
+          "quote_volume": "515428.04"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792569009,
+          "quote_volume": "4325922.8"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792568995,
+          "spread_pct": "0.6531881804043545878693623639"
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792568987
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792568993,
+          "imbalance": "0.4884272815928931003088381912"
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792568987
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792569008,
+          "imbalance": "0.6612276472835735703373455214"
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792569009,
+          "quote_volume": "4860896.96"
+        }
+      }
+    },
+    {
+      "run_id": "39565864221",
+      "started_at_utc": "2026-10-21T07:59:46.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792569606,
+          "quote_volume": "516438.29"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792569606,
+          "quote_volume": "4325922.8"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792569593,
+          "imbalance": "0.1937013732928688536966628142"
+        },
+        "ATH_TL": {
+          "stage": "discovery",
+          "reason": "volume not expanding",
+          "observed_at": 1792569623,
+          "score": 59,
+          "rsi": "50.56687768195539",
+          "return_3": "0",
+          "volume_ratio": "0.0",
+          "atr_pct": "0.3253129683178122712594187298",
+          "macd_histogram": "0.0000622884723079707",
+          "closed_candle_at": 1792568700,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 5,
+            "1h": 0,
+            "4h": 0
+          }
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792569593,
+          "imbalance": "0.5044352711602229825630830173"
+        },
+        "DYM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792569604,
+          "spread_pct": "1.136363636363636363636363636"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "15m momentum not constructive",
+          "observed_at": 1792569625,
+          "score": 41,
+          "rsi": "48.72608168413077",
+          "return_3": "0.364889519562132576525440900",
+          "volume_ratio": "0.3310271159484629",
+          "atr_pct": "1.021504275521694203191274490",
+          "macd_histogram": "-0.000828856512740534",
+          "closed_candle_at": 1792568700,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "ONDO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792569593,
+          "imbalance": "0.4859564871173815663782743232"
+        }
+      }
+    },
+    {
+      "run_id": "39567112588",
+      "started_at_utc": "2026-10-21T08:09:43.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792570198,
+          "quote_volume": "518349.75"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792570198,
+          "quote_volume": "4325640.12"
+        },
+        "GRASS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792570183
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792570183
+        },
+        "W_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792570183
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792570183
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792570197,
+          "imbalance": "0.5889647070888301092048613464"
+        },
+        "ONDO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792570183
+        }
+      }
+    },
+    {
+      "run_id": "39568353567",
+      "started_at_utc": "2026-10-21T08:19:42.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792570798,
+          "quote_volume": "474765.63"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792570798,
+          "quote_volume": "4469440.67"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792570795,
+          "imbalance": "0.1283063088764200369937675723"
+        },
+        "ATH_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792570796,
+          "imbalance": "0.1167121841505046505953173703"
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792570786,
+          "imbalance": "0.6770965725750152229712197858"
+        },
+        "DYM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792570788,
+          "spread_pct": "1.136363636363636363636363636"
+        },
+        "ALT_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792570798,
+          "imbalance": "0.7919266429683287212540140490"
+        },
+        "ONDO_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792570798,
+          "quote_volume": "4988444.37"
+        }
+      }
+    },
+    {
+      "run_id": "39569604620",
+      "started_at_utc": "2026-10-21T08:29:48.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792571403,
+          "quote_volume": "476750.64"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792571403,
+          "quote_volume": "4469440.67"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792571395,
+          "imbalance": "0.1539892457727592214536941943"
+        },
+        "ATH_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792571393,
+          "spread_pct": "0.6776034236804564907275320970"
+        },
+        "W_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792571388
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792571388
+        },
+        "ALT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792571388
+        },
+        "ONDO_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792571391,
+          "imbalance": "0.7452930968610336245365345089"
+        }
+      }
+    },
+    {
+      "run_id": "39570881585",
+      "started_at_utc": "2026-10-21T08:39:49.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792572008,
+          "quote_volume": "476716.1"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792572008,
+          "quote_volume": "4469159.9"
+        },
+        "GRASS_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792571989
+        },
+        "ATH_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792571989
+        },
+        "W_TL": {
+          "stage": "book",
+          "reason": "imbalance_too_low",
+          "observed_at": 1792571992,
+          "imbalance": "0.3823781680304028540591980165"
+        },
+        "DYM_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792572004,
+          "spread_pct": "1.136363636363636363636363636"
+        },
+        "ALT_TL": {
+          "stage": "discovery",
+          "reason": "RSI outside watch range",
+          "observed_at": 1792572024,
+          "score": 37,
+          "rsi": "43.580228925873",
+          "return_3": "-1.488035391112004826060727930",
+          "volume_ratio": "1.1677854017985907",
+          "atr_pct": "0.9912602253325557256582976118",
+          "macd_histogram": "-0.0011751087328479297",
+          "closed_candle_at": 1792570500,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 0,
+            "1h": 1,
+            "4h": 0
+          }
+        },
+        "ONDO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792571989
+        }
+      }
+    },
+    {
+      "run_id": "39572138807",
+      "started_at_utc": "2026-10-21T08:49:50.000Z",
+      "btc_ok": true,
+      "symbols": {
+        "MASK_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792572611,
+          "quote_volume": "478642.95"
+        },
+        "LIT_TL": {
+          "stage": "universe",
+          "reason": "quote_volume_below_minimum",
+          "observed_at": 1792572611,
+          "quote_volume": "4557353.69"
+        },
+        "GRASS_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792572608,
+          "spread_pct": "0.5026704366949418787307571473"
+        },
+        "ATH_TL": {
+          "stage": "book",
+          "reason": "spread_too_high",
+          "observed_at": 1792572610,
+          "spread_pct": "1.171043293115684882895670688"
+        },
+        "W_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792572590
+        },
+        "DYM_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792572590
+        },
+        "ALT_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792572590
+        },
+        "ONDO_TL": {
+          "stage": "coverage",
+          "reason": "not_evaluated_capacity",
+          "observed_at": 1792572590
+        }
+      }
+    }
+  ],
+  "qualified_controls": [
+    {
+      "symbol": "ALT_TL",
+      "run_id": "39169946881",
+      "state_commit": "0ee2c12f7bc57d8a6d2b740094bf279777b505a1",
+      "quote_volume_tl": "102006872.6803",
+      "score": 89,
+      "ready_delivered": true
+    },
+    {
+      "symbol": "ONDO_TL",
+      "run_id": "39605507651",
+      "state_commit": "339e44104179981593c195bb00e2c5b1173f5fc9",
+      "quote_volume_tl": "5122805.33",
+      "score": 89,
+      "ready_delivered": true,
+      "shadow_entry_fill_unproven": true
+    },
+    {
+      "symbol": "ETHFI_TL",
+      "run_id": "39367858155",
+      "state_commit": "b4f99557ad8effee704d85b69de5c526adc8b960",
+      "quote_volume_tl": "84189114.49",
+      "score": 81,
+      "ready_delivered": true
+    }
+  ],
+  "derived": {
+    "mask_below_volume_threshold_in_all_but_last_cycle": true,
+    "first_qualifying_ticker_observation": "2026-10-22T10:41:46Z",
+    "last_cycle_post_volume_gate": "book:spread_too_high",
+    "last_cycle_observed_spread_pct": "0.9666080843585237258347978910",
+    "spread_threshold_default_pct": "0.40",
+    "mask_exact_orderbook_pre_volume_threshold": "not measured in stored screening diagnostics",
+    "mask_technical_readiness_before_volume_gate": "not measured in stored screening diagnostics",
+    "classification": "sequential correct gate rejections (liquidity then spread); no proven missed eligible READY",
+    "threshold_change": "NOT AUTHORIZED/NOT RECOMMENDED on current evidence",
+    "limits": "Historical raw order books and authentic closed OHLCV for rejected MASK not retained; screenshot alone cannot reconstruct complete READY eligibility. Counterfactual requires original timestamped records."
+  }
+}
