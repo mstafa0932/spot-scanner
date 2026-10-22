@@ -140,3 +140,33 @@ def test_retry_window_expiry_archives_incomplete(tmp_path, monkeypatch):
                                   archive_path=archive, output=lambda _: None)
     assert record["processed"] is True
     assert json.loads(archive.read_text().strip())["outcome"] == "incomplete_data"
+
+
+def test_durable_archive_reconciles_before_retry_backoff(tmp_path):
+    # Simulate an archive fsync followed by a crash before state persistence.
+    record = event()
+    record["measurement_attempts"] = 1
+    record["next_measurement_attempt_at"] = NOW + 3600
+    state = {"near_miss_queue": {"MASK_TL": record}}
+    archive = tmp_path / "archive.jsonl"
+    archive.write_text(json.dumps({
+        "event_id": record["event_id"],
+        "outcome": "incomplete_data",
+        "incomplete_reason_code": "http_429",
+    }) + "\n", encoding="utf-8")
+    requested = []
+
+    def unexpected_fetch(*args):
+        requested.append(args)
+        raise AssertionError("Archived event must not be fetched again")
+
+    assert research.process_state(
+        state, now=NOW, fetcher=unexpected_fetch,
+        archive_path=archive, output=lambda _: None,
+    )
+    assert record["processed"] is True
+    assert record["processed_at"] == NOW
+    assert "measurement_attempts" not in record
+    assert "next_measurement_attempt_at" not in record
+    assert requested == []
+    assert len(archive.read_text(encoding="utf-8").splitlines()) == 1
