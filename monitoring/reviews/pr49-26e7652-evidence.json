@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "scope": "PR49 only",
+  "observed_at_utc": "2026-10-22T03:31:31.897Z",
+  "repository": "mstafa0932/spot-scanner",
+  "pr": 49,
+  "original_head": "02f7fc57b0d121cebcdc71ca80faea72a9286e18",
+  "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+  "base_reference": "cbc089186a1dd165d2bf2affcfee04d322f9befd",
+  "pr_base_snapshot": "11c535d93102be6844593411e080fd2c63927a37",
+  "tree": "b16d4469e75f101f84f59264eaed9b71820b5ff5",
+  "scanner_blob": "5e55deeae9bb077fe1e8d0ca63414f739321410e",
+  "files_changed": [
+    "scanner.py",
+    "tests/test_confirmation_lifecycle_audit.py"
+  ],
+  "reproduced_defect": {
+    "kind": "audit_label_only",
+    "before": {
+      "failed": 1,
+      "passed": 65
+    },
+    "observations": 2,
+    "average_imbalance": "1.05",
+    "unchanged_min_average_imbalance": "1.06",
+    "actual_ready_branch": "existing_explosive_exception",
+    "wrong_mode": "closed_candle_persistence",
+    "regression": "tests/test_confirmation_lifecycle_audit.py::test_explosive_confirmation_with_two_observations_records_actual_path",
+    "fix": "Use the unchanged existing explosive predicate solely to label the audit event; do not infer the branch from observation count."
+  },
+  "local": {
+    "security": {
+      "bandit_version": "1.9.4",
+      "new_findings": 0,
+      "baseline_findings": 2,
+      "current_findings": 2,
+      "findings": [
+        {
+          "id": "B105",
+          "severity": "LOW",
+          "line": 63,
+          "issue": "Possible hardcoded password: 'TELEGRAM_BOT_TOKEN'"
+        },
+        {
+          "id": "B112",
+          "severity": "LOW",
+          "line": 1050,
+          "issue": "Try, Except, Continue detected."
+        }
+      ],
+      "exit_code": 1,
+      "independent_approval": false
+    },
+    "probes": {
+      "scope": "PR49 only; source review plus offline probes, not independent approval",
+      "baseline_main": "cbc089186a1dd165d2bf2affcfee04d322f9befd",
+      "checks": {
+        "entire_scanner_AST_identical_except_declared_audit_changes": true,
+        "audit_predicate_matches_existing_explosive_exception": true,
+        "legacy_state_without_new_fields_roundtrips_unchanged": true,
+        "new_state_and_metadata_roundtrip": true,
+        "TTL_exact_boundary_preserved": true,
+        "TTL_expires_once_after_boundary_and_preserves_audit": true,
+        "watchlist_anchor_preserved": true,
+        "early_watch_followups_anchor_preserved": true,
+        "future_timestamp_not_expired": true,
+        "unknown_timestamp_not_expired": true,
+        "new_confirmed_label_does_not_change_scheduling_priority": true
+      },
+      "passed": 11,
+      "network_blocked": true,
+      "live_scanner_executed": false
+    },
+    "local_suite": {
+      "tests": 353,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": "20.763",
+      "network_blocked": true
+    }
+  },
+  "ci": {
+    "run_id": 39716978157,
+    "head_sha": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+    "conclusion": "success",
+    "event": "pull_request",
+    "tested_merge_parent_main": "cbc089186a1dd165d2bf2affcfee04d322f9befd",
+    "tested_merge_preview_prefix": "314c91a",
+    "jobs": [
+      {
+        "id": 119621319672,
+        "name": "tests (3.10)",
+        "conclusion": "success",
+        "evidence": [
+          "2026-10-22T03:28:04.7579649Z ##[group]Checking out the ref",
+          "2026-10-22T03:28:04.7928846Z HEAD is now at 314c91a Merge 26e765239ef3a445565ce3291c0a28fa7bcff683 into cbc089186a1dd165d2bf2affcfee04d322f9befd",
+          "2026-10-22T03:28:04.7991052Z [command]/usr/bin/git log -1 --format=%H",
+          "2026-10-22T03:28:35.0188799Z 353 passed in 11.86s"
+        ]
+      },
+      {
+        "id": 119621319428,
+        "name": "tests (3.12)",
+        "conclusion": "success",
+        "evidence": [
+          "2026-10-22T03:28:04.3124047Z ##[group]Checking out the ref",
+          "2026-10-22T03:28:04.3386562Z HEAD is now at 314c91a Merge 26e765239ef3a445565ce3291c0a28fa7bcff683 into cbc089186a1dd165d2bf2affcfee04d322f9befd",
+          "2026-10-22T03:28:04.3434738Z [command]/usr/bin/git log -1 --format=%H",
+          "2026-10-22T03:28:25.5066810Z 353 passed in 5.38s"
+        ]
+      }
+    ]
+  },
+  "mergeability": {
+    "first_observation": {
+      "head": "02f7fc57b0d121cebcdc71ca80faea72a9286e18",
+      "base": "11c535d93102be6844593411e080fd2c63927a37",
+      "mergeable": null,
+      "mergeable_state": "unknown"
+    },
+    "second_observation_same_head_and_base": {
+      "mergeable": true,
+      "mergeable_state": "clean"
+    },
+    "latest_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+    "latest_mergeable": true,
+    "latest_mergeable_state": "clean",
+    "non_mutating_merge_tree": "9c528ff6f0260f1d4aa777eb337147cd923806ac",
+    "main_state_blobs_preserved": true,
+    "historical_false_root_cause": "Previous normalized false alone does not prove conflict. This session directly observed null/unknown -> true/clean with no head/base change. Transient computation is supported; the exact old normalization/cause cannot be conclusively reconstructed without its raw response."
+  },
+  "review_independence": {
+    "kind": "implementer_source_review_plus_automated_tests_and_static_security",
+    "independent_review_performed": false,
+    "github_reviews": 0,
+    "independent_approval": false
+  },
+  "safety": {
+    "shadow_mode": true,
+    "live_scanner_executed": false,
+    "test_telegram_sent": false,
+    "real_trades": false,
+    "production_state_or_config_changed": false,
+    "strategy_changed": false,
+    "scheduler_or_capacity_changed": false,
+    "targets_or_stops_changed": false,
+    "merged": false,
+    "deployed": false
+  },
+  "decision": "Keep PR49 open/unmerged. Technical validation passes; independent exact-head review and explicit user merge/deploy approval remain required. Stop this PR49-only session."
+}
