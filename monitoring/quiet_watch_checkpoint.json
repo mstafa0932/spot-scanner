@@ -37,41 +37,41 @@
     "controller_status_observed": "in_progress",
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
-    "controller_status_checked_at_utc": "2026-10-22T02:35:50Z",
-    "latest_persisted_state_commit": "16bdc3e06942932985d73880e3b14a045728575c",
-    "latest_persisted_state_blob": "f16a43b3578106b0d200a89c6841717b19f2735f",
-    "latest_persisted_state_bytes": 3231140,
+    "controller_status_checked_at_utc": "2026-10-22T03:01:45Z",
+    "latest_persisted_state_commit": "298c93b7d8275cbec141617abc93ac5019ddcb9c",
+    "latest_persisted_state_blob": "7cb6d84a4c47a006c61709e129ae0efba76b0f95",
+    "latest_persisted_state_bytes": 3220643,
     "last_controller_completion_expected_end_of_window": true,
     "last_controller_completion_note": "Cadence Controller 39644287905 and successor 39679278489 completed successfully; current existing controller 39706052377 remains in progress within its intended window. Monitoring created no scanner, controller, schedule, or resource."
   },
   "last_verified_production_run": {
-    "run_id": 39711748253,
-    "job_id": 119604450708,
-    "head_sha": "210df86742efc5c023bdc8d1abfaf42174f2af13",
-    "refreshed_main_sha": "210df86742efc5c023bdc8d1abfaf42174f2af13",
+    "run_id": 39714465266,
+    "job_id": 119613168022,
+    "head_sha": "820fa3e4ce749fb5b74f52ea467d607946985059",
+    "refreshed_main_sha": "820fa3e4ce749fb5b74f52ea467d607946985059",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "16bdc3e06942932985d73880e3b14a045728575c",
+    "resulting_state_commit": "298c93b7d8275cbec141617abc93ac5019ddcb9c",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-22T02:31:50Z",
+    "finished_at_utc": "2026-10-22T03:01:36Z",
     "infra": {
-      "run_id": "39711748253",
-      "started_at": 1792636226,
-      "finished_at": 1792636308,
+      "run_id": "39714465266",
+      "started_at": 1792638061,
+      "finished_at": 1792638093,
       "btc_ok": false,
-      "btc_reason": "ema21_15m_bearish",
-      "candles_complete": 31,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 27,
       "candles_synthetic": 0,
       "candles_error": 0,
       "cadence_expected_seconds": 600,
       "cadence_late_after_seconds": 1200,
-      "cadence_gap_seconds": 593,
+      "cadence_gap_seconds": 589,
       "cadence_status": "ok",
       "funnel": {
-        "book_approved": 31,
-        "data_valid": 31,
+        "book_approved": 27,
+        "data_valid": 27,
         "discovery_passed": 0,
         "early_watch": 0,
         "early_watch_alerts": 0,
@@ -80,27 +80,28 @@
         "limit_simulated": 0,
         "universe": 235,
         "orderbooks_attempted": 80,
-        "technicals_attempted": 31,
-        "universe_excluded": 94
+        "technicals_attempted": 27,
+        "universe_excluded": 95
       },
       "stage_drops": {
         "book:imbalance_too_low": 28,
-        "book:spread_too_high": 21,
-        "coverage:not_evaluated_capacity": 61,
-        "discovery:15m momentum not constructive": 1,
-        "discovery:RSI outside watch range": 30,
+        "book:spread_too_high": 25,
+        "coverage:not_evaluated_capacity": 60,
+        "discovery:15m momentum not constructive": 2,
+        "discovery:ATR outside range": 1,
+        "discovery:RSI outside watch range": 24,
         "universe:excluded_base_asset": 3,
-        "universe:quote_volume_below_minimum": 91
+        "universe:quote_volume_below_minimum": 92
       }
     },
-    "evidence": "scanner_state.json blob f16a43b3578106b0d200a89c6841717b19f2735f; valid 3231140-byte JSON. Latest run refreshed main 210df86742efc5c023bdc8d1abfaf42174f2af13, SHADOW true, native /v1/chart/ohlc, cadence 593s, zero synthetic/errors; BTC gate blocked progression and no candidate, signal, or eligible alert occurred; persistence succeeded."
+    "evidence": "scanner_state.json blob 7cb6d84a4c47a006c61709e129ae0efba76b0f95; valid 3220643-byte JSON. Latest run refreshed main 820fa3e4ce749fb5b74f52ea467d607946985059, SHADOW true, native /v1/chart/ohlc, cadence589s, zero synthetic/errors; BTC gate blocked progression and no candidate, confirmation, signal, or eligible alert occurred; persistence succeeded."
   },
   "latest_loaded_state": {
-    "commit_sha": "16bdc3e06942932985d73880e3b14a045728575c",
-    "blob_sha": "f16a43b3578106b0d200a89c6841717b19f2735f",
-    "bytes": 3231140,
+    "commit_sha": "298c93b7d8275cbec141617abc93ac5019ddcb9c",
+    "blob_sha": "7cb6d84a4c47a006c61709e129ae0efba76b0f95",
+    "bytes": 3220643,
     "json_valid": true,
-    "observed_at_utc": "2026-10-22T02:35:50Z",
+    "observed_at_utc": "2026-10-22T03:01:45Z",
     "runs": [
       {
         "run_id": "39694896395",
@@ -551,12 +552,87 @@
           "universe_excluded": 94
         },
         "seconds_since_previous_run": 593
+      },
+      {
+        "run_id": "39712673782",
+        "code_sha": "16bdc3e06942932985d73880e3b14a045728575c",
+        "status": "completed",
+        "started_at": 1792636860,
+        "finished_at": 1792636897,
+        "shadow_mode": true,
+        "btc_ok": false,
+        "btc_reason": "BTC 15m below EMA21 -1.26%",
+        "funnel": {
+          "book_approved": 25,
+          "data_valid": 25,
+          "discovery_passed": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 25,
+          "universe_excluded": 95
+        },
+        "seconds_since_previous_run": 597
+      },
+      {
+        "run_id": "39713568061",
+        "code_sha": "e34011a52e4a88e5fbe25065497877b0096676e5",
+        "status": "completed",
+        "started_at": 1792637472,
+        "finished_at": 1792637511,
+        "shadow_mode": true,
+        "btc_ok": false,
+        "btc_reason": "BTC 15m below EMA21 -1.17%",
+        "funnel": {
+          "book_approved": 24,
+          "data_valid": 24,
+          "discovery_passed": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 24,
+          "universe_excluded": 95
+        },
+        "seconds_since_previous_run": 612
+      },
+      {
+        "run_id": "39714465266",
+        "code_sha": "820fa3e4ce749fb5b74f52ea467d607946985059",
+        "status": "completed",
+        "started_at": 1792638061,
+        "finished_at": 1792638093,
+        "shadow_mode": true,
+        "btc_ok": false,
+        "btc_reason": "BTC confirmed weakness RSI=20.3 | 3C=-0.46%",
+        "funnel": {
+          "book_approved": 27,
+          "data_valid": 27,
+          "discovery_passed": 0,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 27,
+          "universe_excluded": 95
+        },
+        "seconds_since_previous_run": 589
       }
     ],
     "older_detail_retained_in_git_history": true,
-    "commit": "16bdc3e06942932985d73880e3b14a045728575c",
-    "blob": "f16a43b3578106b0d200a89c6841717b19f2735f",
-    "loaded_at_utc": "2026-10-22T02:35:50Z",
+    "commit": "298c93b7d8275cbec141617abc93ac5019ddcb9c",
+    "blob": "7cb6d84a4c47a006c61709e129ae0efba76b0f95",
+    "loaded_at_utc": "2026-10-22T03:01:45Z",
     "valid_json": true
   },
   "fixes": {
@@ -1112,7 +1188,7 @@
   ],
   "readiness": {
     "accepted": false,
-    "post_material_fix_verified_production_cycles": 472,
+    "post_material_fix_verified_production_cycles": 475,
     "required_consecutive_cycles": 24,
     "qualified_ready_delivery_verified_after_fix": true,
     "stable_executable_and_settings_since_merge": true,
@@ -1123,16 +1199,16 @@
     ],
     "acceptance_code_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
     "previous_30_cycle_window": "Historical source validation before PR47; not transferred as acceptance after another material code change.",
-    "cycle_count_basis": "472 consecutive actual post-PR48 production cycles through39711748253. Six new cycles completed SHADOW with persisted valid state and native /v1/chart/ohlc; cadence591-622s and zero synthetic. One bounded OM_TL candle-unavailable error failed closed and recovered next cycle. BTC gates safely blocked five cycles. No confirmation, eligible delivery, generic EARLY WATCH delivery, production-setting change, live execution, profitability, or new critical defect was established.",
+    "cycle_count_basis": "475 consecutive actual post-PR48 production cycles through39714465266. Three new cycles completed SHADOW with persisted valid state and native /v1/chart/ohlc; cadence589-612s and zero synthetic/errors. BTC gates safely blocked all three cycles. No candidate, confirmation, eligible delivery, generic EARLY WATCH delivery, production-setting change, live execution, profitability, or new critical defect was established.",
     "previous_32_cycle_window": "Historical post-PR46 integrity evidence retained in POST_PR45_AUDIT_20261018.md; acceptance reset at PR48.",
     "blockers": [
       "SOL_TL organically exercised NEAR READY then READY with separate accepted message IDs and no observed duplicate, proving the normal transition path. Retry/failure and concurrent-delivery loss or duplication branches remain unexhausted.",
       "SOL_TL completed the six-hour SHADOW horizon as EXPIRED after only an OHLC-model estimated fill; no target or stop event, exchange-confirmed execution, realized gain/loss, live execution, or profitability is established.",
       "PR #49 corrects the proven confirmation audit-label mismatch only and remains open/unmerged; independent final review and explicit user merge approval are still required."
     ],
-    "consecutive_count_lower_bound_from_previous_checkpoint": 472,
-    "previous_count_verified_through_run": 39711748253,
-    "latest_separate_health_run": 39711748253,
+    "consecutive_count_lower_bound_from_previous_checkpoint": 475,
+    "previous_count_verified_through_run": 39714465266,
+    "latest_separate_health_run": 39714465266,
     "executable_and_settings_unchanged_since": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0"
   },
   "known_access_caveats": [
@@ -2523,6 +2599,19 @@
       "latest_state_commit": "16bdc3e06942932985d73880e3b14a045728575c",
       "latest_state_blob": "f16a43b3578106b0d200a89c6841717b19f2735f",
       "result": "Six new existing-controller cycles completed; SHADOW true; cadence591-622s; latest Refresh/main210df867; native closed Paribu /v1/chart/ohlc, zero synthetic, scanner success, and valid JSON persistence. One bounded OM_TL canonical-history shortage failed closed in run39709901168 and the next cycle recovered to zero candle errors. BTC gates safely blocked five cycles. No confirmation, eligible Telegram alert, generic EARLY WATCH delivery, signal, duplicate READY, production/config change, or new critical defect was established. PR49 remains open/unmerged at unchanged head with no GitHub review approval."
+    },
+    {
+      "observed_at_utc": "2026-10-22T03:01:45Z",
+      "kind": "production_cycle_batch_verified",
+      "run_ids": [
+        39712673782,
+        39713568061,
+        39714465266
+      ],
+      "latest_run": 39714465266,
+      "latest_state_commit": "298c93b7d8275cbec141617abc93ac5019ddcb9c",
+      "latest_state_blob": "7cb6d84a4c47a006c61709e129ae0efba76b0f95",
+      "result": "Three new existing-controller cycles completed; SHADOW true; cadence589-612s; latest Refresh/main820fa3e; native closed Paribu /v1/chart/ohlc, zero synthetic/errors, scanner success, and valid JSON persistence. BTC gates safely blocked all three cycles. No candidate, confirmation, eligible Telegram alert, generic EARLY WATCH delivery, signal, duplicate READY, production/config change, or new critical defect was established. PR49 remains open/unmerged at unchanged head with no GitHub review approval."
     }
   ],
   "scheduler_confirmation": {
@@ -2540,7 +2629,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-22T02:35:50Z",
+  "last_check_utc": "2026-10-22T03:01:45Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -2806,10 +2895,13 @@
     39708941154,
     39709901168,
     39710836094,
-    39711748253
+    39711748253,
+    39712673782,
+    39713568061,
+    39714465266
   ],
-  "current_priority": "Continue quiet stability monitoring after 39711748253. Keep PR49 head02f7fc57 unmerged; independent final review and explicit user merge approval remain pending. Inspect only new cycles for native closed Paribu data, cadence/state persistence, eligible NEAR READY/READY delivery integrity and duplicates. Do not change strategy, settings, capacity, fill model, or production resources.",
-  "last_security_gate_check_utc": "2026-10-22T02:35:50Z",
+  "current_priority": "Continue quiet stability monitoring after39714465266. Keep PR49 head02f7fc57 unmerged; independent final review and explicit user merge approval remain pending. Inspect only new cycles for native closed Paribu data, cadence/state persistence, eligible NEAR READY/READY delivery integrity and duplicates. Do not change strategy, settings, capacity, fill model, or production resources.",
+  "last_security_gate_check_utc": "2026-10-22T03:01:45Z",
   "notification_fingerprints": [
     "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
     "important_fix:pr47_zero_volume_and_pr46_expiry_deployed_runtime_verified",
