@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-22T11:39:00.630Z",
+  "display_timezone": "Europe/Istanbul",
+  "repository": "mstafa0932/spot-scanner",
+  "pr": 49,
+  "reviewed_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+  "decision": "BLOCKED_REVIEW_ENVIRONMENT_CREATION_APPROVAL_AND_VERIFIED_FREE_HEADLESS_AUTH",
+  "pr_snapshot": {
+    "state": "open",
+    "merged": false,
+    "head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+    "github_mergeability_base": "11c535d93102be6844593411e080fd2c63927a37",
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "files": [
+      {
+        "path": "scanner.py",
+        "sha": "5e55deeae9bb077fe1e8d0ca63414f739321410e"
+      },
+      {
+        "path": "tests/test_confirmation_lifecycle_audit.py",
+        "sha": "514586ecc4cfe978ffb1bf7fcde664ddfea8dbe8"
+      }
+    ]
+  },
+  "validation_retained": {
+    "ci_run": 39716978157,
+    "ci_status": "completed",
+    "ci_conclusion": "success",
+    "ci_head": "26e765239ef3a445565ce3291c0a28fa7bcff683",
+    "tests_per_python": 353,
+    "python_versions": [
+      "3.10",
+      "3.12"
+    ],
+    "tests_rerun": false,
+    "bandit": "Previously documented: zero new findings versus baseline, two pre-existing LOW; not rerun",
+    "observed_main": "295d4648f15ff2e92612a81a25cd4457f8049a0d",
+    "main_since_last_verified_compatible_sha": "a71c00adc6b037d193cd70a197ad1302e06c720b",
+    "net_changed_files": [
+      "near_misses_archive.jsonl",
+      "scanner_state.json"
+    ],
+    "production_source_dependency_workflow_or_test_changes_observed": false,
+    "compatibility": "GitHub returned true/clean for returned PR base; newer main snapshot differs only in scanner_state.json and near_misses_archive.json. No new code test obligation inferred; final moving-head merge check remains required.",
+    "production_state_or_archive_content_submitted": false
+  },
+  "prior_isolation_failure_retained": {
+    "enforced": false,
+    "bubblewrap_all_namespaces": "Failed to create NETLINK_ROUTE socket: Operation not permitted",
+    "user_namespace": "setting up uid map / writing /proc/self/uid_map: Operation not permitted",
+    "mount_pid_namespace_attempt": "Creating new namespace failed: Operation not permitted",
+    "landlock": {
+      "available": false,
+      "errno": 38,
+      "error": "Function not implemented"
+    },
+    "linux_capabilities": {
+      "permitted": "0000000000000000",
+      "effective": "0000000000000000",
+      "bounding": "0000000000000000",
+      "no_new_privs": 1
+    },
+    "alternative_runtimes": {
+      "docker": false,
+      "podman": false,
+      "proot": false,
+      "runsc": false,
+      "nsjail": false,
+      "firejail": false,
+      "qemu": false
+    },
+    "weaker_fallback_used": false
+  },
+  "one_candidate": {
+    "provider": "GitHub-hosted Actions",
+    "placement": "A separate disposable PUBLIC review repository, name proposed only: mstafa0932/pr49-coderabbit-review-20261022",
+    "runner": "ubuntu-24.04 standard full VM; not ubuntu-slim, larger, self-hosted or production",
+    "creation_approved": false,
+    "created": false,
+    "cost_of_standard_runner_in_public_repository": "$0 per official GitHub docs; no paid storage/artifacts, larger runner or paid add-on proposed",
+    "workflow": "One manually dispatched job, no cron or bot scanner, permissions: {}, no checkout credential persistence, no GitHub App, PAT, OIDC, production credentials or repository write token exposed to vendor",
+    "sandbox": "Proposed separate PID/mount/network namespaces inside disposable VM; non-root container, read-only root/source, dropped capabilities, no-new-privileges, no host network/PID/home/proc/docker-socket mount; temporary scratch only",
+    "egress": "Proposed internal bridge + trusted proxy-only path + explicit host INPUT and DOCKER-USER rules, IPv4/IPv6/DNS/private-host/metadata denials; internal network alone is insufficient",
+    "runtime_isolation_proven": false,
+    "required_preflight": "Without bot source or service credentials first: prove read/write/process boundaries and direct/proxy/private-host/metadata/IPv6/DNS denial with controlled probes. Fail closed on any unresolved bypass. Do not label the uncreated candidate validated."
+  },
+  "auth": {
+    "official_method": "Headless CLI requires organization-scoped Agentic API key and assigned seat; browser alternative requires localhost callback. User API keys unsupported.",
+    "free_cli_documented": true,
+    "free_cli_per_hour_documented": 3,
+    "account_or_organization_inspected": false,
+    "existing_key_available_verified": false,
+    "free_assigned_seat_agentic_key_eligibility_verified": false,
+    "paid_key_requirement_proven": false,
+    "cost_guard": "No paid org/seat/credits/subscription or --use-credits. Verify assigned seat, free allowance and disabled usage-based billing before login/review. Docs warn auto-assigned seats on some paid plans may incur charges; do not test login to discover billing.",
+    "account_creation_or_service_linking_approved": false
+  },
+  "package": {
+    "previous_release_metadata_signature_verified": true,
+    "previous_release": "0.9.1",
+    "expected_archive_sha256": "9558e02f1b6570ade33d8191b33e10ffae2472ab2680d4518d03261bcebc80bc",
+    "binary_downloaded": false,
+    "binary_executed": false,
+    "actual_help_checked": false,
+    "required": "Verify official signed manifest, complete archive digest and actual --version/--help within successfully tested sandbox before login/review. Do not execute installer doctor outside it."
+  },
+  "data_scope": {
+    "intended": "Only the PR49 diff and exact necessary context from scanner.py plus tests/test_confirmation_lifecycle_audit.py at pinned head and required base; canonical file hashes and line mappings. Sanitized local snapshot git IDs, if needed, must not be represented as canonical repository commits.",
+    "excluded": [
+      ".env and credential files",
+      "production secrets and Telegram config",
+      "scanner_state.json and bot state",
+      "near_misses_archive.jsonl",
+      "production logs",
+      "unnecessary git author/email or personal metadata",
+      "unrelated repository files"
+    ],
+    "bundle_created": false,
+    "actual_payload_verified": false,
+    "source_transmitted": false,
+    "required_gate": "Inspect/quarantine actual outgoing payload before any source leaves. Confirm allowlisted content/paths, not only --committed. TLS inspection must retain certificate validation; opaque/pinned/application-encrypted payload or unexplained traffic causes stop, not a weaker fallback."
+  },
+  "independent_review": {
+    "cli_executed": false,
+    "vendor_report_received": false,
+    "findings_available": false,
+    "github_reviews_count": 0,
+    "github_approved": false,
+    "human_approval": false,
+    "formal_gate_complete": false,
+    "classification": "A future CodeRabbit output is external AI review evidence, not human or GitHub APPROVED."
+  },
+  "execution_safety": {
+    "new_repository_created": false,
+    "new_workflow_created": false,
+    "new_runner_or_vm_created": false,
+    "new_account_created": false,
+    "code_modified": false,
+    "production_state_modified": false,
+    "shadow_mode_changed": false,
+    "live_scanner_run": false,
+    "telegram_sent": false,
+    "trade": false,
+    "merged": false,
+    "deployed": false,
+    "cost_usd": 0
+  },
+  "tool_limit": "Current GitHub connector exposes no create-repository, dispatch-workflow or secret-management tool. Creating the separate repository requires the user or explicit permission for GitHub UI fallback; no fallback attempted.",
+  "next_action": "Obtain explicit permission to create the proposed disposable public review repository and manual preflight job outside production (including GitHub UI fallback if required). Confirm eligible free CodeRabbit Agentic authentication without billable seat assignment. Then test the sandbox without source/credentials; proceed to source only if every gate passes. No merge or production action."
+}
