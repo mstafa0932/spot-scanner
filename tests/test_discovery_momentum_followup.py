@@ -92,3 +92,59 @@ def test_no_followup_for_ineligible_rejects(
     assert state["scan_diagnostics"][-1]["symbols"][ticker.symbol]["reason"] == reason
     assert not state["scan_diagnostics"][-1]["signal_recorded"]
     assert not state["scan_diagnostics"][-1]["alert_sent"]
+
+
+def test_priority_followup_reserves_capacity_only_for_distinct_closed_bar(monkeypatch):
+    """Qualified internal follow-ups do not exceed the existing fair quota."""
+    from types import SimpleNamespace as NS
+
+    target = "BONK_TL"
+    tickers = [
+        NS(symbol=f"M{i:02}_TL", last=D("100"), quote_volume=D("10000000"))
+        for i in range(40)
+    ]
+    tickers.append(
+        NS(symbol=target, last=D("100"), quote_volume=D("10000000"))
+    )
+    state = {
+        "coverage_scheduler": {},
+        "early_watch_followups": {
+            target: {
+                "symbol": target,
+                "first_seen": NOW,
+                "last_seen": NOW,
+                "last_candle_at": (NOW // 900 - 1) * 900,
+                "last_score": 87,
+                "last_reason": "15m momentum not constructive",
+            },
+        },
+    }
+    monkeypatch.setattr(scanner, "MAX_ORDERBOOK_MARKETS", 20)
+    market_names = {ticker.symbol for ticker in tickers}
+
+    def selected(at):
+        coverage = scanner.CoverageCycle(
+            state["coverage_scheduler"], market_names
+        )
+        return scanner._hot_radar_order(tickers, state, coverage, at)
+
+    # One new closed 15m bar is now available; the follow-up takes one
+    # priority slot and normal fair coverage remains intact.
+    at = NOW + 900
+    ordered, radar = selected(at)
+    assert radar["early_watch_symbols"] == [target]
+    assert ordered[0].symbol == target
+    assert target in radar["selected_priority_symbols"]
+    assert len(radar["selected_priority_symbols"]) <= 10
+    assert sum(item.symbol != target for item in ordered[:20]) >= 19
+
+    # After the scanner has actually rechecked that closed bar, the stored
+    # identity prevents priority for a duplicate observation five minutes later.
+    scanner._record_early_watch_followup(
+        state, symbol=target, now=at,
+        candle_at=(at // 900 - 1) * 900,
+        score=85, reason="15m momentum not constructive",
+    )
+    _ordered, radar = selected(at + 300)
+    assert target not in radar["early_watch_symbols"]
+    assert target not in radar["selected_priority_symbols"]
