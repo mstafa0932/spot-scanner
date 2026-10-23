@@ -1217,6 +1217,28 @@ def _retain_risk_rejection_followup(
     return True
 
 
+def _preserve_risk_followup_during_rsi_overheat(
+    state: dict[str, Any], symbol: str, rsi: Decimal, reason: str, now: int,
+) -> bool:
+    """Keep a prior risk-blocked candidate under the existing fixed TTL.
+
+    This does not waive RSI: the coin remains ineligible for discovery/READY
+    while RSI is outside the original range, but can receive a fresh recheck.
+    """
+    if reason != "RSI outside watch range" or rsi <= WATCH_RSI_HIGH:
+        return False
+    item = _execution_followups(state).get(symbol)
+    if not isinstance(item, dict) or not str(item.get("last_reason", "")).startswith("risk:"):
+        return False
+    try:
+        first_seen = int(item.get("first_seen", 0) or 0)
+        last_seen = int(item.get("last_seen", 0) or 0)
+    except (TypeError, ValueError):
+        return False
+    return (first_seen > 0 and last_seen > 0
+            and 0 <= now - first_seen <= EXECUTION_FOLLOWUP_TTL_SECONDS)
+
+
 def _prune_execution_followups(state: dict[str, Any], now: int) -> None:
     followups = _execution_followups(state)
     for symbol, item in list(followups.items()):
@@ -1969,7 +1991,10 @@ def run_scanner() -> None:
             ticker, book, tech_15, tech_1h, tech_4h, score
         )
         if not ok:
-            _execution_followups(state).pop(ticker.symbol, None)
+            if not _preserve_risk_followup_during_rsi_overheat(
+                state, ticker.symbol, tech_15.rsi14, discovery_reason, now
+            ):
+                _execution_followups(state).pop(ticker.symbol, None)
             note(ticker.symbol, "discovery", discovery_reason, **indicator_metrics)
             if _early_watch_mtf_ok(book, tech_15, score, btc_ok, discovery_reason):
                 funnel["early_watch"] += 1
