@@ -2226,7 +2226,8 @@ def run_scanner() -> None:
                  best_bid=str(candidate.book.best_bid),
                  best_ask=str(candidate.book.best_ask),
                  min_rr=os.getenv("MIN_REWARD_RISK", "1.50"),
-                 max_risk_pct=os.getenv("MAX_STOP_PCT_V2", "4.00"))
+                 max_risk_pct=os.getenv("MAX_STOP_PCT_V2", "4.00"),
+                 risk_audit=risk_result.evidence or {})
             if not _retain_risk_rejection_followup(
                 state, candidate, risk_reason, int(time.time())
             ):
