@@ -14,6 +14,11 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
+# Two 10-minute scanner intervals: beyond this, the next observed run is
+# not proof that a capacity-deferred market was promptly revisited.
+DEFAULT_MAX_NEXT_RUN_GAP_SECONDS = 20 * 60
+
+
 def _snapshot_runs(paths: Iterable[Path]) -> tuple[list[dict[str, Any]], int]:
     seen: dict[str, dict[str, Any]] = {}
     snapshots = 0
@@ -57,8 +62,11 @@ def _numeric_score(value: Any) -> int | None:
 
 
 def analyze_snapshots(
-    paths: Iterable[Path], symbols: Iterable[str] | None = None
+    paths: Iterable[Path], symbols: Iterable[str] | None = None,
+    *, max_next_run_gap_seconds: int = DEFAULT_MAX_NEXT_RUN_GAP_SECONDS,
 ) -> dict[str, Any]:
+    if type(max_next_run_gap_seconds) is not int or max_next_run_gap_seconds <= 0:
+        raise ValueError("max_next_run_gap_seconds must be a positive integer")
     runs, input_count = _snapshot_runs(paths)
     selected = (
         sorted({str(s).strip().upper().replace("/", "_") for s in symbols if str(s).strip()})
@@ -75,6 +83,8 @@ def analyze_snapshots(
         by_stage = Counter(str(d.get("stage") or "unknown") for _, d in decisions)
         by_reason = Counter(str(d.get("reason") or "unknown") for _, d in decisions)
         skipped_then_evaluated = skipped_then_universe = skipped_twice = 0
+        skipped_gap_uncertain = skipped_missing_decision = 0
+        skipped_end_censored = 0
         early_to_late = []
         last_early: tuple[int, int, str] | None = None
         for index, (run, decision) in enumerate(decisions):
@@ -103,7 +113,12 @@ def analyze_snapshots(
             nxt = runs[i + 1]["symbols"].get(symbol)
             if not isinstance(prior, dict) or prior.get("reason") != "not_evaluated_capacity":
                 continue
+            run_gap = runs[i + 1]["started_at"] - runs[i]["started_at"]
+            if not (0 < run_gap <= max_next_run_gap_seconds):
+                skipped_gap_uncertain += 1
+                continue
             if not isinstance(nxt, dict):
+                skipped_missing_decision += 1
                 continue
             if nxt.get("reason") == "not_evaluated_capacity":
                 skipped_twice += 1
@@ -111,6 +126,10 @@ def analyze_snapshots(
                 skipped_then_universe += 1
             else:
                 skipped_then_evaluated += 1
+        if runs:
+            tail = runs[-1]["symbols"].get(symbol)
+            if isinstance(tail, dict) and tail.get("reason") == "not_evaluated_capacity":
+                skipped_end_censored += 1
         scored = [
             (_numeric_score(d.get("score")), run)
             for run, d in decisions
@@ -127,12 +146,16 @@ def analyze_snapshots(
             "capacity_skips_evaluated_next": skipped_then_evaluated,
             "capacity_skips_universe_excluded_next": skipped_then_universe,
             "capacity_skips_repeated_next": skipped_twice,
+            "capacity_skips_gap_uncertain": skipped_gap_uncertain,
+            "capacity_skips_missing_next_decision": skipped_missing_decision,
+            "capacity_skips_end_censored": skipped_end_censored,
             "early_70_79_to_later_rsi_rejection": early_to_late,
         }
     return {
         "mode": "offline_shadow_diagnostics_only",
         "input_snapshots": input_count,
         "distinct_completed_runs": len(runs),
+        "max_next_run_gap_seconds": max_next_run_gap_seconds,
         "first_started_at_utc": (
             datetime.fromtimestamp(runs[0]["started_at"], timezone.utc).isoformat()
             if runs else None
@@ -145,6 +168,7 @@ def analyze_snapshots(
             "Neither high/low excursions nor screenshot rallies prove executed trades",
             "A 70-79 to high-RSI transition is research evidence, not a lost READY",
             "The per-run decisions are bounded by existing API and coverage capacity",
+            "Capacity follow-up is unverified across long cadence gaps, missing decisions, or final snapshot censoring",
             "Historical data may have incomplete/synthetic-candle research measurement bias",
         ],
         "symbols": cases,
@@ -155,8 +179,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("snapshots", nargs="+", type=Path, help="local scanner_state.json snapshots")
     parser.add_argument("--symbols", nargs="*", default=None, help="tickers, e.g. ATH_TL DOT_TL")
+    parser.add_argument(
+        "--max-next-run-gap-seconds", type=int,
+        default=DEFAULT_MAX_NEXT_RUN_GAP_SECONDS,
+        help="maximum start-time gap to count a capacity skip as promptly revisited",
+    )
     args = parser.parse_args()
-    report = analyze_snapshots(args.snapshots, args.symbols)
+    report = analyze_snapshots(
+        args.snapshots, args.symbols,
+        max_next_run_gap_seconds=args.max_next_run_gap_seconds,
+    )
     print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
 
 
