@@ -271,6 +271,11 @@ def _hot_radar_order(
 
     current_markets: dict[str, dict[str, Any]] = {}
     hot_rows: list[tuple[Decimal, Decimal, Decimal, Decimal, Any]] = []
+    # Evidence only: observe markets nearing the UNCHANGED TL liquidity gate.
+    # These are never passed into order-book/technical/READY evaluation.
+    near_liquidity: list[dict[str, Any]] = []
+    new_liquidity_crossings: list[dict[str, Any]] = []
+    near_liquidity_floor = MIN_QUOTE_VOLUME_TL * Decimal("0.80")
     previous_at = previous.get("observed_at")
     comparable = (
         type(previous_at) is int
@@ -293,6 +298,39 @@ def _hot_radar_order(
             "last": str(last),
             "quote_volume": str(quote_volume) if quote_volume is not None else None,
         }
+
+        # Keep below-threshold evidence separately from trading eligibility.
+        if (symbol not in {"USDT_TL", "USDC_TL", "BTC_TL"}
+                and quote_volume is not None and quote_volume > 0):
+            prior_market = previous_markets.get(symbol)
+            prior_quote = (dec(prior_market.get("quote_volume"))
+                           if isinstance(prior_market, dict) else None)
+            prior_price = (dec(prior_market.get("last"))
+                           if isinstance(prior_market, dict) else None)
+            delta_price = (str(pct(last, prior_price))
+                           if comparable and prior_price is not None and prior_price > 0
+                           else None)
+            delta_quote = (str(pct(quote_volume, prior_quote))
+                           if comparable and prior_quote is not None and prior_quote > 0
+                           else None)
+            if near_liquidity_floor <= quote_volume < MIN_QUOTE_VOLUME_TL:
+                near_liquidity.append({
+                    "symbol": symbol, "quote_volume_tl": str(quote_volume),
+                    "percent_of_minimum": str(quote_volume / MIN_QUOTE_VOLUME_TL * 100),
+                    "price_change_since_snapshot_pct": delta_price,
+                    "rolling_quote_volume_change_pct": delta_quote,
+                })
+            if (comparable and prior_quote is not None and prior_quote > 0
+                    and prior_quote < MIN_QUOTE_VOLUME_TL
+                    and quote_volume >= MIN_QUOTE_VOLUME_TL):
+                new_liquidity_crossings.append({
+                    "symbol": symbol, "observed_at": int(now),
+                    "previous_observed_at": int(previous_at),
+                    "prior_quote_volume_tl": str(prior_quote),
+                    "current_quote_volume_tl": str(quote_volume),
+                    "price_change_since_snapshot_pct": delta_price,
+                    "rolling_quote_volume_change_pct": delta_quote,
+                })
 
         if not comparable or not universe_eligible(ticker):
             continue
@@ -413,8 +451,25 @@ def _hot_radar_order(
     # Keep excluded symbols for the normal universe-rejection diagnostics.
     ordered.extend(ticker for ticker in base_order if not universe_eligible(ticker))
 
+    # Research-only history with fixed retention; never used to bypass gates.
+    prior_events = previous.get("recent_liquidity_crossings", [])
+    if not isinstance(prior_events, list):
+        prior_events = []
+    recent_events = [
+        event for event in prior_events
+        if isinstance(event, dict)
+        and type(event.get("observed_at")) is int
+        and 0 <= now - event["observed_at"] < 24 * 60 * 60
+    ]
+    recent_events.extend(new_liquidity_crossings)
+    near_liquidity.sort(
+        key=lambda row: Decimal(row["percent_of_minimum"]), reverse=True
+    )
     state["ticker_radar"] = {
         "version": 2,
+        "near_liquidity_research": near_liquidity[:30],
+        "recent_liquidity_crossings": recent_events[-48:],
+        "liquidity_research_basis": "rolling_24h_quote_volume_deltas_not_interval_buy_flow",
         "observed_at": int(now),
         "previous_observed_at": previous_at,
         "snapshot_comparable": comparable,
