@@ -37,116 +37,62 @@
     "controller_status_observed": "completed_success",
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
-    "controller_status_checked_at_utc": "2026-10-23T07:48:27Z",
-    "latest_persisted_state_commit": "6d896cd741de9711b5081e74149f6c319e311a2d",
-    "latest_persisted_state_blob": "0d92b222eb3e89af19ab249503f909d613e57b12",
-    "latest_persisted_state_bytes": 3458872,
+    "controller_status_checked_at_utc": "2026-10-23T08:13:03Z",
+    "latest_persisted_state_commit": "5ca2b26e4427082e14b705a50d4f4a5149c7743f",
+    "latest_persisted_state_blob": "86fe079e3c7b6013732d6dfff6921cd3dc33c3d4",
+    "latest_persisted_state_bytes": 3454980,
     "last_controller_completion_expected_end_of_window": true,
-    "last_controller_completion_note": "Existing controller39857976265 remains completed successfully. Eight new existing main scanner cycles39912092918–39919551050 were verified; monitoring created no scanner, controller, schedule, repository, or resource. OM_TL failed closed once for insufficient native history (186 canonical vs205 required), with clear cycles before and after, no synthetic substitution or signal."
+    "last_controller_completion_note": "Existing controller39857976265 remains completed successfully. Two new completed existing main scanner cycles39920680493 and39921829241 were verified; run39923007578 was still in progress and was not counted or rerun. Monitoring created no scanner, controller, schedule, repository, or resource."
   },
   "last_verified_production_run": {
-    "run_id": 39919551050,
-    "job_id": 120301203398,
-    "head_sha": "f2317c50000ec77e4aa0aa8633cf56c6b1836ea5",
-    "refreshed_main_sha": "f2317c50000ec77e4aa0aa8633cf56c6b1836ea5",
+    "run_id": 39921829241,
+    "job_id": 120308644113,
+    "head_sha": "b420ac80b2a204cc69ecf8ccbcbb15e2d1eadb52",
+    "refreshed_main_sha": "b420ac80b2a204cc69ecf8ccbcbb15e2d1eadb52",
     "source_baseline": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0",
-    "resulting_state_commit": "6d896cd741de9711b5081e74149f6c319e311a2d",
+    "resulting_state_commit": "5ca2b26e4427082e14b705a50d4f4a5149c7743f",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-23T07:43:38Z",
+    "finished_at_utc": "2026-10-23T08:03:36Z",
     "infra": {
-      "run_id": "39919551050",
-      "started_at": 1792741371,
-      "finished_at": 1792741418,
+      "run_id": "39921829241",
+      "started_at": 1792742575,
+      "finished_at": 1792742616,
       "btc_ok": true,
       "btc_reason": "regime_neutral",
-      "candles_complete": 38,
+      "candles_complete": 40,
       "candles_synthetic": 0,
       "candles_error": 0,
       "cadence_expected_seconds": 600,
       "cadence_late_after_seconds": 1200,
-      "cadence_gap_seconds": 584,
+      "cadence_gap_seconds": 587,
       "cadence_status": "ok",
       "funnel": {
-        "book_approved": 38,
-        "data_valid": 38,
-        "discovery_passed": 4,
-        "early_watch": 2,
+        "book_approved": 40,
+        "data_valid": 40,
+        "discovery_passed": 2,
+        "early_watch": 0,
         "early_watch_alerts": 0,
         "near_ready_alerts": 0,
         "confirmed": 0,
         "limit_simulated": 0,
         "universe": 235,
         "orderbooks_attempted": 80,
-        "technicals_attempted": 38,
+        "technicals_attempted": 40,
         "universe_excluded": 102
       }
     },
-    "evidence": "scanner_state.json blob0d92b222eb3e89af19ab249503f909d613e57b12; valid3458872-byte JSON. Run39919551050 refreshed exact main f2317c50000ec77e4aa0aa8633cf56c6b1836ea5, SHADOW true, native closed /v1/chart/ohlc, cadence584s, zero synthetic/errors. Across eight new cycles cadence584–612s, no confirmation, execution, limit simulation, NEAR READY/READY delivery, generic Telegram alert or duplicate occurred. OM_TL failed closed once in run39918418606 because only186 canonical 15m candles were available versus205 required; clear cycles surrounded it, with no synthetic fallback or signal, so no new software defect is established."
+    "evidence": "scanner_state.json blob86fe079e3c7b6013732d6dfff6921cd3dc33c3d4; valid3454980-byte JSON. Run39921829241 refreshed exact main b420ac80b2a204cc69ecf8ccbcbb15e2d1eadb52, SHADOW true, native closed /v1/chart/ohlc, cadence587s, zero synthetic/errors. Across two new completed cycles cadence587–617s, no confirmation, execution, limit simulation, NEAR READY/READY delivery, generic Telegram alert or duplicate occurred. Run39923007578 remained in progress and was not counted or rerun."
   },
   "latest_loaded_state": {
-    "commit_sha": "6d896cd741de9711b5081e74149f6c319e311a2d",
-    "blob_sha": "0d92b222eb3e89af19ab249503f909d613e57b12",
-    "bytes": 3458872,
+    "commit_sha": "5ca2b26e4427082e14b705a50d4f4a5149c7743f",
+    "blob_sha": "86fe079e3c7b6013732d6dfff6921cd3dc33c3d4",
+    "bytes": 3454980,
     "json_valid": true,
-    "observed_at_utc": "2026-10-23T07:48:27Z",
+    "observed_at_utc": "2026-10-23T08:13:03Z",
     "runs": [
-      {
-        "run_id": "39908158361",
-        "code_sha": "556679be753e5f6f47ac20a5e4e261bc0b624159",
-        "status": "completed",
-        "started_at": 1792734771,
-        "finished_at": 1792734809,
-        "shadow_mode": true,
-        "btc_ok": true,
-        "btc_reason": "BTC neutral/acceptable | RSI=54.4",
-        "funnel": {
-          "book_approved": 42,
-          "data_valid": 42,
-          "discovery_passed": 1,
-          "early_watch": 3,
-          "early_watch_alerts": 0,
-          "near_ready_alerts": 0,
-          "confirmed": 0,
-          "limit_simulated": 0,
-          "universe": 235,
-          "orderbooks_attempted": 80,
-          "technicals_attempted": 42,
-          "universe_excluded": 98
-        },
-        "seconds_since_previous_run": 584,
-        "signal_recorded": false,
-        "alert_sent": false
-      },
-      {
-        "run_id": "39909101203",
-        "code_sha": "d6b052b3d4aadd55c6b6a7fab614d3c440fc1ab1",
-        "status": "completed",
-        "started_at": 1792735375,
-        "finished_at": 1792735410,
-        "shadow_mode": true,
-        "btc_ok": true,
-        "btc_reason": "BTC neutral/acceptable | RSI=57.8",
-        "funnel": {
-          "book_approved": 36,
-          "data_valid": 35,
-          "discovery_passed": 3,
-          "early_watch": 2,
-          "early_watch_alerts": 0,
-          "near_ready_alerts": 0,
-          "confirmed": 0,
-          "limit_simulated": 0,
-          "universe": 235,
-          "orderbooks_attempted": 80,
-          "technicals_attempted": 36,
-          "universe_excluded": 98
-        },
-        "seconds_since_previous_run": 604,
-        "signal_recorded": false,
-        "alert_sent": false
-      },
       {
         "run_id": "39910082651",
         "code_sha": "abbd056047a8e4b5acd786de6bcf54bc1ff56b19",
@@ -414,6 +360,60 @@
           "universe_excluded": 102
         },
         "seconds_since_previous_run": 584,
+        "signal_recorded": false,
+        "alert_sent": false
+      },
+      {
+        "run_id": "39920680493",
+        "code_sha": "6d896cd741de9711b5081e74149f6c319e311a2d",
+        "status": "completed",
+        "started_at": 1792741988,
+        "finished_at": 1792742037,
+        "shadow_mode": true,
+        "btc_ok": true,
+        "btc_reason": "BTC neutral/acceptable | RSI=48.9",
+        "funnel": {
+          "book_approved": 38,
+          "data_valid": 38,
+          "discovery_passed": 0,
+          "early_watch": 2,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 38,
+          "universe_excluded": 102
+        },
+        "seconds_since_previous_run": 617,
+        "signal_recorded": false,
+        "alert_sent": false
+      },
+      {
+        "run_id": "39921829241",
+        "code_sha": "b420ac80b2a204cc69ecf8ccbcbb15e2d1eadb52",
+        "status": "completed",
+        "started_at": 1792742575,
+        "finished_at": 1792742616,
+        "shadow_mode": true,
+        "btc_ok": true,
+        "btc_reason": "BTC neutral/acceptable | RSI=43.9",
+        "funnel": {
+          "book_approved": 40,
+          "data_valid": 40,
+          "discovery_passed": 2,
+          "early_watch": 0,
+          "early_watch_alerts": 0,
+          "near_ready_alerts": 0,
+          "confirmed": 0,
+          "limit_simulated": 0,
+          "universe": 235,
+          "orderbooks_attempted": 80,
+          "technicals_attempted": 40,
+          "universe_excluded": 102
+        },
+        "seconds_since_previous_run": 587,
         "signal_recorded": false,
         "alert_sent": false
       }
@@ -1011,7 +1011,7 @@
       "SOL_TL completed the six-hour SHADOW horizon as EXPIRED after only an OHLC-model estimated fill; no target or stop event, exchange-confirmed execution, realized gain/loss, live execution, or profitability is established.",
       "PR #49 corrects the proven confirmation audit-label mismatch only and remains open/unmerged; independent final review and explicit user merge approval are still required."
     ],
-    "consecutive_count_lower_bound_from_previous_checkpoint": 647,
+    "consecutive_count_lower_bound_from_previous_checkpoint": 649,
     "previous_count_verified_through_run": 39887334598,
     "latest_separate_health_run": 39887334598,
     "executable_and_settings_unchanged_since": "bf5ef221abd983dc4384853ea1ca77824e4a2dc0"
@@ -2754,6 +2754,16 @@
         39919551050
       ],
       "conclusion": "Eight new production scanner cycles39912092918–39919551050 completed successfully. Each refreshed the exact main SHA actually used, remained SHADOW=true, used authentic closed Paribu /v1/chart/ohlc data, persisted valid JSON, and held cadence584–612s. Synthetic data stayed zero; one OM_TL limited-history failure in run39918418606 failed closed at186 canonical candles versus205 required and cleared next cycle. No confirmations, executions, limit simulations, NEAR READY/READY deliveries, generic Telegram alerts or duplicates occurred. No new critical defect, security issue, milestone, PR change, or user decision was established."
+    },
+    {
+      "source": "scheduled_quiet_watch",
+      "checked_at_utc": "2026-10-23T08:13:03Z",
+      "inspected_run_ids": [
+        39920680493,
+        39921829241
+      ],
+      "in_progress_run_id": 39923007578,
+      "conclusion": "Two new production scanner cycles39920680493 and39921829241 completed successfully. Both refreshed the exact main SHA actually used, remained SHADOW=true, used authentic closed Paribu /v1/chart/ohlc data, persisted valid JSON, held cadence587–617s, and reported zero synthetic/errors. No confirmations, executions, limit simulations, NEAR READY/READY deliveries, generic Telegram alerts or duplicates occurred. Run39923007578 was still in progress and was not counted or rerun. No new critical defect, security issue, milestone, PR change, or user decision was established."
     }
   ],
   "scheduler_confirmation": {
@@ -2771,7 +2781,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-23T07:48:27Z",
+  "last_check_utc": "2026-10-23T08:13:03Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -3191,9 +3201,11 @@
     39916257386,
     39917268023,
     39918418606,
-    39919551050
+    39919551050,
+    39920680493,
+    39921829241
   ],
-  "current_priority": "Continue from run39919551050 and persisted main state6d896cd741de9711b5081e74149f6c319e311a2d. Existing controller39857976265 completed successfully; do not create a replacement. PR49/PR51/PR52 remain open and unmerged with unchanged recorded heads and gates. Wait for organic recommendations and verify them; do not merge, deploy, change thresholds, or create resources.",
+  "current_priority": "Continue from completed run39921829241 and persisted main state5ca2b26e4427082e14b705a50d4f4a5149c7743f; inspect in-progress run39923007578 only after completion. Existing controller39857976265 completed successfully; do not create a replacement. PR49/PR51/PR52 remain open and unmerged with unchanged recorded heads and gates. Wait for organic recommendations and verify them; do not merge, deploy, change thresholds, or create resources.",
   "last_security_gate_check_utc": "2026-10-22T08:07:07Z",
   "notification_fingerprints": [
     "important_fix:pr45_native_reader_merged_prod_verified_30_cycles",
