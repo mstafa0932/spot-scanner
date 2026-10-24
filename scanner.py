@@ -1196,6 +1196,49 @@ def _record_execution_followup(
     del history[:-12]
 
 
+def _retain_risk_rejection_followup(
+    state: dict[str, Any], candidate: Candidate, reason: str, now: int,
+) -> bool:
+    """Recheck strong, risk-blocked setups with the existing bounded quota/TTL.
+
+    This is scheduling only: every subsequent scan must pass the unchanged
+    candle, RSI, order-book, confirmation and risk gates before READY.
+    """
+    if candidate.score < ALERT_MIN_SCORE or reason not in {
+        "risk_out_of_range", "rr_below_min", "tp1_blocked_by_wall"
+    }:
+        return False
+    _record_execution_followup(
+        state, symbol=candidate.symbol, now=now, reason="risk:" + reason,
+        spread_pct=candidate.book.spread_percent,
+        imbalance=candidate.book.imbalance_ratio,
+        best_ask=candidate.book.best_ask,
+    )
+    return True
+
+
+def _preserve_risk_followup_during_rsi_overheat(
+    state: dict[str, Any], symbol: str, rsi: Decimal, reason: str, now: int,
+) -> bool:
+    """Keep a prior risk-blocked candidate under the existing fixed TTL.
+
+    This does not waive RSI: the coin remains ineligible for discovery/READY
+    while RSI is outside the original range, but can receive a fresh recheck.
+    """
+    if reason != "RSI outside watch range" or rsi <= WATCH_RSI_HIGH:
+        return False
+    item = _execution_followups(state).get(symbol)
+    if not isinstance(item, dict) or not str(item.get("last_reason", "")).startswith("risk:"):
+        return False
+    try:
+        first_seen = int(item.get("first_seen", 0) or 0)
+        last_seen = int(item.get("last_seen", 0) or 0)
+    except (TypeError, ValueError):
+        return False
+    return (first_seen > 0 and last_seen > 0
+            and 0 <= now - first_seen <= EXECUTION_FOLLOWUP_TTL_SECONDS)
+
+
 def _prune_execution_followups(state: dict[str, Any], now: int) -> None:
     followups = _execution_followups(state)
     for symbol, item in list(followups.items()):
@@ -1948,7 +1991,10 @@ def run_scanner() -> None:
             ticker, book, tech_15, tech_1h, tech_4h, score
         )
         if not ok:
-            _execution_followups(state).pop(ticker.symbol, None)
+            if not _preserve_risk_followup_during_rsi_overheat(
+                state, ticker.symbol, tech_15.rsi14, discovery_reason, now
+            ):
+                _execution_followups(state).pop(ticker.symbol, None)
             note(ticker.symbol, "discovery", discovery_reason, **indicator_metrics)
             if _early_watch_mtf_ok(book, tech_15, score, btc_ok, discovery_reason):
                 funnel["early_watch"] += 1
@@ -2160,7 +2206,6 @@ def run_scanner() -> None:
                                     lifecycle_state="confirmation_2_of_2", reason="READY", now=now)
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
-            _execution_followups(state).pop(candidate.symbol, None)
             risk_result = build_risk_plan_result(
                 book=candidate.book,
                 tech=candidate.tech_15,
@@ -2172,7 +2217,21 @@ def run_scanner() -> None:
                 tp2_pct=TP2_PCT,
             )
             risk_reason = risk_result.rejection_reason or "opportunity_unavailable"
-            note(candidate.symbol, "risk", risk_reason)
+            # Persist the inputs needed to audit genuine risk failures, without
+            # using a later market price or changing any execution gate.
+            note(candidate.symbol, "risk", risk_reason,
+                 score=candidate.score, setup=candidate.setup,
+                 atr14=str(candidate.tech_15.atr14),
+                 swing_low=str(candidate.tech_15.swing_low),
+                 best_bid=str(candidate.book.best_bid),
+                 best_ask=str(candidate.book.best_ask),
+                 min_rr=os.getenv("MIN_REWARD_RISK", "1.50"),
+                 max_risk_pct=os.getenv("MAX_STOP_PCT_V2", "4.00"),
+                 risk_audit=risk_result.evidence or {})
+            if not _retain_risk_rejection_followup(
+                state, candidate, risk_reason, int(time.time())
+            ):
+                _execution_followups(state).pop(candidate.symbol, None)
             _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
                                         lifecycle_state="rejected", reason=risk_reason, now=now)
             if risk_reason in {"tp1_blocked_by_wall", "rr_below_min"}:
