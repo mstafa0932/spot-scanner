@@ -53,6 +53,7 @@ class RiskPlan:
 class RiskPlanResult:
     plan: Optional[RiskPlan]
     rejection_reason: Optional[str] = None
+    evidence: Optional[dict[str, str]] = None
 
 
 def limit_entry_price(book, tech, setup: str) -> Optional[Decimal]:
@@ -160,7 +161,11 @@ def build_risk_plan_result(
     risk = entry - stop
     risk_pct = risk / entry * D("100")
     if risk_pct <= 0 or risk_pct > max_risk_pct:
-        return RiskPlanResult(None, "risk_out_of_range")
+        return RiskPlanResult(None, "risk_out_of_range", {
+            "entry": str(entry), "stop": str(stop), "risk_pct": str(risk_pct),
+            "max_risk_pct": str(max_risk_pct), "atr14": str(atr),
+            "swing_low": str(swing_low),
+        })
 
     raw_tp1 = max(
         entry * (D("1") + tp1_pct / D("100")),
@@ -178,16 +183,28 @@ def build_risk_plan_result(
         step = price_step(wall_price)
         candidate_tp1 = wall_price - step
         if candidate_tp1 <= entry:
-            return RiskPlanResult(None, "tp1_blocked_by_wall")
+            return RiskPlanResult(None, "tp1_blocked_by_wall", {
+                "entry": str(entry), "stop": str(stop),
+                "sell_wall_price": str(wall_price), "sell_wall_share": str(wall_share),
+                "adjusted_tp1": str(candidate_tp1), "min_rr": str(min_rr),
+            })
         candidate_rr = (candidate_tp1 - entry) / risk
         if candidate_rr < min_rr:
-            return RiskPlanResult(None, "rr_below_min")
+            return RiskPlanResult(None, "rr_below_min", {
+                "entry": str(entry), "stop": str(stop), "risk_pct": str(risk_pct),
+                "sell_wall_price": str(wall_price), "sell_wall_share": str(wall_share),
+                "adjusted_tp1": str(candidate_tp1),
+                "actual_rr": str(candidate_rr), "min_rr": str(min_rr),
+            })
         tp1 = candidate_tp1
         adjusted = True
 
     rr = (tp1 - entry) / risk
     if rr < min_rr:
-        return RiskPlanResult(None, "rr_below_min")
+        return RiskPlanResult(None, "rr_below_min", {
+            "entry": str(entry), "stop": str(stop), "risk_pct": str(risk_pct),
+            "tp1": str(tp1), "actual_rr": str(rr), "min_rr": str(min_rr),
+        })
     if tp2 <= tp1:
         tp2 = tp1 + risk
 
