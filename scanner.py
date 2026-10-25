@@ -807,6 +807,40 @@ def setup_type(tech: IndicatorResult) -> tuple[bool, str]:
     return False, "NO_TRIGGER_SETUP"
 
 
+def _setup_veto_diagnostics(tech: IndicatorResult) -> dict[str, bool | None]:
+    """Record predicates for a rejected setup, never change setup eligibility.
+
+    The scanner's actual setup_type() remains the sole decision function.
+    Missing/invalid fields are explicit None rather than invented False data.
+    No additional exchange calls, candles, or prior/future state are used.
+    """
+    def boolean(field: str) -> bool | None:
+        value = getattr(tech, field, None)
+        return value if type(value) is bool else None
+
+    def number(field: str) -> Decimal | None:
+        return dec(getattr(tech, field, None))
+
+    ema21, ema50 = number("ema21"), number("ema50")
+    macd_line, macd_signal = number("macd_line"), number("macd_signal")
+    macd_hist = number("macd_histogram")
+    ratio, rsi, ret3 = number("volume_ratio"), number("rsi14"), number("recent_return_3")
+    return {
+        "breakout": boolean("breakout"),
+        "is_pullback": boolean("is_pullback"),
+        "mean_touch": boolean("mean_touch"),
+        "bullish_candle": boolean("is_bullish_candle"),
+        "above_ema9": boolean("is_above_ema9"),
+        "above_ema21": boolean("is_above_ema21"),
+        "ema21_gte_ema50": ema21 >= ema50 if ema21 is not None and ema50 is not None else None,
+        "macd_hist_positive": macd_hist > 0 if macd_hist is not None else None,
+        "macd_line_gt_signal": macd_line > macd_signal if macd_line is not None and macd_signal is not None else None,
+        "volume_ratio_gte_1_20": ratio >= Decimal("1.20") if ratio is not None else None,
+        "pullback_rsi_lte_60": rsi <= Decimal("60") if rsi is not None else None,
+        "recovery_return3_lt_2_60": ret3 < Decimal("2.60") if ret3 is not None else None,
+    }
+
+
 def score_candidate(
     ticker: Ticker,
     book: OrderBookSnapshot,
@@ -2072,7 +2106,14 @@ def run_scanner() -> None:
                     and not item.get("near_ready_attempted_at")
                     and not item.get("near_ready_notified_at")):
                 near_ready_candidate = (candidate, item)
-            note(candidate.symbol, "trigger", trigger_reason, score=candidate.score)
+            # Record *why* an otherwise high-score candidate has no valid
+            # setup. This is forensic-only; no predicates or trigger changes.
+            trigger_meta = {"score": candidate.score}
+            if trigger_reason == "setup not ready":
+                trigger_meta["setup_veto_diagnostics"] = _setup_veto_diagnostics(
+                    candidate.tech_15
+                )
+            note(candidate.symbol, "trigger", trigger_reason, **trigger_meta)
             lifecycle_state = ("confirmation_1_of_2" if trigger_reason.startswith("watching: confirmations 1/")
                                else "rejected")
             _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
