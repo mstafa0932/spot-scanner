@@ -1214,6 +1214,9 @@ def _retain_risk_rejection_followup(
         imbalance=candidate.book.imbalance_ratio,
         best_ask=candidate.book.best_ask,
     )
+    # Do not lose the risk origin when a later recheck is rejected by the book
+    # before RSI overheats. Original first_seen TTL still bounds the episode.
+    _execution_followups(state)[candidate.symbol]["risk_rejection_origin"] = True
     return True
 
 
@@ -1228,7 +1231,12 @@ def _preserve_risk_followup_during_rsi_overheat(
     if reason != "RSI outside watch range" or rsi <= WATCH_RSI_HIGH:
         return False
     item = _execution_followups(state).get(symbol)
-    if not isinstance(item, dict) or not str(item.get("last_reason", "")).startswith("risk:"):
+    if not isinstance(item, dict):
+        return False
+    # A transient book rejection overwrites last_reason, not the risk episode.
+    # Support legacy episodes that predate the explicit origin flag.
+    if (item.get("risk_rejection_origin") is not True
+            and not str(item.get("last_reason", "")).startswith("risk:")):
         return False
     try:
         first_seen = int(item.get("first_seen", 0) or 0)
