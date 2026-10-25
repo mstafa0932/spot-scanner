@@ -1,5 +1,9 @@
 # Paribu — multi-cause audit of user-documented surges, 11–25 October 2026
 
+## Release status update — 26 October 2026
+
+PR [#54](https://github.com/mstafa0932/spot-scanner/pull/54) was independently reviewed by CodeRabbit (no actionable findings; one non-security docstring coverage warning) and **merged into `main`** as `28ea8df8975d3460e0ef3d1c715ed4d5da42bad5`. The historical case analysis below was written before that merge and preserves the evidence and state at the time. PR #60 contains *diagnostics only* and still requires its own independent review before merging. SHADOW_MODE remains required; no live orders.
+
 **Purpose:** group all *recoverable and documented* user-supplied cases from the last 15 calendar days by real scanner stage, isolate proven defects from justified rejections, and prioritize **non-strategy** calibration. This report is not a list of all actual Paribu market gainers, nor a backtest of executable trades.
 
 ## Sources and coverage
