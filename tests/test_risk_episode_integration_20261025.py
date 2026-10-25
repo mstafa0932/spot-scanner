@@ -10,7 +10,7 @@ from test_scanner_research import prepare
 
 
 def test_risk_episode_overheat_recheck_then_fixed_expiry(monkeypatch, tmp_path):
-    ticker, _book, tech = prepare(monkeypatch, tmp_path)
+    ticker, book, tech = prepare(monkeypatch, tmp_path)
     tech.atr14 = D("0.8")
     tech.swing_low = D("98")
     tech.rsi14 = D("60")
@@ -53,9 +53,25 @@ def test_risk_episode_overheat_recheck_then_fixed_expiry(monkeypatch, tmp_path):
     assert first["shadow_sent_signals"] == {}
     assert first["active_signals"] == []
 
-    # RSI subsequently rises beyond the unchanged discovery ceiling.
-    # Retain a bounded scheduling record, not an eligibility override.
-    clock["now"] += 600
+    # The next scan's order book becomes unusable. This must record the
+    # current rejection without erasing the earlier risk-followup provenance.
+    clock["now"] += 300
+    book.spread_percent = scanner.MAX_SPREAD_PCT + D("0.01")
+    scanner.run_scanner()
+    wide = scanner.load_state()
+    assert wide["scan_diagnostics"][-1]["symbols"][ticker.symbol]["reason"] == (
+        "spread_too_high"
+    )
+    assert wide["execution_followups"][ticker.symbol]["last_reason"] == "spread_too_high"
+    assert wide["execution_followups"][ticker.symbol]["risk_rejection_origin"] is True
+    assert wide["execution_followups"][ticker.symbol]["first_seen"] == followup["first_seen"]
+    assert wide["shadow_sent_signals"] == {}
+    assert wide["active_signals"] == []
+
+    # The book recovers but RSI overheats: still no READY, yet bounded
+    # priority persists until its original expiry (not a renewed TTL).
+    clock["now"] += 300
+    book.spread_percent = D("0.1")
     tech.rsi14 = scanner.WATCH_RSI_HIGH + D("0.01")
     scanner.run_scanner()
     second = scanner.load_state()
