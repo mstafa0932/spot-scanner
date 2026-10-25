@@ -4,11 +4,13 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Callable
+from pandas.api.types import is_bool
 import json
 import os
+import re
 import time
 
-from market_data import fetch_candles
+from market_data import CandleUnavailableError, fetch_candles
 
 
 STATE_FILE = Path(os.getenv("SCANNER_STATE_FILE", "scanner_state.json"))
@@ -18,6 +20,12 @@ MATURITY_CANDLES = 16
 PRUNE_AFTER_SECONDS = 172800
 RESEARCH_FAVORABLE_MFE_PCT = Decimal("1.50")
 RESEARCH_MAE_LIMIT_PCT = Decimal("1.50")
+
+# Research-only retries; no changes to live scanner or trading thresholds.
+TRANSIENT_MEASUREMENT_CODES = frozenset({"http_429", "timeout", "fetch_error"})
+TRANSIENT_RETRY_DELAY_SECONDS = 6 * 60 * 60
+TRANSIENT_RETRY_MAX_ATTEMPTS = 3
+TRANSIENT_RETRY_MAX_AGE_SECONDS = 36 * 60 * 60
 
 
 def _decimal(value: Any) -> Decimal | None:
@@ -107,6 +115,12 @@ def _classify_fetch_error(exc: Exception) -> tuple[str, str]:
         return "consecutive_synthetic_limit_exceeded", detail
     if "Synthetic candle limit exceeded" in message:
         return "synthetic_candle_limit_exceeded", detail
+    # Insufficient canonical history (e.g. a newly listed market) is a
+    # structural research-data gap, not a transient API outage. Retrying it
+    # while near_miss_queue is symbol-keyed can censor later observations.
+    if (isinstance(exc, CandleUnavailableError)
+            and re.fullmatch(r"Only \d+ canonical candles; \d+ required", message)):
+        return "insufficient_canonical_history", detail
     if "429" in message:
         return "http_429", detail
     if "timeout" in lowered or "timed out" in lowered:
@@ -151,6 +165,14 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
             detail=f"missing_columns={missing}",
         )
 
+    # Paribu native 15m frames carry per-row provenance from candle_backfill.
+    # A locally forward-filled row must never become a measured market outcome.
+    source = str(getattr(candles, "attrs", {}).get("source") or "").upper()
+    if source != "PARIBU":
+        return _incomplete(base, code="invalid_provenance", detail="missing or non-Paribu measurement source")
+    if not {"is_authentic", "data_quality"}.issubset(columns):
+        return _incomplete(base, code="missing_provenance", detail="Paribu measurement provenance missing")
+
     window = candles[(candles["timestamp"] >= first_close) & (candles["timestamp"] < maturity_at)].copy()
     window = window.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
     expected = [first_close + i * INTERVAL_SECONDS for i in range(MATURITY_CANDLES)]
@@ -161,6 +183,20 @@ def _measure_event(symbol: str, record: dict[str, Any], fetcher: Callable[..., A
             code="insufficient_window",
             detail=f"expected={MATURITY_CANDLES} actual={len(window)} contiguous={actual == expected}",
             candles=len(window),
+        )
+
+    if ("is_authentic" in window.columns
+            and not all(is_bool(value) and bool(value) for value in window["is_authentic"])):
+        return _incomplete(
+            base, code="inauthentic_window",
+            detail="measurement window contains non-authentic candles", candles=len(window),
+        )
+    if ("data_quality" in window.columns
+            and not all(isinstance(value, str) and value == "PARIBU"
+                        for value in window["data_quality"])):
+        return _incomplete(
+            base, code="inauthentic_window",
+            detail="measurement window contains non-Paribu data-quality rows", candles=len(window),
         )
 
     highs = [_decimal(x) for x in window["high"].tolist()]
@@ -232,16 +268,70 @@ def process_state(
             maturity_at = 0
         if maturity_at <= 0 or maturity_at > now:
             continue
-
+        # Reconcile a durable archive before applying retry backoff. A crash
+        # after archiving but before saving state must not block new episodes.
         event_id = _event_id(symbol, record)
         if event_id in archived:
             record["processed"] = True
             record["processed_at"] = now
+            record.pop("measurement_attempts", None)
+            record.pop("next_measurement_attempt_at", None)
             changed = True
             continue
 
-        row = _measure_event(symbol, record, fetcher)
-        time.sleep(0.3)
+        try:
+            previous_attempts = max(0, int(record.get("measurement_attempts", 0) or 0))
+        except (ValueError, TypeError):
+            previous_attempts = 0
+        retry_deadline = maturity_at + TRANSIENT_RETRY_MAX_AGE_SECONDS
+        if previous_attempts and now > retry_deadline:
+            # A delayed workflow must not issue another Paribu request after
+            # the declared retry horizon. Retain the last transient as context.
+            rejected_at = int(record.get("rejected_at", 0) or 0)
+            row = _incomplete(
+                {
+                    "event_id": event_id,
+                    "symbol": symbol,
+                    "rejected_at": rejected_at,
+                    "rejected_price": str(record.get("rejected_price")),
+                    "rejected_stage": str(record.get("rejected_stage", "")),
+                    "first_close": ((rejected_at // INTERVAL_SECONDS) + 1) * INTERVAL_SECONDS,
+                    "maturity_at": maturity_at,
+                },
+                code="retry_window_expired",
+                detail=("last_transient_reason="
+                        + str(record.get("incomplete_reason_code") or "unknown")
+                        + "; last_transient_detail="
+                        + str(record.get("incomplete_reason_detail") or "")),
+            )
+        else:
+            try:
+                retry_not_before = int(record.get("next_measurement_attempt_at", 0) or 0)
+            except (TypeError, ValueError):
+                retry_not_before = 0
+            if now < retry_not_before:
+                continue
+            row = _measure_event(symbol, record, fetcher)
+            time.sleep(0.3)
+        failure_code = row.get("incomplete_reason_code")
+        if row["outcome"] == "incomplete_data" and failure_code in TRANSIENT_MEASUREMENT_CODES:
+            attempts = previous_attempts + 1
+            may_retry = (attempts < TRANSIENT_RETRY_MAX_ATTEMPTS
+                         and maturity_at <= now
+                         and now + TRANSIENT_RETRY_DELAY_SECONDS <= retry_deadline)
+            if may_retry:
+                record["measurement_attempts"] = attempts
+                record["next_measurement_attempt_at"] = now + TRANSIENT_RETRY_DELAY_SECONDS
+                record["incomplete_reason_code"] = failure_code
+                record["incomplete_reason_detail"] = row.get("incomplete_reason_detail")
+                changed = True
+                output(f"[NEAR_MISS_RETRY] {symbol} | {failure_code} | attempt={attempts} | deferred")
+                # Do not flood the exchange with further requests after a 429.
+                if failure_code == "http_429":
+                    output("[NEAR_MISS_RATE_LIMIT] stop remaining measurements for this run")
+                    break
+                continue
+
         row["processed_at"] = now
         append_archive(archive_path, row)
         archived.add(event_id)
@@ -262,7 +352,13 @@ def process_state(
 
         record["processed"] = True
         record["processed_at"] = now
+        record.pop("measurement_attempts", None)
+        record.pop("next_measurement_attempt_at", None)
         changed = True
+        # Even an exhausted 429 means the remaining batch should stop.
+        if failure_code == "http_429":
+            output("[NEAR_MISS_RATE_LIMIT] stop remaining measurements for this run")
+            break
 
     archive_rows = []
     if archive_path.exists():
