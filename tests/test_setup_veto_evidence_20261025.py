@@ -51,15 +51,16 @@ def test_full_scanner_records_setup_veto_but_sends_no_alert(monkeypatch, tmp_pat
     tech.macd_line, tech.macd_signal = D("1.2"), D("1.1")
     tech.mean_touch = False
     tech.recent_return_3 = D("1")
+    tech.recent_return_12 = D("2")
+    tech.recent_return_48 = D("4")
     tech.rsi14 = D("60")
+    book.imbalance_ratio = D("1.4")
+    book.largest_bid_wall_share = D("0.20")
+    book.largest_ask_wall_share = D("0.10")
     monkeypatch.setattr(scanner, "score_candidate", lambda *a: (89, []))
     monkeypatch.setattr(scanner, "discovery_ok", lambda *a: (True, "OK"))
-    # Use REAL setup and trigger; only the early book-snapshot fixture is mocked.
-    # Original trigger_check checks book levels before setup, so the fixture
-    # must provide a valid fresh alert-level orderbook and candidate history.
-    monkeypatch.setattr(scanner, "trigger_check", lambda *a: (
-        False, "setup not ready", D("0"), 0
-    ))
+    # Exercise the real setup_type() and trigger_check() decisions using
+    # offline book/candle fixtures. No actual Telegram or Paribu requests.
     scanner.run_scanner()
     state = scanner.load_state()
     row = state["scan_diagnostics"][-1]["symbols"][ticker.symbol]
