@@ -80,7 +80,10 @@ def test_risk_episode_overheat_recheck_then_fixed_expiry(monkeypatch, tmp_path):
     )
     preserved = second["execution_followups"][ticker.symbol]
     assert preserved["first_seen"] == followup["first_seen"]
-    assert preserved["last_seen"] == followup["last_seen"]
+    # last_seen accurately advances to the most recent rejected book scan,
+    # but it must NOT move the original fixed TTL anchor (first_seen).
+    assert preserved["last_seen"] == wide["execution_followups"][ticker.symbol]["last_seen"]
+    assert preserved["last_seen"] == followup["first_seen"] + 300
     assert not second["active_signals"]
     assert not second["shadow_sent_signals"]
 
