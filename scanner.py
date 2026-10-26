@@ -27,6 +27,7 @@ import os
 import time
 
 import requests
+import numpy as np
 
 from market_data import (
     ParibuDataError,
@@ -1075,12 +1076,24 @@ def _candidate_lifecycle_update(
     return item
 
 
+def _strict_authentic_candle_mask(frame: Any):
+    """Accept only actual Python/numpy boolean True as Paribu provenance.
+
+    In particular, pandas astype(bool) treats nonempty strings such as
+    "False", numeric 1 and NaN as truthy. None of those are trustworthy
+    provider-authenticity flags, even if their metadata claims PARIBU.
+    """
+    return frame["is_authentic"].map(
+        lambda flag: type(flag) in (bool, np.bool_) and bool(flag)
+    )
+
+
 def _candle_synthetic_rows(*frames: Any) -> int:
     total = 0
     for frame in frames:
         try:
             if "is_authentic" in frame.columns:
-                total += int((~frame["is_authentic"].astype(bool)).sum())
+                total += int((~_strict_authentic_candle_mask(frame)).sum())
         except Exception:
             continue
     return total
@@ -1124,7 +1137,7 @@ def _all_candles_authentic(*frames: Any) -> bool:
         try:
             if "is_authentic" not in frame.columns or frame.empty:
                 return False
-            if not bool(frame["is_authentic"].astype(bool).all()):
+            if not bool(_strict_authentic_candle_mask(frame).all()):
                 return False
         except Exception:
             return False
