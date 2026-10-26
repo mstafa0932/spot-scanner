@@ -1350,7 +1350,8 @@ def _expire_candidate_lifecycles(state: dict[str, Any], now: int) -> list[str]:
     lifecycles = state.get("candidate_lifecycle", {})
     if not isinstance(lifecycles, dict):
         return []
-    active_states = {"early_watch", "discovery", "confirmation_1_of_2", "confirmation_2_of_2"}
+    active_states = {"early_watch", "discovery", "confirmation_1_of_2", "confirmation_2_of_2",
+                     "confirmation_explosive"}
     expired = []
     for symbol, episode in list(lifecycles.items()):
         if not isinstance(episode, dict) or str(episode.get("current_state")) not in active_states:
@@ -2264,8 +2265,25 @@ def run_scanner() -> None:
         # Keep any bounded execution follow-up until READY delivery is
         # confirmed. Dropping it here can starve a Telegram retry.
         funnel["confirmed"] += 1
-        _candidate_lifecycle_update(state, symbol=candidate.symbol, score=candidate.score,
-                                    lifecycle_state="confirmation_2_of_2", reason="READY", now=now)
+        # Mirror trigger_check's existing exception only for audit labeling.
+        # This path may bypass persistence even with two or more observations.
+        explosive_confirmation = bool(
+            candidate.score >= 88
+            and candidate.setup == "BREAKOUT"
+            and candidate.book.imbalance_ratio >= Decimal("1.25")
+            and candidate.tech_15.volume_ratio >= Decimal("1.80")
+            and candidate.tech_15.recent_return_3 < Decimal("2.80")
+        )
+        episode = _candidate_lifecycle_update(
+            state, symbol=candidate.symbol, score=candidate.score,
+            lifecycle_state="confirmation_explosive" if explosive_confirmation else "confirmation_2_of_2",
+            reason="READY", now=now,
+        )
+        episode["history"][-1].update(
+            confirmations=confirmations,
+            confirmation_target=MIN_CONFIRMATIONS,
+            confirmation_mode="explosive_breakout" if explosive_confirmation else "closed_candle_persistence",
+        )
         opp = build_opportunity(candidate, avg_imbalance, confirmations, btc_reason)
         if opp is None:
             risk_result = build_risk_plan_result(
