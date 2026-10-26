@@ -3941,5 +3941,58 @@
       "security_scan_complete": false,
       "next_action": "Keep draft/unmerged. Perform independent exact-head review and separate security scan before any request for explicit merge approval; do not infer a threshold defect from excluded-market counts."
     }
+  },
+  "quiet_audit_20261027_0240_trt": {
+    "baseline_main_sha": "f34c06ee1b5a1fa2a58a44359a324eba5a77ae2c",
+    "observed_main_sha": "bffcd953ee913c44e18823c8592812f0c88c1d1f",
+    "observed_main_diff": "26 commits ahead of baseline; only scanner_state.json and near_misses_archive.jsonl changed",
+    "scanner_runs_since_baseline": {
+      "first_id": 40388405985,
+      "last_id": 40421050261,
+      "count_checked": 25,
+      "all_success": true,
+      "dispatch_interval_min_seconds": 597,
+      "dispatch_interval_max_seconds": 616,
+      "latest_run_steps": {
+        "run_scanner": "success",
+        "persist_scanner_state": "success",
+        "refresh_main": "success"
+      },
+      "latest_run_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/40421050261"
+    },
+    "scanner_state": {
+      "source": "main scanner_state.json",
+      "last_recorded_run_id": "40421050261",
+      "last_recorded_run_finished_utc": "2026-10-26T23:39:26Z",
+      "last_run_shadow_mode": true,
+      "last_run_seconds_since_previous": 609,
+      "retained_diagnostics_count": 12,
+      "retained_diagnostics_shadow_mode_all_true": true,
+      "last_run_funnel": {
+        "universe": 235,
+        "orderbooks_attempted": 80,
+        "technicals_attempted": 30,
+        "confirmed": 0,
+        "near_ready_alerts": 0,
+        "early_watch_alerts": 0
+      },
+      "last_run_alert_sent": false
+    },
+    "controller": {
+      "previous_id": 40370335714,
+      "previous_conclusion": "failure",
+      "previous_finished_utc": "2026-10-26T21:37:38Z",
+      "next_id": 40405933846,
+      "next_status": "in_progress",
+      "next_started_utc": "2026-10-26T21:37:36Z",
+      "observed_effect": "No scanner dispatch gap > 616s among 25 inspected new scanner runs. Failure cause not proven from accessible job metadata; retain for correlation if cadence degrades.",
+      "previous_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/40370335714"
+    },
+    "assessment": "No confirmed critical regression, security issue, Telegram delivery, or live trade. No code or production state changes made. No user notification warranted.",
+    "evidence_limitations": [
+      "Controller failure log not retrieved; only job-level failure verified.",
+      "Latest scanner_state.json contains 12 retained diagnostic cycles, not all 25 checked runs.",
+      "No Telegram acceptance test performed."
+    ]
   }
 }
