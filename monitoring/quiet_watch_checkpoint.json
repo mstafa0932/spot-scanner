@@ -2781,7 +2781,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-23T08:13:03Z",
+  "last_check_utc": "2026-10-27T03:40:21Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -3993,6 +3993,61 @@
       "Controller failure log not retrieved; only job-level failure verified.",
       "Latest scanner_state.json contains 12 retained diagnostic cycles, not all 25 checked runs.",
       "No Telegram acceptance test performed."
+    ]
+  },
+  "quiet_audit_20261027_0640_trt": {
+    "baseline_checkpoint": "quiet_audit_20261027_0240_trt",
+    "observed_main_sha": "d81f80ca75d85c0596bf0fdf7844c2c4a4935638",
+    "baseline_main_sha": "f34c06ee1b5a1fa2a58a44359a324eba5a77ae2c",
+    "main_diff": "52 commits ahead of reference; only scanner_state.json and near_misses_archive.jsonl changed",
+    "new_workflows_since_last_audit": {
+      "after_run_id": 40421050261,
+      "observed_runs": 27,
+      "scanner_runs": 24,
+      "first_scanner_run_id": 40422166841,
+      "last_scanner_run_id": 40445249606,
+      "all_completed_scanner_runs_success": true,
+      "scanner_dispatch_interval_min_seconds": 598,
+      "scanner_dispatch_interval_max_seconds": 614,
+      "controller_run_id": 40433707124,
+      "controller_status": "in_progress",
+      "other_completed_workflows": "successful",
+      "latest_scanner_url": "https://github.com/mstafa0932/spot-scanner/actions/runs/40445249606"
+    },
+    "latest_state": {
+      "source": "main/scanner_state.json",
+      "latest_run_id": 40445249606,
+      "latest_run_started_utc": "2026-10-27T03:38:50Z",
+      "latest_run_finished_utc": "2026-10-27T03:39:32Z",
+      "retained_diagnostic_runs": 12,
+      "shadow_mode_true_in_all_retained": true,
+      "universe": 235,
+      "orderbooks_attempted": 80,
+      "technicals_attempted": 30,
+      "cadence_gap_seconds": 614,
+      "btc_reason": "regime_bearish",
+      "candles_synthetic": 0,
+      "candles_error": 1,
+      "candle_error_market": "OM_TL",
+      "candle_error_reason": "candle_unavailable_other",
+      "candle_error_handling": "market rejected fail closed; intermittent and not proven code defect",
+      "confirmed": 0,
+      "ready_or_near_ready_sent": false,
+      "run_scanner_step": "success",
+      "persist_scanner_state_step": "success"
+    },
+    "security_and_release": {
+      "strategy_files_changed": false,
+      "production_state_edited_manually": false,
+      "merge_or_deploy_performed": false,
+      "telegram_test_sent": false,
+      "live_trade_performed": false
+    },
+    "assessment": "No new confirmed critical regression or security defect. Controller handoff active. No production code change warranted. No user notification.",
+    "limitations": [
+      "Controller currently running; final status unavailable.",
+      "Retained scanner_state diagnostics cover only the last 12 scanner runs; Actions outcomes cover all 24 new scanner runs.",
+      "Telegram delivery not independently retested."
     ]
   }
 }
