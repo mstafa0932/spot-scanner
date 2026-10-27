@@ -32,32 +32,32 @@
   "runtime_source": {
     "platform": "GitHub Actions",
     "render_bot_service_found": false,
-    "existing_controller_run": 40552581011,
-    "existing_controller_job": null,
+    "existing_controller_run": 40588579243,
+    "existing_controller_job": 122486549235,
     "controller_status_observed": "in_progress_expected_4h_window",
     "scanner_target_seconds": 600,
     "duplicate_controller_created": false,
-    "controller_status_checked_at_utc": "2026-10-27T20:01:12Z",
-    "latest_persisted_state_commit": "63f8d8a998680774a0fc16513ca6ed886a2b6b06",
-    "latest_persisted_state_blob": "86fe079e3c7b6013732d6dfff6921cd3dc33c3d4",
-    "latest_persisted_state_bytes": 3454980,
+    "controller_status_checked_at_utc": "2026-10-27T23:13:00Z",
+    "latest_persisted_state_commit": "a0d4e9b6256653b45fad4036adba22618608f41d",
+    "latest_persisted_state_blob": "d4ea73b7806f1bf4fe133aa2e109a9b1aa5f4eb8",
+    "latest_persisted_state_bytes": 3566913,
     "last_controller_completion_expected_end_of_window": true,
-    "last_controller_completion_note": "Existing controller39857976265 remains completed successfully. Two new completed existing main scanner cycles39920680493 and39921829241 were verified; run39923007578 was still in progress and was not counted or rerun. Monitoring created no scanner, controller, schedule, repository, or resource."
+    "last_controller_completion_note": "Prior controller 40552581011 completed success at 2026-10-27T21:39:26Z; current existing controller 40588579243 remains in_progress within its four-hour window. No duplicate controller or scanner started by monitoring."
   },
   "last_verified_production_run": {
-    "run_id": 40573982961,
-    "job_id": 122435390358,
-    "head_sha": "5228f550a84e247cba3971d74e4978e2992826f9",
-    "refreshed_main_sha": "5228f550a84e247cba3971d74e4978e2992826f9",
-    "resulting_state_commit": "63f8d8a998680774a0fc16513ca6ed886a2b6b06",
+    "run_id": 40600147781,
+    "job_id": 122525959607,
+    "head_sha": "b7eec2471e85b2b8f4c9b76c531a2e482301a76f",
+    "refreshed_main_sha": "b7eec2471e85b2b8f4c9b76c531a2e482301a76f",
+    "resulting_state_commit": "a0d4e9b6256653b45fad4036adba22618608f41d",
     "run_scanner_step": "success",
     "persist_state_step": "success",
     "validate_signal_lifecycle": "skipped_by_intended_event_guard",
     "event": "workflow_dispatch",
-    "finished_at_utc": "2026-10-27T20:01:07Z",
+    "finished_at_utc": "2026-10-27T23:11:13Z",
     "infra": {
       "cadence_expected_seconds": 600,
-      "cadence_gap_seconds": 617,
+      "cadence_gap_seconds": 595,
       "cadence_status": "ok",
       "candles_synthetic": 0,
       "candles_error": 0,
@@ -65,20 +65,22 @@
       "funnel": {
         "universe": 235,
         "orderbooks_attempted": 80,
-        "technicals_attempted": 37,
+        "technicals_attempted": 41,
         "confirmed": 0,
         "near_ready_alerts": 0,
         "early_watch_alerts": 0
       }
     },
-    "evidence": "GitHub Actions run40573982961 job122435390358 and main state 63f8d8a998680774a0fc16513ca6ed886a2b6b06"
+    "evidence": "GitHub Actions run 40600147781 job 122525959607, persisted main commit a0d4e9b6256653b45fad4036adba22618608f41d"
   },
   "latest_loaded_state": {
-    "commit_sha": "63f8d8a998680774a0fc16513ca6ed886a2b6b06",
+    "commit_sha": "a0d4e9b6256653b45fad4036adba22618608f41d",
+    "blob_sha": "d4ea73b7806f1bf4fe133aa2e109a9b1aa5f4eb8",
+    "bytes": 3566913,
     "json_valid": true,
-    "observed_at_utc": "2026-10-27T20:01:12Z",
+    "observed_at_utc": "2026-10-27T23:13:00Z",
     "retained_diagnostics_count": 12,
-    "last_run_id": 40573982961,
+    "last_run_id": 40600147781,
     "all_retained_shadow_mode": true
   },
   "fixes": {
@@ -3784,5 +3786,77 @@
       "https://github.com/mstafa0932/spot-scanner/actions/runs/40573982961",
       "https://github.com/mstafa0932/spot-scanner/actions/runs/40552581011"
     ]
+  },
+  "last_incremental_monitoring": {
+    "observed_at_utc": "2026-10-27T23:13:00Z",
+    "previous_checkpoint_observed_at_utc": "2026-10-27T20:01:12Z",
+    "main_at_check": "a0d4e9b6256653b45fad4036adba22618608f41d",
+    "main_baseline": "f34c06ee1b5a1fa2a58a44359a324eba5a77ae2c",
+    "main_diff_paths": [
+      "scanner_state.json",
+      "near_misses_archive.jsonl"
+    ],
+    "production_code_or_config_changed": false,
+    "scanner_runs_since_previous_checkpoint": {
+      "count": 19,
+      "first_run_id": 40575476727,
+      "last_run_id": 40600147781,
+      "all_completed_success": true,
+      "created_at_gap_min_seconds": 598,
+      "created_at_gap_max_seconds": 616,
+      "created_at_gap_mean_seconds": 601,
+      "expected_seconds": 600
+    },
+    "controller": {
+      "previous_id": 40552581011,
+      "previous_conclusion": "success",
+      "current_id": 40588579243,
+      "current_job_id": 122486549235,
+      "current_status": "in_progress",
+      "current_window_expected_4h": true
+    },
+    "scanner_latest": {
+      "run_id": 40600147781,
+      "run_step": "success",
+      "persist_step": "success",
+      "state_commit": "a0d4e9b6256653b45fad4036adba22618608f41d",
+      "state_blob": "d4ea73b7806f1bf4fe133aa2e109a9b1aa5f4eb8",
+      "state_valid": true,
+      "shadow": true,
+      "native_candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+      "synthetic_candles": 0,
+      "candle_errors": 0
+    },
+    "new_organic_ready_delivery": {
+      "run_id": 40589959495,
+      "job_id": 122491325673,
+      "head_sha": "a756299653b08f6438b6c53e54b4b10168bdec1e",
+      "at_utc": "2026-10-27T21:51:06Z",
+      "symbol": "ETHFI_TL",
+      "score": 84,
+      "mode": "SHADOW",
+      "confirmations": 2,
+      "distinct_closed_candle_open_times_utc_seconds": [
+        1793133000,
+        1793136600
+      ],
+      "entry_reference_tl": "33.2400",
+      "stop_reference_tl": "32.64617328519855595667870036",
+      "tp1_reference_tl": "34.13074007220216606498194946",
+      "telegram_api_accepted": true,
+      "telegram_message_id": 1116,
+      "telegram_human_read_not_proven": true,
+      "duplicate_ready_alerts_in_following_eight_completed_scans": 0,
+      "real_trade_executed": false,
+      "paper_limit_fill_is_model_estimate_not_exchange_confirmed": true
+    },
+    "new_proven_bug": false,
+    "production_code_changed": false,
+    "production_settings_changed": false,
+    "scanner_or_controller_dispatched_by_monitor": false,
+    "heavy_tests_rerun": false,
+    "monitoring_only": true,
+    "user_notification_sent": false,
+    "notes": "19 successful existing scanner runs checked since prior checkpoint, plus one existing controller in progress and successful near-miss research run. Signal ETHFI_TL was organic, not a test; Telegram API acceptance was logged with message_id 1116. No evidence of a new code defect, no code or strategy changes warranted."
   }
 }
