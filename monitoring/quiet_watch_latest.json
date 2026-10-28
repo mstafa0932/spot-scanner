@@ -3,97 +3,98 @@
   "kind": "quiet_watch_incremental_checkpoint",
   "repository": "mstafa0932/spot-scanner",
   "monitor_branch": "monitor/quiet-engineering-20261017",
-  "checked_at_utc": "2026-10-28T07:12:08.549Z",
-  "previous_completed_checkpoint_run": 40625095241,
-  "first_new_completed_run": 40626053175,
-  "last_completed_run": 40648329955,
-  "completed_scanner_runs": 24,
-  "main_sha": "2f17c2ed3180a8733f536c557cc19c22944f4c11",
-  "main_state_blob_sha": "86e5c9b828d5631c91494a9712742be17f7781dd",
-  "main_state_validated_bytes": 3652716,
-  "main_diff_since_reference": {
-    "base": "1726a1fd21efcb69f3c99a72a37792a2dac5addd",
-    "ahead_commits": 28,
+  "latest_completed_at_utc": "2026-10-28T11:42:15Z",
+  "baseline_last_completed_run": 40650473334,
+  "first_new_completed_run": 40651559674,
+  "last_completed_run": 40681768354,
+  "completed_scanner_runs": 25,
+  "successful_scanner_runs": 25,
+  "run_scanner_step_success": 25,
+  "persist_scanner_state_step_success": 25,
+  "main_sha": "30fa5f1f9a23649d048ebbaf8ceec119a6591746",
+  "main_state_blob_sha": "b1c24dc33fd277bc972fe1e62748f08cbe4efb0e",
+  "main_state_bytes": 3688693,
+  "main_diff_since_baseline": {
+    "base": "df505ee71bb137ba2f51af1990aa5af006031194",
+    "ahead_commits": 25,
     "changed_files": [
-      "scanner_state.json",
-      "near_misses_archive.jsonl"
+      "scanner_state.json"
     ],
     "code_or_config_changes": false
   },
   "scanner": {
-    "runs_completed_success": 24,
-    "run_scanner_step_success": 24,
-    "persist_scanner_state_step_success": 24,
+    "start_gap_seconds_min": 599,
+    "start_gap_seconds_max": 617,
     "all_shadow_mode": true,
-    "synthetic_candles_total": 0,
-    "candle_error_runs": [
-      {
-        "run": 40629782176,
-        "market": "OM_TL",
-        "reason": "candle_unavailable_other"
-      },
-      {
-        "run": 40633578394,
-        "market": "OM_TL",
-        "reason": "candle_unavailable_other"
-      },
-      {
-        "run": 40637350321,
-        "market": "MORPHO_TL",
-        "reason": "timeout"
-      }
+    "early_watch_general_alerts_disabled": true,
+    "synthetic_candles_in_reviewed_logs": 0,
+    "transient_candle_errors_observed": [
+      "OM_TL candle_unavailable_other (intermittent)",
+      "CHZ_TL timeout",
+      "NMR_TL timeout",
+      "PEPE_TL timeout"
     ],
-    "cadence_gap_seconds_min": 576,
-    "cadence_gap_seconds_max": 632,
-    "most_recent": {
-      "run": 40648329955,
-      "job": 122682270714,
-      "completed_at_utc": "2026-10-28T07:11:38Z",
-      "candles_complete": 34,
+    "btc_gate_timeouts_runs": [
+      40660846421,
+      40675271782
+    ],
+    "recovered_in_subsequent_cycles": true,
+    "unavailable_job_log": [
+      40662125413
+    ],
+    "last_run": {
+      "id": 40681768354,
+      "job": 122793990744,
+      "candles_complete": 43,
       "candles_synthetic": 0,
       "candles_error": 0,
-      "cadence_gap_seconds": 591,
-      "state_saved": "OK",
-      "signal": false,
-      "near_ready_alerts": 0
+      "cadence_gap_seconds": 599,
+      "state_saved": "OK"
     }
   },
   "controller": {
-    "prior_run": 40616354480,
+    "prior_run": 40639305833,
     "prior_result": "success",
-    "prior_chain_to_run": 40639305833,
-    "active_run": 40639305833,
-    "active_status": "in_progress_expected_4h_window",
-    "new_scanner_dispatches_observed": true,
-    "duplicate_controller_started_by_monitor": false
+    "active_run": 40666044394,
+    "active_status": "in_progress_within_expected_4h_window",
+    "duplicate_dispatch_by_monitor": false
   },
-  "signal_followup": {
-    "DOGE_TL": [
-      {
-        "run": 40626053175,
-        "reason": "trigger:score 66 < 80"
+  "new_signal_delivery": {
+    "BONK_TL": {
+      "near_ready": {
+        "run": 40657223987,
+        "closed_candle": 1793175300,
+        "confirmations": "1/2",
+        "telegram_message_id": 1120
       },
-      {
-        "run": 40627961618,
-        "reason": "trigger:score 72 < 80"
-      }
-    ],
-    "ONDO_TL": "15m momentum not constructive in 406260/406270/406279; later book imbalance too low in 406452",
-    "PUMP_TL": "book imbalance too low 406260; later 15m momentum not constructive",
-    "run_40645240659": "confirmed=1 but risk:rr_below_min=1; exec=0, no READY; no defect inferred"
+      "ready": {
+        "run": 40659636556,
+        "closed_candle": 1793176200,
+        "confirmations": 2,
+        "score": 89,
+        "telegram_message_id": 1121,
+        "entry": "0.00015352",
+        "stop": "0.00015164820",
+        "tp1": "0.0001563277000"
+      },
+      "distinct_closed_candles": true,
+      "telegram_api_accepted": true,
+      "trade_executed": false
+    },
+    "new_ready_count": 1,
+    "new_near_ready_count": 1,
+    "telegram_test_messages_sent": 0,
+    "duplicate_delivery_observed": false
   },
-  "telegram": {
-    "new_ready_or_near_ready_alerts_observed": 0,
-    "test_messages_sent": 0,
-    "previous_verified_message_ids": [
-      1116,
-      1117,
-      1118,
-      1119
-    ],
-    "repeat_claims_avoided": true
+  "finding": "No proven new code defect. Normal cadence and persisted state; transient upstream Paribu timeouts fail closed. BONK_TL moved NEAR READY to READY on distinct closed candles; Telegram API accepted message IDs 1120 and 1121.",
+  "limitation": "One completed job's log download returned 404 despite successful job steps; large scanner_state.json direct connector read empty, while workflow validated nonempty JSON and state was committed to main.",
+  "changes": {
+    "production_code": false,
+    "production_config": false,
+    "production_state_manual": false,
+    "scanner_or_controller_dispatched": false,
+    "telegram_test": false,
+    "pr_opened": false
   },
-  "finding": "No new proven code defect. Three isolated market-specific candle errors were classified and skipped, with subsequent cycles successful. No production changes or additional dispatch.",
-  "limitation": "GitHub connector returns empty direct content for large scanner_state.json; each successful scanner workflow validates JSON and pushes its state to main. Active controller job logs unavailable until completion (404), but its dispatches and predecessor's handoff are visible.",
-  "next": "Resume after scanner run 40648329955; recheck controller 40639305833 when its four-hour window completes. Inspect any repeated market-specific candle failures if they persist."
+  "next": "Resume after completed scanner run 40681768354; verify active controller 40666044394 at expected four-hour end and monitor whether candle timeouts persist. No strategy changes."
 }

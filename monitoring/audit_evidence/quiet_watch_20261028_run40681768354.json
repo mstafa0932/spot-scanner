@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "repository": "mstafa0932/spot-scanner",
+  "run_window_utc": [
+    "2026-10-28T07:40:05Z",
+    "2026-10-28T11:42:15Z"
+  ],
+  "runs": [
+    40651559674,
+    40652630044,
+    40653698858,
+    40654859020,
+    40656027022,
+    40657223987,
+    40658437512,
+    40659636556,
+    40660846421,
+    40662125413,
+    40663414455,
+    40664714895,
+    40666028650,
+    40667374003,
+    40668656893,
+    40669987731,
+    40671323570,
+    40672650703,
+    40673971648,
+    40675271782,
+    40676551452,
+    40677873603,
+    40679174069,
+    40680472353,
+    40681768354
+  ],
+  "links": {
+    "latest_run": "https://github.com/mstafa0932/spot-scanner/actions/runs/40681768354",
+    "near_ready": "https://github.com/mstafa0932/spot-scanner/actions/runs/40657223987",
+    "ready": "https://github.com/mstafa0932/spot-scanner/actions/runs/40659636556",
+    "controller": "https://github.com/mstafa0932/spot-scanner/actions/runs/40666044394"
+  },
+  "summary": {
+    "schema_version": 1,
+    "kind": "quiet_watch_incremental_checkpoint",
+    "repository": "mstafa0932/spot-scanner",
+    "monitor_branch": "monitor/quiet-engineering-20261017",
+    "latest_completed_at_utc": "2026-10-28T11:42:15Z",
+    "baseline_last_completed_run": 40650473334,
+    "first_new_completed_run": 40651559674,
+    "last_completed_run": 40681768354,
+    "completed_scanner_runs": 25,
+    "successful_scanner_runs": 25,
+    "run_scanner_step_success": 25,
+    "persist_scanner_state_step_success": 25,
+    "main_sha": "30fa5f1f9a23649d048ebbaf8ceec119a6591746",
+    "main_state_blob_sha": "b1c24dc33fd277bc972fe1e62748f08cbe4efb0e",
+    "main_state_bytes": 3688693,
+    "main_diff_since_baseline": {
+      "base": "df505ee71bb137ba2f51af1990aa5af006031194",
+      "ahead_commits": 25,
+      "changed_files": [
+        "scanner_state.json"
+      ],
+      "code_or_config_changes": false
+    },
+    "scanner": {
+      "start_gap_seconds_min": 599,
+      "start_gap_seconds_max": 617,
+      "all_shadow_mode": true,
+      "early_watch_general_alerts_disabled": true,
+      "synthetic_candles_in_reviewed_logs": 0,
+      "transient_candle_errors_observed": [
+        "OM_TL candle_unavailable_other (intermittent)",
+        "CHZ_TL timeout",
+        "NMR_TL timeout",
+        "PEPE_TL timeout"
+      ],
+      "btc_gate_timeouts_runs": [
+        40660846421,
+        40675271782
+      ],
+      "recovered_in_subsequent_cycles": true,
+      "unavailable_job_log": [
+        40662125413
+      ],
+      "last_run": {
+        "id": 40681768354,
+        "job": 122793990744,
+        "candles_complete": 43,
+        "candles_synthetic": 0,
+        "candles_error": 0,
+        "cadence_gap_seconds": 599,
+        "state_saved": "OK"
+      }
+    },
+    "controller": {
+      "prior_run": 40639305833,
+      "prior_result": "success",
+      "active_run": 40666044394,
+      "active_status": "in_progress_within_expected_4h_window",
+      "duplicate_dispatch_by_monitor": false
+    },
+    "new_signal_delivery": {
+      "BONK_TL": {
+        "near_ready": {
+          "run": 40657223987,
+          "closed_candle": 1793175300,
+          "confirmations": "1/2",
+          "telegram_message_id": 1120
+        },
+        "ready": {
+          "run": 40659636556,
+          "closed_candle": 1793176200,
+          "confirmations": 2,
+          "score": 89,
+          "telegram_message_id": 1121,
+          "entry": "0.00015352",
+          "stop": "0.00015164820",
+          "tp1": "0.0001563277000"
+        },
+        "distinct_closed_candles": true,
+        "telegram_api_accepted": true,
+        "trade_executed": false
+      },
+      "new_ready_count": 1,
+      "new_near_ready_count": 1,
+      "telegram_test_messages_sent": 0,
+      "duplicate_delivery_observed": false
+    },
+    "finding": "No proven new code defect. Normal cadence and persisted state; transient upstream Paribu timeouts fail closed. BONK_TL moved NEAR READY to READY on distinct closed candles; Telegram API accepted message IDs 1120 and 1121.",
+    "limitation": "One completed job's log download returned 404 despite successful job steps; large scanner_state.json direct connector read empty, while workflow validated nonempty JSON and state was committed to main.",
+    "changes": {
+      "production_code": false,
+      "production_config": false,
+      "production_state_manual": false,
+      "scanner_or_controller_dispatched": false,
+      "telegram_test": false,
+      "pr_opened": false
+    },
+    "next": "Resume after completed scanner run 40681768354; verify active controller 40666044394 at expected four-hour end and monitor whether candle timeouts persist. No strategy changes."
+  }
+}
