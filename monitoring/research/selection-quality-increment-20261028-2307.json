@@ -1,0 +1,677 @@
+{
+  "schema_version": 1,
+  "kind": "prospective_selection_quality_increment",
+  "date_local": "2026-10-28",
+  "prior_research_commit": "fddb1b15ca00de75faec155c6d5b1335eafb81cb",
+  "prior_baseline_path": "monitoring/research/selection-quality-20261028.json",
+  "prior_increment_path": "monitoring/research/selection-quality-increment-20261028-1820.json",
+  "reviewed_scanner_run_id_range": [
+    40716677590,
+    40759448254
+  ],
+  "reviewed_completed_scanner_runs": 28,
+  "baseline_non_sent_episodes": 91,
+  "previous_increment_non_sent_episodes": 1,
+  "new_non_sent_episodes": 17,
+  "combined_non_sent_episodes": 109,
+  "cohort_policy": "First logged non-sent score >=80 event per symbol per 6 hours, without later price knowledge. Log stage/reason and ticker reference from the same completed scan's saved state; previous 92 episodes retained, not overwritten. Overlap with a later READY is possible and preserved.",
+  "new_non_sent_high_score_episodes": [
+    {
+      "symbol": "TLM_TL",
+      "run_id": 40721693216,
+      "scan_started_at_utc_seconds": 1793203299,
+      "reference_quote_at_utc_seconds": 1793203299,
+      "reference_last_tl": "0.0602",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 83,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793202300,
+      "authentic_only": true,
+      "source_state_commit": "057893859644f647edc1783936f5e6ddd67dc90e",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793206899,
+          "observed_at_utc_seconds": 1793206952,
+          "observed_last_tl": "0.0602",
+          "last_change_pct": 0,
+          "source_state_commit": "49eff43dc4405e1f3d083896183ae563195343b0",
+          "sample_delay_seconds": 53
+        },
+        "4": {
+          "status": "observed",
+          "due_utc_seconds": 1793217699,
+          "observed_at_utc_seconds": 1793217726,
+          "observed_last_tl": "0.0614",
+          "last_change_pct": 1.9933554817275878,
+          "source_state_commit": "5780e77ca4359d6cf5c1f4f62d4c9dc374154f47",
+          "sample_delay_seconds": 27
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793224899
+        }
+      }
+    },
+    {
+      "symbol": "TRUMP_TL",
+      "run_id": 40723370852,
+      "scan_started_at_utc_seconds": 1793203940,
+      "reference_quote_at_utc_seconds": 1793203940,
+      "reference_last_tl": "84.81",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 84,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793202300,
+      "authentic_only": true,
+      "source_state_commit": "a669af2d29d0fb7fde6f516e320254be5dd56e49",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793207540,
+          "observed_at_utc_seconds": 1793208237,
+          "observed_last_tl": "84.37",
+          "last_change_pct": -0.5188067444876765,
+          "source_state_commit": "295af8e1daed7db95c908433253985c8304eb52e",
+          "sample_delay_seconds": 697
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793218340
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793225540
+        }
+      }
+    },
+    {
+      "symbol": "PENGU_TL",
+      "run_id": 40728318953,
+      "scan_started_at_utc_seconds": 1793205680,
+      "reference_quote_at_utc_seconds": 1793205680,
+      "reference_last_tl": "0.3848",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 80,
+      "decision_stage": "trigger",
+      "decision_reason": "BTC blocked: BTC confirmed weakness RSI=35.8 | 3C=-0.14%",
+      "closed_candle_open_utc_seconds": 1793204100,
+      "authentic_only": true,
+      "source_state_commit": "a53c6e85854dffc404f43f5da99e4d3d1dd4bcf8",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793209280,
+          "observed_at_utc_seconds": 1793209291,
+          "observed_last_tl": "0.3837",
+          "last_change_pct": -0.28586278586277825,
+          "source_state_commit": "d74d5d6eaa259f61579370590c1680da1e9f9350",
+          "sample_delay_seconds": 11
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793220080
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793227280
+        }
+      }
+    },
+    {
+      "symbol": "PEPE_TL",
+      "run_id": 40739582094,
+      "scan_started_at_utc_seconds": 1793209970,
+      "reference_quote_at_utc_seconds": 1793209970,
+      "reference_last_tl": "0.00024451",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 80,
+      "decision_stage": "trigger",
+      "decision_reason": "volume ratio 1.12 < 1.30",
+      "closed_candle_open_utc_seconds": 1793208600,
+      "authentic_only": true,
+      "source_state_commit": "b2d53bb2718be453119ed588ec5c23de7db1648e",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793213570,
+          "observed_at_utc_seconds": 1793214131,
+          "observed_last_tl": "0.00024185",
+          "last_change_pct": -1.0878900658459645,
+          "source_state_commit": "826ea018d7a355a1cf1c5a7c94d45469f0c6d7fd",
+          "sample_delay_seconds": 561
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793224370
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793231570
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": 40744263581,
+      "scan_started_at_utc_seconds": 1793211694,
+      "reference_quote_at_utc_seconds": 1793211694,
+      "reference_last_tl": "65.589",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 82,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793210400,
+      "authentic_only": true,
+      "source_state_commit": "c75dc15d5cba604fc64035c0792a24c979abc09b",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793215294,
+          "observed_at_utc_seconds": 1793215336,
+          "observed_last_tl": "66.015",
+          "last_change_pct": 0.6494991538215311,
+          "source_state_commit": "f7604ae35b38eecc7e24e0cd3466537ceef903b4",
+          "sample_delay_seconds": 42
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793226094
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793233294
+        }
+      }
+    },
+    {
+      "symbol": "BONK_TL",
+      "run_id": 40744263581,
+      "scan_started_at_utc_seconds": 1793211694,
+      "reference_quote_at_utc_seconds": 1793211694,
+      "reference_last_tl": "0.0001526",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 89,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793210400,
+      "authentic_only": true,
+      "source_state_commit": "c75dc15d5cba604fc64035c0792a24c979abc09b",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793215294,
+          "observed_at_utc_seconds": 1793215336,
+          "observed_last_tl": "0.0001555",
+          "last_change_pct": 1.900393184796867,
+          "source_state_commit": "f7604ae35b38eecc7e24e0cd3466537ceef903b4",
+          "sample_delay_seconds": 42
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793226094
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793233294
+        }
+      }
+    },
+    {
+      "symbol": "ETHFI_TL",
+      "run_id": 40744263581,
+      "scan_started_at_utc_seconds": 1793211694,
+      "reference_quote_at_utc_seconds": 1793211694,
+      "reference_last_tl": "32.6",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 82,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793210400,
+      "authentic_only": true,
+      "source_state_commit": "c75dc15d5cba604fc64035c0792a24c979abc09b",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793215294,
+          "observed_at_utc_seconds": 1793215336,
+          "observed_last_tl": "32.96",
+          "last_change_pct": 1.104294478527601,
+          "source_state_commit": "f7604ae35b38eecc7e24e0cd3466537ceef903b4",
+          "sample_delay_seconds": 42
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793226094
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793233294
+        }
+      }
+    },
+    {
+      "symbol": "RVN_TL",
+      "run_id": 40748914731,
+      "scan_started_at_utc_seconds": 1793213498,
+      "reference_quote_at_utc_seconds": 1793213498,
+      "reference_last_tl": "0.0778",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 85,
+      "decision_stage": "discovery",
+      "decision_reason": "RSI outside watch range",
+      "closed_candle_open_utc_seconds": 1793212200,
+      "authentic_only": true,
+      "source_state_commit": "2592a5befc8801ded34572805e2cb1e3fcd2777e",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793217098,
+          "observed_at_utc_seconds": 1793217143,
+          "observed_last_tl": "0.0754",
+          "last_change_pct": -3.084832904884316,
+          "source_state_commit": "73a6afdf693106ba50c5541bffe2c81b08846a7c",
+          "sample_delay_seconds": 45
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793227898
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793235098
+        }
+      }
+    },
+    {
+      "symbol": "FET_TL",
+      "run_id": 40748914731,
+      "scan_started_at_utc_seconds": 1793213498,
+      "reference_quote_at_utc_seconds": 1793213498,
+      "reference_last_tl": "9.121",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 80,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793212200,
+      "authentic_only": true,
+      "source_state_commit": "2592a5befc8801ded34572805e2cb1e3fcd2777e",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "observed",
+          "due_utc_seconds": 1793217098,
+          "observed_at_utc_seconds": 1793217143,
+          "observed_last_tl": "9.194",
+          "last_change_pct": 0.800350838723829,
+          "source_state_commit": "73a6afdf693106ba50c5541bffe2c81b08846a7c",
+          "sample_delay_seconds": 45
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793227898
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793235098
+        }
+      }
+    },
+    {
+      "symbol": "SEI_TL",
+      "run_id": 40751963113,
+      "scan_started_at_utc_seconds": 1793214722,
+      "reference_quote_at_utc_seconds": 1793214722,
+      "reference_last_tl": "2.632",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 80,
+      "decision_stage": "discovery",
+      "decision_reason": "4h clearly weak",
+      "closed_candle_open_utc_seconds": 1793213100,
+      "authentic_only": true,
+      "source_state_commit": "ac99d1e2e205543ce336dd28113309c9e9e6642d",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793218322
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793229122
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793236322
+        }
+      }
+    },
+    {
+      "symbol": "HOT_TL",
+      "run_id": 40751963113,
+      "scan_started_at_utc_seconds": 1793214722,
+      "reference_quote_at_utc_seconds": 1793214722,
+      "reference_last_tl": "0.01733",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 80,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793213100,
+      "authentic_only": true,
+      "source_state_commit": "ac99d1e2e205543ce336dd28113309c9e9e6642d",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793218322
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793229122
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793236322
+        }
+      }
+    },
+    {
+      "symbol": "HYPE_TL",
+      "run_id": 40753487432,
+      "scan_started_at_utc_seconds": 1793215336,
+      "reference_quote_at_utc_seconds": 1793215336,
+      "reference_last_tl": "4028.74",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 83,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793214000,
+      "authentic_only": true,
+      "source_state_commit": "f7604ae35b38eecc7e24e0cd3466537ceef903b4",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793218936
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793229736
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793236936
+        }
+      }
+    },
+    {
+      "symbol": "DOGE_TL",
+      "run_id": 40753487432,
+      "scan_started_at_utc_seconds": 1793215336,
+      "reference_quote_at_utc_seconds": 1793215336,
+      "reference_last_tl": "3.9538",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 86,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793214000,
+      "authentic_only": true,
+      "source_state_commit": "f7604ae35b38eecc7e24e0cd3466537ceef903b4",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793218936
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793229736
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793236936
+        }
+      }
+    },
+    {
+      "symbol": "ZRO_TL",
+      "run_id": 40757967290,
+      "scan_started_at_utc_seconds": 1793217143,
+      "reference_quote_at_utc_seconds": 1793217143,
+      "reference_last_tl": "86.67",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 83,
+      "decision_stage": "trigger",
+      "decision_reason": "setup not ready",
+      "closed_candle_open_utc_seconds": 1793215800,
+      "authentic_only": true,
+      "source_state_commit": "73a6afdf693106ba50c5541bffe2c81b08846a7c",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793220743
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793231543
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793238743
+        }
+      }
+    },
+    {
+      "symbol": "PUMP_TL",
+      "run_id": 40759448254,
+      "scan_started_at_utc_seconds": 1793217726,
+      "reference_quote_at_utc_seconds": 1793217726,
+      "reference_last_tl": "0.2299",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 82,
+      "decision_stage": "discovery",
+      "decision_reason": "RSI outside watch range",
+      "closed_candle_open_utc_seconds": 1793216700,
+      "authentic_only": true,
+      "source_state_commit": "5780e77ca4359d6cf5c1f4f62d4c9dc374154f47",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793221326
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793232126
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793239326
+        }
+      }
+    },
+    {
+      "symbol": "RAY_TL",
+      "run_id": 40759448254,
+      "scan_started_at_utc_seconds": 1793217726,
+      "reference_quote_at_utc_seconds": 1793217726,
+      "reference_last_tl": "92.54",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 80,
+      "decision_stage": "discovery",
+      "decision_reason": "RSI outside watch range",
+      "closed_candle_open_utc_seconds": 1793216700,
+      "authentic_only": true,
+      "source_state_commit": "5780e77ca4359d6cf5c1f4f62d4c9dc374154f47",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793221326
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793232126
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793239326
+        }
+      }
+    },
+    {
+      "symbol": "ARB_TL",
+      "run_id": 40759448254,
+      "scan_started_at_utc_seconds": 1793217726,
+      "reference_quote_at_utc_seconds": 1793217726,
+      "reference_last_tl": "8.83",
+      "reference_price_basis": "saved_ticker_radar_last_not_executable_bid_ask",
+      "score": 83,
+      "decision_stage": "discovery",
+      "decision_reason": "RSI outside watch range",
+      "closed_candle_open_utc_seconds": 1793216700,
+      "authentic_only": true,
+      "source_state_commit": "5780e77ca4359d6cf5c1f4f62d4c9dc374154f47",
+      "telegram_sent": false,
+      "real_trade": false,
+      "horizons": {
+        "1": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793221326
+        },
+        "4": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793232126
+        },
+        "6": {
+          "status": "right_censored_not_matured",
+          "due_utc_seconds": 1793239326
+        }
+      }
+    }
+  ],
+  "previous_MEGA_TL_episode_update": {
+    "symbol": "MEGA_TL",
+    "run_id": 40709947322,
+    "reference_quote_at_utc_seconds": 1793199095,
+    "reference_last_tl": "2.495",
+    "score": 85,
+    "reason": "BTC blocked: BTC confirmed weakness RSI=33.4 | 3C=-0.17%",
+    "horizons": {
+      "1": {
+        "status": "observed",
+        "due_utc_seconds": 1793202695,
+        "observed_at_utc_seconds": 1793202712,
+        "observed_last_tl": "2.506",
+        "last_change_pct": 0.44088176352703456,
+        "source_state_commit": "ff9a5466954f6b9280e05a51febaad6217444574"
+      },
+      "4": {
+        "status": "observed",
+        "due_utc_seconds": 1793213495,
+        "observed_at_utc_seconds": 1793213498,
+        "observed_last_tl": "2.471",
+        "last_change_pct": -0.9619238476953895,
+        "source_state_commit": "2592a5befc8801ded34572805e2cb1e3fcd2777e"
+      },
+      "6": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793220695
+      }
+    }
+  },
+  "new_READY_signal": {
+    "symbol": "FET_TL",
+    "run_id": 40757967290,
+    "signal_id": "FET_TL:1793217189",
+    "opened_at_utc_seconds": 1793217189,
+    "score": 81,
+    "setup": "RECOVERY",
+    "closed_candle_open_utc_seconds": 1793215800,
+    "authentic_only": true,
+    "confirmation_count_reported": 4,
+    "distinct_closed_candle_open_times_in_watch_history": [
+      1793211300,
+      1793212200,
+      1793213100,
+      1793215800
+    ],
+    "entry_tl": "9.1902",
+    "stop_tl": "8.852170730379884619571133123",
+    "tp1_tl": "9.697243904430173070643300316",
+    "tp2_tl": "9.866258539240230760857733754",
+    "atr15m_pct": 0.6084937160677573,
+    "tp1_distance_pct": 5.517223830059992,
+    "tp1_atr_multiple": 9.06701858108529,
+    "telegram_accepted_message_id": 1122,
+    "telegram_acceptance_logged_at_utc": "2026-10-28T19:53:09Z",
+    "fill_estimated": false,
+    "fill_confirmed": false,
+    "shadow_status_at_cutoff": "PENDING_ENTRY",
+    "sampled_ticker_at_signal_scan_tl": "9.194",
+    "sampled_ticker_at_latest_tl": "9.343",
+    "horizons": {
+      "1": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793220789
+      },
+      "4": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793231589
+      },
+      "6": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793238789
+      }
+    },
+    "real_trade": false
+  },
+  "new_risk_gate_evidence": {
+    "symbol": "PEPE_TL",
+    "run_id": 40754981176,
+    "stage": "risk",
+    "reason": "rr_below_min",
+    "score": 84,
+    "actual_rr": "0.02998170571067553841708785955",
+    "min_rr": "1.50",
+    "closed_candle_open_utc_seconds": 1793214900,
+    "authentic_only": true,
+    "ready_sent": false,
+    "classification": "policy_rejection_not_proven_bug"
+  },
+  "measurement_cutoff_utc_seconds": 1793217726,
+  "methodology": "For observed horizons use the first retained ticker snapshot at or after the due time, within 20 minutes. These are last-price samples, not executable returns, MFE/MAE, realized PnL or confirmed fills. No missing outcome is imputed to zero; no threshold change is justified.",
+  "limitations": [
+    "Only prospective episodes from completed scanner runs through 40759448254 are included; run 40760955059 was in progress and excluded.",
+    "The logged non-sent cohort can overlap a later READY for the same symbol; neither should be removed ex post.",
+    "Observed book imbalance and spread at decision time are not a reconstructed future order book.",
+    "No strategy/scoring/risk/filter/stop/target changes or independent calibration validation."
+  ]
+}

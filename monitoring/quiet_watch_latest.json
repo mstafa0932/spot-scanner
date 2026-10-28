@@ -3,49 +3,59 @@
   "kind": "quiet_watch_incremental_checkpoint",
   "repository": "mstafa0932/spot-scanner",
   "monitor_branch": "monitor/quiet-engineering-20261017",
-  "previous_quality_review_main": "3bc53d6c6cae6a13ac1dfdd00e52f58646472e60",
-  "previous_quality_review_last_run": 40697028167,
-  "main_sha": "9bb45fcba354ccb7ec56ab9b4a4530d95dbb65bc",
-  "last_completed_run": 40714971524,
-  "last_completed_at_utc": "2026-10-28T15:22:41Z",
-  "completed_scanner_runs_since_quality_review": 11,
-  "successful_scanner_runs": 11,
-  "run_scanner_step_success": 11,
-  "persist_scanner_state_step_success": 11,
-  "scanner_start_gap_seconds_min": 598,
-  "scanner_start_gap_seconds_max": 616,
-  "health_cadence_gap_seconds_min": 580,
-  "health_cadence_gap_seconds_max": 622,
-  "synthetic_candles_in_reviewed_infra_health": 0,
-  "candle_errors_in_reviewed_infra_health": 0,
-  "shadow_mode_all_runs": true,
-  "ready_sent_in_new_runs": 0,
-  "near_ready_sent_in_new_runs": 0,
-  "main_diff_since_quality_review": {
-    "ahead_commits": 11,
+  "previous_monitor_commit": "fddb1b15ca00de75faec155c6d5b1335eafb81cb",
+  "previous_last_completed_run": 40714971524,
+  "main_sha": "5780e77ca4359d6cf5c1f4f62d4c9dc374154f47",
+  "main_compared_from": "9bb45fcba354ccb7ec56ab9b4a4530d95dbb65bc",
+  "main_diff": {
+    "ahead_commits": 28,
     "changed_files": [
       "scanner_state.json"
     ],
     "code_or_config_changes": false
   },
+  "last_completed_run": 40759448254,
+  "last_completed_at_utc": "2026-10-28T20:02:56Z",
+  "in_progress_run_excluded": 40760955059,
+  "completed_scanner_runs_since_checkpoint": 28,
+  "successful_scanner_runs": 28,
+  "run_scanner_step_success": 28,
+  "persist_scanner_state_step_success": 28,
+  "refresh_main_step_success": 28,
+  "scanner_start_gap_seconds_min": 597,
+  "scanner_start_gap_seconds_max": 617,
+  "health_cadence_gap_seconds_min": 470,
+  "health_cadence_gap_seconds_max": 740,
+  "health_cadence_status": "ok in logged runs",
+  "synthetic_candles_in_reviewed_infra_health": 0,
+  "candle_errors_in_reviewed_infra_health": 0,
+  "latest_state": {
+    "json_valid": true,
+    "bytes": 3668156,
+    "ticker_observed_at_utc_seconds": 1793217726,
+    "source_commit": "5780e77ca4359d6cf5c1f4f62d4c9dc374154f47"
+  },
   "controller": {
-    "run_id": 40698602329,
-    "status": "in_progress",
-    "expected_four_hour_window": true,
-    "previous_run_id": 40666044394,
+    "previous_run_id": 40698602329,
     "previous_conclusion": "success",
-    "monitor_dispatched_extra_runs": false
+    "current_run_id": 40737989661,
+    "current_status": "in_progress",
+    "current_started_at_utc": "2026-10-28T17:40:44Z",
+    "expected_four_hour_window": true,
+    "extra_dispatch_by_monitor": false
   },
   "quality": {
-    "baseline_sent_signals": 3,
-    "baseline_non_sent_high_score_episodes": 91,
-    "new_non_sent_high_score_episodes": 1,
-    "new_ready_signals": 0,
-    "new_matured_horizon": "BONK_TL:1793177506 at 6h",
-    "increment_path": "monitoring/research/selection-quality-increment-20261028-1820.json",
+    "prior_non_sent_episodes": 92,
+    "new_non_sent_episodes": 17,
+    "combined_non_sent_episodes": 109,
+    "new_READY_signals": 1,
+    "new_READY_symbol": "FET_TL",
+    "telegram_message_id": 1122,
+    "new_risk_gate_evidence": "PEPE_TL rr_below_min run40754981176",
+    "increment_path": "monitoring/research/selection-quality-increment-20261028-2307.json",
     "calibration_validated": false
   },
-  "new_findings": "MEGA_TL score85 non-sent due to BTC confirmed weakness; 1/4/6h future outcomes pending. BONK89 6h sampled last-price change -1.6234%, not PnL. No proven new code defect.",
+  "proven_new_code_defect": false,
   "changes": {
     "production_code": false,
     "production_config": false,
@@ -54,5 +64,5 @@
     "telegram_test": false,
     "pr_opened": false
   },
-  "next": "Resume after scanner run 40714971524. Recheck controller 40698602329 at four-hour deadline; measure MEGA 1/4/6h only when mature using first saved quote at or after horizon within 20 minutes, preserve censored observations and no strategy changes."
+  "next": "Resume after completed scanner run 40759448254, inspect in-progress 40760955059 only after completion, recheck current controller at four-hour deadline, and mature saved 1/4/6h quote horizons including FET without treating estimated fills as trades. No threshold or strategy changes."
 }
