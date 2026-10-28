@@ -1,0 +1,806 @@
+{
+  "schema_version": 1,
+  "protocol": {
+    "version": "precursor_research_v1_20261029",
+    "min_quote_volume_tl": 5000000,
+    "max_gap_seconds": 1200,
+    "history_seconds": 3600,
+    "minimum_history_seconds": 3000,
+    "max_recent_gain_pct": 2.3,
+    "max_compression_pct": 2.0,
+    "max_breakout_step_pct": 0.75,
+    "episode_cooldown_seconds": 21600,
+    "surge_label_pct": 5.0,
+    "adverse_label_pct": -2.0,
+    "retrospective_boundary": 1792789200,
+    "prospective_start": 1793224800
+  },
+  "protocol_sha256": "2d4bb6c7d63b1aabc18a07a51b06d306f5aaaa495c0a9c1c4938f2b47486de74",
+  "incremental": false,
+  "evidence": {
+    "pinned_main": "447052ceacec42ef6632f010dd9bbb351475fef2",
+    "since": 1791925200,
+    "counts": {
+      "states_read": 2370,
+      "missing_old_or_duplicate_ticker": 203,
+      "paired_snapshots": 2166,
+      "unmatched_completed_run": 1
+    },
+    "first_quote_at": 1791925670,
+    "last_quote_at": 1793221311,
+    "cache_sha256": "422011408ec2d77721b3911bd11d05de7a1785444f921bdca7e22b907a98eead"
+  },
+  "observed_checkout_sha_count": 2165,
+  "code_history_note": "Checkout SHA changes may be state-only commits; unique checkout hashes are not unique source-code regimes.",
+  "summaries": {
+    "all": {
+      "hot_once": {
+        "1": {
+          "events": 6512,
+          "observed": 6480,
+          "unknown": 32,
+          "status_counts": {
+            "observed": 6480,
+            "quote_gap": 23,
+            "right_censored": 9
+          },
+          "sampled_surge_5pct": 46,
+          "no_sampled_surge_5pct": 6434,
+          "adverse_2pct": 310,
+          "surge_before_adverse": 46,
+          "mean_last_change_pct": -0.08453703400899593,
+          "median_lead_minutes_when_hit": 34.608333333333334
+        },
+        "4": {
+          "events": 6512,
+          "observed": 6356,
+          "unknown": 156,
+          "status_counts": {
+            "observed": 6356,
+            "missing_terminal_quote": 6,
+            "quote_gap": 73,
+            "right_censored": 77
+          },
+          "sampled_surge_5pct": 197,
+          "no_sampled_surge_5pct": 6159,
+          "adverse_2pct": 1301,
+          "surge_before_adverse": 181,
+          "mean_last_change_pct": -0.20461892438660076,
+          "median_lead_minutes_when_hit": 119.55
+        },
+        "6": {
+          "events": 6512,
+          "observed": 6256,
+          "unknown": 256,
+          "status_counts": {
+            "observed": 6256,
+            "quote_gap": 116,
+            "right_censored": 140
+          },
+          "sampled_surge_5pct": 304,
+          "no_sampled_surge_5pct": 5952,
+          "adverse_2pct": 1741,
+          "surge_before_adverse": 274,
+          "mean_last_change_pct": -0.23846806175915125,
+          "median_lead_minutes_when_hit": 189.64166666666665
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 3010,
+          "observed": 2989,
+          "unknown": 21,
+          "status_counts": {
+            "observed": 2989,
+            "quote_gap": 3,
+            "right_censored": 18
+          },
+          "sampled_surge_5pct": 19,
+          "no_sampled_surge_5pct": 2970,
+          "adverse_2pct": 131,
+          "surge_before_adverse": 19,
+          "mean_last_change_pct": -0.155602368282817,
+          "median_lead_minutes_when_hit": 29.2
+        },
+        "4": {
+          "events": 3010,
+          "observed": 2892,
+          "unknown": 118,
+          "status_counts": {
+            "observed": 2892,
+            "quote_gap": 46,
+            "right_censored": 72
+          },
+          "sampled_surge_5pct": 103,
+          "no_sampled_surge_5pct": 2789,
+          "adverse_2pct": 623,
+          "surge_before_adverse": 94,
+          "mean_last_change_pct": -0.24416078940700595,
+          "median_lead_minutes_when_hit": 149.18333333333334
+        },
+        "6": {
+          "events": 3010,
+          "observed": 2856,
+          "unknown": 154,
+          "status_counts": {
+            "observed": 2856,
+            "quote_gap": 62,
+            "right_censored": 92
+          },
+          "sampled_surge_5pct": 134,
+          "no_sampled_surge_5pct": 2722,
+          "adverse_2pct": 855,
+          "surge_before_adverse": 119,
+          "mean_last_change_pct": -0.36768740774786407,
+          "median_lead_minutes_when_hit": 179.54166666666669
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 2790,
+          "observed": 2776,
+          "unknown": 14,
+          "status_counts": {
+            "observed": 2776,
+            "quote_gap": 4,
+            "right_censored": 10
+          },
+          "sampled_surge_5pct": 14,
+          "no_sampled_surge_5pct": 2762,
+          "adverse_2pct": 84,
+          "surge_before_adverse": 14,
+          "mean_last_change_pct": -0.12138272554900212,
+          "median_lead_minutes_when_hit": 24.34166666666667
+        },
+        "4": {
+          "events": 2790,
+          "observed": 2690,
+          "unknown": 100,
+          "status_counts": {
+            "observed": 2690,
+            "quote_gap": 42,
+            "right_censored": 58
+          },
+          "sampled_surge_5pct": 80,
+          "no_sampled_surge_5pct": 2610,
+          "adverse_2pct": 513,
+          "surge_before_adverse": 75,
+          "mean_last_change_pct": -0.20909818643222244,
+          "median_lead_minutes_when_hit": 149.39166666666665
+        },
+        "6": {
+          "events": 2790,
+          "observed": 2657,
+          "unknown": 133,
+          "status_counts": {
+            "observed": 2657,
+            "quote_gap": 55,
+            "right_censored": 78
+          },
+          "sampled_surge_5pct": 112,
+          "no_sampled_surge_5pct": 2545,
+          "adverse_2pct": 736,
+          "surge_before_adverse": 102,
+          "mean_last_change_pct": -0.32057709297082787,
+          "median_lead_minutes_when_hit": 199.68333333333334
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 11,
+          "observed": 11,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 11
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 11,
+          "adverse_2pct": 1,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": -0.19086735067229182,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 11,
+          "observed": 10,
+          "unknown": 1,
+          "status_counts": {
+            "observed": 10,
+            "right_censored": 1
+          },
+          "sampled_surge_5pct": 1,
+          "no_sampled_surge_5pct": 9,
+          "adverse_2pct": 2,
+          "surge_before_adverse": 1,
+          "mean_last_change_pct": -0.2890405860015377,
+          "median_lead_minutes_when_hit": 139.5
+        },
+        "6": {
+          "events": 11,
+          "observed": 10,
+          "unknown": 1,
+          "status_counts": {
+            "observed": 10,
+            "right_censored": 1
+          },
+          "sampled_surge_5pct": 1,
+          "no_sampled_surge_5pct": 9,
+          "adverse_2pct": 3,
+          "surge_before_adverse": 1,
+          "mean_last_change_pct": -0.5654081939077638,
+          "median_lead_minutes_when_hit": 139.5
+        }
+      }
+    },
+    "early_retrospective": {
+      "hot_once": {
+        "1": {
+          "events": 4167,
+          "observed": 4167,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 4167
+          },
+          "sampled_surge_5pct": 32,
+          "no_sampled_surge_5pct": 4135,
+          "adverse_2pct": 215,
+          "surge_before_adverse": 32,
+          "mean_last_change_pct": -0.07721802701253576,
+          "median_lead_minutes_when_hit": 39.458333333333336
+        },
+        "4": {
+          "events": 4167,
+          "observed": 4167,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 4167
+          },
+          "sampled_surge_5pct": 159,
+          "no_sampled_surge_5pct": 4008,
+          "adverse_2pct": 959,
+          "surge_before_adverse": 146,
+          "mean_last_change_pct": -0.2211052368591946,
+          "median_lead_minutes_when_hit": 129.36666666666667
+        },
+        "6": {
+          "events": 4167,
+          "observed": 4167,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 4167
+          },
+          "sampled_surge_5pct": 241,
+          "no_sampled_surge_5pct": 3926,
+          "adverse_2pct": 1253,
+          "surge_before_adverse": 218,
+          "mean_last_change_pct": -0.24301065705991126,
+          "median_lead_minutes_when_hit": 189.75
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 1888,
+          "observed": 1888,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1888
+          },
+          "sampled_surge_5pct": 15,
+          "no_sampled_surge_5pct": 1873,
+          "adverse_2pct": 93,
+          "surge_before_adverse": 15,
+          "mean_last_change_pct": -0.15888750324576792,
+          "median_lead_minutes_when_hit": 29.583333333333332
+        },
+        "4": {
+          "events": 1888,
+          "observed": 1888,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1888
+          },
+          "sampled_surge_5pct": 81,
+          "no_sampled_surge_5pct": 1807,
+          "adverse_2pct": 454,
+          "surge_before_adverse": 72,
+          "mean_last_change_pct": -0.22044577725137843,
+          "median_lead_minutes_when_hit": 149.3
+        },
+        "6": {
+          "events": 1888,
+          "observed": 1888,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1888
+          },
+          "sampled_surge_5pct": 107,
+          "no_sampled_surge_5pct": 1781,
+          "adverse_2pct": 612,
+          "surge_before_adverse": 92,
+          "mean_last_change_pct": -0.4110937040239693,
+          "median_lead_minutes_when_hit": 179.5
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 1733,
+          "observed": 1733,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1733
+          },
+          "sampled_surge_5pct": 12,
+          "no_sampled_surge_5pct": 1721,
+          "adverse_2pct": 65,
+          "surge_before_adverse": 12,
+          "mean_last_change_pct": -0.1240695589039351,
+          "median_lead_minutes_when_hit": 29.133333333333333
+        },
+        "4": {
+          "events": 1733,
+          "observed": 1733,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1733
+          },
+          "sampled_surge_5pct": 66,
+          "no_sampled_surge_5pct": 1667,
+          "adverse_2pct": 371,
+          "surge_before_adverse": 61,
+          "mean_last_change_pct": -0.2011785327428386,
+          "median_lead_minutes_when_hit": 149.39166666666665
+        },
+        "6": {
+          "events": 1733,
+          "observed": 1733,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1733
+          },
+          "sampled_surge_5pct": 92,
+          "no_sampled_surge_5pct": 1641,
+          "adverse_2pct": 522,
+          "surge_before_adverse": 83,
+          "mean_last_change_pct": -0.35798065773545495,
+          "median_lead_minutes_when_hit": 194.39999999999998
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 7,
+          "observed": 7,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 7
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 7,
+          "adverse_2pct": 1,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": -0.46393106300985126,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 7,
+          "observed": 7,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 7
+          },
+          "sampled_surge_5pct": 1,
+          "no_sampled_surge_5pct": 6,
+          "adverse_2pct": 2,
+          "surge_before_adverse": 1,
+          "mean_last_change_pct": -0.09000552796874269,
+          "median_lead_minutes_when_hit": 139.5
+        },
+        "6": {
+          "events": 7,
+          "observed": 7,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 7
+          },
+          "sampled_surge_5pct": 1,
+          "no_sampled_surge_5pct": 6,
+          "adverse_2pct": 2,
+          "surge_before_adverse": 1,
+          "mean_last_change_pct": -0.4735918799375801,
+          "median_lead_minutes_when_hit": 139.5
+        }
+      }
+    },
+    "late_retrospective": {
+      "hot_once": {
+        "1": {
+          "events": 2345,
+          "observed": 2313,
+          "unknown": 32,
+          "status_counts": {
+            "observed": 2313,
+            "quote_gap": 23,
+            "right_censored": 9
+          },
+          "sampled_surge_5pct": 14,
+          "no_sampled_surge_5pct": 2299,
+          "adverse_2pct": 95,
+          "surge_before_adverse": 14,
+          "mean_last_change_pct": -0.09772263805320236,
+          "median_lead_minutes_when_hit": 29.016666666666666
+        },
+        "4": {
+          "events": 2345,
+          "observed": 2189,
+          "unknown": 156,
+          "status_counts": {
+            "observed": 2189,
+            "missing_terminal_quote": 6,
+            "quote_gap": 73,
+            "right_censored": 77
+          },
+          "sampled_surge_5pct": 38,
+          "no_sampled_surge_5pct": 2151,
+          "adverse_2pct": 342,
+          "surge_before_adverse": 35,
+          "mean_last_change_pct": -0.1732354323476339,
+          "median_lead_minutes_when_hit": 99.24166666666667
+        },
+        "6": {
+          "events": 2345,
+          "observed": 2089,
+          "unknown": 256,
+          "status_counts": {
+            "observed": 2089,
+            "quote_gap": 116,
+            "right_censored": 140
+          },
+          "sampled_surge_5pct": 63,
+          "no_sampled_surge_5pct": 2026,
+          "adverse_2pct": 488,
+          "surge_before_adverse": 56,
+          "mean_last_change_pct": -0.22940679099885114,
+          "median_lead_minutes_when_hit": 189.25
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 1122,
+          "observed": 1101,
+          "unknown": 21,
+          "status_counts": {
+            "observed": 1101,
+            "quote_gap": 3,
+            "right_censored": 18
+          },
+          "sampled_surge_5pct": 4,
+          "no_sampled_surge_5pct": 1097,
+          "adverse_2pct": 38,
+          "surge_before_adverse": 4,
+          "mean_last_change_pct": -0.14996900333272498,
+          "median_lead_minutes_when_hit": 19.59166666666667
+        },
+        "4": {
+          "events": 1122,
+          "observed": 1004,
+          "unknown": 118,
+          "status_counts": {
+            "observed": 1004,
+            "quote_gap": 46,
+            "right_censored": 72
+          },
+          "sampled_surge_5pct": 22,
+          "no_sampled_surge_5pct": 982,
+          "adverse_2pct": 169,
+          "surge_before_adverse": 22,
+          "mean_last_change_pct": -0.2887563501140027,
+          "median_lead_minutes_when_hit": 139.31666666666666
+        },
+        "6": {
+          "events": 1122,
+          "observed": 968,
+          "unknown": 154,
+          "status_counts": {
+            "observed": 968,
+            "quote_gap": 62,
+            "right_censored": 92
+          },
+          "sampled_surge_5pct": 27,
+          "no_sampled_surge_5pct": 941,
+          "adverse_2pct": 243,
+          "surge_before_adverse": 27,
+          "mean_last_change_pct": -0.2830271935233944,
+          "median_lead_minutes_when_hit": 179.58333333333334
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 1057,
+          "observed": 1043,
+          "unknown": 14,
+          "status_counts": {
+            "observed": 1043,
+            "quote_gap": 4,
+            "right_censored": 10
+          },
+          "sampled_surge_5pct": 2,
+          "no_sampled_surge_5pct": 1041,
+          "adverse_2pct": 19,
+          "surge_before_adverse": 2,
+          "mean_last_change_pct": -0.11691840895830331,
+          "median_lead_minutes_when_hit": 14.316666666666666
+        },
+        "4": {
+          "events": 1057,
+          "observed": 957,
+          "unknown": 100,
+          "status_counts": {
+            "observed": 957,
+            "quote_gap": 42,
+            "right_censored": 58
+          },
+          "sampled_surge_5pct": 14,
+          "no_sampled_surge_5pct": 943,
+          "adverse_2pct": 142,
+          "surge_before_adverse": 14,
+          "mean_last_change_pct": -0.22343962827517144,
+          "median_lead_minutes_when_hit": 174.35833333333335
+        },
+        "6": {
+          "events": 1057,
+          "observed": 924,
+          "unknown": 133,
+          "status_counts": {
+            "observed": 924,
+            "quote_gap": 55,
+            "right_censored": 78
+          },
+          "sampled_surge_5pct": 20,
+          "no_sampled_surge_5pct": 904,
+          "adverse_2pct": 214,
+          "surge_before_adverse": 19,
+          "mean_last_change_pct": -0.25042516901292877,
+          "median_lead_minutes_when_hit": 214.69166666666666
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 4,
+          "observed": 4,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 4
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 4,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 0.2869941459184372,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 4,
+          "observed": 3,
+          "unknown": 1,
+          "status_counts": {
+            "observed": 3,
+            "right_censored": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 3,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": -0.7534557214113927,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 4,
+          "observed": 3,
+          "unknown": 1,
+          "status_counts": {
+            "observed": 3,
+            "right_censored": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 3,
+          "adverse_2pct": 1,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": -0.7796462598381922,
+          "median_lead_minutes_when_hit": null
+        }
+      }
+    },
+    "prospective": {
+      "hot_once": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      }
+    }
+  },
+  "production_changed": false,
+  "performance_improvement_proven": false,
+  "independent_future_validation_complete": false,
+  "limitations": [
+    "Retrospective rules informed by prior cases: time splits are not independent validation.",
+    "Rolling 24h turnover differences are activity proxies, not interval trade volume or executed buying.",
+    "All-market cohorts include non-rallies; user cases never determine eligibility or labels.",
+    "Six-hour episodes overlap across rules; hit rates do not establish statistical superiority.",
+    "Ticker last snapshots are not executable prices, true intrabar extrema, fills or PnL.",
+    "Missing/gapped/right-censored outcomes remain unknown.",
+    "Liquidity and BTC screens are retained; research tags do not bypass spread, book, candles, risk or READY.",
+    "Older code/provenance regimes are distinct; quotes are not a candle-authenticity replay.",
+    "No transaction-cost profitability conclusion or production calibration is approved."
+  ],
+  "validation": {
+    "unit_tests_passed": 12,
+    "real_data_incremental_partition_rows": 200,
+    "real_data_incremental_replay_matches_one_pass": true,
+    "candidate_time_and_unknown_outcome_assertions": true,
+    "validated_at_utc": "2026-10-28T21:15:16.154874+00:00"
+  },
+  "discovery_gate_strata": {
+    "hot_once": {
+      "not_revalidated_or_missing_candle_evidence": 4540,
+      "discovery_rejected": 1902,
+      "discovery_passed_not_ready_or_risk_approved": 70
+    },
+    "persistent_heat": {
+      "not_revalidated_or_missing_candle_evidence": 2130,
+      "discovery_rejected": 820,
+      "discovery_passed_not_ready_or_risk_approved": 60
+    },
+    "compression_heat": {
+      "not_revalidated_or_missing_candle_evidence": 1946,
+      "discovery_rejected": 787,
+      "discovery_passed_not_ready_or_risk_approved": 57
+    }
+  },
+  "baseline_scope": "recorded_ready counts final diagnostic shadow-stage records; not a claim of exhaustive Telegram delivery or confirmed fills."
+}
