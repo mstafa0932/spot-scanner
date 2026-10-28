@@ -2445,7 +2445,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-27T20:01:12Z",
+  "last_check_utc": "2026-10-28T23:20:17Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -3567,7 +3567,20 @@
       "incremental_actual_data_matches_one_pass": true,
       "report": "monitoring/research/early-surge-research-20261029.md",
       "continuation": "monitoring/research/early-surge-continuation-20261029.json",
-      "next_action": "Use existing quiet automation; fixed-rule future replay on new snapshots only, include negative/missing cases; no production calibration justified."
+      "next_action": "Use existing quiet automation; fixed-rule future replay on new snapshots only, include negative/missing cases; no production calibration justified.",
+      "latest_incremental": {
+        "at_utc": "2026-10-28T23:20:17Z",
+        "new_main_pin": "19834dbf6078e2d645b9ed794d4b9e12eba42fab",
+        "last_completed_run_id": 40785533750,
+        "paired_rows": 13,
+        "new_events": 81,
+        "prospective_new_events": 38,
+        "continuation_path": "monitoring/research/early-surge-continuation-20261029.json",
+        "incremental_result_path": "monitoring/research/early-surge-incremental-20261029-0220.json",
+        "method": "js_equivalent_pending_python_cli_crosscheck",
+        "production_changed": false,
+        "performance_improvement_proven": false
+      }
     }
   },
   "pr49_review": {
@@ -3880,76 +3893,33 @@
     ]
   },
   "last_incremental_monitoring": {
-    "observed_at_utc": "2026-10-27T23:13:00Z",
-    "previous_checkpoint_observed_at_utc": "2026-10-27T20:01:12Z",
-    "main_at_check": "a0d4e9b6256653b45fad4036adba22618608f41d",
-    "main_baseline": "f34c06ee1b5a1fa2a58a44359a324eba5a77ae2c",
+    "observed_at_utc": "2026-10-28T23:20:17Z",
+    "previous_main": "447052ceacec42ef6632f010dd9bbb351475fef2",
+    "main_at_check": "19834dbf6078e2d645b9ed794d4b9e12eba42fab",
     "main_diff_paths": [
-      "scanner_state.json",
-      "near_misses_archive.jsonl"
+      "near_misses_archive.jsonl",
+      "scanner_state.json"
     ],
     "production_code_or_config_changed": false,
     "scanner_runs_since_previous_checkpoint": {
-      "count": 19,
-      "first_run_id": 40575476727,
-      "last_run_id": 40600147781,
+      "count": 13,
+      "first_run_id": 40769774246,
+      "last_run_id": 40785533750,
       "all_completed_success": true,
-      "created_at_gap_min_seconds": 598,
-      "created_at_gap_max_seconds": 616,
-      "created_at_gap_mean_seconds": 601,
-      "expected_seconds": 600
+      "run_scanner_steps_success": 13,
+      "persist_state_steps_success": 13
     },
     "controller": {
-      "previous_id": 40552581011,
-      "previous_conclusion": "success",
-      "current_id": 40588579243,
-      "current_job_id": 122486549235,
-      "current_status": "in_progress",
-      "current_window_expected_4h": true
+      "current_id": 40773967969,
+      "current_status": "in_progress_expected_4h_window",
+      "previous_id": 40737989661,
+      "previous_status": "success"
     },
-    "scanner_latest": {
-      "run_id": 40600147781,
-      "run_step": "success",
-      "persist_step": "success",
-      "state_commit": "a0d4e9b6256653b45fad4036adba22618608f41d",
-      "state_blob": "d4ea73b7806f1bf4fe133aa2e109a9b1aa5f4eb8",
-      "state_valid": true,
-      "shadow": true,
-      "native_candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
-      "synthetic_candles": 0,
-      "candle_errors": 0
-    },
-    "new_organic_ready_delivery": {
-      "run_id": 40589959495,
-      "job_id": 122491325673,
-      "head_sha": "a756299653b08f6438b6c53e54b4b10168bdec1e",
-      "at_utc": "2026-10-27T21:51:06Z",
-      "symbol": "ETHFI_TL",
-      "score": 84,
-      "mode": "SHADOW",
-      "confirmations": 2,
-      "distinct_closed_candle_open_times_utc_seconds": [
-        1793133000,
-        1793136600
-      ],
-      "entry_reference_tl": "33.2400",
-      "stop_reference_tl": "32.64617328519855595667870036",
-      "tp1_reference_tl": "34.13074007220216606498194946",
-      "telegram_api_accepted": true,
-      "telegram_message_id": 1116,
-      "telegram_human_read_not_proven": true,
-      "duplicate_ready_alerts_in_following_eight_completed_scans": 0,
-      "real_trade_executed": false,
-      "paper_limit_fill_is_model_estimate_not_exchange_confirmed": true
-    },
-    "new_proven_bug": false,
-    "production_code_changed": false,
-    "production_settings_changed": false,
-    "scanner_or_controller_dispatched_by_monitor": false,
-    "heavy_tests_rerun": false,
-    "monitoring_only": true,
-    "user_notification_sent": false,
-    "notes": "19 successful existing scanner runs checked since prior checkpoint, plus one existing controller in progress and successful near-miss research run. Signal ETHFI_TL was organic, not a test; Telegram API acceptance was logged with message_id 1116. No evidence of a new code defect, no code or strategy changes warranted."
+    "shadow": true,
+    "production_changed": false,
+    "early_surge_replay_method": "js_equivalent_not_original_python",
+    "research_result_path": "monitoring/research/early-surge-incremental-20261029-0220.json",
+    "user_notification_sent": false
   },
   "historical_automation_id": "6ad0f106fa608191a823826728c80f35"
 }
