@@ -1,0 +1,3428 @@
+{
+  "pinned_main": "3bc53d6c6cae6a13ac1dfdd00e52f58646472e60",
+  "run_count": 327,
+  "quote_snapshots": 327,
+  "window_utc": [
+    "2026-10-26T07:07:19+00:00",
+    "2026-10-28T13:31:23+00:00"
+  ],
+  "summaries": {
+    "sent": {
+      "1": {
+        "observed_events": 3,
+        "unobserved_events": 0,
+        "mean_sampled_last_change_pct": 0.04117309112794768,
+        "median_sampled_last_change_pct": 0
+      },
+      "4": {
+        "observed_events": 3,
+        "unobserved_events": 0,
+        "mean_sampled_last_change_pct": -0.731073606691357,
+        "median_sampled_last_change_pct": -0.5239030779305764
+      },
+      "6": {
+        "observed_events": 2,
+        "unobserved_events": 1,
+        "mean_sampled_last_change_pct": -0.4876512079391049,
+        "median_sampled_last_change_pct": -0.4876512079391049
+      }
+    },
+    "not_sent_high_score": {
+      "1": {
+        "observed_events": 91,
+        "unobserved_events": 0,
+        "mean_sampled_last_change_pct": -0.25677253738173117,
+        "median_sampled_last_change_pct": -0.1927943125677789
+      },
+      "4": {
+        "observed_events": 85,
+        "unobserved_events": 6,
+        "mean_sampled_last_change_pct": -0.25711654365171815,
+        "median_sampled_last_change_pct": -0.36090610468837436
+      },
+      "6": {
+        "observed_events": 70,
+        "unobserved_events": 21,
+        "mean_sampled_last_change_pct": -0.2523765199686128,
+        "median_sampled_last_change_pct": -0.38593928928840615
+      }
+    }
+  },
+  "limitations": [
+    "Sampled ticker last prices are not executable bids, fills, exact intrabar MFE/MAE, or PnL.",
+    "The sample is bounded; rejected episodes may overlap sent episodes and are not independent.",
+    "No threshold, score weight, stop, target, or strategy was tuned on these outcomes.",
+    "No transaction costs or order-book reconstruction are invented.",
+    "Right-censored outcomes remain missing, never zero or assumed successful.",
+    "Photographed winners are a selected subset, not a representative calibration sample.",
+    "Signal tracking incomplete flags and model fill estimates are preserved.",
+    "One XRP_TL passed_pending_trigger event was not fully assessed after another signal was selected; it is not classified as a proven rejection or missed READY."
+  ],
+  "sent_signals": [
+    {
+      "signal": {
+        "id": "BONK_TL:1793118012",
+        "symbol": "BONK_TL",
+        "opened_at": 1793118012,
+        "entry": "0.00015272",
+        "stop": "0.00014675310",
+        "tp1": "0.0001616703500",
+        "tp2": "0.0001646538000",
+        "score": 81,
+        "setup": "RECOVERY",
+        "risk_budget_pct": "1.00",
+        "status": "EXPIRED",
+        "tp1_notified": false,
+        "events": [
+          {
+            "kind": "EXPIRED",
+            "price": "0.00015272",
+            "at": 1793139612,
+            "delivered": false,
+            "simulation_version": "ohlc_penetration_v2",
+            "execution_basis": "estimated_not_exchange_confirmed",
+            "price_basis": "entry_reference_not_current_price"
+          }
+        ],
+        "tracking_mode": "shadow_limit_simulation",
+        "fill_confirmed": false,
+        "fill_estimated": true,
+        "simulation_version": "ohlc_penetration_v2",
+        "research_cohort": "shadow_integrity_v2:1790082787",
+        "evidence": {
+          "btc_reason": "BTC neutral/acceptable | RSI=60.8",
+          "spread_pct": "0.06548788474132285527177472168",
+          "imbalance": "1.189628888836988633128789056",
+          "volume_ratio": "2.3636856882750554",
+          "quote_volume_tl": "29450733.5605048",
+          "bid_wall_share": "0.1281385720040324845202288303",
+          "ask_wall_share": "0.1188356111106497577786763752",
+          "execution_research": {
+            "mode": "hypothetical_snapshot_only",
+            "budget_tl": "100000",
+            "buy_fee_rate_scenario": "0.0011",
+            "sell_fee_rate_scenario": "0.0011",
+            "fees_verified_for_all_orders": false,
+            "limit_fill_guaranteed": false,
+            "status": "snapshot_depth_available",
+            "quantity": "653731157.5068471801437267173",
+            "entry_vwap_tl": "0.0001528000000000000000000000000",
+            "entry_impact_pct": "0E-24",
+            "immediate_roundtrip_loss_tl": "285.05947123086071290167205"
+          },
+          "shadow_mode": true
+        },
+        "breakeven_armed": false,
+        "breakeven_stop": null,
+        "tracking_data_error": null,
+        "last_processed_candle": 1793138400,
+        "filled_at": 1793119500,
+        "fill_evidence": {
+          "model": "ohlc_penetration_v2",
+          "basis": "authentic_positive_volume_price_penetration",
+          "candle_open": 1793118600,
+          "candle_close": 1793119500,
+          "low": "0.0001521",
+          "high": "0.0001528",
+          "volume": "1000932847.0",
+          "time_basis": "bar_close_upper_bound_not_exact_fill_time",
+          "quantity_basis": "unknown_no_queue_or_partial_fill_model"
+        },
+        "tracking_incomplete": true,
+        "skipped_tracking_candles": {
+          "1793129400": "no_positive_trade_volume"
+        }
+      },
+      "run_id": "40539686030",
+      "discovery_evidence": [
+        {
+          "symbol": "BONK_TL",
+          "stage": "discovery",
+          "reason": "passed_pending_trigger",
+          "observed_at": 1793117997,
+          "score": 81,
+          "rsi": "63.61189772433314",
+          "return_3": "-0.1971090670170827858081471700",
+          "volume_ratio": "2.3636856882750554",
+          "atr_pct": "0.5658727220061720210664911126",
+          "macd_histogram": "3.2981690682834234E-7",
+          "closed_candle_at": 1793116800,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 10,
+            "1h": 1,
+            "4h": 0
+          }
+        }
+      ],
+      "sampled_quote_path": {
+        "reference_at": 1793117977,
+        "reference_last": 0.0001527,
+        "horizons": {
+          "1": {
+            "status": "observed",
+            "observed_until": 1793121584,
+            "quote_samples": 7,
+            "max_sample_gap_seconds": 635,
+            "last_change_pct": 0,
+            "sampled_high_change_pct": 0.1309757694826441,
+            "sampled_low_change_pct": -0.4584151931892544
+          },
+          "4": {
+            "status": "observed",
+            "observed_until": 1793132396,
+            "quote_samples": 25,
+            "max_sample_gap_seconds": 717,
+            "last_change_pct": -0.5239030779305764,
+            "sampled_high_change_pct": 0.7203667321545426,
+            "sampled_low_change_pct": -0.5893909626718985
+          },
+          "6": {
+            "status": "observed",
+            "observed_until": 1793139619,
+            "quote_samples": 37,
+            "max_sample_gap_seconds": 717,
+            "last_change_pct": -0.5239030779305764,
+            "sampled_high_change_pct": 0.7203667321545426,
+            "sampled_low_change_pct": -1.178781925343808
+          }
+        }
+      }
+    },
+    {
+      "signal": {
+        "id": "ETHFI_TL:1793137866",
+        "symbol": "ETHFI_TL",
+        "opened_at": 1793137866,
+        "entry": "33.2400",
+        "stop": "32.64617328519855595667870036",
+        "tp1": "34.13074007220216606498194946",
+        "tp2": "34.42765342960288808664259928",
+        "score": 84,
+        "setup": "PULLBACK",
+        "risk_budget_pct": "1.00",
+        "status": "EXPIRED",
+        "tp1_notified": false,
+        "events": [
+          {
+            "kind": "EXPIRED",
+            "price": "33.2400",
+            "at": 1793159466,
+            "delivered": false,
+            "simulation_version": "ohlc_penetration_v2",
+            "execution_basis": "estimated_not_exchange_confirmed",
+            "price_basis": "entry_reference_not_current_price"
+          }
+        ],
+        "tracking_mode": "shadow_limit_simulation",
+        "fill_confirmed": false,
+        "fill_estimated": true,
+        "simulation_version": "ohlc_penetration_v2",
+        "research_cohort": "shadow_integrity_v2:1790082787",
+        "evidence": {
+          "btc_reason": "BTC neutral/acceptable | RSI=69.2",
+          "spread_pct": "0.1504211793020457280385078219",
+          "imbalance": "1.394735512277322222870693397",
+          "volume_ratio": "1.7007158376933202",
+          "quote_volume_tl": "91417500.89",
+          "bid_wall_share": "0.1385418934355878130899798031",
+          "ask_wall_share": "0.09713268295339301946261611641",
+          "execution_research": {
+            "mode": "hypothetical_snapshot_only",
+            "budget_tl": "100000",
+            "buy_fee_rate_scenario": "0.0011",
+            "sell_fee_rate_scenario": "0.0011",
+            "fees_verified_for_all_orders": false,
+            "limit_fill_guaranteed": false,
+            "status": "snapshot_depth_available",
+            "quantity": "3000.604411746658129346994365",
+            "entry_vwap_tl": "33.29000000000000000000000000",
+            "entry_impact_pct": "0E-24",
+            "immediate_roundtrip_loss_tl": "371.29728412812595640139794"
+          },
+          "shadow_mode": true
+        },
+        "breakeven_armed": false,
+        "breakeven_stop": null,
+        "tracking_data_error": null,
+        "last_processed_candle": 1793158200,
+        "filled_at": 1793140200,
+        "fill_evidence": {
+          "model": "ohlc_penetration_v2",
+          "basis": "authentic_positive_volume_price_penetration",
+          "candle_open": 1793139300,
+          "candle_close": 1793140200,
+          "low": "33.08",
+          "high": "33.3",
+          "volume": "32289.126",
+          "time_basis": "bar_close_upper_bound_not_exact_fill_time",
+          "quantity_basis": "unknown_no_queue_or_partial_fill_model"
+        },
+        "tracking_incomplete": true,
+        "skipped_tracking_candles": {
+          "1793146500": "no_positive_trade_volume",
+          "1793147400": "no_positive_trade_volume",
+          "1793148300": "no_positive_trade_volume",
+          "1793150100": "no_positive_trade_volume",
+          "1793152800": "no_positive_trade_volume",
+          "1793156400": "no_positive_trade_volume"
+        }
+      },
+      "run_id": "40589959495",
+      "discovery_evidence": [
+        {
+          "symbol": "ETHFI_TL",
+          "stage": "discovery",
+          "reason": "passed_pending_trigger",
+          "observed_at": 1793137865,
+          "score": 84,
+          "rsi": "56.99442417446492",
+          "return_3": "0.150829562594268476621417800",
+          "volume_ratio": "1.7007158376933202",
+          "atr_pct": "0.4902671510084225301204819277",
+          "macd_histogram": "0.001980289568850324",
+          "closed_candle_at": 1793136600,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 3,
+            "1h": 0,
+            "4h": 0
+          }
+        }
+      ],
+      "sampled_quote_path": {
+        "reference_at": 1793137830,
+        "reference_last": 33.23,
+        "horizons": {
+          "1": {
+            "status": "observed",
+            "observed_until": 1793142022,
+            "quote_samples": 8,
+            "max_sample_gap_seconds": 616,
+            "last_change_pct": -0.33102618116159777,
+            "sampled_high_change_pct": 0.21065302437557332,
+            "sampled_low_change_pct": -0.4513993379476333
+          },
+          "4": {
+            "status": "observed",
+            "observed_until": 1793152296,
+            "quote_samples": 25,
+            "max_sample_gap_seconds": 676,
+            "last_change_pct": -0.2407463135720711,
+            "sampled_high_change_pct": 0.21065302437557332,
+            "sampled_low_change_pct": -0.9027986758952666
+          },
+          "6": {
+            "status": "observed",
+            "observed_until": 1793159441,
+            "quote_samples": 37,
+            "max_sample_gap_seconds": 676,
+            "last_change_pct": -0.4513993379476333,
+            "sampled_high_change_pct": 0.21065302437557332,
+            "sampled_low_change_pct": -0.9027986758952666
+          }
+        }
+      }
+    },
+    {
+      "signal": {
+        "id": "BONK_TL:1793177506",
+        "symbol": "BONK_TL",
+        "opened_at": 1793177506,
+        "entry": "0.00015352",
+        "stop": "0.00015164820",
+        "tp1": "0.0001563277000",
+        "tp2": "0.0001572636000",
+        "score": 89,
+        "setup": "RECOVERY",
+        "risk_budget_pct": "1.00",
+        "status": "STOP",
+        "tp1_notified": false,
+        "events": [
+          {
+            "kind": "STOP",
+            "price": "0.00015164820",
+            "at": 1793192400,
+            "delivered": false,
+            "simulation_version": "ohlc_penetration_v2",
+            "execution_basis": "estimated_not_exchange_confirmed"
+          }
+        ],
+        "tracking_mode": "shadow_limit_simulation",
+        "fill_confirmed": false,
+        "fill_estimated": true,
+        "simulation_version": "ohlc_penetration_v2",
+        "research_cohort": "shadow_integrity_v2:1790082787",
+        "evidence": {
+          "btc_reason": "BTC neutral/acceptable | RSI=77.6",
+          "spread_pct": "0.06514657980456026058631921824",
+          "imbalance": "1.297727741535605598967580026",
+          "volume_ratio": "2.127253239327825",
+          "quote_volume_tl": "25975874.7992869",
+          "bid_wall_share": "0.1618327632598891249317626396",
+          "ask_wall_share": "0.1050107484930397447921545030",
+          "execution_research": {
+            "mode": "hypothetical_snapshot_only",
+            "budget_tl": "100000",
+            "buy_fee_rate_scenario": "0.0011",
+            "sell_fee_rate_scenario": "0.0011",
+            "fees_verified_for_all_orders": false,
+            "limit_fill_guaranteed": false,
+            "status": "snapshot_depth_available",
+            "quantity": "650154982.3058923870348598336",
+            "entry_vwap_tl": "0.0001536404758643359856906363568",
+            "entry_impact_pct": "0.026351474177074017341378100",
+            "immediate_roundtrip_loss_tl": "310.98888480786851969985162"
+          },
+          "shadow_mode": true
+        },
+        "breakeven_armed": false,
+        "breakeven_stop": null,
+        "tracking_data_error": null,
+        "last_processed_candle": 1793191500,
+        "filled_at": 1793178900,
+        "fill_evidence": {
+          "model": "ohlc_penetration_v2",
+          "basis": "authentic_positive_volume_price_penetration",
+          "candle_open": 1793178000,
+          "candle_close": 1793178900,
+          "low": "0.0001534",
+          "high": "0.0001539",
+          "volume": "2419282130.0",
+          "time_basis": "bar_close_upper_bound_not_exact_fill_time",
+          "quantity_basis": "unknown_no_queue_or_partial_fill_model"
+        }
+      },
+      "run_id": "40659636556",
+      "discovery_evidence": [
+        {
+          "symbol": "BONK_TL",
+          "stage": "discovery",
+          "reason": "passed_pending_trigger",
+          "observed_at": 1793177484,
+          "score": 89,
+          "rsi": "63.71189948350138",
+          "return_3": "0.982961992136304062909567500",
+          "volume_ratio": "2.127253239327825",
+          "atr_pct": "0.3538429153868251135626216742",
+          "macd_histogram": "1.1420388154785554E-7",
+          "closed_candle_at": 1793176200,
+          "authentic_only": true,
+          "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+          "exchange_zero_volume_bars": {
+            "15m": 10,
+            "1h": 1,
+            "4h": 0
+          }
+        }
+      ],
+      "sampled_quote_path": {
+        "reference_at": 1793177465,
+        "reference_last": 0.000154,
+        "horizons": {
+          "1": {
+            "status": "observed",
+            "observed_until": 1793181072,
+            "quote_samples": 7,
+            "max_sample_gap_seconds": 618,
+            "last_change_pct": 0.4545454545454408,
+            "sampled_high_change_pct": 0.4545454545454408,
+            "sampled_low_change_pct": -0.32467532467532756
+          },
+          "4": {
+            "status": "observed",
+            "observed_until": 1793191872,
+            "quote_samples": 25,
+            "max_sample_gap_seconds": 618,
+            "last_change_pct": -1.4285714285714235,
+            "sampled_high_change_pct": 0.5194805194805197,
+            "sampled_low_change_pct": -1.4285714285714235
+          },
+          "6": {
+            "status": "right_censored_or_missing"
+          }
+        }
+      }
+    }
+  ],
+  "non_sent_high_score_episodes": [
+    {
+      "symbol": "ENA_TL",
+      "run_id": "40294624799",
+      "started_at": 1793004439,
+      "decision": {
+        "stage": "discovery",
+        "reason": "15m momentum not constructive",
+        "observed_at": 1793004459,
+        "score": 81,
+        "rsi": "58.93872592905684",
+        "return_3": "2.355250245338567222767419000",
+        "volume_ratio": "2.7814460252998994",
+        "atr_pct": "0.9359090940339307766059443912",
+        "macd_histogram": "-0.001188918351929108",
+        "closed_candle_at": 1793003400,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 30,
+          "1h": 3,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -2.564102564102555
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -2.3741690408357052
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.089268755935414
+        }
+      }
+    },
+    {
+      "symbol": "QNT_TL",
+      "run_id": "40297038390",
+      "started_at": 1793005632,
+      "decision": {
+        "stage": "trigger",
+        "reason": "RSI 70.2 outside alert range",
+        "observed_at": 1793005671,
+        "score": 85
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 5.162206530743529
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 9.644595088034457
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 6.634622873482643
+        }
+      }
+    },
+    {
+      "symbol": "TRX_TL",
+      "run_id": "40304840484",
+      "started_at": 1793009260,
+      "decision": {
+        "stage": "discovery",
+        "reason": "ATR outside range",
+        "observed_at": 1793009301,
+        "score": 81,
+        "rsi": "60.41084122593196",
+        "return_3": "0.403078050567973616709417400",
+        "volume_ratio": "1.1178548039477623",
+        "atr_pct": "0.1322637368611627128953771290",
+        "macd_histogram": "0.005298939765837768",
+        "closed_candle_at": 1793007900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 0,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.19468272799172404
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.17034738699277518
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.1764312222425013
+        }
+      }
+    },
+    {
+      "symbol": "GRASS_TL",
+      "run_id": "40306168237",
+      "started_at": 1793009862,
+      "decision": {
+        "stage": "trigger",
+        "reason": "setup not ready",
+        "observed_at": 1793009908,
+        "score": 85,
+        "setup_veto_diagnostics": {
+          "breakout": false,
+          "is_pullback": true,
+          "mean_touch": true,
+          "bullish_candle": true,
+          "above_ema9": true,
+          "above_ema21": true,
+          "ema21_gte_ema50": false,
+          "macd_hist_positive": true,
+          "macd_line_gt_signal": true,
+          "volume_ratio_gte_1_20": true,
+          "pullback_rsi_lte_60": true,
+          "recovery_return3_lt_2_60": true
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.657518582046901
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.2292738707833095
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.686678101772432
+        }
+      }
+    },
+    {
+      "symbol": "TRUMP_TL",
+      "run_id": "40317609299",
+      "started_at": 1793015248,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793015270,
+        "score": 85,
+        "rsi": "61.07545610878541",
+        "return_3": "0.302443745463343818049842700",
+        "volume_ratio": "2.309863161667578",
+        "atr_pct": "0.4096176102573201061391870703",
+        "macd_histogram": "0.03688458783345938",
+        "closed_candle_at": 1793014200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 4,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.1927943125677789
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.6146523677551539
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.2772623207615297
+        }
+      }
+    },
+    {
+      "symbol": "AVAX_TL",
+      "run_id": "40318824607",
+      "started_at": 1793015863,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793015900,
+        "score": 83,
+        "rsi": "60.55138149285788",
+        "return_3": "0.335343896290961469211379200",
+        "volume_ratio": "4.6936798909610475",
+        "atr_pct": "0.3365596688300697606603710101",
+        "macd_histogram": "0.29865670751925333",
+        "closed_candle_at": 1793014200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 17,
+          "1h": 1,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.6674281618849309
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.011198459092032209
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.5576832627830486
+        }
+      }
+    },
+    {
+      "symbol": "RENDER_TL",
+      "run_id": "40320053888",
+      "started_at": 1793016461,
+      "decision": {
+        "stage": "trigger",
+        "reason": "4h still weak",
+        "observed_at": 1793016496,
+        "score": 85
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.2569493109086607
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.9577201588413908
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.7124503620649314
+        }
+      }
+    },
+    {
+      "symbol": "RAY_TL",
+      "run_id": "40325170320",
+      "started_at": 1793018866,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793018911,
+        "score": 85
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.2418300653594727
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.7080610021786393
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.7320261437908546
+        }
+      }
+    },
+    {
+      "symbol": "ADA_TL",
+      "run_id": "40327811632",
+      "started_at": 1793020059,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793020082,
+        "score": 80,
+        "rsi": "57.943261788646694",
+        "return_3": "0.412938747419132828630419800",
+        "volume_ratio": "1.6101027397909273",
+        "atr_pct": "0.3642328820409563301674336630",
+        "macd_histogram": "0.005702362984997298",
+        "closed_candle_at": 1793018700,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 4,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.7071996856890195
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.7759552106865852
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.009822217856814142
+        }
+      }
+    },
+    {
+      "symbol": "TLM_TL",
+      "run_id": "40329220809",
+      "started_at": 1793020663,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793020692,
+        "score": 80,
+        "rsi": "67.23623209399366",
+        "return_3": "0.869565217391304347826087000",
+        "volume_ratio": "2.1076464994984585",
+        "atr_pct": "0.3485302665460605862068965517",
+        "macd_histogram": "0.00010856246953178073",
+        "closed_candle_at": 1793019600,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 45,
+          "1h": 1,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.865051903114189
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.34602076124566894
+        }
+      }
+    },
+    {
+      "symbol": "PUMP_TL",
+      "run_id": "40341285266",
+      "started_at": 1793025472,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793025492,
+        "score": 82,
+        "rsi": "56.67592064126715",
+        "return_3": "0.282752120640904806786050900",
+        "volume_ratio": "2.80432138196609",
+        "atr_pct": "0.8428620901367843515037593985",
+        "macd_histogram": "0.000018368008612223074",
+        "closed_candle_at": 1793024100,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 4,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 2.490601503759393
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.3157894736842146
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.5507518796992414
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": "40346164574",
+      "started_at": 1793027285,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793027336,
+        "score": 88
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.4716470533657202
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.6664914098380881
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.3113334467348081
+        }
+      }
+    },
+    {
+      "symbol": "LINK_TL",
+      "run_id": "40346164574",
+      "started_at": 1793027285,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793027328,
+        "score": 83,
+        "rsi": "63.975384617079705",
+        "return_3": "1.449275362318840579710144900",
+        "volume_ratio": "3.9915428625920915",
+        "atr_pct": "0.2867078399620546689895470383",
+        "macd_histogram": "0.3057531523036582",
+        "closed_candle_at": 1793025900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 71,
+          "1h": 13,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.6210855949895455
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.8754349338900411
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.098121085594984
+        }
+      }
+    },
+    {
+      "symbol": "ENA_TL",
+      "run_id": "40346164574",
+      "started_at": 1793027285,
+      "decision": {
+        "stage": "trigger",
+        "reason": "buy flow not strong enough: 0.88",
+        "observed_at": 1793027336,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.4761904761904856
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.4285714285714346
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.6666666666666616
+        }
+      }
+    },
+    {
+      "symbol": "ALGO_TL",
+      "run_id": "40351107382",
+      "started_at": 1793029083,
+      "decision": {
+        "stage": "trigger",
+        "reason": "4h still weak",
+        "observed_at": 1793029118,
+        "score": 82
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.6641162968630385
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.21040550879878328
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.9946442234123887
+        }
+      }
+    },
+    {
+      "symbol": "BEAM_TL",
+      "run_id": "40352739258",
+      "started_at": 1793029680,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793029730,
+        "score": 91
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -3.523194362889026
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -4.462712859659423
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.2900763358778664
+        }
+      }
+    },
+    {
+      "symbol": "HYPE_TL",
+      "run_id": "40359263336",
+      "started_at": 1793032086,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793032110,
+        "score": 87,
+        "rsi": "74.07026546740423",
+        "return_3": "0.316739284941750872964370700",
+        "volume_ratio": "2.486803598082588",
+        "atr_pct": "0.2143543289327667739666599925",
+        "macd_histogram": "5.021635287131737",
+        "closed_candle_at": 1793030400,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 56,
+          "1h": 17,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.5724891581812996
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.723130669943417
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.9436945216360848
+        }
+      }
+    },
+    {
+      "symbol": "COMP_TL",
+      "run_id": "40392830648",
+      "started_at": 1793045302,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793045334,
+        "score": 81,
+        "rsi": "61.44528917646541",
+        "return_3": "0.630023285510403365131826000",
+        "volume_ratio": "1.7649034105933106",
+        "atr_pct": "0.5752955865156590622813156053",
+        "macd_histogram": "0.785607447746071",
+        "closed_candle_at": 1793043900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 24,
+          "1h": 1,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.7968799804998872
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 3.6337727110794527
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 2.8734554590966077
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": "40424377694",
+      "started_at": 1793059718,
+      "decision": {
+        "stage": "trigger",
+        "reason": "RSI 68.9 outside alert range",
+        "observed_at": 1793059763,
+        "score": 87
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.28879979108098475
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.0107992687835132
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.970858872144631
+        }
+      }
+    },
+    {
+      "symbol": "STX_TL",
+      "run_id": "40424377694",
+      "started_at": 1793059718,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793059742,
+        "score": 80,
+        "rsi": "62.447077191248255",
+        "return_3": "1.807228915662650602409638600",
+        "volume_ratio": "2.0754455343562883",
+        "atr_pct": "0.3405610630656644312952005260",
+        "macd_histogram": "0.027646838235971014",
+        "closed_candle_at": 1793058300,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 54,
+          "1h": 2,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.6565988181221227
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.5101772816808912
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.7728168089297447
+        }
+      }
+    },
+    {
+      "symbol": "PUMP_TL",
+      "run_id": "40425483216",
+      "started_at": 1793060313,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793060337,
+        "score": 80,
+        "rsi": "63.0345903089232",
+        "return_3": "1.857142857142857142857142900",
+        "volume_ratio": "5.1520991643704726",
+        "atr_pct": "0.6450446341619389901823281907",
+        "macd_histogram": "0.0005283879162945301",
+        "closed_candle_at": 1793059200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 3,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.1405152224824291
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -3.3723653395784425
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -3.2786885245901676
+        }
+      }
+    },
+    {
+      "symbol": "TRUMP_TL",
+      "run_id": "40425483216",
+      "started_at": 1793060313,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793060361,
+        "score": 87
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.04731488052991395
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.9936124911284594
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.0409273716583956
+        }
+      }
+    },
+    {
+      "symbol": "ETHFI_TL",
+      "run_id": "40427615977",
+      "started_at": 1793061515,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793061540,
+        "score": 84,
+        "rsi": "72.3711450248174",
+        "return_3": "1.517967781908302354399008700",
+        "volume_ratio": "1.5521131972562532",
+        "atr_pct": "0.5845759751657652425999389686",
+        "macd_histogram": "0.09337412749429681",
+        "closed_candle_at": 1793060100,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 4,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.7014333638304282
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -3.019213174748392
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.043305885940838
+        }
+      }
+    },
+    {
+      "symbol": "W_TL",
+      "run_id": "40464264084",
+      "started_at": 1793084329,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793084348,
+        "score": 80,
+        "rsi": "60.54169408120927",
+        "return_3": "0.586892729051190088033909400",
+        "volume_ratio": "1.6471168193159516",
+        "atr_pct": "0.5140657678741358508914100486",
+        "macd_histogram": "0.0009048970869548144",
+        "closed_candle_at": 1793082600,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 4,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.1781376518218747
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.8259109311740898
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 2.574898785425095
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": "40466316353",
+      "started_at": 1793085543,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793085575,
+        "score": 90
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.1299303944315433
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.16395978344934115
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.044083526682127
+        }
+      }
+    },
+    {
+      "symbol": "QNT_TL",
+      "run_id": "40470359385",
+      "started_at": 1793087938,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793087975,
+        "score": 84,
+        "rsi": "74.93791566691871",
+        "return_3": "5.621501640609920864697934800",
+        "volume_ratio": "9.036805946563058",
+        "atr_pct": "0.9224986498347039799290358932",
+        "macd_histogram": "58.02361179742811",
+        "closed_candle_at": 1793086200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 0,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.5959337993592606
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -2.774622764399559
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -5.0336231203691355
+        }
+      }
+    },
+    {
+      "symbol": "ETHFI_TL",
+      "run_id": "40473716834",
+      "started_at": 1793089744,
+      "decision": {
+        "stage": "trigger",
+        "reason": "setup not ready",
+        "observed_at": 1793089775,
+        "score": 81,
+        "setup_veto_diagnostics": {
+          "breakout": false,
+          "is_pullback": true,
+          "mean_touch": true,
+          "bullish_candle": false,
+          "above_ema9": true,
+          "above_ema21": true,
+          "ema21_gte_ema50": true,
+          "macd_hist_positive": true,
+          "macd_line_gt_signal": true,
+          "volume_ratio_gte_1_20": true,
+          "pullback_rsi_lte_60": false,
+          "recovery_return3_lt_2_60": true
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.8591592513040869
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.2580546179809637
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.27615833077632157
+        }
+      }
+    },
+    {
+      "symbol": "FET_TL",
+      "run_id": "40493897996",
+      "started_at": 1793099364,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793099398,
+        "score": 83,
+        "rsi": "58.39633730151415",
+        "return_3": "1.355456882449170366908156100",
+        "volume_ratio": "4.459035699166715",
+        "atr_pct": "0.5010069502224498501268157713",
+        "macd_histogram": "0.0005610607846050567",
+        "closed_candle_at": 1793097900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 16,
+          "1h": 2,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.6654428636989396
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.5488756310234164
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 2.2602111060119334
+        }
+      }
+    },
+    {
+      "symbol": "HYPE_TL",
+      "run_id": "40496419703",
+      "started_at": 1793100559,
+      "decision": {
+        "stage": "trigger",
+        "reason": "setup not ready",
+        "observed_at": 1793100600,
+        "score": 84,
+        "setup_veto_diagnostics": {
+          "breakout": false,
+          "is_pullback": true,
+          "mean_touch": true,
+          "bullish_candle": true,
+          "above_ema9": true,
+          "above_ema21": true,
+          "ema21_gte_ema50": false,
+          "macd_hist_positive": true,
+          "macd_line_gt_signal": true,
+          "volume_ratio_gte_1_20": true,
+          "pullback_rsi_lte_60": true,
+          "recovery_return3_lt_2_60": true
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 1.035144663798171
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 2.180901632761967
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 3.9504394702007284
+        }
+      }
+    },
+    {
+      "symbol": "ZRO_TL",
+      "run_id": "40497675124",
+      "started_at": 1793101162,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793101197,
+        "score": 80,
+        "rsi": "63.806565394553026",
+        "return_3": "1.945718180691535506258520300",
+        "volume_ratio": "1.5706810241666003",
+        "atr_pct": "0.6352821389284409190371991247",
+        "macd_histogram": "0.13509726949445372",
+        "closed_candle_at": 1793099700,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 11,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 1.6262135922330057
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.1286407766990303
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.662621359223282
+        }
+      }
+    },
+    {
+      "symbol": "BCH_TL",
+      "run_id": "40506707739",
+      "started_at": 1793105357,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793105406,
+        "score": 86
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.11323022915540326
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.759548377174469
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.5398605680841726
+        }
+      }
+    },
+    {
+      "symbol": "DOGE_TL",
+      "run_id": "40515392503",
+      "started_at": 1793108983,
+      "decision": {
+        "stage": "risk",
+        "reason": "rr_below_min",
+        "observed_at": 1793109035,
+        "score": 82,
+        "setup": "PULLBACK",
+        "atr14": "0.010202953087242445",
+        "swing_low": "3.8072",
+        "best_bid": "3.8483",
+        "best_ask": "3.8519",
+        "min_rr": "1.50",
+        "max_risk_pct": "4.00",
+        "risk_audit": {
+          "entry": "3.8493",
+          "stop": "3.801857672218901852766156485",
+          "risk_pct": "1.232492343571510332627841815",
+          "sell_wall_price": "3.8604",
+          "sell_wall_share": "0.1408762358747545550665863833",
+          "adjusted_tp1": "3.8603",
+          "actual_rr": "0.2318604612057545856762178245",
+          "min_rr": "1.50"
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.33182972986984804
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.8425364234976973
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.0162285477264499
+        }
+      }
+    },
+    {
+      "symbol": "BEAM_TL",
+      "run_id": "40528085563",
+      "started_at": 1793113780,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793113801,
+        "score": 86,
+        "rsi": "75.85844271394494",
+        "return_3": "2.029850746268656716417910400",
+        "volume_ratio": "2.0787213635390316",
+        "atr_pct": "0.8986842725979561146869514336",
+        "macd_histogram": "0.0009894631404578798",
+        "closed_candle_at": 1793112300,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 3,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -2.30632761679479
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.5966883500887041
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.5966883500887041
+        }
+      }
+    },
+    {
+      "symbol": "SOL_TL",
+      "run_id": "40528085563",
+      "started_at": 1793113780,
+      "decision": {
+        "stage": "trigger",
+        "reason": "4h still weak",
+        "observed_at": 1793113823,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.024973029128538826
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.3310424741279627
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.27909857354058154
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": "40531397053",
+      "started_at": 1793114981,
+      "decision": {
+        "stage": "trigger",
+        "reason": "RSI 70.2 outside alert range",
+        "observed_at": 1793115027,
+        "score": 86
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.012173039760199345
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.001521629970024918
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.41388335184648906
+        }
+      }
+    },
+    {
+      "symbol": "BONK_TL",
+      "run_id": "40531397053",
+      "started_at": 1793114981,
+      "decision": {
+        "stage": "trigger",
+        "reason": "4h still weak",
+        "observed_at": 1793115027,
+        "score": 80
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.13140604467805073
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.26281208935611255
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.854139290407363
+        }
+      }
+    },
+    {
+      "symbol": "ENA_TL",
+      "run_id": "40531397053",
+      "started_at": 1793114981,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793115027,
+        "score": 84
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 1.615969581749055
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.760456273764254
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.7110266159695797
+        }
+      }
+    },
+    {
+      "symbol": "XAUT_TL",
+      "run_id": "40533052108",
+      "started_at": 1793115586,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793115617,
+        "score": 80,
+        "rsi": "78.32081260644233",
+        "return_3": "0.252467408300052784112977900",
+        "volume_ratio": "1.68116121750929",
+        "atr_pct": "0.1623400724390441177201043090",
+        "macd_histogram": "176.11608151837265",
+        "closed_candle_at": 1793114100,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 2,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.023337454628502563
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.06306078165576601
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.10923914932494672
+        }
+      }
+    },
+    {
+      "symbol": "ARB_TL",
+      "run_id": "40534711090",
+      "started_at": 1793116187,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793116223,
+        "score": 83,
+        "rsi": "56.69154837281401",
+        "return_3": "0.360144057623049219687875200",
+        "volume_ratio": "4.730113820359582",
+        "atr_pct": "0.5130641101105301435406698565",
+        "macd_histogram": "0.00448402395313981",
+        "closed_candle_at": 1793115000,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 70,
+          "1h": 4,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.35799522673032325
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.23866348448688957
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.35799522673032325
+        }
+      }
+    },
+    {
+      "symbol": "BIO_TL",
+      "run_id": "40536371157",
+      "started_at": 1793116788,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793116811,
+        "score": 80,
+        "rsi": "63.90424699662359",
+        "return_3": "0.906618313689936536718041700",
+        "volume_ratio": "13.497960443944628",
+        "atr_pct": "0.4334214156686353998203054807",
+        "macd_histogram": "0.0015511060336630658",
+        "closed_candle_at": 1793115900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 4,
+          "1h": 13,
+          "4h": 1
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.17937219730941312
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.6278026905829792
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.7174887892376747
+        }
+      }
+    },
+    {
+      "symbol": "ETHFI_TL",
+      "run_id": "40541330692",
+      "started_at": 1793118587,
+      "decision": {
+        "stage": "trigger",
+        "reason": "buy flow not strong enough: 1.08",
+        "observed_at": 1793118642,
+        "score": 80
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.4992503748125885
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.6296851574212892
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.8095952023988051
+        }
+      }
+    },
+    {
+      "symbol": "TLM_TL",
+      "run_id": "40541330692",
+      "started_at": 1793118587,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793118620,
+        "score": 80,
+        "rsi": "88.4632522606159",
+        "return_3": "2.666666666666666666666666700",
+        "volume_ratio": "4.425165095902687",
+        "atr_pct": "0.7011827413148277597402597403",
+        "macd_histogram": "0.0003562472652773389",
+        "closed_candle_at": 1793117700,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 25,
+          "1h": 1,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -3.7337662337662447
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -2.4350649350649345
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.110389610389618
+        }
+      }
+    },
+    {
+      "symbol": "BAT_TL",
+      "run_id": "40544592354",
+      "started_at": 1793119799,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793119836,
+        "score": 83,
+        "rsi": "51.57335882363481",
+        "return_3": "0.439741651779579497045485800",
+        "volume_ratio": "1.708662910664163",
+        "atr_pct": "0.9591724530472918319879600493",
+        "macd_histogram": "0.0024684096556923368",
+        "closed_candle_at": 1793118600,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 14,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 1.735298168296362
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.2754441536978458
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.23412753064315783
+        }
+      }
+    },
+    {
+      "symbol": "PEPE_TL",
+      "run_id": "40546188898",
+      "started_at": 1793120385,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793120410,
+        "score": 83,
+        "rsi": "79.41909800143264",
+        "return_3": "3.522156235724074920054819600",
+        "volume_ratio": "4.3003510584433915",
+        "atr_pct": "0.7568451458829599311592604033",
+        "macd_histogram": "7.810329580070616E-7",
+        "closed_candle_at": 1793119500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 8,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.7210944395410488
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.2974404236540171
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.18093556928509003
+        }
+      }
+    },
+    {
+      "symbol": "SKL_TL",
+      "run_id": "40546188898",
+      "started_at": 1793120385,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793120412,
+        "score": 81,
+        "rsi": "58.0121395795229",
+        "return_3": "0",
+        "volume_ratio": "2.2661744041039844",
+        "atr_pct": "0.4284102711703377664974619289",
+        "macd_histogram": "0.00016941944331575994",
+        "closed_candle_at": 1793119500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 11,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.9137055837563413
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.9289340101522834
+        }
+      }
+    },
+    {
+      "symbol": "TRUMP_TL",
+      "run_id": "40552564284",
+      "started_at": 1793122920,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793122966,
+        "score": 82
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.20199619771863464
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.24952471482890815
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.6059885931559039
+        }
+      }
+    },
+    {
+      "symbol": "SYN_TL",
+      "run_id": "40558865515",
+      "started_at": 1793125215,
+      "decision": {
+        "stage": "trigger",
+        "reason": "setup not ready",
+        "observed_at": 1793125282,
+        "score": 89,
+        "setup_veto_diagnostics": {
+          "breakout": false,
+          "is_pullback": true,
+          "mean_touch": true,
+          "bullish_candle": true,
+          "above_ema9": true,
+          "above_ema21": true,
+          "ema21_gte_ema50": false,
+          "macd_hist_positive": true,
+          "macd_line_gt_signal": true,
+          "volume_ratio_gte_1_20": true,
+          "pullback_rsi_lte_60": true,
+          "recovery_return3_lt_2_60": true
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.4444444444444362
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.7777777777777772
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.7777777777777781
+        }
+      }
+    },
+    {
+      "symbol": "AEVO_TL",
+      "run_id": "40576974148",
+      "started_at": 1793132396,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793132445,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.09182736455464191
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.45913682277318735
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.6528925619834656
+        }
+      }
+    },
+    {
+      "symbol": "QNT_TL",
+      "run_id": "40578474288",
+      "started_at": 1793133033,
+      "decision": {
+        "stage": "trigger",
+        "reason": "setup not ready",
+        "observed_at": 1793133086,
+        "score": 85,
+        "setup_veto_diagnostics": {
+          "breakout": false,
+          "is_pullback": true,
+          "mean_touch": true,
+          "bullish_candle": true,
+          "above_ema9": true,
+          "above_ema21": true,
+          "ema21_gte_ema50": false,
+          "macd_hist_positive": true,
+          "macd_line_gt_signal": true,
+          "volume_ratio_gte_1_20": true,
+          "pullback_rsi_lte_60": true,
+          "recovery_return3_lt_2_60": true
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.2932057124457321
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.5985489176064895
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.7003634226124489
+        }
+      }
+    },
+    {
+      "symbol": "RVN_TL",
+      "run_id": "40582860363",
+      "started_at": 1793134797,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793134822,
+        "score": 82,
+        "rsi": "72.15731404782703",
+        "return_3": "2.503477051460361613351877600",
+        "volume_ratio": "3.542292007582291",
+        "atr_pct": "0.9855082924478472184531886024",
+        "macd_histogram": "0.00025712783026477306",
+        "closed_candle_at": 1793133900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 60,
+          "1h": 6,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.8995929443690662
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -2.4423337856173677
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.170963364993217
+        }
+      }
+    },
+    {
+      "symbol": "HOT_TL",
+      "run_id": "40597712626",
+      "started_at": 1793141418,
+      "decision": {
+        "stage": "trigger",
+        "reason": "4h still weak",
+        "observed_at": 1793141467,
+        "score": 83
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.3468208092485714
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.23121387283238093
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 1.7341040462427904
+        }
+      }
+    },
+    {
+      "symbol": "PEPE_TL",
+      "run_id": "40598905266",
+      "started_at": 1793142022,
+      "decision": {
+        "stage": "trigger",
+        "reason": "volume ratio 1.13 < 1.30",
+        "observed_at": 1793142074,
+        "score": 80
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.3347870137879294
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 5.175983436852993
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 5.506365358354248
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": "40601347223",
+      "started_at": 1793143222,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793143262,
+        "score": 88
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.06671923333535501
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.40031540001215227
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.028810578031157608
+        }
+      }
+    },
+    {
+      "symbol": "PUMP_TL",
+      "run_id": "40602480896",
+      "started_at": 1793143819,
+      "decision": {
+        "stage": "trigger",
+        "reason": "buy flow not strong enough: 1.02",
+        "observed_at": 1793143864,
+        "score": 80
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.46403712296982924
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.1600928074245953
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.3712296983758634
+        }
+      }
+    },
+    {
+      "symbol": "API3_TL",
+      "run_id": "40605823599",
+      "started_at": 1793145624,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793145655,
+        "score": 80,
+        "rsi": "75.77889207586429",
+        "return_3": "2.700617283950617283950617300",
+        "volume_ratio": "6.901191685277128",
+        "atr_pct": "0.5629648406662257700976709241",
+        "macd_histogram": "0.018448579670961307",
+        "closed_candle_at": 1793144700,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 38,
+          "1h": 4,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -2.4242424242424176
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.3636363636363669
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.6666666666666607
+        }
+      }
+    },
+    {
+      "symbol": "AKT_TL",
+      "run_id": "40606946283",
+      "started_at": 1793146221,
+      "decision": {
+        "stage": "trigger",
+        "reason": "volume ratio 1.09 < 1.30",
+        "observed_at": 1793146257,
+        "score": 80
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.7312079555425566
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.0821877742029806
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.7256507750804229
+        }
+      }
+    },
+    {
+      "symbol": "PENGU_TL",
+      "run_id": "40617347932",
+      "started_at": 1793152296,
+      "decision": {
+        "stage": "trigger",
+        "reason": "RSI 70.1 outside alert range",
+        "observed_at": 1793152337,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.667865399434886
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.2586694066272663
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.1302337528897866
+        }
+      }
+    },
+    {
+      "symbol": "SOL_TL",
+      "run_id": "40617347932",
+      "started_at": 1793152296,
+      "decision": {
+        "stage": "discovery",
+        "reason": "ATR outside range",
+        "observed_at": 1793152325,
+        "score": 83,
+        "rsi": "62.84255777778341",
+        "return_3": "0.242776359428312376225811800",
+        "volume_ratio": "6.745115004686712",
+        "atr_pct": "0.1317090475061352406908220322",
+        "macd_histogram": "-0.20105743606132442",
+        "closed_candle_at": 1793151000,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 28,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.037450586032306
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.21340889500955917
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.6687604648628387
+        }
+      }
+    },
+    {
+      "symbol": "ONDO_TL",
+      "run_id": "40617347932",
+      "started_at": 1793152296,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793152337,
+        "score": 86
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.2391200382592107
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.2434241989478845
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.9086561453849895
+        }
+      }
+    },
+    {
+      "symbol": "LDO_TL",
+      "run_id": "40618297924",
+      "started_at": 1793152835,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793152883,
+        "score": 82
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.37413148049171285
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.0689470871191875
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.5879208979155504
+        }
+      }
+    },
+    {
+      "symbol": "FLOKI_TL",
+      "run_id": "40618297924",
+      "started_at": 1793152835,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793152863,
+        "score": 83,
+        "rsi": "73.23773506420976",
+        "return_3": "1.566908285949911020443595600",
+        "volume_ratio": "3.090849314276505",
+        "atr_pct": "0.3279094951999947863247863248",
+        "macd_histogram": "0.0000014904402029265156",
+        "closed_candle_at": 1793151900,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 2,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.2644938355872206
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.36090610468837436
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.2516957467684877
+        }
+      }
+    },
+    {
+      "symbol": "LINK_TL",
+      "run_id": "40620276423",
+      "started_at": 1793154035,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793154067,
+        "score": 84,
+        "rsi": "73.29035957723761",
+        "return_3": "0.774047660462689163332753500",
+        "volume_ratio": "1.5197045264870346",
+        "atr_pct": "0.2124623780069849313886251834",
+        "macd_histogram": "0.399857452390026",
+        "closed_candle_at": 1793152800,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 43,
+          "1h": 10,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.5000856311012103
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.13015927384826265
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.032539818462051784
+        }
+      }
+    },
+    {
+      "symbol": "DOGE_TL",
+      "run_id": "40620276423",
+      "started_at": 1793154035,
+      "decision": {
+        "stage": "discovery",
+        "reason": "ATR outside range",
+        "observed_at": 1793154079,
+        "score": 87,
+        "rsi": "61.41661405967167",
+        "return_3": "0.303959131545338441890166000",
+        "volume_ratio": "2.6068800663526743",
+        "atr_pct": "0.1999347616102363696554534111",
+        "macd_histogram": "0.0007232504746519722",
+        "closed_candle_at": 1793152800,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 34,
+          "1h": 2,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.04310344827586077
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.6085192697768749
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.7581135902636982
+        }
+      }
+    },
+    {
+      "symbol": "AVAX_TL",
+      "run_id": "40628888586",
+      "started_at": 1793159441,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793159464,
+        "score": 81,
+        "rsi": "73.10024702020824",
+        "return_3": "0.454910355900454910355900500",
+        "volume_ratio": "3.226011410755374",
+        "atr_pct": "0.2696397836544725625998934470",
+        "macd_histogram": "0.17874612910744458",
+        "closed_candle_at": 1793158200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 5,
+          "1h": 1,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.7328935971750217
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.6151864436893417
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.2842738801163702
+        }
+      }
+    },
+    {
+      "symbol": "AEVO_TL",
+      "run_id": "40628888586",
+      "started_at": 1793159441,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793159480,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.1808318264014508
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.5424954792043413
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.0904159132007365
+        }
+      }
+    },
+    {
+      "symbol": "ETHFI_TL",
+      "run_id": "40635402464",
+      "started_at": 1793163660,
+      "decision": {
+        "stage": "trigger",
+        "reason": "buy flow not strong enough: 1.05",
+        "observed_at": 1793163710,
+        "score": 82
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.09038867128654537
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.21090689966858367
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -0.5122024706236683
+        }
+      }
+    },
+    {
+      "symbol": "MORPHO_TL",
+      "run_id": "40635402464",
+      "started_at": 1793163660,
+      "decision": {
+        "stage": "trigger",
+        "reason": "volume ratio 1.14 < 1.30",
+        "observed_at": 1793163710,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.3437669621856432
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.32567396417586547
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": 0.569929437307759
+        }
+      }
+    },
+    {
+      "symbol": "SYN_TL",
+      "run_id": "40638319612",
+      "started_at": 1793165425,
+      "decision": {
+        "stage": "trigger",
+        "reason": "setup not ready",
+        "observed_at": 1793165460,
+        "score": 86,
+        "setup_veto_diagnostics": {
+          "breakout": false,
+          "is_pullback": true,
+          "mean_touch": true,
+          "bullish_candle": true,
+          "above_ema9": true,
+          "above_ema21": true,
+          "ema21_gte_ema50": false,
+          "macd_hist_positive": true,
+          "macd_line_gt_signal": true,
+          "volume_ratio_gte_1_20": true,
+          "pullback_rsi_lte_60": true,
+          "recovery_return3_lt_2_60": true
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 2.1205357142856984
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.227678571428581
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.67857142857143
+        }
+      }
+    },
+    {
+      "symbol": "ALT_TL",
+      "run_id": "40643207425",
+      "started_at": 1793168456,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793168472,
+        "score": 85,
+        "rsi": "65.88555657975111",
+        "return_3": "2.241326373963770340804421200",
+        "volume_ratio": "4.876625831266278",
+        "atr_pct": "0.6817094332271391291291291291",
+        "macd_histogram": "0.000022730403055143834",
+        "closed_candle_at": 1793167200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 0,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -3.529062870699884
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.6607354685646447
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -2.164887307236052
+        }
+      }
+    },
+    {
+      "symbol": "QNT_TL",
+      "run_id": "40650473334",
+      "started_at": 1793172656,
+      "decision": {
+        "stage": "risk",
+        "reason": "rr_below_min",
+        "observed_at": 1793172851,
+        "score": 87,
+        "setup": "PULLBACK",
+        "atr14": "48.91224078622396",
+        "swing_low": "9794.58",
+        "best_bid": "9976.14",
+        "best_ask": "10000.1",
+        "min_rr": "1.50",
+        "max_risk_pct": "4.00",
+        "risk_audit": {
+          "entry": "9976.14",
+          "stop": "9759.294087292279378597333237",
+          "risk_pct": "2.173645445109236853158303342",
+          "sell_wall_price": "10002.05",
+          "sell_wall_share": "0.1443309776753334670059769365",
+          "adjusted_tp1": "10002.04",
+          "actual_rr": "0.1194396503793444647156321419",
+          "min_rr": "1.50"
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.7329648241206077
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.10502512562814426
+        },
+        "6": {
+          "status": "observed",
+          "last_change_pct": -1.6177889447236082
+        }
+      }
+    },
+    {
+      "symbol": "TRX_TL",
+      "run_id": "40653698858",
+      "started_at": 1793174452,
+      "decision": {
+        "stage": "discovery",
+        "reason": "ATR outside range",
+        "observed_at": 1793174528,
+        "score": 80,
+        "rsi": "58.5017980400536",
+        "return_3": "0.012166190157552162540300500",
+        "volume_ratio": "1.143104895363609",
+        "atr_pct": "0.08732625556402573444437686272",
+        "macd_histogram": "0.00034305781247698057",
+        "closed_candle_at": 1793173500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 0,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.17030594246092434
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.15205887719726974
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "FLOKI_TL",
+      "run_id": "40653698858",
+      "started_at": 1793174452,
+      "decision": {
+        "stage": "discovery",
+        "reason": "15m momentum not constructive",
+        "observed_at": 1793174524,
+        "score": 84,
+        "rsi": "58.3314025319718",
+        "return_3": "0.859724236158182395387347800",
+        "volume_ratio": "2.4186641772631567",
+        "atr_pct": "0.3424920058236437801464896088",
+        "macd_histogram": "-9.244486841595378E-7",
+        "closed_candle_at": 1793173500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 2,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.2621276595744515
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 1.3097872340425365
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "SOL_TL",
+      "run_id": "40654859020",
+      "started_at": 1793175052,
+      "decision": {
+        "stage": "discovery",
+        "reason": "ATR outside range",
+        "observed_at": 1793175088,
+        "score": 85,
+        "rsi": "63.606557594155376",
+        "return_3": "0.308206263240924105441686600",
+        "volume_ratio": "3.1897370836980117",
+        "atr_pct": "0.1404242897192353751673096607",
+        "macd_histogram": "-0.190770939517801",
+        "closed_candle_at": 1793173500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 34,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.5004132394033523
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.09799677279702657
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "PEPE_TL",
+      "run_id": "40656027022",
+      "started_at": 1793175651,
+      "decision": {
+        "stage": "discovery",
+        "reason": "15m momentum not constructive",
+        "observed_at": 1793175696,
+        "score": 87,
+        "rsi": "62.608884713683565",
+        "return_3": "1.994865535962291149362400600",
+        "volume_ratio": "1.7509547151169473",
+        "atr_pct": "1.013942472978458964307819270",
+        "macd_histogram": "-1.7028935469140887E-7",
+        "closed_candle_at": 1793174400,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 8,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 1.761316872427976
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": 0.8724279835390814
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "ADA_TL",
+      "run_id": "40657223987",
+      "started_at": 1793176262,
+      "decision": {
+        "stage": "trigger",
+        "reason": "4h still weak",
+        "observed_at": 1793176314,
+        "score": 85
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.09704968944098669
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.193711180124235
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "NEAR_TL",
+      "run_id": "40657223987",
+      "started_at": 1793176262,
+      "decision": {
+        "stage": "risk",
+        "reason": "rr_below_min",
+        "observed_at": 1793176314,
+        "score": 88,
+        "setup": "RECOVERY",
+        "atr14": "1.0810425692496974",
+        "swing_low": "231.3",
+        "best_bid": "236.94",
+        "best_ask": "237.26",
+        "min_rr": "1.50",
+        "max_risk_pct": "4.00",
+        "risk_audit": {
+          "entry": "237.02",
+          "stop": "230.8314256773866801721954925",
+          "risk_pct": "2.610992457435372469751289976",
+          "sell_wall_price": "237.26",
+          "sell_wall_share": "0.08776645400836737298325147349",
+          "adjusted_tp1": "237.25",
+          "actual_rr": "0.03716526424504105786400902159",
+          "min_rr": "1.50"
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.7104194857916024
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -2.655615696887692
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "BONK_TL",
+      "run_id": "40657223987",
+      "started_at": 1793176262,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793176314,
+        "score": 92
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.3913894324853118
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.1304631441617743
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "DOGE_TL",
+      "run_id": "40657223987",
+      "started_at": 1793176262,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793176314,
+        "score": 86
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.05267250244551658
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -0.8051368230956313
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "W_TL",
+      "run_id": "40657223987",
+      "started_at": 1793176262,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793176314,
+        "score": 84
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.9071004066312005
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.0165780419142845
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "ONDO_TL",
+      "run_id": "40657223987",
+      "started_at": 1793176262,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793176314,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.23946360153257462
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.1015325670498122
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "TLM_TL",
+      "run_id": "40658437512",
+      "started_at": 1793176854,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793176915,
+        "score": 84
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.33057851239669533
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.1570247933884281
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "XRP_TL",
+      "run_id": "40659636556",
+      "started_at": 1793177465,
+      "decision": {
+        "stage": "discovery",
+        "reason": "passed_pending_trigger",
+        "observed_at": 1793177495,
+        "score": 80,
+        "rsi": "59.32818307885253",
+        "return_3": "0.397186344066460493602571100",
+        "volume_ratio": "1.1761479487660358",
+        "atr_pct": "0.2212072657145137710264850663",
+        "macd_histogram": "0.029328764883018017",
+        "closed_candle_at": 1793176200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 0,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.07097660792219074
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.3470454099276608
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "PENGU_TL",
+      "run_id": "40659636556",
+      "started_at": 1793177465,
+      "decision": {
+        "stage": "discovery",
+        "reason": "15m momentum not constructive",
+        "observed_at": 1793177485,
+        "score": 85,
+        "rsi": "55.42862162227698",
+        "return_3": "0.389711613406079501169134800",
+        "volume_ratio": "2.132205370921013",
+        "atr_pct": "0.2378121050106637163561076605",
+        "macd_histogram": "-0.000013456520439711212",
+        "closed_candle_at": 1793176200,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 47,
+          "1h": 12,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.7763975155279601
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.0869565217391353
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "HYPE_TL",
+      "run_id": "40660846421",
+      "started_at": 1793178053,
+      "decision": {
+        "stage": "trigger",
+        "reason": "BTC blocked: BTC gate error: Paribu chart unavailable for btc_tl 1h: GET failed: https://web.paribu.com/v1/chart/ohlc: HTTPSConnectionPool(host='web.paribu.com', port=443): Read timed out. (read timeout=12)",
+        "observed_at": 1793178420,
+        "score": 89
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.6167839089572746
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.4588601439408655
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "ZKC_TL",
+      "run_id": "40660846421",
+      "started_at": 1793178053,
+      "decision": {
+        "stage": "trigger",
+        "reason": "BTC blocked: BTC gate error: Paribu chart unavailable for btc_tl 1h: GET failed: https://web.paribu.com/v1/chart/ohlc: HTTPSConnectionPool(host='web.paribu.com', port=443): Read timed out. (read timeout=12)",
+        "observed_at": 1793178420,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": 0.8428657435279874
+        },
+        "4": {
+          "status": "observed",
+          "last_change_pct": -1.505117399157141
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "BCH_TL",
+      "run_id": "40667374003",
+      "started_at": 1793181072,
+      "decision": {
+        "stage": "discovery",
+        "reason": "RSI outside watch range",
+        "observed_at": 1793181100,
+        "score": 86,
+        "rsi": "77.32688474916247",
+        "return_3": "1.472897065444221098087932400",
+        "volume_ratio": "4.4553021651341576",
+        "atr_pct": "0.4111626542178169537161691658",
+        "macd_histogram": "17.424271287396294",
+        "closed_candle_at": 1793179800,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 1,
+          "1h": 0,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.21093757774009
+        },
+        "4": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "ARB_TL",
+      "run_id": "40669987731",
+      "started_at": 1793182279,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793182305,
+        "score": 82,
+        "rsi": "56.13973919525044",
+        "return_3": "0.717703349282296650717703300",
+        "volume_ratio": "5.928448081980008",
+        "atr_pct": "0.3242750739505312707838479810",
+        "macd_histogram": "0.0036741787323304256",
+        "closed_candle_at": 1793180700,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 50,
+          "1h": 4,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.187648456057
+        },
+        "4": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "AVAX_TL",
+      "run_id": "40672650703",
+      "started_at": 1793183465,
+      "decision": {
+        "stage": "trigger",
+        "reason": "buy flow not strong enough: 1.11",
+        "observed_at": 1793183518,
+        "score": 81
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.5143964192664829
+        },
+        "4": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "STX_TL",
+      "run_id": "40672650703",
+      "started_at": 1793183465,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793183498,
+        "score": 83,
+        "rsi": "63.79851377350058",
+        "return_3": "0.530152418820410868124585800",
+        "volume_ratio": "1.9708386419323833",
+        "atr_pct": "0.2607765590220227422544495715",
+        "macd_histogram": "0.02165578480030474",
+        "closed_candle_at": 1793182500,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 21,
+          "1h": 2,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -0.19775873434410007
+        },
+        "4": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "BEAM_TL",
+      "run_id": "40680472353",
+      "started_at": 1793187079,
+      "decision": {
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "observed_at": 1793187129,
+        "score": 91
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -1.1778563015312105
+        },
+        "4": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    },
+    {
+      "symbol": "SEI_TL",
+      "run_id": "40683044031",
+      "started_at": 1793188271,
+      "decision": {
+        "stage": "discovery",
+        "reason": "4h clearly weak",
+        "observed_at": 1793188305,
+        "score": 82,
+        "rsi": "60.73621631561581",
+        "return_3": "0.150375939849624060150375900",
+        "volume_ratio": "1.7533115022342662",
+        "atr_pct": "0.2427190643884090465465465465",
+        "macd_histogram": "0.0006763761192544772",
+        "closed_candle_at": 1793187000,
+        "authentic_only": true,
+        "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+        "exchange_zero_volume_bars": {
+          "15m": 55,
+          "1h": 4,
+          "4h": 0
+        }
+      },
+      "sampled_horizons": {
+        "1": {
+          "status": "observed",
+          "last_change_pct": -2.0270270270270396
+        },
+        "4": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        },
+        "6": {
+          "status": "right_censored_or_missing",
+          "last_change_pct": null
+        }
+      }
+    }
+  ],
+  "non_sent_episode_schema": {
+    "horizons": "hours -> status and last-price change percentage; never PnL"
+  },
+  "cohort_composition": {
+    "documented_rejections": 90,
+    "unassessed_after_another_signal_selected": 1
+  }
+}

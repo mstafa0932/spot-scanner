@@ -3,10 +3,10 @@
   "repository": "mstafa0932/spot-scanner",
   "monitor_branch": "monitor/quiet-engineering-20261017",
   "checkpoint_path": "monitoring/quiet_watch_checkpoint.json",
-  "automation_id": "6ad0f106fa608191a823826728c80f35",
+  "automation_id": "6ade6b5546f88191923ebff11ff11370",
   "user_request_received_utc": "2026-10-17T20:13:40Z",
   "monitoring_policy": {
-    "engineering_review": "hourly",
+    "engineering_review": "every_4_hours",
     "routine_notifications": false,
     "notify_only": [
       "user_decision_required",
@@ -3476,6 +3476,81 @@
         "unassessed_build_windows": 5
       },
       "conclusion": "No permanent starvation established; reconstructed technical eligibility alone does not prove READY or remaining contemporaneous gates."
+    },
+    "selection_quality_20261028": {
+      "report_path": "monitoring/research/selection-quality-20261028.md",
+      "evidence_path": "monitoring/research/selection-quality-20261028.json",
+      "reproduction_script": "monitoring/research/selection_quality_quote_audit.py",
+      "pinned_main": "3bc53d6c6cae6a13ac1dfdd00e52f58646472e60",
+      "window_utc": [
+        "2026-10-26T07:07:19+00:00",
+        "2026-10-28T13:31:23+00:00"
+      ],
+      "completed_state_diagnostics": 327,
+      "ticker_snapshots": 327,
+      "sent_signals": 3,
+      "comparison_high_score_non_sent_events": 91,
+      "comparison_composition": {
+        "documented_rejections": 90,
+        "unassessed_after_another_signal_selected": 1
+      },
+      "latest_research_run_id": 40697028167,
+      "observed_statuses": {
+        "BONK_1793118012": "EXPIRED_tracking_incomplete",
+        "ETHFI_1793137866": "EXPIRED_tracking_incomplete",
+        "BONK_1793177506": "STOP_estimated_fill_only"
+      },
+      "sampled_quote_summaries": {
+        "sent": {
+          "1": {
+            "observed_events": 3,
+            "unobserved_events": 0,
+            "mean_sampled_last_change_pct": 0.04117309112794768,
+            "median_sampled_last_change_pct": 0
+          },
+          "4": {
+            "observed_events": 3,
+            "unobserved_events": 0,
+            "mean_sampled_last_change_pct": -0.731073606691357,
+            "median_sampled_last_change_pct": -0.5239030779305764
+          },
+          "6": {
+            "observed_events": 2,
+            "unobserved_events": 1,
+            "mean_sampled_last_change_pct": -0.4876512079391049,
+            "median_sampled_last_change_pct": -0.4876512079391049
+          }
+        },
+        "not_sent_high_score": {
+          "1": {
+            "observed_events": 91,
+            "unobserved_events": 0,
+            "mean_sampled_last_change_pct": -0.25677253738173117,
+            "median_sampled_last_change_pct": -0.1927943125677789
+          },
+          "4": {
+            "observed_events": 85,
+            "unobserved_events": 6,
+            "mean_sampled_last_change_pct": -0.25711654365171815,
+            "median_sampled_last_change_pct": -0.36090610468837436
+          },
+          "6": {
+            "observed_events": 70,
+            "unobserved_events": 21,
+            "mean_sampled_last_change_pct": -0.2523765199686128,
+            "median_sampled_last_change_pct": -0.38593928928840615
+          }
+        }
+      },
+      "parameter_change_approved": false,
+      "production_bug_proven": false,
+      "strategy_quality_validated": false,
+      "performance_problem_resolved": false,
+      "production_changes": [],
+      "telegram_or_order_actions": [],
+      "interpretation": "Weak outcomes in three recent sent signals are recorded explicitly. Existing gates being correctly enforced does not validate selection quality. Score is a deterministic present-momentum checklist, not a calibrated explosion probability. No parameter change is validated by this sample.",
+      "next_action": "Continue current quiet task. Include every new READY and comparison episode before observing its outcome, measure sampled 1h/4h/6h quote changes with missingness and model caveats, preserve losses/non-winners, and require out-of-sample evidence before proposing any parameter change. Do not silently classify the one unassessed XRP observation as a missed READY.",
+      "notification_fingerprint": "selection-quality-20261028:3bc53d6:3-signals:90-rejected:1-unassessed"
     }
   },
   "pr49_review": {
@@ -3858,5 +3933,6 @@
     "monitoring_only": true,
     "user_notification_sent": false,
     "notes": "19 successful existing scanner runs checked since prior checkpoint, plus one existing controller in progress and successful near-miss research run. Signal ETHFI_TL was organic, not a test; Telegram API acceptance was logged with message_id 1116. No evidence of a new code defect, no code or strategy changes warranted."
-  }
+  },
+  "historical_automation_id": "6ad0f106fa608191a823826728c80f35"
 }
