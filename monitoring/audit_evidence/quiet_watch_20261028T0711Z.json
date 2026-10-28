@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "kind": "quiet_watch_incremental_checkpoint",
+  "repository": "mstafa0932/spot-scanner",
+  "monitor_branch": "monitor/quiet-engineering-20261017",
+  "checked_at_utc": "2026-10-28T07:12:08.549Z",
+  "previous_completed_checkpoint_run": 40625095241,
+  "first_new_completed_run": 40626053175,
+  "last_completed_run": 40648329955,
+  "completed_scanner_runs": 24,
+  "main_sha": "2f17c2ed3180a8733f536c557cc19c22944f4c11",
+  "main_state_blob_sha": "86e5c9b828d5631c91494a9712742be17f7781dd",
+  "main_state_validated_bytes": 3652716,
+  "main_diff_since_reference": {
+    "base": "1726a1fd21efcb69f3c99a72a37792a2dac5addd",
+    "ahead_commits": 28,
+    "changed_files": [
+      "scanner_state.json",
+      "near_misses_archive.jsonl"
+    ],
+    "code_or_config_changes": false
+  },
+  "scanner": {
+    "runs_completed_success": 24,
+    "run_scanner_step_success": 24,
+    "persist_scanner_state_step_success": 24,
+    "all_shadow_mode": true,
+    "synthetic_candles_total": 0,
+    "candle_error_runs": [
+      {
+        "run": 40629782176,
+        "market": "OM_TL",
+        "reason": "candle_unavailable_other"
+      },
+      {
+        "run": 40633578394,
+        "market": "OM_TL",
+        "reason": "candle_unavailable_other"
+      },
+      {
+        "run": 40637350321,
+        "market": "MORPHO_TL",
+        "reason": "timeout"
+      }
+    ],
+    "cadence_gap_seconds_min": 576,
+    "cadence_gap_seconds_max": 632,
+    "most_recent": {
+      "run": 40648329955,
+      "job": 122682270714,
+      "completed_at_utc": "2026-10-28T07:11:38Z",
+      "candles_complete": 34,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "cadence_gap_seconds": 591,
+      "state_saved": "OK",
+      "signal": false,
+      "near_ready_alerts": 0
+    }
+  },
+  "controller": {
+    "prior_run": 40616354480,
+    "prior_result": "success",
+    "prior_chain_to_run": 40639305833,
+    "active_run": 40639305833,
+    "active_status": "in_progress_expected_4h_window",
+    "new_scanner_dispatches_observed": true,
+    "duplicate_controller_started_by_monitor": false
+  },
+  "signal_followup": {
+    "DOGE_TL": [
+      {
+        "run": 40626053175,
+        "reason": "trigger:score 66 < 80"
+      },
+      {
+        "run": 40627961618,
+        "reason": "trigger:score 72 < 80"
+      }
+    ],
+    "ONDO_TL": "15m momentum not constructive in 406260/406270/406279; later book imbalance too low in 406452",
+    "PUMP_TL": "book imbalance too low 406260; later 15m momentum not constructive",
+    "run_40645240659": "confirmed=1 but risk:rr_below_min=1; exec=0, no READY; no defect inferred"
+  },
+  "telegram": {
+    "new_ready_or_near_ready_alerts_observed": 0,
+    "test_messages_sent": 0,
+    "previous_verified_message_ids": [
+      1116,
+      1117,
+      1118,
+      1119
+    ],
+    "repeat_claims_avoided": true
+  },
+  "finding": "No new proven code defect. Three isolated market-specific candle errors were classified and skipped, with subsequent cycles successful. No production changes or additional dispatch.",
+  "limitation": "GitHub connector returns empty direct content for large scanner_state.json; each successful scanner workflow validates JSON and pushes its state to main. Active controller job logs unavailable until completion (404), but its dispatches and predecessor's handoff are visible.",
+  "next": "Resume after scanner run 40648329955; recheck controller 40639305833 when its four-hour window completes. Inspect any repeated market-specific candle failures if they persist."
+}
