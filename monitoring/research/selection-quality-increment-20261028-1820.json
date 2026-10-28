@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "kind": "prospective_selection_quality_increment",
+  "prior_research_commit": "a44772b01b71983118bc8f12b405ad70a7a1787b",
+  "prior_research_path": "monitoring/research/selection-quality-20261028.json",
+  "main_sha": "9bb45fcba354ccb7ec56ab9b4a4530d95dbb65bc",
+  "reviewed_scanner_run_ids": [
+    40698587516,
+    40700174091,
+    40701744962,
+    40703372817,
+    40704990801,
+    40706642636,
+    40708301076,
+    40709947322,
+    40711598930,
+    40713284286,
+    40714971524
+  ],
+  "cohort_policy": "First non-sent event with score >=80 per symbol per 6h; select without later price knowledge; keep unassessed XRP distinct from documented rejection.",
+  "prior_non_sent_episode_count": 91,
+  "new_non_sent_episode_count": 1,
+  "combined_episode_count": 92,
+  "new_ready_count": 0,
+  "new_non_sent_episode": {
+    "symbol": "MEGA_TL",
+    "run_id": "40709947322",
+    "scan_started_at_utc_seconds": 1793199095,
+    "scan_decision_at_utc_seconds": 1793199131,
+    "reference_quote_at_utc_seconds": 1793199095,
+    "reference_last_tl": "2.495",
+    "reference_price_basis": "ticker_radar_last_at_scan_start_not_executable_bid_or_ask",
+    "score": 85,
+    "decision_stage": "trigger",
+    "decision_reason": "BTC blocked: BTC confirmed weakness RSI=33.4 | 3C=-0.17%",
+    "closed_candle_open_utc_seconds": 1793197800,
+    "authentic_only": true,
+    "candle_endpoint": "https://web.paribu.com/v1/chart/ohlc",
+    "rsi_15m": "56.078919329173054",
+    "volume_ratio_15m": "1.9721472122873558",
+    "atr_15m_pct": "0.7709903114556602404809619238",
+    "spread_pct": "0.2392344497607655502392344498",
+    "imbalance": "1.735931986125674150120565389",
+    "telegram_sent": false,
+    "real_trade": false,
+    "horizons": {
+      "1": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793202695
+      },
+      "4": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793213495
+      },
+      "6": {
+        "status": "right_censored_not_matured",
+        "due_utc_seconds": 1793220695
+      }
+    }
+  },
+  "newly_matured_existing_signal_horizon": {
+    "symbol": "BONK_TL",
+    "signal_id": "BONK_TL:1793177506",
+    "signal_score": 89,
+    "signal_status_in_shadow": "STOP",
+    "horizon_hours": 6,
+    "reference_at_utc_seconds": 1793177465,
+    "reference_last_tl": "0.000154",
+    "horizon_due_utc_seconds": 1793199065,
+    "observed_at_utc_seconds": 1793199095,
+    "observed_last_tl": "0.0001515",
+    "last_change_pct": -1.6233766233766267,
+    "observation_status": "observed",
+    "source_state_commit": "e9dfae041976fd672c74c242c26876938f3f729f",
+    "interpretation": "Sampled ticker last-price change only; not realized PnL, bid execution, exact MFE/MAE, or user trade. STOP is a shadow simulation."
+  },
+  "methodology": "Preserve baseline as immutable; new MEGA cohort selected on logged score and gate, with ticker snapshot at scan start. BONK 6h computed using baseline run-start ticker quote and first saved ticker snapshot at or after +6h within 20min. Missing/unmatured outcomes remain null.",
+  "no_production_strategy_changes": true
+}
