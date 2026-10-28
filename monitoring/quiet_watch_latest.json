@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "kind": "quiet_watch_incremental_checkpoint",
+  "repository": "mstafa0932/spot-scanner",
+  "monitor_branch": "monitor/quiet-engineering-20261017",
+  "checked_at_utc": "2026-10-28T03:19:54Z",
+  "previous_verified_run": 40622252300,
+  "last_completed_run": 40625095241,
+  "latest_observed_run": 40626053175,
+  "main_sha": "961767ac7877d971e416e7fb68800093395f10c7",
+  "state_blob_sha": "5bcae8765d0e16600ee4598e1bfa428b2ce0a3c7",
+  "validated_state_bytes": 3624542,
+  "main_diff_since_prior": {
+    "base": "1726a1fd21efcb69f3c99a72a37792a2dac5addd",
+    "ahead_commits": 3,
+    "changed_files": [
+      "scanner_state.json"
+    ],
+    "code_changes": false
+  },
+  "scanner": [
+    {
+      "run": 40623205971,
+      "job": 122601911830,
+      "created": "2026-10-28T02:49:47Z",
+      "status": "success",
+      "run_scanner": "success",
+      "persist": "success",
+      "gap_seconds": 578,
+      "synthetic": 0,
+      "candle_errors": 0,
+      "shadow": true,
+      "signal": false,
+      "near_ready_alerts": 0,
+      "state_bytes": 3621438
+    },
+    {
+      "run": 40624127355,
+      "job": 122604889492,
+      "created": "2026-10-28T02:59:48Z",
+      "status": "success",
+      "run_scanner": "success",
+      "persist": "success",
+      "gap_seconds": 617,
+      "synthetic": 0,
+      "candle_errors": 0,
+      "shadow": true,
+      "signal": false,
+      "near_ready_alerts": 0,
+      "state_bytes": 3621900
+    },
+    {
+      "run": 40625095241,
+      "job": 122608012858,
+      "created": "2026-10-28T03:09:47Z",
+      "status": "success",
+      "run_scanner": "success",
+      "persist": "success",
+      "gap_seconds": 593,
+      "synthetic": 0,
+      "candle_errors": 0,
+      "shadow": true,
+      "signal": false,
+      "near_ready_alerts": 0,
+      "state_bytes": 3624542
+    },
+    {
+      "run": 40626053175,
+      "job": 122611125864,
+      "created": "2026-10-28T03:19:48Z",
+      "status": "in_progress_at_check"
+    }
+  ],
+  "controller": {
+    "run": 40616354480,
+    "job": 122579668542,
+    "started": "2026-10-28T01:39:37Z",
+    "status": "in_progress_expected_four_hour_window"
+  },
+  "signal_followup": {
+    "DOGE_TL": [
+      {
+        "run": 40623205971,
+        "reason": "trigger:setup not ready",
+        "score": 81
+      },
+      {
+        "run": 40624127355,
+        "reason": "risk:rr_below_min",
+        "actual_rr": 0.1674213065936949,
+        "min_rr": 1.5
+      }
+    ],
+    "PUMP_TL": "discovery momentum/volume rejected",
+    "ONDO_TL": "discovery 15m momentum rejected"
+  },
+  "findings": "No new proven defect. No missed READY proven. All three completed runs successful and persisted state. No new Telegram delivery claim. No production code/config/state edits or extra scanner/controller/Telegram dispatch.",
+  "limitation": "Direct large scanner_state.json read returned empty through connector; workflow validated nonempty JSON and successful main push.",
+  "next": "Resume with run 40626053175 and newer; recheck controller 40616354480."
+}
