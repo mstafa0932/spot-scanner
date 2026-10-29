@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "case": "REEF_TL_T_TL_post_photo",
+  "observed_at_utc": "2026-10-29T11:18:59Z",
+  "main_pin": "b3b8e7b4c1b13c4f849960677577b9eef0f52ba8",
+  "source": "saved scanner_state ticker_radar and GitHub Actions job logs",
+  "runs": [
+    40860907338,
+    40862201217,
+    40863514806
+  ],
+  "reef": [
+    {
+      "run": 40860907338,
+      "at_trt": "2026-10-29T13:52:48+03:00",
+      "last_tl": "0.002230",
+      "reason": "spread_too_high",
+      "spread_pct": "2.910882221227048813255709807"
+    },
+    {
+      "run": 40862201217,
+      "at_trt": "2026-10-29T14:02:51+03:00",
+      "last_tl": "0.002269",
+      "reason": "spread_too_high",
+      "spread_pct": "1.296958855098389982110912343"
+    },
+    {
+      "run": 40863514806,
+      "at_trt": "2026-10-29T14:12:44+03:00",
+      "last_tl": "0.002198",
+      "reason": "not_evaluated_capacity",
+      "spread_pct": null
+    }
+  ],
+  "t": [
+    {
+      "run": 40860907338,
+      "at_trt": "2026-10-29T13:52:48+03:00",
+      "last_tl": "0.2401",
+      "reason": "anti-FOMO: 3C already +5.39%",
+      "score": 74
+    },
+    {
+      "run": 40862201217,
+      "at_trt": "2026-10-29T14:02:51+03:00",
+      "last_tl": "0.2421",
+      "reason": "score 71 < 80",
+      "score": 71
+    },
+    {
+      "run": 40863514806,
+      "at_trt": "2026-10-29T14:12:44+03:00",
+      "last_tl": "0.2421",
+      "reason": "imbalance_too_low",
+      "imbalance": "0.8284491903950316454439364291"
+    }
+  ],
+  "infra": {
+    "cadence_gaps_seconds": [
+      597,
+      603,
+      593
+    ],
+    "run_scanner_success": 3,
+    "persist_success": 3,
+    "candles_synthetic": 0,
+    "candles_error": 0,
+    "shadow": true
+  },
+  "research": {
+    "canonical_python_cli_executed": false,
+    "continuation_advanced": false,
+    "seed_pin": "6870b0b0ee8b20d4d882b66536e385bb8cb5dbde",
+    "seed_last_quote_at": 1793269368,
+    "pending_run_ids": [
+      40858298065,
+      40859608270,
+      40860907338,
+      40862201217,
+      40863514806
+    ],
+    "pending_rows": 5,
+    "blocker": "Original Python CLI requires local git checkout and Git history; this runner's container cannot resolve github.com, and GitHub connector data cannot be passed to the local checkout without a supported transfer. No unvalidated JS substitution used.",
+    "next_action": "Run frozen Python program on the five new state snapshots with unchanged seed; retain all negative and unknown outcomes, merge episode IDs. Continue after latest pinned main without re-downloading the 15-day window."
+  },
+  "limitations": [
+    "Ticker snapshots not fills or exact OHLC extrema",
+    "No book evidence at the photographed high",
+    "Capacity defer is not a positive screen",
+    "No original Python research execution in this run"
+  ]
+}

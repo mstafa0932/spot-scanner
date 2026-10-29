@@ -2445,7 +2445,7 @@
     "controller_observed_running": true,
     "xcn_pending_close_assignment_persisted": true
   },
-  "last_check_utc": "2026-10-29T07:42:18.612Z",
+  "last_check_utc": "2026-10-29T11:18:59Z",
   "inspected_run_ids": [
     39380465441,
     39381459092,
@@ -3584,6 +3584,21 @@
         "case_report": "monitoring/cases/SAFA_SFA_FET_20261029.md",
         "production_changed": false,
         "performance_improvement_proven": false
+      },
+      "pending_continuation": {
+        "checked_at_utc": "2026-10-29T11:18:59Z",
+        "main_pin": "b3b8e7b4c1b13c4f849960677577b9eef0f52ba8",
+        "seed_last_quote_at": 1793269368,
+        "pending_run_ids": [
+          40858298065,
+          40859608270,
+          40860907338,
+          40862201217,
+          40863514806
+        ],
+        "canonical_python_executed": false,
+        "performance_improvement_proven": false,
+        "reason": "Local checkout unavailable; preserve frozen seed, no substitute research results."
       }
     },
     "safa_sfa_fet_20261029": {
@@ -3610,11 +3625,110 @@
       ],
       "original_T_hot_detection_confirmed": true,
       "T_detection_run_id": "40812620943",
-      "reef_after_photo_followup_required": true,
+      "reef_after_photo_followup_required": false,
       "proven_runtime_bug": false,
       "calibration_approved": false,
       "research_continuation_not_advanced_for_two_case_only_quotes": true,
-      "next_action": "Continue canonical research from the existing seed, inspect completed REEF cycles after13:50TRT, include negative controls; do not loosen gates from photographed winners."
+      "next_action": "Continue canonical research from the existing seed, inspect completed REEF cycles after13:50TRT, include negative controls; do not loosen gates from photographed winners.",
+      "followup_20261029_1412": {
+        "observed_at_utc": "2026-10-29T11:18:59Z",
+        "verified_main_sha": "b3b8e7b4c1b13c4f849960677577b9eef0f52ba8",
+        "current_main_at_prewrite": "b3b8e7b4c1b13c4f849960677577b9eef0f52ba8",
+        "source_previous_main": "5b7d8e30e2c1f0a8ce01d2f6711b987e403fb1db",
+        "source_diff": {
+          "commits_ahead": 3,
+          "changed_files": [
+            "scanner_state.json"
+          ],
+          "production_code_or_config_changed": false
+        },
+        "scanner_runs": [
+          40860907338,
+          40862201217,
+          40863514806
+        ],
+        "all_three_completed_success": true,
+        "run_scanner_and_persist_steps_all_success": true,
+        "run_cadence_gaps_seconds": [
+          597,
+          603,
+          593
+        ],
+        "all_three_shadow": true,
+        "all_three_candles_synthetic_zero": true,
+        "all_three_candles_error_zero": true,
+        "all_three_state_saved_ok": true,
+        "controller_run": 40851656039,
+        "controller_status": "in_progress_expected_four_hour_window",
+        "last_completed_run": 40863514806,
+        "last_quote_at": 1793272364,
+        "post_photo_reef": [
+          {
+            "run": 40860907338,
+            "at_trt": "2026-10-29T13:52:48+03:00",
+            "last_tl": "0.002230",
+            "reason": "spread_too_high",
+            "spread_pct": "2.910882221227048813255709807"
+          },
+          {
+            "run": 40862201217,
+            "at_trt": "2026-10-29T14:02:51+03:00",
+            "last_tl": "0.002269",
+            "reason": "spread_too_high",
+            "spread_pct": "1.296958855098389982110912343"
+          },
+          {
+            "run": 40863514806,
+            "at_trt": "2026-10-29T14:12:44+03:00",
+            "last_tl": "0.002198",
+            "reason": "not_evaluated_capacity",
+            "spread_pct": null
+          }
+        ],
+        "post_photo_t": [
+          {
+            "run": 40860907338,
+            "at_trt": "2026-10-29T13:52:48+03:00",
+            "last_tl": "0.2401",
+            "reason": "anti-FOMO: 3C already +5.39%",
+            "score": 74
+          },
+          {
+            "run": 40862201217,
+            "at_trt": "2026-10-29T14:02:51+03:00",
+            "last_tl": "0.2421",
+            "reason": "score 71 < 80",
+            "score": 71
+          },
+          {
+            "run": 40863514806,
+            "at_trt": "2026-10-29T14:12:44+03:00",
+            "last_tl": "0.2421",
+            "reason": "imbalance_too_low",
+            "imbalance": "0.8284491903950316454439364291"
+          }
+        ],
+        "research": {
+          "canonical_python_cli_executed": false,
+          "continuation_advanced": false,
+          "seed_pin": "6870b0b0ee8b20d4d882b66536e385bb8cb5dbde",
+          "seed_last_quote_at": 1793269368,
+          "pending_run_ids": [
+            40858298065,
+            40859608270,
+            40860907338,
+            40862201217,
+            40863514806
+          ],
+          "pending_rows": 5,
+          "blocker": "Original Python CLI requires local git checkout and Git history; this runner's container cannot resolve github.com, and GitHub connector data cannot be passed to the local checkout without a supported transfer. No unvalidated JS substitution used.",
+          "next_action": "Run frozen Python program on the five new state snapshots with unchanged seed; retain all negative and unknown outcomes, merge episode IDs. Continue after latest pinned main without re-downloading the 15-day window."
+        },
+        "no_proven_production_bug": true,
+        "production_changes": [],
+        "trading_or_telegram_actions": [],
+        "user_notification": false
+      }
     }
   },
   "pr49_review": {
@@ -3927,32 +4041,29 @@
     ]
   },
   "last_incremental_monitoring": {
-    "observed_at_utc": "2026-10-28T23:20:17Z",
-    "previous_main": "447052ceacec42ef6632f010dd9bbb351475fef2",
-    "main_at_check": "19834dbf6078e2d645b9ed794d4b9e12eba42fab",
+    "observed_at_utc": "2026-10-29T11:18:59Z",
+    "previous_main": "5b7d8e30e2c1f0a8ce01d2f6711b987e403fb1db",
+    "main_at_check": "b3b8e7b4c1b13c4f849960677577b9eef0f52ba8",
     "main_diff_paths": [
-      "near_misses_archive.jsonl",
       "scanner_state.json"
     ],
     "production_code_or_config_changed": false,
     "scanner_runs_since_previous_checkpoint": {
-      "count": 13,
-      "first_run_id": 40769774246,
-      "last_run_id": 40785533750,
+      "count": 3,
+      "first_run_id": 40860907338,
+      "last_run_id": 40863514806,
       "all_completed_success": true,
-      "run_scanner_steps_success": 13,
-      "persist_state_steps_success": 13
+      "run_scanner_steps_success": 3,
+      "persist_state_steps_success": 3
     },
     "controller": {
-      "current_id": 40773967969,
-      "current_status": "in_progress_expected_4h_window",
-      "previous_id": 40737989661,
-      "previous_status": "success"
+      "current_id": 40851656039,
+      "current_status": "in_progress_expected_4h_window"
     },
     "shadow": true,
     "production_changed": false,
-    "early_surge_replay_method": "js_equivalent_not_original_python",
-    "research_result_path": "monitoring/research/early-surge-incremental-20261029-0220.json",
+    "research_result_path": null,
+    "research_continuation_advanced": false,
     "user_notification_sent": false
   },
   "historical_automation_id": "6ad0f106fa608191a823826728c80f35"
