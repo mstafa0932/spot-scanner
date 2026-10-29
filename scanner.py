@@ -636,6 +636,28 @@ def _early_watch_mtf_ok(
     return True
 
 
+def _discovery_momentum_followup_ok(
+    *,
+    reason: str,
+    score: int,
+    volume_ratio: Decimal,
+    btc_ok: bool,
+) -> bool:
+    """Revisit strong discovery momentum rejects, never treat them as READY.
+
+    discovery_ok has already evaluated liquidity, book, RSI, ATR, anti-FOMO,
+    and higher timeframes before it can return this reason. This helper
+    allocates only an existing bounded EARLY WATCH scheduling slot, subject
+    to the normal candle-close check and all fresh gates on every revisit.
+    """
+    return bool(
+        btc_ok
+        and reason == "15m momentum not constructive"
+        and score >= ALERT_MIN_SCORE
+        and volume_ratio >= MIN_WATCH_VOLUME_RATIO
+    )
+
+
 def format_early_watch(
     *,
     symbol: str,
@@ -2034,6 +2056,7 @@ def run_scanner() -> None:
             "volume_ratio": str(tech_15.volume_ratio),
             "atr_pct": str(atr / close * 100) if close and close > 0 and atr is not None else None,
             "macd_histogram": str(getattr(tech_15, "macd_histogram", "")),
+            "above_ema21": getattr(tech_15, "is_above_ema21", None),
             "closed_candle_at": int(df_15["timestamp"].iloc[-1]),
             "authentic_only": True,
             "candle_endpoint": df_15.attrs.get("candle_endpoint"),
@@ -2111,6 +2134,30 @@ def run_scanner() -> None:
                         tech_15.rsi14,
                         sent_watch,
                     )
+            elif _discovery_momentum_followup_ok(
+                reason=discovery_reason,
+                score=score,
+                volume_ratio=tech_15.volume_ratio,
+                btc_ok=btc_ok,
+            ):
+                # BONK-style high-score momentum rejection: keep watch on a
+                # future CLOSED candle without changing discovery or READY.
+                # Reuse the existing fair, quota-limited priority slots.
+                _record_early_watch_followup(
+                    state,
+                    symbol=ticker.symbol,
+                    now=now,
+                    candle_at=int(df_15["timestamp"].iloc[-1]),
+                    score=score,
+                    reason=discovery_reason,
+                )
+                LOGGER.info(
+                    "DISCOVERY_MOMENTUM_FOLLOWUP | %s | score=%d | "
+                    "volume_ratio=%s | no_ready_no_alert",
+                    ticker.symbol,
+                    score,
+                    tech_15.volume_ratio,
+                )
             continue
 
         note(ticker.symbol, "discovery", "passed_pending_trigger", **indicator_metrics)
