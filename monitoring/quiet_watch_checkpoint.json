@@ -3569,45 +3569,48 @@
       "continuation": "monitoring/research/early-surge-continuation-20261029.json",
       "next_action": "Use existing quiet automation; fixed-rule future replay on new snapshots only, include negative/missing cases; no production calibration justified.",
       "latest_incremental": {
-        "at_utc": "2026-10-28T23:20:17Z",
-        "new_main_pin": "19834dbf6078e2d645b9ed794d4b9e12eba42fab",
-        "last_completed_run_id": 40785533750,
-        "paired_rows": 13,
-        "new_events": 81,
-        "prospective_new_events": 38,
+        "at_utc": "2026-10-29T04:06:10Z",
+        "new_main_pin": "14c8eba0082db6bcc32f0de2756fe2d4c9947455",
+        "last_completed_run_id": 40815383565,
+        "paired_rows": 29,
+        "new_events": 85,
+        "new_prospective_events": 85,
         "continuation_path": "monitoring/research/early-surge-continuation-20261029.json",
-        "incremental_result_path": "monitoring/research/early-surge-incremental-20261029-0220.json",
+        "incremental_result_path": "monitoring/research/early-surge-incremental-20261029-0706.json",
         "method": "js_equivalent_pending_python_cli_crosscheck",
+        "python_cli_executed": false,
         "production_changed": false,
         "performance_improvement_proven": false,
         "engineering_health": {
-          "scanned_runs": 13,
-          "all_scanner_steps_success": true,
-          "all_persist_steps_success": true,
-          "all_btc_ok": true,
+          "scanned_runs": 29,
+          "first_run_id": 40786752534,
+          "last_run_id": 40815383565,
+          "all_run_scanner_and_persist_steps_success": true,
+          "verified_step_checks": "29/29 from GitHub Actions job steps",
           "all_shadow": true,
-          "all_state_saved_OK": true,
-          "all_candles_synthetic_zero": true,
-          "all_candles_error_zero": true,
-          "cadence_gap_seconds_range": [
-            447,
-            737
-          ],
-          "cadence_status_all_ok": true,
-          "internal_early_watch_count": 2,
+          "btc_gate_rejections": 10,
+          "btc_gate_reason": "BTC confirmed weakness, policy-driven (RSI and 3C), not a software fault",
           "generic_early_watch_alerts": 0,
-          "near_ready_alerts": 0,
-          "confirmed_ready": 0,
-          "observed_errors": 0,
-          "controller": {
-            "id": 40773967969,
-            "status": "in_progress_expected_4h_window",
-            "step": "Dispatch scanner every 10 minutes for 4 hours"
+          "ready_or_near_ready_alerts": 0,
+          "controller_run_id": 40801908484,
+          "controller_status": "in_progress within expected 4h window",
+          "cadence_start_gaps_seconds": [
+            593,
+            615
+          ],
+          "latest_infra": {
+            "run_id": 40815383565,
+            "candles_synthetic": 0,
+            "candles_error": 0,
+            "cadence_gap_seconds": 604,
+            "state_saved": "OK",
+            "btc_ok": false
           },
-          "next_completed_run_not_included": {
-            "run_id": 40786752534,
-            "reason": "completed after pinned main; leave to next incremental review"
-          }
+          "production_code_changed": false,
+          "changed_main_paths_since_seed": [
+            "scanner_state.json",
+            "near_misses_archive.jsonl"
+          ]
         }
       }
     }
