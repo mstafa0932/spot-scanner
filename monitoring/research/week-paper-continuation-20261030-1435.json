@@ -1,0 +1,241 @@
+{
+  "schema": "paribu_weekly_readonly_continuation_v1",
+  "audit_window_trt": [
+    "2026-10-30T10:23:17+03:00",
+    "2026-10-30T14:34:58+03:00"
+  ],
+  "trial_window_trt": [
+    "2026-10-29T14:42:00+03:00",
+    "2026-11-05T14:42:00+03:00"
+  ],
+  "previous_ledger_commit": "ea2976943e4d11930625ab2ab5de40fc387b0fc8",
+  "previous_ledger_path": "monitoring/research/week-paper-continuation-20261030-1020.json",
+  "previous_last_run": 41018742849,
+  "verified_main": "854673f7530874e94dbf17806e2133f90062b0bf",
+  "main_compare_from": "43f8dd341beebb489e58ebf0b860fc556b1a10e3",
+  "main_compare": {
+    "ahead_by": 26,
+    "behind_by": 0,
+    "changed_files": [
+      "scanner_state.json"
+    ],
+    "production_code_or_config_changed": false
+  },
+  "new_window": {
+    "runs": 26,
+    "first_run": 41019773338,
+    "last_run": 41048932425,
+    "run_ids": [
+      41019773338,
+      41020791216,
+      41021814119,
+      41022833676,
+      41023883772,
+      41024990082,
+      41026091923,
+      41027221182,
+      41028353091,
+      41029472558,
+      41030618765,
+      41031832025,
+      41033053109,
+      41034278813,
+      41035481393,
+      41036718181,
+      41037924251,
+      41039165029,
+      41040400129,
+      41041625599,
+      41042839478,
+      41044062797,
+      41045286353,
+      41046536395,
+      41047752103,
+      41048932425
+    ],
+    "all_workflow_runs_success": true,
+    "all_run_scanner_and_persist_steps_success": true,
+    "all_infra_logs_state_saved_ok": true,
+    "all_infra_logs_synthetic_zero": true,
+    "shadow_mode_true_in_all_job_environment_logs": true,
+    "market_cycles": 6110,
+    "orderbooks_attempted": 2080,
+    "technicals_attempted": 738,
+    "capacity_deferred_market_cycles": 2288,
+    "btc_ok_cycles": 17,
+    "btc_bearish_cycles": 9,
+    "cadence_gap_seconds": {
+      "min": 583,
+      "max": 619,
+      "all_status_ok": true
+    },
+    "candle_error_events": [
+      {
+        "symbol": "OM_TL",
+        "interval": "4h",
+        "run_id": 41021814119,
+        "canonical_closed": 53,
+        "required": 205
+      },
+      {
+        "symbol": "OM_TL",
+        "interval": "4h",
+        "run_id": 41023883772,
+        "canonical_closed": 54,
+        "required": 205
+      },
+      {
+        "symbol": "OM_TL",
+        "interval": "4h",
+        "run_id": 41037924251,
+        "canonical_closed": 54,
+        "required": 205
+      },
+      {
+        "symbol": "OM_TL",
+        "interval": "4h",
+        "run_id": 41040400129,
+        "canonical_closed": 54,
+        "required": 205
+      }
+    ],
+    "candle_error_interpretation": "Source-history shortfall; scanner failed closed for OM_TL without synthetic substitution. No code defect proven.",
+    "ready": 0,
+    "near_ready": 0,
+    "early_watch_public": 0,
+    "confirmed": 0,
+    "candidate_decision_observations": 4,
+    "high_score_non_ready_observations": [
+      {
+        "symbol": "PEPE_TL",
+        "run": 41027221182,
+        "score": 85,
+        "reason": "discovery:15m momentum not constructive",
+        "closed_candle_at": 1793348100
+      },
+      {
+        "symbol": "PEPE_TL",
+        "run": 41028353091,
+        "score": 81,
+        "reason": "discovery:15m momentum not constructive",
+        "closed_candle_at": 1793348100,
+        "note": "same closed candle as previous; not a second confirmation"
+      },
+      {
+        "symbol": "PEPE_TL",
+        "run": 41044062797,
+        "score": 87,
+        "reason": "trigger:setup not ready",
+        "closed_candle_at": 1793356200,
+        "setup_veto": {
+          "breakout": false,
+          "is_pullback": false
+        }
+      },
+      {
+        "symbol": "PEPE_TL",
+        "run": 41046536395,
+        "score": 83,
+        "reason": "discovery:anti-FOMO 3C +6.57%",
+        "closed_candle_at": 1793357100
+      },
+      {
+        "symbol": "PEPE_TL",
+        "run": 41047752103,
+        "score": 80,
+        "reason": "discovery:anti-FOMO 3C +3.44%",
+        "closed_candle_at": 1793358000
+      },
+      {
+        "symbol": "PEPE_TL",
+        "run": 41048932425,
+        "score": 88,
+        "reason": "trigger:setup not ready",
+        "closed_candle_at": 1793358900,
+        "setup_veto": {
+          "breakout": false,
+          "is_pullback": false
+        }
+      },
+      {
+        "symbol": "BCH_TL",
+        "run": 41048932425,
+        "score": 86,
+        "reason": "trigger:watching confirmations 1/2",
+        "closed_candle_at": 1793358900,
+        "status": "pending_followup_not_ready"
+      }
+    ],
+    "pepe_prior_confirmation_followup": {
+      "previous_run": 41017709295,
+      "previous_status": "watching confirmations 1/2",
+      "deferred_run": 41018742849,
+      "first_new_run": 41019773338,
+      "first_new_reason": "book:imbalance_too_low",
+      "second_new_run": 41020791216,
+      "second_new_reason": "book:imbalance_too_low",
+      "interpretation": "Later re-evaluation occurred; neither a READY nor a confirmed defect."
+    },
+    "new_confirmed_exchange_fills": 0,
+    "new_closed_paper_trades_with_as_of_L2_evidence": 0,
+    "pnl": "UNKNOWN_NOT_CALCULABLE",
+    "notes": "235 markets evaluated per cycle; deferred market-cycle counts are repeated observations, not independent missed opportunities. High-score rows are non-unique repeated observations; no outcomes are retrospectively imputed."
+  },
+  "weekly_cumulative": {
+    "runs": 144,
+    "market_cycles": 33840,
+    "capacity_deferred_market_cycles": 10556,
+    "ready_signals": 1,
+    "near_ready_alerts": 1,
+    "confirmed_exchange_fills": 0,
+    "closed_paper_trades_with_as_of_bid_ask_L2_evidence": 0,
+    "paper_trading_started": false,
+    "net_pnl": "UNKNOWN_NOT_CALCULABLE",
+    "ready_entry_expired_no_fill": "ONDO_TL"
+  },
+  "controller": {
+    "previous": {
+      "run": 41009972111,
+      "conclusion": "success"
+    },
+    "current": {
+      "run": 41035491994,
+      "status": "in_progress",
+      "started_at_utc": "2026-10-30T09:43:23Z",
+      "within_expected_four_hour_window": true
+    }
+  },
+  "pr63": {
+    "number": 63,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "offline_only": true
+  },
+  "early_surge_v1": {
+    "protocol_sha256": "2d4bb6c7d63b1aabc18a07a51b06d306f5aaaa495c0a9c1c4938f2b47486de74",
+    "program_sha256": "fef977da9b6f9c8157942e8cd4c29a0d6cfa544ca990c3a187dd5c63013d3c36",
+    "last_verified_main": "6870b0b0ee8b20d4d882b66536e385bb8cb5dbde",
+    "seed": "monitoring/research/early-surge-continuation-20261029.json",
+    "prospective_1h_4h_6h": "UNKNOWN_PENDING_CANONICAL_PYTHON",
+    "blocker": "Container cannot resolve github.com; canonical Git history checkout unavailable. No unverified substitution used."
+  },
+  "safety": {
+    "production_files_modified": false,
+    "workflow_modified": false,
+    "scanner_state_modified_by_monitor": false,
+    "dispatch": false,
+    "telegram_test": false,
+    "orders": false,
+    "merge": false,
+    "code_fix": false
+  },
+  "next_checkpoint_after_run": 41048932425,
+  "evidence": {
+    "first": "https://github.com/mstafa0932/spot-scanner/actions/runs/41019773338",
+    "last": "https://github.com/mstafa0932/spot-scanner/actions/runs/41048932425",
+    "controller": "https://github.com/mstafa0932/spot-scanner/actions/runs/41035491994",
+    "main": "https://github.com/mstafa0932/spot-scanner/commit/854673f7530874e94dbf17806e2133f90062b0bf",
+    "pr63": "https://github.com/mstafa0932/spot-scanner/pull/63"
+  }
+}
