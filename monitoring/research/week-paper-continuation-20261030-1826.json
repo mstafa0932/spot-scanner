@@ -1,0 +1,175 @@
+{
+  "schema": "paribu_weekly_readonly_continuation_v1",
+  "recorded_at_trt": "2026-10-30T18:26:16+03:00",
+  "trial_window_trt": [
+    "2026-10-29T14:42:00+03:00",
+    "2026-11-05T14:42:00+03:00"
+  ],
+  "previous_ledger_path": "monitoring/research/week-paper-continuation-20261030-1435.json",
+  "previous_ledger_commit": "2083b66680b6dc93dedcd10dd143d4e00f67ff8a",
+  "previous_last_run": 41048932425,
+  "verified_main": "305e40e0c84415881ba4bcfd4276eb15fce52436",
+  "main_compare_from": "854673f7530874e94dbf17806e2133f90062b0bf",
+  "main_compare": {
+    "ahead_by": 24,
+    "behind_by": 0,
+    "changed_files": [
+      "scanner_state.json",
+      "near_misses_archive.jsonl"
+    ],
+    "production_code_or_config_changed": false
+  },
+  "new_window": {
+    "runs": 23,
+    "first_run": 41050133519,
+    "last_run": 41080324937,
+    "first_created_utc": "2026-10-30T11:43:33Z",
+    "last_completed_utc": "2026-10-30T15:25:07Z",
+    "run_ids": [
+      41050133519,
+      41051326040,
+      41052518531,
+      41053741050,
+      41054983132,
+      41056246431,
+      41057506949,
+      41058794599,
+      41060099980,
+      41061457889,
+      41062848767,
+      41064249983,
+      41065603746,
+      41067064736,
+      41068526566,
+      41070007406,
+      41071315904,
+      41072666222,
+      41074203788,
+      41075713304,
+      41077219968,
+      41078753366,
+      41080324937
+    ],
+    "all_workflow_runs_success": true,
+    "all_run_scanner_and_persist_steps_success": true,
+    "all_infra_logs_state_saved_ok": true,
+    "all_infra_logs_synthetic_zero": true,
+    "all_run_complete_shadow_true": true,
+    "market_cycles": 5405,
+    "capacity_deferred_market_cycles": 2088,
+    "btc_bearish_cycles": 6,
+    "candle_error_events": [
+      {
+        "symbol": "OM_TL",
+        "run_id": 41058794599
+      },
+      {
+        "symbol": "OM_TL",
+        "run_id": 41061457889
+      },
+      {
+        "symbol": "OM_TL",
+        "run_id": 41067064736
+      },
+      {
+        "symbol": "OM_TL",
+        "run_id": 41078753366
+      }
+    ],
+    "candle_error_interpretation": "Canonical candle unavailable; scanner failed closed, no synthetic replacement or new code defect established.",
+    "confirmed_internal_counter_runs": [
+      41064249983
+    ],
+    "confirmed_internal_counter_note": "Funnel confirmed=1 is not evidence of a READY signal or a fill; signal=False and no READY/NEAR_READY alerts.",
+    "ready": 0,
+    "near_ready": 0,
+    "early_watch_public": 0,
+    "signals": false,
+    "high_score_non_ready_observations": [
+      {
+        "symbol": "PEPE_TL",
+        "run_id": 41053741050,
+        "score": 80,
+        "stage": "trigger",
+        "reason": "BTC blocked: confirmed weakness RSI=36.1 | 3C=-0.16%"
+      },
+      {
+        "symbol": "BCH_TL",
+        "run_id": 41074203788,
+        "score": 91,
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "closed_candle_at": 1793370600
+      },
+      {
+        "symbol": "BCH_TL",
+        "run_id": 41075713304,
+        "score": 88,
+        "stage": "trigger",
+        "reason": "watching: confirmations 1/2",
+        "closed_candle_at": 1793370600,
+        "note": "same closed candle as prior observation; not independent second confirmation"
+      }
+    ],
+    "bch_followup": "By run 41078753366, BCH_TL discovery rejected volume not expanding, score 72; no READY."
+  },
+  "weekly_cumulative": {
+    "runs": 167,
+    "market_cycles": 39245,
+    "capacity_deferred_market_cycles": 12644,
+    "ready_signals": 1,
+    "near_ready_alerts": 1,
+    "confirmed_exchange_fills": 0,
+    "closed_paper_trades_with_as_of_bid_ask_L2_evidence": 0,
+    "paper_trading_started": false,
+    "net_pnl": "UNKNOWN_NOT_CALCULABLE",
+    "ready_entry_expired_no_fill": "ONDO_TL"
+  },
+  "controller": {
+    "previous": {
+      "run": 41035491994,
+      "conclusion": "success"
+    },
+    "current": {
+      "run": 41065617364,
+      "status": "in_progress",
+      "started_at_utc": "2026-10-30T13:43:40Z",
+      "within_expected_four_hour_window": true
+    }
+  },
+  "pr63": {
+    "number": 63,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "offline_only": true
+  },
+  "early_surge_v1": {
+    "protocol_sha256": "2d4bb6c7d63b1aabc18a07a51b06d306f5aaaa495c0a9c1c4938f2b47486de74",
+    "program_sha256": "fef977da9b6f9c8157942e8cd4c29a0d6cfa544ca990c3a187dd5c63013d3c36",
+    "last_verified_main": "7bd82afd935e1998f4345123aadbb107d400006a",
+    "seed": "monitoring/research/early-surge-continuation-20261030-1620.json",
+    "last_canonical_quote_at": 1793366066,
+    "unprocessed_newer_quotes": "PENDING_CANONICAL_PYTHON",
+    "blocker": "Local git ls-remote cannot resolve github.com; canonical Git checkout unavailable in this runtime. No alternate replay claimed validated.",
+    "note": "The earlier 161-snapshot canonical run is preserved separately; no 15-day replay repeated."
+  },
+  "safety": {
+    "production_files_modified": false,
+    "workflow_modified": false,
+    "scanner_state_modified_by_monitor": false,
+    "dispatch": false,
+    "telegram_test": false,
+    "orders": false,
+    "merge": false,
+    "code_fix": false
+  },
+  "next_checkpoint_after_run": 41080324937,
+  "evidence": {
+    "first": "https://github.com/mstafa0932/spot-scanner/actions/runs/41050133519",
+    "last": "https://github.com/mstafa0932/spot-scanner/actions/runs/41080324937",
+    "controller": "https://github.com/mstafa0932/spot-scanner/actions/runs/41065617364",
+    "main": "https://github.com/mstafa0932/spot-scanner/commit/305e40e0c84415881ba4bcfd4276eb15fce52436",
+    "pr63": "https://github.com/mstafa0932/spot-scanner/pull/63"
+  }
+}
