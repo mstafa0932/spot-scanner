@@ -1,0 +1,198 @@
+{
+  "schema": "paribu_weekly_readonly_continuation_v1",
+  "generated_at_utc": "2026-10-30T07:19:00Z",
+  "trial_window_trt": [
+    "2026-10-29T14:42:00+03:00",
+    "2026-11-05T14:42:00+03:00"
+  ],
+  "previous_ledger_commit": "ad6d43ef39b101de87a41f645f4d5d70be8bfeae",
+  "previous_ledger_path": "monitoring/research/week-paper-continuation-20261030-0630.json",
+  "previous_last_run": 40997067068,
+  "main_pin": "43f8dd341beebb489e58ebf0b860fc556b1a10e3",
+  "main_compare_from": "06025b34fc0b5f16e59a568e6ebdf3b736475ba0",
+  "main_compare": {
+    "ahead_by": 24,
+    "changed_files": [
+      "scanner_state.json",
+      "near_misses_archive.jsonl"
+    ],
+    "code_or_config_changed": false
+  },
+  "new_window": {
+    "first_run": 40998004245,
+    "last_run": 41018742849,
+    "first_started_utc": "2026-10-30T03:33:56Z",
+    "last_finished_utc": "2026-10-30T07:14:22Z",
+    "runs": 23,
+    "run_ids": [
+      40998004245,
+      40998922702,
+      40999811782,
+      41000701700,
+      41001647278,
+      41002583759,
+      41003514610,
+      41004428489,
+      41005334377,
+      41006234306,
+      41007174506,
+      41008132553,
+      41009048257,
+      41009964573,
+      41010906138,
+      41011834533,
+      41012805022,
+      41013779420,
+      41014752969,
+      41015731283,
+      41016727192,
+      41017709295,
+      41018742849
+    ],
+    "all_workflow_jobs_success": true,
+    "all_run_scanner_and_persist_steps_success": true,
+    "all_infra_logs_state_saved_ok": true,
+    "all_infra_logs_synthetic_zero": true,
+    "all_infra_logs_candles_error_zero": true,
+    "all_diagnostics_shadow_mode_true": true,
+    "market_cycles": 5405,
+    "orderbooks_attempted": 1840,
+    "technicals_attempted": 469,
+    "capacity_deferred_market_cycles": 1882,
+    "btc_ok_cycles": 20,
+    "cadence_gap_seconds": {
+      "min": 551,
+      "max": 647,
+      "all_status_ok": true
+    },
+    "ready": 0,
+    "near_ready": 0,
+    "early_watch_public": 0,
+    "stage_drop_counts_repeated_market_cycles": {
+      "coverage:not_evaluated_capacity": 1882,
+      "universe:quote_volume_below_minimum": 1614,
+      "universe:excluded_base_asset": 69,
+      "book:imbalance_too_low": 691,
+      "book:spread_too_high": 680,
+      "discovery:1h clearly weak": 205,
+      "discovery:4h clearly weak": 117,
+      "discovery:RSI outside watch range": 107
+    },
+    "high_score_non_ready": [
+      {
+        "symbol": "HYPE_TL",
+        "run_id": 41001647278,
+        "score": 80,
+        "stage": "trigger",
+        "reason": "volume ratio 1.07 < 1.30",
+        "disposition": "rejected_by_existing_rule"
+      },
+      {
+        "symbol": "BEAM_TL",
+        "run_id": 41009964573,
+        "score": 84,
+        "stage": "discovery",
+        "reason": "RSI 83.35630139725318 outside watch range",
+        "disposition": "rejected_by_existing_rule"
+      },
+      {
+        "symbol": "PEPE_TL",
+        "run_id": 41017709295,
+        "score": 82,
+        "stage": "trigger",
+        "reason": "watching confirmations 1/2",
+        "disposition": "not_ready",
+        "next_run": 41018742849,
+        "next_run_reason": "coverage:not_evaluated_capacity",
+        "next_step": "check subsequent runs for fresh distinct closed candle; one defer alone is not a proven bug"
+      }
+    ],
+    "new_confirmed_paper_fills": 0,
+    "new_executable_closed_paper_trades": 0,
+    "unknowns": "No contemporaneous full bid/ask L2 time series or confirmed fills; no net PnL inference."
+  },
+  "weekly_cumulative": {
+    "runs": 118,
+    "market_cycles": 27730,
+    "capacity_deferred_market_cycles": 8268,
+    "ready_signals": 1,
+    "near_ready_alerts": 1,
+    "confirmed_exchange_fills": 0,
+    "closed_paper_trades_with_as_of_bid_ask_L2_evidence": 0,
+    "paper_trading_started": false,
+    "net_pnl": "UNKNOWN_NOT_CALCULABLE",
+    "ready_entry_expired_no_fill": "ONDO_TL",
+    "note": "Repeated market/capacity observations are not unique opportunities."
+  },
+  "ondo_quote_only_followup": {
+    "event_id": "ONDO_TL:1793292838",
+    "signal_at_utc": "2026-10-29T16:53:58Z",
+    "baseline_quote_at": 1793292792,
+    "baseline_last_tl": "21.26",
+    "horizon_4h": {
+      "target_at": 1793307238,
+      "observed_at": 1793307807,
+      "observed_last_tl": "19.45",
+      "observed_change_pct": -8.513641,
+      "source_state_sha": "7bd91d5c62f88e5b56ac506ea4d35922b20694e0",
+      "source_run": 40954312312
+    },
+    "horizon_6h": {
+      "target_at": 1793314438,
+      "observed_at": 1793315019,
+      "observed_last_tl": "18.95",
+      "observed_change_pct": -10.865475,
+      "source_state_sha": "0edd614d3a24d21f9e2ffc1331e9461902018ab6",
+      "source_run": 40970343758
+    },
+    "basis": "sampled ticker last about 10 minutes after horizon, NOT bid/ask fill, PnL, or executable high/low",
+    "model_status": "ENTRY_EXPIRED",
+    "fill_confirmed": false,
+    "fill_estimated": false
+  },
+  "controller": {
+    "previous": {
+      "run": 40987462818,
+      "conclusion": "success"
+    },
+    "current": {
+      "run": 41009972111,
+      "status": "in_progress",
+      "within_expected_4h_window": true
+    }
+  },
+  "pr63": {
+    "number": 63,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "head": "78ad6e436e4d478581cc720d0ac36c784cff74bd",
+    "offline_only": true
+  },
+  "early_surge_v1": {
+    "protocol_sha256": "2d4bb6c7d63b1aabc18a07a51b06d306f5aaaa495c0a9c1c4938f2b47486de74",
+    "program_sha256": "fef977da9b6f9c8157942e8cd4c29a0d6cfa544ca990c3a187dd5c63013d3c36",
+    "seed": "monitoring/research/early-surge-continuation-20261029.json",
+    "last_verified_main": "6870b0b0ee8b20d4d882b66536e385bb8cb5dbde",
+    "prospective_1h_4h_6h": "UNKNOWN_PENDING_CANONICAL_PYTHON",
+    "blocker": "Local Git checkout unavailable (DNS for github.com fails in container); no unverified alternative used. Preserve frozen rules and seed."
+  },
+  "safety": {
+    "production_files_modified": false,
+    "workflow_modified": false,
+    "scanner_state_modified_by_monitor": false,
+    "dispatch": false,
+    "telegram_test": false,
+    "orders": false,
+    "merge": false,
+    "code_fix": false
+  },
+  "next_checkpoint_after_run": 41018742849,
+  "evidence": {
+    "first": "https://github.com/mstafa0932/spot-scanner/actions/runs/40998004245",
+    "last": "https://github.com/mstafa0932/spot-scanner/actions/runs/41018742849",
+    "controller": "https://github.com/mstafa0932/spot-scanner/actions/runs/41009972111",
+    "main": "https://github.com/mstafa0932/spot-scanner/commit/43f8dd341beebb489e58ebf0b860fc556b1a10e3",
+    "pr63": "https://github.com/mstafa0932/spot-scanner/pull/63"
+  }
+}
