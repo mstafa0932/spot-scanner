@@ -961,6 +961,18 @@ def score_candidate(
     return max(0, min(score, 100)), reasons
 
 
+def _rescore_with_book(candidate: Candidate, book: OrderBookSnapshot) -> Candidate:
+    """Keep the decision score and its explanations tied to the current book."""
+    score, reasons = score_candidate(
+        candidate.ticker, book, candidate.tech_15, candidate.tech_1h, candidate.tech_4h
+    )
+    # Discovery describes the earlier admission; retain that context without
+    # carrying stale book-scoring reasons into risk or notification. Historical
+    # watch observations remain untouched and no confirmation is added here.
+    discovery_reasons = [r for r in candidate.reasons if r.startswith("discovery:")]
+    return replace(candidate, book=book, score=score, reasons=reasons + discovery_reasons)
+
+
 def discovery_ok(
     ticker: Ticker,
     book: OrderBookSnapshot,
@@ -1679,7 +1691,7 @@ def _send_near_ready(
     if not 0 <= now - (candidate.candle_at + 900) <= 960:
         return False
     try:
-        candidate = replace(candidate, book=get_order_book(candidate.symbol))
+        candidate = _rescore_with_book(candidate, get_order_book(candidate.symbol))
     except ParibuDataError:
         return False
     checked_at = int(time.time())
@@ -2240,7 +2252,7 @@ def run_scanner() -> None:
         # Re-read the book immediately before pricing a notification. A scan can
         # take minutes; its earlier book must not masquerade as an executable quote.
         try:
-            candidate = replace(candidate, book=get_order_book(candidate.symbol))
+            candidate = _rescore_with_book(candidate, get_order_book(candidate.symbol))
         except ParibuDataError:
             _record_execution_followup(
                 state, symbol=candidate.symbol, now=int(time.time()),
@@ -2259,7 +2271,8 @@ def run_scanner() -> None:
                 imbalance=candidate.book.imbalance_ratio,
                 best_ask=candidate.book.best_ask,
             )
-            note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason)
+            note(candidate.symbol, "execution", "fresh_book_rejected: " + trigger_reason,
+                 score=candidate.score)
             continue
         # Keep any bounded execution follow-up until READY delivery is
         # confirmed. Dropping it here can starve a Telegram retry.
