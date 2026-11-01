@@ -46,6 +46,7 @@ from candle_backfill import bind_history, recent_authentic
 from coverage_scheduler import CoverageCycle
 from research_cohort import ensure_cohort
 from risk_engine import build_risk_plan, build_risk_plan_result
+from research_capture import ResearchCapture
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -1671,6 +1672,7 @@ def build_opportunity(
 def _send_near_ready(
     state: dict[str, Any], candidate: Candidate, item: dict[str, Any],
     btc_ok: bool, btc_reason: str, now: int,
+    capture: Optional[ResearchCapture] = None,
 ) -> bool:
     """Notify only one confirmation short, without writing READY state."""
     if (not TELEGRAM_NEAR_READY_ALERTS or not SHADOW_MODE
@@ -1691,7 +1693,10 @@ def _send_near_ready(
     if not 0 <= now - (candidate.candle_at + 900) <= 960:
         return False
     try:
-        candidate = _rescore_with_book(candidate, get_order_book(candidate.symbol))
+        fresh_book = get_order_book(candidate.symbol)
+        if capture is not None:
+            capture.book(fresh_book, "near_ready_refresh")
+        candidate = _rescore_with_book(candidate, fresh_book)
     except ParibuDataError:
         return False
     checked_at = int(time.time())
@@ -1801,6 +1806,7 @@ def run_scanner() -> None:
     if not SHADOW_MODE or os.getenv("SHADOW_MODE", "true").strip().lower() != "true":
         raise RuntimeError("This release requires SHADOW_MODE=true")
     now = int(time.time())
+    capture = ResearchCapture.from_env(now)
     state = load_state()
     cohort = ensure_cohort(state, now)
     LOGGER.info("RESEARCH_COHORT | id=%s | code=%s | shadow=%s", cohort["id"], os.getenv("GITHUB_SHA"), SHADOW_MODE)
@@ -1830,6 +1836,7 @@ def run_scanner() -> None:
             )
 
     def finish_diagnostics(status):
+        diagnostics["research_capture"] = capture.finish()
         diagnostics["status"] = status
         diagnostics["finished_at"] = int(time.time())
         history = state.setdefault("scan_diagnostics", [])
@@ -1865,6 +1872,7 @@ def run_scanner() -> None:
         save_state(state)
         raise RuntimeError("Paribu snapshot unavailable; scan incomplete") from exc
 
+    capture.tickers(snapshot)
     btc_ok, _btc_15, btc_reason = btc_gate()
     diagnostics.update(btc_ok=btc_ok, btc_reason=btc_reason)
 
@@ -1913,6 +1921,7 @@ def run_scanner() -> None:
             note(ticker.symbol, "data", "orderbook_error:" + type(exc).__name__)
             continue
 
+        capture.book(book, "initial")
         # Cheap rejection before candle calls.
         if book.spread_percent > MAX_SPREAD_PCT:
             if ticker.symbol in hot_symbol_set or ticker.symbol in _execution_followups(state):
@@ -2018,6 +2027,8 @@ def run_scanner() -> None:
 
         funnel["data_valid"] += 1
         candle_stats["complete"] += 1
+        for timeframe, frame in candle_frames.items():
+            capture.candles(ticker.symbol, timeframe, frame)
 
         # Keep an execution follow-up until it hands over to a strategy watch
         # or passes the final refreshed quote. A preliminary book recovery
@@ -2252,7 +2263,9 @@ def run_scanner() -> None:
         # Re-read the book immediately before pricing a notification. A scan can
         # take minutes; its earlier book must not masquerade as an executable quote.
         try:
-            candidate = _rescore_with_book(candidate, get_order_book(candidate.symbol))
+            fresh_book = get_order_book(candidate.symbol)
+            capture.book(fresh_book, "ready_refresh")
+            candidate = _rescore_with_book(candidate, fresh_book)
         except ParibuDataError:
             _record_execution_followup(
                 state, symbol=candidate.symbol, now=int(time.time()),
@@ -2418,7 +2431,7 @@ def run_scanner() -> None:
     # preparation attempt per run; no preparation cooldown touches READY keys.
     if not sent and near_ready_candidate is not None:
         candidate, item = near_ready_candidate
-        if _send_near_ready(state, candidate, item, btc_ok, btc_reason, int(time.time())):
+        if _send_near_ready(state, candidate, item, btc_ok, btc_reason, int(time.time()), capture):
             funnel["near_ready_alerts"] += 1
 
     if os.getenv("SHADOW_RADAR_ENABLED", "true").lower() == "true":
