@@ -24,6 +24,7 @@ def enable(monkeypatch, directory):
     monkeypatch.setenv("RESEARCH_CAPTURE_UNTIL", "2026-11-03T12:00:00Z")
     monkeypatch.setenv("GITHUB_RUN_ID", "offline-archive-fixture")
     monkeypatch.setenv("GITHUB_SHA", "fixture-code-identity")
+    monkeypatch.setenv("RESEARCH_CAPTURE_CODE_SHA", "fixture-checked-out-identity")
     monkeypatch.setattr(capture.time, "time", lambda: NOW)
     return capture.ResearchCapture.from_env(NOW)
 
@@ -129,6 +130,44 @@ def test_archive_io_failure_is_observational_only(monkeypatch, tmp_path):
     recorder.book(book(), "initial")
     assert recorder.finish()["status"].startswith("error:")
     assert path.read_text() == "existing file"
+
+
+def test_checked_out_code_and_trigger_are_distinct_identities(monkeypatch, tmp_path):
+    """A refreshed checkout must not be attributed to its workflow trigger."""
+    recorder = enable(monkeypatch, tmp_path)
+    recorder.book(book(), "initial")
+    manifest = recorder.finish()
+    assert manifest["code_sha"] == "fixture-checked-out-identity"
+    assert manifest["trigger_sha"] == "fixture-code-identity"
+    assert records(tmp_path)[0]["record"]["code_sha"] == manifest["code_sha"]
+
+
+def test_missing_checkout_provenance_is_not_filled_with_the_trigger(monkeypatch, tmp_path):
+    enable(monkeypatch, tmp_path)
+    monkeypatch.delenv("RESEARCH_CAPTURE_CODE_SHA")
+    recorder = capture.ResearchCapture.from_env(NOW)
+    recorder.book(book(), "initial")
+    summary = recorder.finish()
+    assert summary["code_sha"] is None
+    assert summary["trigger_sha"] == "fixture-code-identity"
+    assert summary["status"] == "partial"
+
+
+def test_snapshot_failure_does_not_report_successful_capture(monkeypatch, tmp_path):
+    """The scanner's real failure path marks the empty artifact incomplete."""
+    harness.pipeline(monkeypatch, tmp_path)
+    enable(monkeypatch, tmp_path / "archive")
+
+    def unavailable():
+        raise scanner.ParibuDataError("offline snapshot failure")
+
+    monkeypatch.setattr(scanner, "get_market_snapshot", unavailable)
+    with pytest.raises(RuntimeError, match="snapshot unavailable"):
+        scanner.run_scanner()
+    summary = json.loads((tmp_path / "archive" / "manifest.json").read_text())
+    assert summary["scan_status"] == "snapshot_failed"
+    assert summary["status"] == "incomplete:snapshot_failed"
+    assert records(tmp_path / "archive") == []
 
 
 @pytest.mark.parametrize("near", [False, True])

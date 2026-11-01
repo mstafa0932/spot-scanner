@@ -60,7 +60,9 @@ jobs:
           RUN_AI_MANAGER_TEST: ${{ vars.RUN_AI_MANAGER_TEST || 'false' }}
           RESEARCH_CAPTURE_DIR: research_evidence
           RESEARCH_CAPTURE_UNTIL: '2026-11-05T12:00:00Z'
-        run: python main.py
+        run: |
+          export RESEARCH_CAPTURE_CODE_SHA="$(git rev-parse HEAD)"
+          python main.py
 
       - name: Archive existing public research inputs
         if: ${{ always() && github.ref == 'refs/heads/main' }}

@@ -1836,7 +1836,7 @@ def run_scanner() -> None:
             )
 
     def finish_diagnostics(status):
-        diagnostics["research_capture"] = capture.finish()
+        diagnostics["research_capture"] = capture.finish(status)
         diagnostics["status"] = status
         diagnostics["finished_at"] = int(time.time())
         history = state.setdefault("scan_diagnostics", [])

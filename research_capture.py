@@ -22,13 +22,16 @@ CANDLE_BUDGET = 384 * 1024
 class ResearchCapture:
     """Capture public numeric inputs without modifying their objects or gates."""
 
-    def __init__(self, enabled=False, directory=None, run_id=None, code_sha=None):
+    def __init__(self, enabled=False, directory=None, run_id=None, code_sha=None, trigger_sha=None):
         self.enabled = enabled
         self.directory = Path(directory) if directory is not None else None
         self.run_id, self.code_sha = run_id, code_sha
+        self.trigger_sha = trigger_sha
         self.members = []
         self.sizes = Counter()
         self.counts = Counter()
+        if enabled and not code_sha:
+            self.counts["unknown:checked_out_code_sha"] = 1
 
     @classmethod
     def from_env(cls, now):
@@ -41,7 +44,11 @@ class ResearchCapture:
             end = datetime.fromisoformat(until.replace("Z", "+00:00"))
             if end.tzinfo is None or not 0 < end.timestamp() - now <= 7 * 86400:
                 return cls()
-            return cls(True, directory, os.getenv("GITHUB_RUN_ID"), os.getenv("GITHUB_SHA"))
+            # The workflow can refresh main after its triggering commit. Its
+            # checked-out HEAD is supplied separately; never substitute the
+            # triggering SHA when actual checkout provenance is unavailable.
+            return cls(True, directory, os.getenv("GITHUB_RUN_ID"),
+                       os.getenv("RESEARCH_CAPTURE_CODE_SHA"), os.getenv("GITHUB_SHA"))
         except (ValueError, TypeError, OSError):
             return cls()
 
@@ -52,7 +59,7 @@ class ResearchCapture:
         try:
             record = {"schema_version": 1, "kind": kind, "source": "PARIBU",
                       "available_at": int(time.time()), "run_id": self.run_id,
-                      "code_sha": self.code_sha, "payload": payload}
+                      "code_sha": self.code_sha, "trigger_sha": self.trigger_sha, "payload": payload}
             raw = json.dumps(record, sort_keys=True, separators=(",", ":"),
                              allow_nan=False).encode()
             wrapped = {"sha256": hashlib.sha256(raw).hexdigest(), "record": record}
@@ -126,12 +133,13 @@ class ResearchCapture:
             self.counts["error:candles"] += 1
             LOGGER.warning("Research candle capture failed: %s", type(exc).__name__)
 
-    def finish(self):
+    def finish(self, scan_status="completed"):
         """Publish a bounded artifact; archive failures never affect readiness."""
         if not self.enabled:
             return {"enabled": False}
         summary = {"enabled": True, "schema_version": 1, "run_id": self.run_id,
-                   "code_sha": self.code_sha, "counts": dict(self.counts),
+                   "code_sha": self.code_sha, "trigger_sha": self.trigger_sha,
+                   "scan_status": scan_status, "counts": dict(self.counts),
                    "compressed_bytes": sum(self.sizes.values()),
                    "maximum_compressed_bytes": BOOK_BUDGET + CANDLE_BUDGET,
                    "scope": "existing fetched inputs only; not all-market candle coverage",
@@ -144,7 +152,12 @@ class ResearchCapture:
             raw = b"".join(self.members)
             assert len(raw) <= BOOK_BUDGET + CANDLE_BUDGET
             summary["data_sha256"] = hashlib.sha256(raw).hexdigest()
-            summary["status"] = "partial" if any(k.startswith(("omitted", "error")) for k in self.counts) else "captured"
+            if scan_status != "completed":
+                summary["status"] = "incomplete:" + scan_status
+            elif any(k.startswith(("omitted", "error", "unknown")) for k in self.counts):
+                summary["status"] = "partial"
+            else:
+                summary["status"] = "captured" if self.members else "incomplete:no_records"
             self.directory.mkdir(parents=True, exist_ok=True)
             temp = self.directory / "inputs.jsonl.gz.tmp"
             temp.write_bytes(raw)
