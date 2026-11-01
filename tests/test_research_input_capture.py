@@ -170,6 +170,37 @@ def test_snapshot_failure_does_not_report_successful_capture(monkeypatch, tmp_pa
     assert records(tmp_path / "archive") == []
 
 
+@pytest.mark.parametrize("fail_save", [False, True], ids=["saved", "save-failed"])
+def test_completion_manifest_follows_state_persistence(monkeypatch, tmp_path, capsys, fail_save):
+    """An archive must not claim completion before the real state save succeeds."""
+    monkeypatch.setattr(harness, "NOW", NOW)
+    harness.pipeline(monkeypatch, tmp_path)
+    archive = tmp_path / "archive"
+    enable(monkeypatch, archive)
+    original_save = scanner.save_state
+    persisted = []
+
+    def save(state):
+        assert not (archive / "manifest.json").exists()
+        if fail_save:
+            raise OSError("offline state persistence failure")
+        original_save(state)
+        persisted.append(True)
+
+    monkeypatch.setattr(scanner, "save_state", save)
+    if fail_save:
+        with pytest.raises(OSError, match="state persistence failure"):
+            scanner.run_scanner()
+    else:
+        scanner.run_scanner()
+    manifest = json.loads((archive / "manifest.json").read_text())
+    assert manifest["scan_status"] == ("state_persistence_failed" if fail_save else "completed")
+    assert bool(persisted) is not fail_save
+    if fail_save:
+        assert manifest["status"] == "incomplete:state_persistence_failed"
+        assert "state_saved=OK" not in capsys.readouterr().out
+
+
 @pytest.mark.parametrize("near", [False, True])
 def test_full_scanner_archives_rejected_books_and_native_frames_without_extra_fetches(monkeypatch, tmp_path, near):
     """A book veto and subsequent real READY run through unchanged gates."""

@@ -1836,7 +1836,11 @@ def run_scanner() -> None:
             )
 
     def finish_diagnostics(status):
-        diagnostics["research_capture"] = capture.finish(status)
+        # The artifact is finalized only after this state has been persisted.
+        # Its manifest/log carries the final capture status, not this reference.
+        diagnostics["research_capture"] = {
+            "enabled": capture.enabled, "finalization": "after_state_persistence",
+        }
         diagnostics["status"] = status
         diagnostics["finished_at"] = int(time.time())
         history = state.setdefault("scan_diagnostics", [])
@@ -1846,6 +1850,14 @@ def run_scanner() -> None:
                 diagnostics["seconds_since_previous_run"] = now - previous_started
         history.append(diagnostics)
         state["scan_diagnostics"] = history[-12:]
+
+    def persist_final_state(status):
+        try:
+            save_state(state)
+        except Exception:
+            capture.finish("state_persistence_failed")
+            raise
+        capture.finish(status)
 
     _prune_watchlist(state, now)
     _prune_early_watch_followups(state, now)
@@ -1869,7 +1881,7 @@ def run_scanner() -> None:
     except ParibuDataError as exc:
         LOGGER.error("Paribu snapshot failed: %s", exc)
         finish_diagnostics("snapshot_failed")
-        save_state(state)
+        persist_final_state("snapshot_failed")
         raise RuntimeError("Paribu snapshot unavailable; scan incomplete") from exc
 
     capture.tickers(snapshot)
@@ -2527,7 +2539,7 @@ def run_scanner() -> None:
     state["directive_009_runs"] = runs[-32:]
 
     # Persist first; only then claim state_saved=OK in the observability line.
-    save_state(state)
+    persist_final_state("completed")
     print(
         "[INFRA_HEALTH] "
         f"run_id={_run_id()} btc_ok={btc_ok} btc_reason={_btc_gate_reason_code(btc_reason)} "
