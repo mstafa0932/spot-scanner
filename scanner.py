@@ -46,6 +46,7 @@ from candle_backfill import bind_history, recent_authentic
 from coverage_scheduler import CoverageCycle
 from research_cohort import ensure_cohort
 from risk_engine import build_risk_plan, build_risk_plan_result
+from research_capture import ResearchCapture
 
 
 LOGGER = logging.getLogger("paribu_momentum_watcher")
@@ -1671,6 +1672,7 @@ def build_opportunity(
 def _send_near_ready(
     state: dict[str, Any], candidate: Candidate, item: dict[str, Any],
     btc_ok: bool, btc_reason: str, now: int,
+    capture: Optional[ResearchCapture] = None,
 ) -> bool:
     """Notify only one confirmation short, without writing READY state."""
     if (not TELEGRAM_NEAR_READY_ALERTS or not SHADOW_MODE
@@ -1691,7 +1693,10 @@ def _send_near_ready(
     if not 0 <= now - (candidate.candle_at + 900) <= 960:
         return False
     try:
-        candidate = _rescore_with_book(candidate, get_order_book(candidate.symbol))
+        fresh_book = get_order_book(candidate.symbol)
+        if capture is not None:
+            capture.book(fresh_book, "near_ready_refresh")
+        candidate = _rescore_with_book(candidate, fresh_book)
     except ParibuDataError:
         return False
     checked_at = int(time.time())
@@ -1726,7 +1731,12 @@ def _send_near_ready(
     # response or process stop must not replay it; READY remains independent.
     item["near_ready_attempted_at"] = checked_at
     state["near_ready_last_attempt_at"] = checked_at
-    save_state(state)
+    try:
+        save_state(state)
+    except Exception:
+        if capture is not None:
+            capture.finish("state_persistence_failed")
+        raise
     if not send_telegram(message):
         return False
     item["near_ready_notified_at"] = checked_at
@@ -1801,6 +1811,7 @@ def run_scanner() -> None:
     if not SHADOW_MODE or os.getenv("SHADOW_MODE", "true").strip().lower() != "true":
         raise RuntimeError("This release requires SHADOW_MODE=true")
     now = int(time.time())
+    capture = ResearchCapture.from_env(now)
     state = load_state()
     cohort = ensure_cohort(state, now)
     LOGGER.info("RESEARCH_COHORT | id=%s | code=%s | shadow=%s", cohort["id"], os.getenv("GITHUB_SHA"), SHADOW_MODE)
@@ -1830,6 +1841,11 @@ def run_scanner() -> None:
             )
 
     def finish_diagnostics(status):
+        # The artifact is finalized only after this state has been persisted.
+        # Its manifest/log carries the final capture status, not this reference.
+        diagnostics["research_capture"] = {
+            "enabled": capture.enabled, "finalization": "after_state_persistence",
+        }
         diagnostics["status"] = status
         diagnostics["finished_at"] = int(time.time())
         history = state.setdefault("scan_diagnostics", [])
@@ -1840,6 +1856,16 @@ def run_scanner() -> None:
         history.append(diagnostics)
         state["scan_diagnostics"] = history[-12:]
 
+    def persist_scan_state(status=None):
+        """Preserve save failures; only a final save publishes completion."""
+        try:
+            save_state(state)
+        except Exception:
+            capture.finish("state_persistence_failed")
+            raise
+        if status is not None:
+            capture.finish(status)
+
     _prune_watchlist(state, now)
     _prune_early_watch_followups(state, now)
     _prune_execution_followups(state, now)
@@ -1847,10 +1873,10 @@ def run_scanner() -> None:
 
     new_events = update_active_signals(state, now)
     if new_events:
-        save_state(state)  # Keep pending observations before attempting delivery.
+        persist_scan_state()  # Keep pending observations before attempting delivery.
     if not shadow_mode:
         if deliver_pending_events(state, send_telegram, format_signal_event):
-            save_state(state)
+            persist_scan_state()
     elif new_events:
         diagnostics["shadow_pending_events"] = len(new_events)
 
@@ -1862,9 +1888,10 @@ def run_scanner() -> None:
     except ParibuDataError as exc:
         LOGGER.error("Paribu snapshot failed: %s", exc)
         finish_diagnostics("snapshot_failed")
-        save_state(state)
+        persist_scan_state("snapshot_failed")
         raise RuntimeError("Paribu snapshot unavailable; scan incomplete") from exc
 
+    capture.tickers(snapshot)
     btc_ok, _btc_15, btc_reason = btc_gate()
     diagnostics.update(btc_ok=btc_ok, btc_reason=btc_reason)
 
@@ -1913,6 +1940,7 @@ def run_scanner() -> None:
             note(ticker.symbol, "data", "orderbook_error:" + type(exc).__name__)
             continue
 
+        capture.book(book, "initial")
         # Cheap rejection before candle calls.
         if book.spread_percent > MAX_SPREAD_PCT:
             if ticker.symbol in hot_symbol_set or ticker.symbol in _execution_followups(state):
@@ -2018,6 +2046,8 @@ def run_scanner() -> None:
 
         funnel["data_valid"] += 1
         candle_stats["complete"] += 1
+        for timeframe, frame in candle_frames.items():
+            capture.candles(ticker.symbol, timeframe, frame)
 
         # Keep an execution follow-up until it hands over to a strategy watch
         # or passes the final refreshed quote. A preliminary book recovery
@@ -2252,7 +2282,9 @@ def run_scanner() -> None:
         # Re-read the book immediately before pricing a notification. A scan can
         # take minutes; its earlier book must not masquerade as an executable quote.
         try:
-            candidate = _rescore_with_book(candidate, get_order_book(candidate.symbol))
+            fresh_book = get_order_book(candidate.symbol)
+            capture.book(fresh_book, "ready_refresh")
+            candidate = _rescore_with_book(candidate, fresh_book)
         except ParibuDataError:
             _record_execution_followup(
                 state, symbol=candidate.symbol, now=int(time.time()),
@@ -2418,7 +2450,7 @@ def run_scanner() -> None:
     # preparation attempt per run; no preparation cooldown touches READY keys.
     if not sent and near_ready_candidate is not None:
         candidate, item = near_ready_candidate
-        if _send_near_ready(state, candidate, item, btc_ok, btc_reason, int(time.time())):
+        if _send_near_ready(state, candidate, item, btc_ok, btc_reason, int(time.time()), capture):
             funnel["near_ready_alerts"] += 1
 
     if os.getenv("SHADOW_RADAR_ENABLED", "true").lower() == "true":
@@ -2514,7 +2546,7 @@ def run_scanner() -> None:
     state["directive_009_runs"] = runs[-32:]
 
     # Persist first; only then claim state_saved=OK in the observability line.
-    save_state(state)
+    persist_scan_state("completed")
     print(
         "[INFRA_HEALTH] "
         f"run_id={_run_id()} btc_ok={btc_ok} btc_reason={_btc_gate_reason_code(btc_reason)} "

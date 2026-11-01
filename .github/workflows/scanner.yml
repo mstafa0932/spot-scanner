@@ -58,7 +58,22 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           RUN_AI_MANAGER_TEST: ${{ vars.RUN_AI_MANAGER_TEST || 'false' }}
-        run: python main.py
+          RESEARCH_CAPTURE_DIR: research_evidence
+          RESEARCH_CAPTURE_UNTIL: '2026-11-05T12:00:00Z'
+        run: |
+          export RESEARCH_CAPTURE_CODE_SHA="$(git rev-parse HEAD)"
+          python main.py
+
+      - name: Archive existing public research inputs
+        if: ${{ always() && github.ref == 'refs/heads/main' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: paribu-inputs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research_evidence/
+          if-no-files-found: ignore
+          retention-days: 7
+          compression-level: 0
 
       - name: Persist scanner state
         if: ${{ always() && github.ref == 'refs/heads/main' }}
