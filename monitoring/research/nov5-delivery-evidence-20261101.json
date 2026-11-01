@@ -1,0 +1,191 @@
+{
+  "schema": "nov5_delivery_research_evidence_v1",
+  "observed_on": "2026-11-01",
+  "timezone": "Europe/Istanbul",
+  "asof_book_unix": 1793547242,
+  "main": {
+    "sha": "c7f1c876ee5fb20a857a91228efe171d53644c69",
+    "scanner_blob": "69900779f84b6a949eab9ab02994c9f86c3f69ad",
+    "market_data_blob": "40a9256907504be815b8d17a8a8369641f3b47af",
+    "since_pr64_changes": [
+      "scanner_state.json",
+      "near_misses_archive.jsonl"
+    ],
+    "pr64": "668a60f8be8075117f6c8ddefcd4522f6997fa56"
+  },
+  "inventory": {
+    "config_total": 467,
+    "tl_non_otc": 243,
+    "usdt_non_otc": 36,
+    "usdt_otc_only": 188,
+    "ticker_total": 270,
+    "ticker_tl": 235,
+    "ticker_usdt": 35,
+    "config_tl_absent_ticker": [
+      "agix_tl",
+      "eos_tl",
+      "ftm_tl",
+      "matic_tl",
+      "mkr_tl",
+      "prb_tl",
+      "rdnt_tl",
+      "rndr_tl"
+    ],
+    "config_usdt_absent_ticker": [
+      "mkr_usdt"
+    ],
+    "historical_coverage_proven": false
+  },
+  "post_week_ledger_actions": {
+    "previous_last_fully_logged_run": 41286178774,
+    "workflow_status_only_new_runs": 46,
+    "first": 41286820692,
+    "last": 41321350039,
+    "all_completed_success": true,
+    "inspected_log_run_ids": [
+      41286820692,
+      41313780930,
+      41321350039
+    ],
+    "all_46_shadow_logs_audited": false
+  },
+  "latest_run": {
+    "id": 41321350039,
+    "job": 124892067955,
+    "shadow_mode": true,
+    "btc_ok": true,
+    "candles_complete": 38,
+    "synthetic": 0,
+    "candle_errors": 0,
+    "cadence_gap_seconds": 594,
+    "state_saved": "OK",
+    "universe": 235,
+    "capacity_deferred": 41,
+    "book_imbalance_rejected": 21,
+    "book_spread_rejected": 21,
+    "candidates": 1,
+    "confirmed": 0,
+    "near_ready_alerts": 0,
+    "public_watch_alerts": 0,
+    "trigger_rejection": "BONK_TL score 75 < 80"
+  },
+  "prior_week_ledger": {
+    "path": "monitoring/research/week-paper-continuation-20261101-1051.json",
+    "runs": 410,
+    "ready": 2,
+    "near_ready": 3,
+    "confirmed_fills": 0,
+    "pnl": "UNKNOWN"
+  },
+  "near_miss_measurement": {
+    "run": 41307342314,
+    "job": 124850326955,
+    "measured": 9105,
+    "incomplete": 7933,
+    "total": 17038,
+    "completeness": 0.5344,
+    "incomplete_codes": {
+      "http_429": 3941,
+      "synthetic_candle_limit_exceeded": 2541,
+      "backfill_gap_limit_exceeded": 676,
+      "fetch_error": 570,
+      "consecutive_synthetic_limit_exceeded": 95,
+      "unclassified": 110
+    },
+    "counts_cumulative": true
+  },
+  "book_snapshot": {
+    "source": "https://api.paribu.com/orderbook",
+    "time_unix": 1793547242,
+    "parameter": "limit=100",
+    "not_historical": true,
+    "kite_tl": {
+      "seq": 29835240,
+      "mid": 6.044,
+      "top20": {
+        "bid_tl": 424596.87,
+        "ask_tl": 562556.47,
+        "ratio": 0.7548,
+        "bid_extent_pct": 0.96,
+        "ask_extent_pct": 0.927
+      },
+      "top100": {
+        "bid_levels": 52,
+        "ask_levels": 100,
+        "ratio": 0.3358
+      },
+      "symmetric_pct": {
+        "p0_5": {
+          "bid_tl": 274281.75,
+          "ask_tl": 416309.68,
+          "ratio": 0.6588
+        },
+        "p1": {
+          "ratio": 0.709
+        }
+      }
+    },
+    "lit_tl": {
+      "seq": 23725495,
+      "mid": 160.865,
+      "top20": {
+        "bid_tl": 1512032.11,
+        "ask_tl": 2060872.82,
+        "ratio": 0.7337,
+        "bid_extent_pct": 0.351,
+        "ask_extent_pct": 0.407
+      },
+      "top100": {
+        "bid_levels": 49,
+        "ask_levels": 70,
+        "ratio": 0.7164
+      },
+      "symmetric_pct": {
+        "p0_25": {
+          "bid_levels": 12,
+          "ask_levels": 3,
+          "ratio": 1.8468
+        },
+        "p0_5": {
+          "bid_levels": 23,
+          "ask_levels": 23,
+          "ratio": 0.7195
+        }
+      }
+    }
+  },
+  "public_recent_trades": {
+    "kite_tl": true,
+    "lit_tl": true,
+    "limit": 20,
+    "as_of_prior_surge": false
+  },
+  "research": {
+    "v1_seed": "monitoring/research/early-surge-continuation-20261031-0640.json",
+    "v1_ran_this_call": false,
+    "reason": "no_checkout_dns",
+    "pr63_merged": false,
+    "recovery_approved": false,
+    "new_protocol_frozen_at": "publication_of_this_commit",
+    "new_protocol_outcomes_measured": 0
+  },
+  "source_links": [
+    "https://docs.paribu.com/api/llms.txt",
+    "https://docs.paribu.com/api/market-data/orderbook.md",
+    "https://docs.paribu.com/api/market-data/ticker.md",
+    "https://docs.paribu.com/api/market-data/recent-trades.md",
+    "https://docs.paribu.com/api/market-data/exchange-config.md",
+    "https://docs.paribu.com/api/error-handling/rate-limiting.md",
+    "https://docs.paribu.com/api/streams/orderbook-sync-via-streams.md",
+    "https://docs.paribu.com/api/streams-v2/public-streams.md",
+    "https://docs.paribu.com/api/streams-v2/overview.md"
+  ],
+  "safety": {
+    "production_modified": false,
+    "dispatch": false,
+    "telegram_test": false,
+    "orders": false,
+    "merge": false,
+    "shadow_unchanged": true
+  }
+}
