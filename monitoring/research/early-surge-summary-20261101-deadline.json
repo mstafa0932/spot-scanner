@@ -1,0 +1,732 @@
+{
+  "schema_version": 1,
+  "protocol": {
+    "version": "precursor_research_v1_20261029",
+    "min_quote_volume_tl": 5000000,
+    "max_gap_seconds": 1200,
+    "history_seconds": 3600,
+    "minimum_history_seconds": 3000,
+    "max_recent_gain_pct": 2.3,
+    "max_compression_pct": 2.0,
+    "max_breakout_step_pct": 0.75,
+    "episode_cooldown_seconds": 21600,
+    "surge_label_pct": 5.0,
+    "adverse_label_pct": -2.0,
+    "retrospective_boundary": 1792789200,
+    "prospective_start": 1793224800
+  },
+  "protocol_sha256": "2d4bb6c7d63b1aabc18a07a51b06d306f5aaaa495c0a9c1c4938f2b47486de74",
+  "incremental": true,
+  "evidence": {
+    "pinned_main": "bf172e36d03b2ff38624295b351bc7b110d524e9",
+    "since": 1793417792,
+    "counts": {
+      "states_read": 200,
+      "missing_old_or_duplicate_ticker": 13,
+      "paired_snapshots": 187
+    },
+    "first_quote_at": 1793418377,
+    "last_quote_at": 1793529516,
+    "cache_sha256": "4ac090b21069f6fab1eec18308c77638364373aeaffa83c7e43e1efd15a63dd5"
+  },
+  "observed_checkout_sha_count": 187,
+  "code_history_note": "Checkout SHA changes may be state-only commits; unique checkout hashes are not unique source-code regimes.",
+  "summaries": {
+    "all": {
+      "hot_once": {
+        "1": {
+          "events": 626,
+          "observed": 597,
+          "unknown": 29,
+          "status_counts": {
+            "observed": 597,
+            "right_censored": 29
+          },
+          "sampled_surge_5pct": 5,
+          "no_sampled_surge_5pct": 592,
+          "adverse_2pct": 17,
+          "surge_before_adverse": 5,
+          "mean_last_change_pct": 0.013278619765295834,
+          "median_lead_minutes_when_hit": 29.466666666666665
+        },
+        "4": {
+          "events": 626,
+          "observed": 553,
+          "unknown": 73,
+          "status_counts": {
+            "observed": 553,
+            "right_censored": 73
+          },
+          "sampled_surge_5pct": 21,
+          "no_sampled_surge_5pct": 532,
+          "adverse_2pct": 63,
+          "surge_before_adverse": 20,
+          "mean_last_change_pct": 0.06403795456832254,
+          "median_lead_minutes_when_hit": 129.5
+        },
+        "6": {
+          "events": 626,
+          "observed": 527,
+          "unknown": 99,
+          "status_counts": {
+            "observed": 527,
+            "right_censored": 99
+          },
+          "sampled_surge_5pct": 28,
+          "no_sampled_surge_5pct": 499,
+          "adverse_2pct": 90,
+          "surge_before_adverse": 27,
+          "mean_last_change_pct": -0.014008133031819652,
+          "median_lead_minutes_when_hit": 184.33333333333331
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 252,
+          "observed": 237,
+          "unknown": 15,
+          "status_counts": {
+            "observed": 237,
+            "right_censored": 15
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 237,
+          "adverse_2pct": 9,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": -0.0995754322635414,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 252,
+          "observed": 223,
+          "unknown": 29,
+          "status_counts": {
+            "observed": 223,
+            "right_censored": 29
+          },
+          "sampled_surge_5pct": 7,
+          "no_sampled_surge_5pct": 216,
+          "adverse_2pct": 30,
+          "surge_before_adverse": 6,
+          "mean_last_change_pct": 0.03469732299945954,
+          "median_lead_minutes_when_hit": 149.56666666666666
+        },
+        "6": {
+          "events": 252,
+          "observed": 204,
+          "unknown": 48,
+          "status_counts": {
+            "observed": 204,
+            "right_censored": 48
+          },
+          "sampled_surge_5pct": 11,
+          "no_sampled_surge_5pct": 193,
+          "adverse_2pct": 42,
+          "surge_before_adverse": 10,
+          "mean_last_change_pct": 0.04574944335538404,
+          "median_lead_minutes_when_hit": 209.11666666666667
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 242,
+          "observed": 227,
+          "unknown": 15,
+          "status_counts": {
+            "observed": 227,
+            "right_censored": 15
+          },
+          "sampled_surge_5pct": 1,
+          "no_sampled_surge_5pct": 226,
+          "adverse_2pct": 4,
+          "surge_before_adverse": 1,
+          "mean_last_change_pct": -0.09132975293681457,
+          "median_lead_minutes_when_hit": 59.45
+        },
+        "4": {
+          "events": 242,
+          "observed": 214,
+          "unknown": 28,
+          "status_counts": {
+            "observed": 214,
+            "right_censored": 28
+          },
+          "sampled_surge_5pct": 5,
+          "no_sampled_surge_5pct": 209,
+          "adverse_2pct": 25,
+          "surge_before_adverse": 5,
+          "mean_last_change_pct": 0.051570290657245006,
+          "median_lead_minutes_when_hit": 199.73333333333332
+        },
+        "6": {
+          "events": 242,
+          "observed": 195,
+          "unknown": 47,
+          "status_counts": {
+            "observed": 195,
+            "right_censored": 47
+          },
+          "sampled_surge_5pct": 8,
+          "no_sampled_surge_5pct": 187,
+          "adverse_2pct": 36,
+          "surge_before_adverse": 8,
+          "mean_last_change_pct": -0.04828371687713493,
+          "median_lead_minutes_when_hit": 214.38333333333333
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 1,
+          "observed": 1,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 1,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 1.49767029065897,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 1,
+          "observed": 1,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 1,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 2.684712669181266,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 1,
+          "observed": 1,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 1,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 1.586421122698023,
+          "median_lead_minutes_when_hit": null
+        }
+      }
+    },
+    "early_retrospective": {
+      "hot_once": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      }
+    },
+    "late_retrospective": {
+      "hot_once": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 0,
+          "observed": 0,
+          "unknown": 0,
+          "status_counts": {},
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 0,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": null,
+          "median_lead_minutes_when_hit": null
+        }
+      }
+    },
+    "prospective": {
+      "hot_once": {
+        "1": {
+          "events": 626,
+          "observed": 597,
+          "unknown": 29,
+          "status_counts": {
+            "observed": 597,
+            "right_censored": 29
+          },
+          "sampled_surge_5pct": 5,
+          "no_sampled_surge_5pct": 592,
+          "adverse_2pct": 17,
+          "surge_before_adverse": 5,
+          "mean_last_change_pct": 0.013278619765295834,
+          "median_lead_minutes_when_hit": 29.466666666666665
+        },
+        "4": {
+          "events": 626,
+          "observed": 553,
+          "unknown": 73,
+          "status_counts": {
+            "observed": 553,
+            "right_censored": 73
+          },
+          "sampled_surge_5pct": 21,
+          "no_sampled_surge_5pct": 532,
+          "adverse_2pct": 63,
+          "surge_before_adverse": 20,
+          "mean_last_change_pct": 0.06403795456832254,
+          "median_lead_minutes_when_hit": 129.5
+        },
+        "6": {
+          "events": 626,
+          "observed": 527,
+          "unknown": 99,
+          "status_counts": {
+            "observed": 527,
+            "right_censored": 99
+          },
+          "sampled_surge_5pct": 28,
+          "no_sampled_surge_5pct": 499,
+          "adverse_2pct": 90,
+          "surge_before_adverse": 27,
+          "mean_last_change_pct": -0.014008133031819652,
+          "median_lead_minutes_when_hit": 184.33333333333331
+        }
+      },
+      "persistent_heat": {
+        "1": {
+          "events": 252,
+          "observed": 237,
+          "unknown": 15,
+          "status_counts": {
+            "observed": 237,
+            "right_censored": 15
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 237,
+          "adverse_2pct": 9,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": -0.0995754322635414,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 252,
+          "observed": 223,
+          "unknown": 29,
+          "status_counts": {
+            "observed": 223,
+            "right_censored": 29
+          },
+          "sampled_surge_5pct": 7,
+          "no_sampled_surge_5pct": 216,
+          "adverse_2pct": 30,
+          "surge_before_adverse": 6,
+          "mean_last_change_pct": 0.03469732299945954,
+          "median_lead_minutes_when_hit": 149.56666666666666
+        },
+        "6": {
+          "events": 252,
+          "observed": 204,
+          "unknown": 48,
+          "status_counts": {
+            "observed": 204,
+            "right_censored": 48
+          },
+          "sampled_surge_5pct": 11,
+          "no_sampled_surge_5pct": 193,
+          "adverse_2pct": 42,
+          "surge_before_adverse": 10,
+          "mean_last_change_pct": 0.04574944335538404,
+          "median_lead_minutes_when_hit": 209.11666666666667
+        }
+      },
+      "compression_heat": {
+        "1": {
+          "events": 242,
+          "observed": 227,
+          "unknown": 15,
+          "status_counts": {
+            "observed": 227,
+            "right_censored": 15
+          },
+          "sampled_surge_5pct": 1,
+          "no_sampled_surge_5pct": 226,
+          "adverse_2pct": 4,
+          "surge_before_adverse": 1,
+          "mean_last_change_pct": -0.09132975293681457,
+          "median_lead_minutes_when_hit": 59.45
+        },
+        "4": {
+          "events": 242,
+          "observed": 214,
+          "unknown": 28,
+          "status_counts": {
+            "observed": 214,
+            "right_censored": 28
+          },
+          "sampled_surge_5pct": 5,
+          "no_sampled_surge_5pct": 209,
+          "adverse_2pct": 25,
+          "surge_before_adverse": 5,
+          "mean_last_change_pct": 0.051570290657245006,
+          "median_lead_minutes_when_hit": 199.73333333333332
+        },
+        "6": {
+          "events": 242,
+          "observed": 195,
+          "unknown": 47,
+          "status_counts": {
+            "observed": 195,
+            "right_censored": 47
+          },
+          "sampled_surge_5pct": 8,
+          "no_sampled_surge_5pct": 187,
+          "adverse_2pct": 36,
+          "surge_before_adverse": 8,
+          "mean_last_change_pct": -0.04828371687713493,
+          "median_lead_minutes_when_hit": 214.38333333333333
+        }
+      },
+      "recorded_ready": {
+        "1": {
+          "events": 1,
+          "observed": 1,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 1,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 1.49767029065897,
+          "median_lead_minutes_when_hit": null
+        },
+        "4": {
+          "events": 1,
+          "observed": 1,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 1,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 2.684712669181266,
+          "median_lead_minutes_when_hit": null
+        },
+        "6": {
+          "events": 1,
+          "observed": 1,
+          "unknown": 0,
+          "status_counts": {
+            "observed": 1
+          },
+          "sampled_surge_5pct": 0,
+          "no_sampled_surge_5pct": 1,
+          "adverse_2pct": 0,
+          "surge_before_adverse": 0,
+          "mean_last_change_pct": 1.586421122698023,
+          "median_lead_minutes_when_hit": null
+        }
+      }
+    }
+  },
+  "production_changed": false,
+  "performance_improvement_proven": false,
+  "independent_future_validation_complete": false,
+  "limitations": [
+    "Retrospective rules informed by prior cases: time splits are not independent validation.",
+    "Rolling 24h turnover differences are activity proxies, not interval trade volume or executed buying.",
+    "All-market cohorts include non-rallies; user cases never determine eligibility or labels.",
+    "Six-hour episodes overlap across rules; hit rates do not establish statistical superiority.",
+    "Ticker last snapshots are not executable prices, true intrabar extrema, fills or PnL.",
+    "Missing/gapped/right-censored outcomes remain unknown.",
+    "Liquidity and BTC screens are retained; research tags do not bypass spread, book, candles, risk or READY.",
+    "Older code/provenance regimes are distinct; quotes are not a candle-authenticity replay.",
+    "No transaction-cost profitability conclusion or production calibration is approved."
+  ]
+}

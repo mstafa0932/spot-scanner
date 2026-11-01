@@ -1,0 +1,19 @@
+{
+  "protocol": {
+    "version": "sampled_price_surge_census_v1_20261101",
+    "purpose": "descriptive_event_label_not_predictor",
+    "threshold_pct": "5",
+    "lookback_seconds": 21600,
+    "minimum_baseline_span_seconds": 20400,
+    "maximum_quote_gap_seconds": 1200,
+    "event_separation_seconds": 21600,
+    "reference": "minimum positive recorded last price in prior six hours, excluding current quote",
+    "crossing": "current >= 1.05*reference and previous < the same frozen threshold",
+    "hot_link": "earliest original HOT recorded in preceding six hours; excludes event quote",
+    "unknown": "missing baseline, gaps and unavailable original HOT records stay unclassified",
+    "scope": "all positive-price markets in verified cached ticker/run pairs; no photo selection",
+    "interpretation": "first sampled threshold crossing, not true pump onset, execution or intrabar high"
+  },
+  "sha256": "e0002738fadf202ca1d67c17cfc646a4b5df3be5487d65b74dfce8d1c92567dd",
+  "recorded_before_label_execution_utc": "2026-11-01T10:51:17.134222+00:00"
+}

@@ -1,0 +1,560 @@
+{
+  "schema": "nov5_comparison_checkpoint_v1",
+  "created_at_utc": "2026-11-01T15:43:52.894270+00:00",
+  "timezone": "Europe/Istanbul",
+  "deadline_trt": "2026-11-05T15:00:00+03:00",
+  "research_pin": "bf172e36d03b2ff38624295b351bc7b110d524e9",
+  "last_research_quote_trt": "2026-11-01T13:38:36+03:00",
+  "prior_monitor_preserved": "d6c342bbaec882e6d3a577ebd8015c023755217d",
+  "canonical_v1": {
+    "program": "monitoring/research/early_surge_research.py",
+    "program_sha256": "fef977da9b6f9c8157942e8cd4c29a0d6cfa544ca990c3a187dd5c63013d3c36",
+    "protocol_sha256": "2d4bb6c7d63b1aabc18a07a51b06d306f5aaaa495c0a9c1c4938f2b47486de74",
+    "previous_seed": "monitoring/research/early-surge-continuation-20261031-0640.json",
+    "new_seed_gzip": "monitoring/research/early-surge-continuation-20261101-deadline.json.gz",
+    "new_paired_snapshots": 187,
+    "last_quote_at": 1793529516,
+    "batch_only_six_hour": {
+      "hot_once": {
+        "events": 626,
+        "observed": 527,
+        "unknown": 99,
+        "status_counts": {
+          "observed": 527,
+          "right_censored": 99
+        },
+        "sampled_surge_5pct": 28,
+        "no_sampled_surge_5pct": 499,
+        "adverse_2pct": 90,
+        "surge_before_adverse": 27,
+        "mean_last_change_pct": -0.014008133031819652,
+        "median_lead_minutes_when_hit": 184.33333333333331
+      },
+      "persistent_heat": {
+        "events": 252,
+        "observed": 204,
+        "unknown": 48,
+        "status_counts": {
+          "observed": 204,
+          "right_censored": 48
+        },
+        "sampled_surge_5pct": 11,
+        "no_sampled_surge_5pct": 193,
+        "adverse_2pct": 42,
+        "surge_before_adverse": 10,
+        "mean_last_change_pct": 0.04574944335538404,
+        "median_lead_minutes_when_hit": 209.11666666666667
+      },
+      "compression_heat": {
+        "events": 242,
+        "observed": 195,
+        "unknown": 47,
+        "status_counts": {
+          "observed": 195,
+          "right_censored": 47
+        },
+        "sampled_surge_5pct": 8,
+        "no_sampled_surge_5pct": 187,
+        "adverse_2pct": 36,
+        "surge_before_adverse": 8,
+        "mean_last_change_pct": -0.04828371687713493,
+        "median_lead_minutes_when_hit": 214.38333333333333
+      },
+      "recorded_ready": {
+        "events": 1,
+        "observed": 1,
+        "unknown": 0,
+        "status_counts": {
+          "observed": 1
+        },
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "adverse_2pct": 0,
+        "surge_before_adverse": 0,
+        "mean_last_change_pct": 1.586421122698023,
+        "median_lead_minutes_when_hit": null
+      }
+    },
+    "pending_episode_ids_must_be_merged_not_summed": true
+  },
+  "sampled_surge_census": {
+    "protocol_sha256": "e0002738fadf202ca1d67c17cfc646a4b5df3be5487d65b74dfce8d1c92567dd",
+    "paired_quotes": 2680,
+    "markets": 235,
+    "quote_window": [
+      1791925670,
+      1793529516
+    ],
+    "window_accounting": {
+      "market_windows_without_sufficient_baseline": 7990,
+      "classifiable_market_windows": 612735,
+      "market_windows_with_quote_gaps": 7990
+    },
+    "events": 1426,
+    "hot_status_counts": {
+      "original_hot_recorded_before_sampled_crossing": 1033,
+      "no_original_hot_in_six_hour_lookback": 393
+    },
+    "first_hot_reason_counts": {
+      "candle_error:synthetic_candle_limit_exceeded": 34,
+      "spread_too_high": 320,
+      "not_evaluated_capacity": 109,
+      "no_original_hot_in_six_hour_lookback": 393,
+      "imbalance_too_low": 286,
+      "synthetic_candles_present": 22,
+      "4h clearly weak": 40,
+      "RSI outside watch range": 146,
+      "candle_error:backfill_gap_limit_exceeded": 3,
+      "candle_error:consecutive_synthetic_limit_exceeded": 3,
+      "1h clearly weak": 18,
+      "volume not expanding": 14,
+      "watching: confirmations 1/2": 1,
+      "15m momentum not constructive": 26,
+      "anti-FOMO: 12C already +10.21%": 1,
+      "score 71 < 80": 1,
+      "setup not ready": 1,
+      "discovery score 62 < 66": 1,
+      "ATR outside range": 1,
+      "score 68 < 80": 1,
+      "anti-FOMO: 3C already +6.45%": 1,
+      "candle_error:candle_unavailable_other": 1,
+      "anti-FOMO: 12C already +9.04%": 1,
+      "score 66 < 80": 1,
+      "score 77 < 80": 1
+    },
+    "prior_hot_without_logged_ready": 1030,
+    "all_logged_ready_timestamps_independently_delivery_verified": false,
+    "labels_are_sampled_crossings_not_pump_onset_or_fills": true
+  },
+  "original_hot_controls": {
+    "protocol_sha256": "9d1e05ce3f043732dc0a1dd61b77e0598597aeb3c5f57acf4b3c83c513d64a97",
+    "episodes": 9115,
+    "source_unknown_rows": 0,
+    "status_counts": {
+      "observed": 8900,
+      "gapped_path": 114,
+      "right_censored": 101
+    },
+    "sampled_surge_5pct": 474,
+    "no_sampled_surge_5pct": 8426,
+    "groups": {
+      "spread_too_high": {
+        "episodes": 2401,
+        "observed": 2344,
+        "sampled_surge_5pct": 157,
+        "no_sampled_surge_5pct": 2187,
+        "sampled_adverse_2pct": 720,
+        "gapped_path": 26,
+        "right_censored": 31
+      },
+      "synthetic_candles_present": {
+        "episodes": 169,
+        "observed": 169,
+        "sampled_surge_5pct": 13,
+        "no_sampled_surge_5pct": 156,
+        "sampled_adverse_2pct": 59
+      },
+      "imbalance_too_low": {
+        "episodes": 2534,
+        "observed": 2474,
+        "sampled_surge_5pct": 136,
+        "no_sampled_surge_5pct": 2338,
+        "sampled_adverse_2pct": 814,
+        "gapped_path": 28,
+        "right_censored": 32
+      },
+      "candle_error:synthetic_candle_limit_exceeded": {
+        "episodes": 365,
+        "observed": 365,
+        "sampled_surge_5pct": 21,
+        "no_sampled_surge_5pct": 344,
+        "sampled_adverse_2pct": 127
+      },
+      "4h clearly weak": {
+        "episodes": 571,
+        "observed": 546,
+        "sampled_surge_5pct": 17,
+        "no_sampled_surge_5pct": 529,
+        "sampled_adverse_2pct": 142,
+        "gapped_path": 19,
+        "right_censored": 6
+      },
+      "not_evaluated_capacity": {
+        "episodes": 1037,
+        "observed": 1011,
+        "sampled_surge_5pct": 38,
+        "no_sampled_surge_5pct": 973,
+        "sampled_adverse_2pct": 241,
+        "gapped_path": 21,
+        "right_censored": 5
+      },
+      "RSI outside watch range": {
+        "episodes": 1143,
+        "observed": 1126,
+        "sampled_surge_5pct": 45,
+        "no_sampled_surge_5pct": 1081,
+        "sampled_adverse_2pct": 268,
+        "gapped_path": 6,
+        "right_censored": 11
+      },
+      "score_below_threshold": {
+        "episodes": 112,
+        "observed": 105,
+        "sampled_surge_5pct": 4,
+        "no_sampled_surge_5pct": 101,
+        "sampled_adverse_2pct": 30,
+        "gapped_path": 5,
+        "right_censored": 2
+      },
+      "ATR outside range": {
+        "episodes": 136,
+        "observed": 130,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 130,
+        "sampled_adverse_2pct": 19,
+        "right_censored": 6
+      },
+      "15m momentum not constructive": {
+        "episodes": 320,
+        "observed": 308,
+        "sampled_surge_5pct": 14,
+        "no_sampled_surge_5pct": 294,
+        "sampled_adverse_2pct": 78,
+        "gapped_path": 5,
+        "right_censored": 7
+      },
+      "candle_error:backfill_gap_limit_exceeded": {
+        "episodes": 13,
+        "observed": 13,
+        "sampled_surge_5pct": 2,
+        "no_sampled_surge_5pct": 11,
+        "sampled_adverse_2pct": 7
+      },
+      "candle_error:consecutive_synthetic_limit_exceeded": {
+        "episodes": 20,
+        "observed": 20,
+        "sampled_surge_5pct": 1,
+        "no_sampled_surge_5pct": 19,
+        "sampled_adverse_2pct": 5
+      },
+      "1h clearly weak": {
+        "episodes": 102,
+        "observed": 102,
+        "sampled_surge_5pct": 7,
+        "no_sampled_surge_5pct": 95,
+        "sampled_adverse_2pct": 26
+      },
+      "volume not expanding": {
+        "episodes": 147,
+        "observed": 144,
+        "sampled_surge_5pct": 10,
+        "no_sampled_surge_5pct": 134,
+        "sampled_adverse_2pct": 45,
+        "gapped_path": 3
+      },
+      "BTC blocked: BTC synthetic candles present": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 0
+      },
+      "anti_FOMO": {
+        "episodes": 7,
+        "observed": 7,
+        "sampled_surge_5pct": 1,
+        "no_sampled_surge_5pct": 6,
+        "sampled_adverse_2pct": 4
+      },
+      "awaiting_confirmation": {
+        "episodes": 9,
+        "observed": 8,
+        "sampled_surge_5pct": 2,
+        "no_sampled_surge_5pct": 6,
+        "sampled_adverse_2pct": 1,
+        "gapped_path": 1
+      },
+      "BTC blocked: BTC confirmed weakness RSI=35.9 | 3C=-0.18%": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 1,
+        "no_sampled_surge_5pct": 0,
+        "sampled_adverse_2pct": 0
+      },
+      "setup not ready": {
+        "episodes": 6,
+        "observed": 6,
+        "sampled_surge_5pct": 1,
+        "no_sampled_surge_5pct": 5,
+        "sampled_adverse_2pct": 4
+      },
+      "rr_below_min": {
+        "episodes": 2,
+        "observed": 2,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 2,
+        "sampled_adverse_2pct": 1
+      },
+      "buy flow not strong enough: 1.01": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 0
+      },
+      "buy flow not strong enough: 1.04": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 1,
+        "no_sampled_surge_5pct": 0,
+        "sampled_adverse_2pct": 0
+      },
+      "orderbook_error:ParibuHTTPError": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 0
+      },
+      "candle_error:candle_unavailable_other": {
+        "episodes": 6,
+        "observed": 6,
+        "sampled_surge_5pct": 2,
+        "no_sampled_surge_5pct": 4,
+        "sampled_adverse_2pct": 3
+      },
+      "indicators_unavailable": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 0
+      },
+      "RSI 68.6 outside alert range": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 1
+      },
+      "RSI 70.2 outside alert range": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 1,
+        "no_sampled_surge_5pct": 0,
+        "sampled_adverse_2pct": 0
+      },
+      "4h still weak": {
+        "episodes": 3,
+        "observed": 2,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 2,
+        "sampled_adverse_2pct": 0,
+        "right_censored": 1
+      },
+      "buy flow not persistent: avg imbalance 1.04": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 1
+      },
+      "fresh_book_rejected: buy flow not strong enough: 0.55": {
+        "episodes": 1,
+        "observed": 1,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 1,
+        "sampled_adverse_2pct": 1
+      },
+      "global_limit_or_cooldown": {
+        "episodes": 2,
+        "observed": 2,
+        "sampled_surge_5pct": 0,
+        "no_sampled_surge_5pct": 2,
+        "sampled_adverse_2pct": 2
+      }
+    },
+    "mixed_historical_code_regimes": true,
+    "not_entry_model_or_filter_bypass_validation": true
+  },
+  "production_capture": {
+    "pr": 65,
+    "head": "0400f64d81db937c2c03db89b94bf03e9fa8a0b6",
+    "status": "AWAITING_EXACT_HEAD_INDEPENDENT_REVIEW",
+    "local_pytest": 400,
+    "ci_python_310": "400 passed",
+    "ci_python_312": "400 passed",
+    "strategy_changes": false,
+    "additional_provider_calls": 0,
+    "until_utc": "2026-11-05T12:00:00Z",
+    "retention_days": 7,
+    "books_budget_bytes": 131072,
+    "candles_budget_bytes": 393216,
+    "all_market_native_candles": false,
+    "limits": [
+      "Existing fetched inputs only; no newly fetched native bars for book-vetoed markets.",
+      "No raw BTC regime bars, executed-trade stream or exchange account identities.",
+      "Verify record, archive and code identities; budget omissions and failed runs stay incomplete."
+    ]
+  },
+  "health_checkpoint": {
+    "last_fully_audited_weekly_run": 41286178774,
+    "weekly_runs": 410,
+    "workflow_status_audit_through": 41321350039,
+    "later_workflows_status_only": 46,
+    "later_full_log_audit_complete": false,
+    "source": "monitoring/research/nov5-research-checkpoint.json",
+    "research_quote_pin_does_not_advance_health_log_audit": true,
+    "new_saved_diagnostics_audit": {
+      "runs": 46,
+      "first": "41286820692",
+      "last": "41321350039",
+      "all_shadow": true,
+      "all_btc_ok": true,
+      "candles_complete": 1526,
+      "candles_synthetic": 0,
+      "candles_error": 0,
+      "recorded_signals": 0,
+      "alerts_sent_flag": 0,
+      "near_ready_alerts": 0,
+      "public_early_alerts": 0,
+      "capacity_market_cycles": 1508,
+      "market_cycles": 10810,
+      "confirmed_before_risk": 10
+    },
+    "saved_diagnostics_audit_through": 41321350039,
+    "saved_diagnostics_audit_file": "monitoring/research/nov5-saved-diagnostics-20261101.json"
+  },
+  "primary_sources": [
+    {
+      "url": "https://www.paribu.com/destek/alim-satim/emir-defteri",
+      "finding": "The displayed book contains pending limit orders aggregated by price, not identities or a history of executed taker flow."
+    },
+    {
+      "url": "https://www.paribu.com/blog/sozluk/kripto-para-islem-hacmi-nedir/",
+      "finding": "Volume is period-specific. Rolling 24-hour turnover is not an individual candle volume or a classified buy-flow series."
+    },
+    {
+      "url": "https://www.paribu.com/blog/sozluk/balina-whale-nedir/",
+      "finding": "Large-holder terminology does not identify the owners of public Paribu book orders."
+    },
+    {
+      "url": "https://docs.paribu.com/api",
+      "finding": "Official API documentation entry point. Deeper documentation and raw captures from the independent scheduled review remain in nov5-delivery-evidence-20261101.json; do not invent unavailable historical books."
+    }
+  ],
+  "direct_access": {
+    "record": "public-access-check.json",
+    "result": "This environment returned a generic 195-byte HTML access page instead of API JSON. Not evidence that Paribu was down. Existing bot fetches native inputs; scheduled review obtained separate current public snapshots."
+  },
+  "binary_manifest": [
+    {
+      "filename": "early-surge-continuation-20261101-deadline.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 488856,
+      "gzip_bytes": 75067,
+      "raw_sha256": "8d7d56dae9632d96bd696a335b04b46d7373bb7d86301d0362b5ed64f95ab529",
+      "gzip_sha256": "5b5443858ea2d611161001119aaf3e5a339462c6b288e7224c40456968b370c5",
+      "git_blob_sha": "a4a32a33283f3f0881b7b2bf33118d5b9e1f8497",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "early-surge-increment-20261101-deadline.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 1836940,
+      "gzip_bytes": 144787,
+      "raw_sha256": "56ab1897d0adf70a2c33c5f30f7ba670abfdb0a03840e6d70d2f5d2cacf218fa",
+      "gzip_sha256": "8dc4de85fe0c7da5c37d1f55377718665133460314ed47d3b2f02f3afd1922b3",
+      "git_blob_sha": "e1ed08f7e2c0207f838c56137fdf71492257c7e3",
+      "format_after_gunzip": "jsonl"
+    },
+    {
+      "filename": "surge-census-20261101.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 1681501,
+      "gzip_bytes": 242054,
+      "raw_sha256": "854acc8c86b1ee86364831ed9eb64a3653fe9bb6699cb7dcfc1ce63ea852b8c8",
+      "gzip_sha256": "cd2135a7833b8ad57d26d4f2e1b60c1da800b422bbb8aafe2fdfd3f65f96d649",
+      "git_blob_sha": "c58ddf07d011fcd1f6e5798692540ff84fb465c7",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "surge-census-continuation-20261101.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 192656,
+      "gzip_bytes": 38399,
+      "raw_sha256": "abfbb0e32a972ad1ead7dd98e4f6824755fb500de4db3c24e43d07030838b1bf",
+      "gzip_sha256": "43713d7376b0f257c1453af2a3aeb4fc74a441ebd3b1236ae51f854e6c139e04",
+      "git_blob_sha": "c0f1869d15918057eee95c684876fca29e7d4af4",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "hot-controls-continuation-20261101.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 249155,
+      "gzip_bytes": 49807,
+      "raw_sha256": "fe6f741bb9aaa2e74614741ec346b42a363ef46f1681e08e0b29820c8d06dfb8",
+      "gzip_sha256": "7eab67bb87d7350bd54065145a97af755d6ca7b7a95014df0d1c654113da7440",
+      "git_blob_sha": "39d5c8047bf4d33187778b5b510a61d0d9094dc5",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "hot-controls-20261101-part-1.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 1393686,
+      "gzip_bytes": 193903,
+      "raw_sha256": "881d53a061c5aae7d3191bb347389f07a9f595eb16752d9f0bace0757cb7053b",
+      "gzip_sha256": "1d07e2376782942f9c5fc0fd751b3417c92a7dd2e5c529119d3bc44c7a4612be",
+      "git_blob_sha": "fe1da335b865173da4eda631d7eaae4e76dcd5b0",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "hot-controls-20261101-part-2.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 1545421,
+      "gzip_bytes": 234371,
+      "raw_sha256": "490f032d92d247c79ec9a73f8a13365f74619a3bf3318216dfa4f43edcad6555",
+      "gzip_sha256": "9e85917cb87c9072ac6e196c3dc3b073296ca4abf0fc8b898e13947a08fc0d53",
+      "git_blob_sha": "053e5911e78b95059ce6e76f0fc80e72bb78d2bd",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "hot-controls-20261101-part-3.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 1597449,
+      "gzip_bytes": 247706,
+      "raw_sha256": "7ba9579da56054f6cfafa6cd25d70d8bf6f27c6ee9e8cacc04c14dbccf139fca",
+      "gzip_sha256": "f05983988205345b83346fdd18362024c850a462caa7462eddf663f10cf26e1d",
+      "git_blob_sha": "7260a5bc23b92d7f2d6ad5c7ae13331f03066f0e",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "hot-controls-20261101-part-4.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 1554872,
+      "gzip_bytes": 238909,
+      "raw_sha256": "8aefa5aec398f2b5946800ea3de37a2caa767ca1c4a5f921f716eb42a44af5c6",
+      "gzip_sha256": "7ff271ae7203715db29f1cc7e545bf997eff6478dd3de438c31002f99f043b28",
+      "git_blob_sha": "9d1843595e81b0848c09ff29f24a7229ad7a6f9b",
+      "format_after_gunzip": "json"
+    },
+    {
+      "filename": "hot-controls-20261101-part-5.json.gz",
+      "encoding": "gzip",
+      "raw_bytes": 843772,
+      "gzip_bytes": 129727,
+      "raw_sha256": "fd2b5f770cb5df8f86283a1fbb46844be12840d37c13159156b8fa3010b649b2",
+      "gzip_sha256": "751fb233e38750445abe9168318459906d14721959c0a2f054d78f831299a0e5",
+      "git_blob_sha": "b3eaa48ac78c1bc48b10dbdd33241e17d1d49348",
+      "format_after_gunzip": "json"
+    }
+  ],
+  "performance_improvement_proven": false,
+  "execution_or_pnl_proven": false,
+  "safety": {
+    "shadow_mode_remains_true": true,
+    "no_live_orders": true,
+    "no_test_telegram": true,
+    "no_duplicate_scanner_or_controller": true
+  }
+}
