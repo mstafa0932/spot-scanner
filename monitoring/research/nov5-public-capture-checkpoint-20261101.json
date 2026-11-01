@@ -1,0 +1,77 @@
+{
+  "schema": "public_capture_deployment_checkpoint_v1",
+  "recorded_at_trt": "2026-11-01T18:59:43.393703+03:00",
+  "pr": 65,
+  "head_sha": "a1272f6c8e17bbf440442831b9e69f41661f24b7",
+  "tree_sha": "da21da3153618e96bfd52e0ae892d1c4bdf030bc",
+  "status": "AWAITING_EXACT_HEAD_INDEPENDENT_REVIEW",
+  "merged": false,
+  "deployment_verified": false,
+  "artifact_verified": false,
+  "ci": {
+    "python310": {
+      "job_id": 124898103274,
+      "passed": 402,
+      "duration_seconds": 9.21
+    },
+    "python312": {
+      "job_id": 124898103056,
+      "passed": 402,
+      "duration_seconds": 6.0
+    }
+  },
+  "local_tests_passed": 402,
+  "source_hashes": {
+    "scanner.py": {
+      "sha256": "dd6115cdfb4210e506dfe7b7411a34ed1d62ddf892683b6a4f246b4fed088bdc",
+      "git_blob_sha": "4e6b813e88c073b5d59bca127f5522eb7d91661d"
+    },
+    "research_capture.py": {
+      "sha256": "035ab9366dce1573e4393c3a3e4975496f50f5c6d310e4689da1a8112bf2250e",
+      "git_blob_sha": "c68153cc46ecbf58be3648f7f7c7d82b72444429"
+    },
+    ".github/workflows/scanner.yml": {
+      "sha256": "71bbc31f19b71ceadea78724dd38c3fe5da6d41efaf7c6108f1f77ae34d8cfb0",
+      "git_blob_sha": "6ccf707b580d77d79a47486f973c51e0ff2ef372"
+    },
+    "tests/test_research_input_capture.py": {
+      "sha256": "a6988b4a4213b60fc9fa95d118f88fb26b0c608d713e259b71879a87c5ca5917",
+      "git_blob_sha": "bb76861dfbf187208d98fbcad720626ffa266d2b"
+    }
+  },
+  "strategy_gate_ast_unchanged": [
+    "score_candidate",
+    "trigger_check",
+    "discovery_ok",
+    "setup_type",
+    "anti_fomo_ok",
+    "build_opportunity",
+    "_update_watchlist",
+    "_rescore_with_book"
+  ],
+  "review_findings_fixed": [
+    "actual checkout identity vs trigger SHA",
+    "empty snapshot failure completeness",
+    "completion follows final local state save",
+    "pre-snapshot pending-event save failures",
+    "near-ready pre-notification save failures"
+  ],
+  "archive_verifier": {
+    "path": "monitoring/research/verify_public_capture_20261101.py",
+    "sha256": "57197a2c847965602689bedc0f4d93b1c91411028b327af68865715aa318cd7a",
+    "offline_checks": [
+      "directory and ZIP produce same audit",
+      "unexpected run identity rejected",
+      "changed archive digest rejected",
+      "closed authentic candle accepted",
+      "future/open candle rejected",
+      "synthetic candle rejected",
+      "changed record rejected even with updated outer archive digest"
+    ],
+    "market_performance_validation": false
+  },
+  "next": "Inspect current-head independent code/security review; merge only after successful CI and review. Verify the organic push workflow, persisted state and first real public-input artifact; no manual scanner dispatch or test Telegram. Update this checkpoint with actual identities and artifact digests.",
+  "shadow_mode": true,
+  "live_orders": false,
+  "strategy_improvement_proven": false
+}
