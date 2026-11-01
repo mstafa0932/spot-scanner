@@ -248,3 +248,61 @@ def test_full_scanner_archives_rejected_books_and_native_frames_without_extra_fe
     actual_candles = [r for r in archived if r["kind"] == "candles"]
     assert len(actual_candles) == len(calls["candles"])
     assert {r["payload"]["resolution"] for r in actual_candles} == {"15m", "1h", "4h"}
+
+
+def test_pre_snapshot_save_failure_finalizes_an_incomplete_archive(monkeypatch, tmp_path):
+    """A pending-event save failure cannot leave an old completed manifest."""
+    monkeypatch.setattr(harness, "NOW", NOW)
+    harness.pipeline(monkeypatch, tmp_path)
+    archive = tmp_path / "archive"
+    recorder = enable(monkeypatch, archive)
+    recorder.book(book(), "prior-run")
+    recorder.finish()
+    monkeypatch.setattr(scanner, "update_active_signals", lambda *args: [{"id": "offline-event"}])
+
+    def fail_save(state):
+        raise OSError("offline early save failure")
+
+    monkeypatch.setattr(scanner, "save_state", fail_save)
+    with pytest.raises(OSError, match="early save failure"):
+        scanner.run_scanner()
+    manifest = json.loads((archive / "manifest.json").read_text())
+    assert manifest["status"] == "incomplete:state_persistence_failed"
+    assert records(archive) == []
+
+
+def test_near_ready_save_failure_finalizes_without_notification(monkeypatch, tmp_path):
+    """Pre-notification persistence failure keeps delivery blocked and evidence incomplete."""
+    monkeypatch.setattr(harness, "NOW", NOW)
+    clock, calls, scan = harness.pipeline(monkeypatch, tmp_path)
+    clock["rsi"] = D("60")
+    monkeypatch.setattr(scanner, "TELEGRAM_NEAR_READY_ALERTS", True)
+    archive = tmp_path / "archive"
+    recorder = enable(monkeypatch, archive)
+    recorder.book(book(), "prior-run")
+    recorder.finish()
+    original_book = scanner.get_order_book
+
+    def named_book(symbol, *args):
+        result = original_book(symbol, *args)
+        return NS(**{**vars(result), "symbol": symbol})
+
+    monkeypatch.setattr(scanner, "get_order_book", named_book)
+    messages, saves = [], []
+    monkeypatch.setattr(scanner, "send_telegram", lambda msg: messages.append(msg) or True)
+    original_save = scanner.save_state
+
+    def fail_near_save(state):
+        if state.get("near_ready_last_attempt_at"):
+            saves.append(True)
+            raise OSError("offline near-ready save failure")
+        original_save(state)
+
+    monkeypatch.setattr(scanner, "save_state", fail_near_save)
+    with pytest.raises(OSError, match="near-ready save failure"):
+        scan()
+    assert saves and messages == []
+    manifest = json.loads((archive / "manifest.json").read_text())
+    assert manifest["status"] == "incomplete:state_persistence_failed"
+    assert any(r["record"]["kind"] == "book" and r["record"]["payload"]["stage"] == "near_ready_refresh"
+               for r in records(archive))

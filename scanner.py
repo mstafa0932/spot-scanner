@@ -1731,7 +1731,12 @@ def _send_near_ready(
     # response or process stop must not replay it; READY remains independent.
     item["near_ready_attempted_at"] = checked_at
     state["near_ready_last_attempt_at"] = checked_at
-    save_state(state)
+    try:
+        save_state(state)
+    except Exception:
+        if capture is not None:
+            capture.finish("state_persistence_failed")
+        raise
     if not send_telegram(message):
         return False
     item["near_ready_notified_at"] = checked_at
@@ -1851,13 +1856,15 @@ def run_scanner() -> None:
         history.append(diagnostics)
         state["scan_diagnostics"] = history[-12:]
 
-    def persist_final_state(status):
+    def persist_scan_state(status=None):
+        """Preserve save failures; only a final save publishes completion."""
         try:
             save_state(state)
         except Exception:
             capture.finish("state_persistence_failed")
             raise
-        capture.finish(status)
+        if status is not None:
+            capture.finish(status)
 
     _prune_watchlist(state, now)
     _prune_early_watch_followups(state, now)
@@ -1866,10 +1873,10 @@ def run_scanner() -> None:
 
     new_events = update_active_signals(state, now)
     if new_events:
-        save_state(state)  # Keep pending observations before attempting delivery.
+        persist_scan_state()  # Keep pending observations before attempting delivery.
     if not shadow_mode:
         if deliver_pending_events(state, send_telegram, format_signal_event):
-            save_state(state)
+            persist_scan_state()
     elif new_events:
         diagnostics["shadow_pending_events"] = len(new_events)
 
@@ -1881,7 +1888,7 @@ def run_scanner() -> None:
     except ParibuDataError as exc:
         LOGGER.error("Paribu snapshot failed: %s", exc)
         finish_diagnostics("snapshot_failed")
-        persist_final_state("snapshot_failed")
+        persist_scan_state("snapshot_failed")
         raise RuntimeError("Paribu snapshot unavailable; scan incomplete") from exc
 
     capture.tickers(snapshot)
@@ -2539,7 +2546,7 @@ def run_scanner() -> None:
     state["directive_009_runs"] = runs[-32:]
 
     # Persist first; only then claim state_saved=OK in the observability line.
-    persist_final_state("completed")
+    persist_scan_state("completed")
     print(
         "[INFRA_HEALTH] "
         f"run_id={_run_id()} btc_ok={btc_ok} btc_reason={_btc_gate_reason_code(btc_reason)} "
