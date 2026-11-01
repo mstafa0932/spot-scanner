@@ -1,13 +1,13 @@
 {
   "schema": "public_capture_deployment_checkpoint_v1",
-  "recorded_at_trt": "2026-11-01T18:59:43.393703+03:00",
+  "recorded_at_trt": "2026-11-01T19:09:44.266732+03:00",
   "pr": 65,
   "head_sha": "a1272f6c8e17bbf440442831b9e69f41661f24b7",
   "tree_sha": "da21da3153618e96bfd52e0ae892d1c4bdf030bc",
-  "status": "AWAITING_EXACT_HEAD_INDEPENDENT_REVIEW",
-  "merged": false,
-  "deployment_verified": false,
-  "artifact_verified": false,
+  "status": "MERGED_ORGANIC_SCAN_STATE_AND_REAL_ARTIFACT_VERIFIED",
+  "merged": true,
+  "deployment_verified": true,
+  "artifact_verified": true,
   "ci": {
     "python310": {
       "job_id": 124898103274,
@@ -70,8 +70,144 @@
     ],
     "market_performance_validation": false
   },
-  "next": "Inspect current-head independent code/security review; merge only after successful CI and review. Verify the organic push workflow, persisted state and first real public-input artifact; no manual scanner dispatch or test Telegram. Update this checkpoint with actual identities and artifact digests.",
+  "next": "Download and verify subsequent existing-run public artifacts; resume from source identities and the frozen research seeds. Use complete as-of frames only; missing data remain UNKNOWN. Compare the frozen RECOVERY strategy including original risk and distinct-candle confirmations and future outcomes; the first artifact replay validates input integrity only. No provider calls, scanner dispatch, Telegram test or strategy change.",
   "shadow_mode": true,
   "live_orders": false,
-  "strategy_improvement_proven": false
+  "strategy_improvement_proven": false,
+  "merge_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+  "pre_merge_main_sha": "da5429a0dc46aec5fcf4c4f5cd8bc2ce13c2399a",
+  "independent_review": {
+    "check_id": 124898224075,
+    "head": "a1272f6c8e17bbf440442831b9e69f41661f24b7",
+    "completed": "2026-11-01T16:01:39Z",
+    "code_review": "No actionable comments were generated in the recent review.",
+    "security_architecture_risk": "Low",
+    "retained_architecture_concerns": "None identified",
+    "review_comment_id": 6557031275
+  },
+  "organic_push_run": 41324270688,
+  "limitations": [
+    "Only frames that reach the capture hook after aggregate scanner validation are archived; a failed sibling timeframe or failed subsequent fetch can omit otherwise fetched frames. Counters are not a census of every provider response.",
+    "512 KiB compressed total per run with independent book/ticker and candle budgets; budget omissions stay missing evidence.",
+    "No additional candles for book-rejected markets, raw BTC-regime bars, complete executed-trade stream or whale account identities."
+  ],
+  "actual_code_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+  "state_commit": "633afa74d051c59f012d9a1405d288d096aaa994",
+  "organic_job_id": 124900804312,
+  "organic_workflow_all_steps": "success",
+  "organic_push_pytest_passed": 402,
+  "organic_run": {
+    "run_id": "41324270688",
+    "started_at": 1793549025,
+    "finished_at": 1793549073,
+    "btc_ok": true,
+    "btc_reason": "regime_neutral",
+    "candles_complete": 37,
+    "candles_synthetic": 0,
+    "candles_error": 0,
+    "cadence_expected_seconds": 600,
+    "cadence_late_after_seconds": 1200,
+    "cadence_gap_seconds": 292,
+    "cadence_status": "ok",
+    "hot_radar_eligible": 20,
+    "hot_radar_selected": 20,
+    "funnel": {
+      "universe": 235,
+      "liq": 80,
+      "spread": 63,
+      "book": 37,
+      "tech": 37,
+      "score": 4,
+      "early_watch": 0,
+      "early_watch_alerts": 0,
+      "near_ready_alerts": 0,
+      "candidates": 1,
+      "confirmed": 0,
+      "exec": 0,
+      "limit": 0
+    },
+    "stage_drops": {
+      "universe:excluded_base_asset": 3,
+      "discovery:ATR outside range": 3,
+      "book:imbalance_too_low": 26,
+      "discovery:RSI outside watch range": 24,
+      "book:spread_too_high": 17,
+      "discovery:volume not expanding": 3,
+      "trigger:score 77 < 80": 1,
+      "discovery:15m momentum not constructive": 3,
+      "coverage:not_evaluated_capacity": 40,
+      "discovery:4h clearly weak": 3,
+      "universe:quote_volume_below_minimum": 112
+    }
+  },
+  "artifact": {
+    "id": 13090581990,
+    "name": "paribu-inputs-41324270688-1",
+    "zip_bytes": 462653,
+    "zip_sha256": "e818d1851e41b1e5c8250379daea57ba8ca4974dd25de67e5405ace5fc20d55e",
+    "expires_at_utc": "2026-11-08T16:04:33Z",
+    "archive_verification": {
+      "run_id": "41324270688",
+      "code_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+      "trigger_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+      "manifest_status": "partial",
+      "scan_status": "completed",
+      "compressed_bytes": 461517,
+      "archive_sha256": "c4f70e2daa0e5698d1cf3fe9e025e0b167f5863a025729f2aa85cf8d8a72a65c",
+      "manifest_sha256": "dcb54507c24ff42ce64acaccafffe2c181343e07e0581cc2e5367b496f991b2e",
+      "records": 155,
+      "kind_counts": {
+        "tickers": 1,
+        "book": 80,
+        "candles": 74
+      },
+      "book_stage_counts": {
+        "initial": 80
+      },
+      "markets_with_three_native_frames": [
+        "AEVO_TL",
+        "AXS_TL",
+        "BLUR_TL",
+        "BONK_TL",
+        "FF_TL",
+        "GRAM_TL",
+        "HOT_TL",
+        "HYPE_TL",
+        "JTO_TL",
+        "LINK_TL",
+        "MANA_TL",
+        "NEAR_TL",
+        "OGN_TL",
+        "ONT_TL",
+        "PENDLE_TL",
+        "PEPE_TL",
+        "PLUME_TL",
+        "SEI_TL",
+        "SPK_TL",
+        "STX_TL",
+        "TRUMP_TL",
+        "TRX_TL",
+        "XAUT_TL",
+        "ZK_TL"
+      ],
+      "capture_counts_including_omissions": {
+        "captured:book": 80,
+        "captured:candles": 74,
+        "captured:tickers": 1,
+        "omitted_budget:candles": 37
+      },
+      "unknown_checkout_provenance": false,
+      "all_market_or_strategy_evidence_complete": false,
+      "is_prediction_or_trade_or_pnl": false
+    },
+    "preserved_path": "monitoring/research/native-inputs/41324270688/inputs.jsonl.gz",
+    "original_manifest_path": "monitoring/research/native-inputs/41324270688/manifest.json"
+  },
+  "replay": {
+    "script": "monitoring/research/replay_public_capture_20261101.py",
+    "evidence": "monitoring/research/native-inputs/41324270688/replay.json",
+    "original_score_and_discovery_exact_matches": 24,
+    "frozen_pattern_feature_positive": 0,
+    "full_strategy_or_future_outcome_evaluated": false
+  }
 }

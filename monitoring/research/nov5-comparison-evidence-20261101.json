@@ -380,7 +380,7 @@
   "production_capture": {
     "pr": 65,
     "head": "a1272f6c8e17bbf440442831b9e69f41661f24b7",
-    "status": "AWAITING_EXACT_HEAD_INDEPENDENT_REVIEW",
+    "status": "MERGED_ORGANIC_SCAN_STATE_AND_REAL_ARTIFACT_VERIFIED",
     "local_pytest": 402,
     "ci_python_310": "402 passed",
     "ci_python_312": "402 passed",
@@ -394,14 +394,25 @@
     "limits": [
       "Existing fetched inputs only; no newly fetched native bars for book-vetoed markets.",
       "No raw BTC regime bars, executed-trade stream or exchange account identities.",
-      "Verify record, archive and code identities; budget omissions and failed runs stay incomplete."
+      "Verify record, archive and code identities; budget omissions and failed runs stay incomplete.",
+      "Only frames that reach the capture hook after aggregate scanner validation are archived; a failed sibling timeframe or failed subsequent fetch can omit otherwise fetched frames. Counters are not a census of every provider response."
     ],
     "ci_jobs": [
       124898103274,
       124898103056
     ],
-    "review_status": "PENDING_FOR_CURRENT_HEAD",
-    "archive_verifier": "monitoring/research/verify_public_capture_20261101.py"
+    "review_status": "CURRENT_HEAD_REVIEW_SUCCESS_NO_ACTIONABLE_COMMENTS_LOW_SECURITY_RISK",
+    "archive_verifier": "monitoring/research/verify_public_capture_20261101.py",
+    "merge_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+    "organic_run": 41324270688,
+    "artifact_id": 13090581990,
+    "archive_data_sha256": "c4f70e2daa0e5698d1cf3fe9e025e0b167f5863a025729f2aa85cf8d8a72a65c",
+    "native_full_three_frame_markets": 24,
+    "captured_native_frames": 74,
+    "omitted_native_frames_budget": 37,
+    "original_score_discovery_reproduced_markets": 24,
+    "full_strategy_improvement_proven": false,
+    "deployment_checkpoint": "monitoring/research/nov5-public-capture-checkpoint-20261101.json"
   },
   "health_checkpoint": {
     "last_fully_audited_weekly_run": 41286178774,

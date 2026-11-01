@@ -1,0 +1,487 @@
+{
+  "schema": "public_capture_original_discovery_replay_v1",
+  "run_id": "41324270688",
+  "actual_code_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+  "state_sha": "633afa74d051c59f012d9a1405d288d096aaa994",
+  "source_sha256": {
+    "scanner.py": "dd6115cdfb4210e506dfe7b7411a34ed1d62ddf892683b6a4f246b4fed088bdc",
+    "indicator_engine.py": "b0774208de9058eac6aeba4b6a9e3ee14d2135c0d9751cb95c7ed99110e2aeef",
+    "market_data.py": "2fd898ab6267c007d0b19f5633edd51cb671df3280d98589955fcbc3076e4ea5",
+    "candle_backfill.py": "3f3fd871a9328d154022b903e48ebc43ff1ebfd0c5818b4485ba76c5e9b22cab",
+    "risk_engine.py": "85d735d864f8e94c964c902febbeb556357128afa195ec6738a06888d39ebdf4"
+  },
+  "input_verification": {
+    "run_id": "41324270688",
+    "code_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+    "trigger_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
+    "manifest_status": "partial",
+    "scan_status": "completed",
+    "compressed_bytes": 461517,
+    "archive_sha256": "c4f70e2daa0e5698d1cf3fe9e025e0b167f5863a025729f2aa85cf8d8a72a65c",
+    "manifest_sha256": "dcb54507c24ff42ce64acaccafffe2c181343e07e0581cc2e5367b496f991b2e",
+    "records": 155,
+    "kind_counts": {
+      "tickers": 1,
+      "book": 80,
+      "candles": 74
+    },
+    "book_stage_counts": {
+      "initial": 80
+    },
+    "markets_with_three_native_frames": [
+      "AEVO_TL",
+      "AXS_TL",
+      "BLUR_TL",
+      "BONK_TL",
+      "FF_TL",
+      "GRAM_TL",
+      "HOT_TL",
+      "HYPE_TL",
+      "JTO_TL",
+      "LINK_TL",
+      "MANA_TL",
+      "NEAR_TL",
+      "OGN_TL",
+      "ONT_TL",
+      "PENDLE_TL",
+      "PEPE_TL",
+      "PLUME_TL",
+      "SEI_TL",
+      "SPK_TL",
+      "STX_TL",
+      "TRUMP_TL",
+      "TRX_TL",
+      "XAUT_TL",
+      "ZK_TL"
+    ],
+    "capture_counts_including_omissions": {
+      "captured:book": 80,
+      "captured:candles": 74,
+      "captured:tickers": 1,
+      "omitted_budget:candles": 37
+    },
+    "unknown_checkout_provenance": false,
+    "all_market_or_strategy_evidence_complete": false,
+    "is_prediction_or_trade_or_pnl": false
+  },
+  "pattern_protocol_sha256": "6c99f4c9daf4a131faebfc7bd0234fe179f10f83d2e4fe642d97d81c73d8333d",
+  "results": [
+    {
+      "symbol": "AEVO_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 26,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "AXS_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 24,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "BLUR_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 49,
+      "discovery_passed": false,
+      "discovery_reason": "volume not expanding",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": true
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "BONK_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 35,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "FF_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 28,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "GRAM_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 52,
+      "discovery_passed": false,
+      "discovery_reason": "15m momentum not constructive",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "HOT_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 77,
+      "discovery_passed": true,
+      "discovery_reason": "OK",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "HYPE_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 43,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "JTO_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 38,
+      "discovery_passed": false,
+      "discovery_reason": "4h clearly weak",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "LINK_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 49,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "MANA_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 23,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "NEAR_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 28,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": true,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "OGN_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 29,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "ONT_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 36,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": true,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "PENDLE_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 28,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "PEPE_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 27,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": true,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "PLUME_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 25,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "SEI_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 36,
+      "discovery_passed": false,
+      "discovery_reason": "4h clearly weak",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": false,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "SPK_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 21,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "STX_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 48,
+      "discovery_passed": false,
+      "discovery_reason": "15m momentum not constructive",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": true,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": false
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "TRUMP_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 57,
+      "discovery_passed": false,
+      "discovery_reason": "RSI outside watch range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": true
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "TRX_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 71,
+      "discovery_passed": false,
+      "discovery_reason": "ATR outside range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": true,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": true
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "XAUT_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 65,
+      "discovery_passed": false,
+      "discovery_reason": "ATR outside range",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": true
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    },
+    {
+      "symbol": "ZK_TL",
+      "status": "exact_original_score_and_discovery_reproduced",
+      "score": 46,
+      "discovery_passed": false,
+      "discovery_reason": "4h clearly weak",
+      "setup": "NO_TRIGGER_SETUP",
+      "frozen_pattern_features": {
+        "setup_is_existing_recovery": false,
+        "three_lows_nondecreasing_with_strict_rise": false,
+        "two_of_three_volumes_above_prior_twenty": true,
+        "three_bar_volume_ratio_at_least_1_30": false,
+        "two_closed_four_hour_lows_and_closes_nondecreasing": true
+      },
+      "all_frozen_structure_features": false,
+      "entry_risk_confirmations_and_outcome": "NOT_EVALUATED_NO_ENTRY_CLAIM"
+    }
+  ],
+  "statuses": {
+    "exact_original_score_and_discovery_reproduced": 24
+  },
+  "pattern_feature_positive": 0,
+  "complete_strategy_comparison_or_predictive_improvement_proven": false,
+  "notify": false,
+  "is_ready": false,
+  "is_trade": false,
+  "pnl": "NOT_CALCULATED"
+}
