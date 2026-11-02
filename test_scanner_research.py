@@ -20,7 +20,17 @@ def prepare(monkeypatch, tmp_path):
     book.spread_percent = D("0.1")
     monkeypatch.setattr(scanner, "get_market_snapshot", lambda: {ticker.symbol: ticker})
     monkeypatch.setattr(scanner, "get_order_book", lambda *a: book)
-    monkeypatch.setattr(scanner, "fetch_candles", lambda *a: frame)
+    def closed_frame(symbol, timeframe, *args):
+        # Each mocked fetch must represent closed data for its own interval
+        # and the test's current clock, including clock-advancing callers.
+        result = frame.copy()
+        seconds = {"15m": 900, "1h": 3600, "4h": 14400}[timeframe]
+        last = (int(scanner.time.time()) // seconds - 1) * seconds
+        result["timestamp"] = [last - (len(result) - 1 - i) * seconds for i in range(len(result))]
+        result.attrs.update(frame.attrs, resolution=timeframe)
+        return result
+
+    monkeypatch.setattr(scanner, "fetch_candles", closed_frame)
     monkeypatch.setattr(scanner, "recent_authentic", lambda *a, **k: True)
     tech = NS(rsi14=D("60"), recent_return_3=D("1"), volume_ratio=D("2"))
     monkeypatch.setattr(scanner, "analyze_symbol", lambda *a: tech)
