@@ -1,4 +1,4 @@
-from decimal import Decimal as D
+from decimal import Decimal as D, localcontext
 from types import SimpleNamespace
 
 from risk_engine import build_risk_plan_result
@@ -54,3 +54,29 @@ def test_valid_risk_plan_is_unchanged():
     assert result.plan is not None
     assert result.evidence is None
     assert result.plan.reward_risk_tp1 >= D("1.50")
+
+
+def test_unadjusted_rr_floor_survives_decimal_rounding_without_loosening():
+    """Reproduce STX_TL's 2026-11-02 risk rejection at 1.499...999."""
+    book = SimpleNamespace(
+        best_bid=D("16.37"),
+        best_ask=D("16.40"),
+        spread_percent=D("0.1832620647525962125839951067"),
+        asks=(),
+    )
+    tech = SimpleNamespace(
+        ema9=D("16.37"),
+        mean_touch=True,
+        atr14=D("0.07024919894994376"),
+        swing_low=D("15.95"),
+    )
+    result = build_risk_plan_result(book=book, tech=tech, setup="PULLBACK")
+    assert result.rejection_reason is None
+    assert result.plan is not None
+    assert result.plan.target_adjusted_for_wall is False
+    assert result.plan.risk_pct <= D("4.00")
+    with localcontext() as ctx:
+        ctx.prec = 50
+        minimum_profit = (result.plan.entry - result.plan.stop) * D("1.50")
+        assert result.plan.tp1 - result.plan.entry >= minimum_profit
+        assert result.plan.reward_risk_tp1 >= D("1.50")
