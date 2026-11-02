@@ -8,7 +8,7 @@ paper-tracked in shadow mode.
 """
 
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_CEILING, localcontext
 from statistics import median
 from typing import Any, Optional
 
@@ -175,9 +175,23 @@ def build_risk_plan_result(
         entry * (D("1") + tp2_pct / D("100")),
         entry + risk * D("2.00"),
     )
+    # Preserve the original wall window: extending it to the first valid
+    # price step can change the median and hide an earlier credible wall.
+    original_tp1 = raw_tp1
+    with localcontext() as ctx:
+        ctx.prec = max(ctx.prec, 50)
+        # Decimal(28) may round the true minimum RR floor down by one ulp.
+        raw_tp1 = max(raw_tp1, entry + risk * min_rr)
+        # The displayed and shadow-tracked TP1 must be the same executable
+        # price step, not an unrepresentable 50-digit target.
+        raw_tp1 = raw_tp1.quantize(price_step(raw_tp1), rounding=ROUND_CEILING)
     tp1 = raw_tp1
     adjusted = False
     wall_price, wall_share = _sell_wall_before_target(book, entry, raw_tp1)
+    if original_tp1 < raw_tp1:
+        prior_wall, prior_share = _sell_wall_before_target(book, entry, original_tp1)
+        if prior_wall is not None and (wall_price is None or prior_wall < wall_price):
+            wall_price, wall_share = prior_wall, prior_share
 
     if wall_price is not None:
         step = price_step(wall_price)
@@ -200,6 +214,16 @@ def build_risk_plan_result(
         adjusted = True
 
     rr = (tp1 - entry) / risk
+    if rr < min_rr and not adjusted:
+        # The unadjusted target was constructed to meet min_rr. Decimal's
+        # default 28-digit context can round entry + risk * min_rr downward
+        # by one ulp, making the subsequent division falsely fail the gate.
+        # Reconstruct that same floor precisely; never relax min_rr or rescue
+        # a sell-wall-adjusted target with genuinely insufficient reward.
+        with localcontext() as ctx:
+            ctx.prec = max(ctx.prec, 50)
+            tp1 = max(tp1, entry + risk * min_rr)
+            rr = (tp1 - entry) / risk
     if rr < min_rr:
         return RiskPlanResult(None, "rr_below_min", {
             "entry": str(entry), "stop": str(stop), "risk_pct": str(risk_pct),
