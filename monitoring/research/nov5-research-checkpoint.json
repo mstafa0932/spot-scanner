@@ -9,7 +9,7 @@
   "market_data_blob": "40a9256907504be815b8d17a8a8369641f3b47af",
   "last_week_ledger": "monitoring/research/week-paper-continuation-20261101-1051.json",
   "last_full_week_log_audit_run": 41286178774,
-  "last_workflow_status_audited_run": 41399115085,
+  "last_workflow_status_audited_run": 41438505079,
   "workflow_status_audit_count_since_full": 50,
   "latest_individual_log_audited_run": 41399115085,
   "canonical_research_seed": "monitoring/research/early-surge-continuation-20261101-deadline.json.gz",
@@ -39,7 +39,7 @@
     "whale_identity": "not_inferable",
     "native_public_capture": "merged_and_live_verified"
   },
-  "next_highest_value_step": "Await CodeRabbit independent exact-head review of PR66 after its wall-boundary correction; merge only if clean, then verify organic CI/scan. In parallel reconcile saved diagnostics after 41374370816 and resume frozen RECOVERY full as-of comparison, preserving UNKNOWN for missing risk/confirmations/outcomes.",
+  "next_highest_value_step": "Await exact-head independent CodeRabbit review of PR66 eebce51; do not merge on CI alone. Preserve selected native captures and complete frozen RECOVERY full as-of comparison with negative controls, risk and confirmations UNKNOWN when absent.",
   "notification": "silent_pending_independent_review",
   "canonical_program_sha256": "fef977da9b6f9c8157942e8cd4c29a0d6cfa544ca990c3a187dd5c63013d3c36",
   "comparison_update": "monitoring/research/nov5-comparison-update-20261101.md",
@@ -55,9 +55,9 @@
   "public_input_capture_status": "MERGED_ORGANIC_SCAN_STATE_AND_REAL_ARTIFACT_VERIFIED",
   "archive_verifier": "monitoring/research/verify_public_capture_20261101.py",
   "public_capture_checkpoint": "monitoring/research/nov5-public-capture-checkpoint-20261101.json",
-  "recorded_update_trt": "2026-11-02T09:29:54.003+03:00",
+  "recorded_update_trt": "2026-11-02T14:46:53.766+03:00",
   "public_input_capture_merge": "ce289ed0b19855316d840129b6c461c985625f6e",
-  "public_input_capture_last_verified_run": 41346141922,
+  "public_input_capture_last_verified_run": 41438505079,
   "public_input_capture_artifact": 13090581990,
   "public_input_capture_state": "633afa74d051c59f012d9a1405d288d096aaa994",
   "public_input_capture_preserved_directory": "monitoring/research/native-inputs/41324270688",
@@ -67,7 +67,7 @@
   "health_continuation_note": "The 46-run batch is complete through41321350039, and the organic push run41324270688 was audited separately. Three intervening successful workflow statuses are known but their full diagnostics are not yet included in the cumulative ledger; reconcile these IDs without double count.",
   "last_individual_saved_diagnostics_audited_run": 41374370816,
   "organic_run_in_cumulative_week_ledger": false,
-  "last_individual_log_audited_run": 41399115085,
+  "last_individual_log_audited_run": 41438505079,
   "last_contiguous_saved_diagnostics_audited_run": 41374370816,
   "native_capture_selected_runs": [
     41324713398,
@@ -98,13 +98,15 @@
     "reason": "rr_below_min",
     "status": "PROVEN_NUMERICAL_FALSE_REJECTION",
     "pr": 66,
-    "head": "bb0bfe49f7a28ff19f3cd08bc92154e95162d072",
-    "ci": "PYTHON_3_10_3_12_SUCCESS_EXACT_HEAD",
-    "independent_review": "RE_REQUESTED_PENDING_EXACT_HEAD",
+    "head": "eebce51d0601f8bd6e5fb4cb98adb32524f90623",
+    "ci": "405_TESTS_EACH_PYTHON_3_10_3_12_SUCCESS_EXACT_HEAD",
+    "independent_review": "REQUESTED_IN_PROGRESS_EXACT_HEAD",
     "merged": false,
     "prior_review_finding": "Correct the TP1 RR floor before sell-wall scan to avoid missing a credible wall at the old rounded target",
     "finding_fixed_in_branch": true,
-    "regression_added": true
+    "regression_added": true,
+    "second_review_finding": "TP1_UNREPRESENTABLE_PRECISION_TRACKER_MISMATCH",
+    "second_review_fix": "QUANTIZE_CEILING_PRESERVE_OLD_WALL_WINDOW_WITH_REGRESSION"
   },
   "health_status_only_20261102": {
     "after_full_saved_diagnostics_run": 41374370816,
@@ -134,14 +136,51 @@
     "main_sha": "650d6334c61a4be078901e93dc19d83f421d94e3",
     "code_sha": "ce289ed0b19855316d840129b6c461c985625f6e",
     "last_full_saved_diagnostics_run": 41374370816,
-    "last_individual_log_run": 41399115085,
+    "last_individual_log_run": 41438505079,
     "last_frozen_v1_quote_trt": "2026-11-01T13:38:36+03:00",
-    "last_native_capture_verified_run": 41346141922,
+    "last_native_capture_verified_run": 41438505079,
     "recovery_structural_four_of_four_positive": "0/123 selected market-runs",
     "recovery_full_strategy": "UNKNOWN",
-    "risk_pr_head": "bb0bfe49f7a28ff19f3cd08bc92154e95162d072",
+    "risk_pr_head": "eebce51d0601f8bd6e5fb4cb98adb32524f90623",
     "paper_fills": "UNKNOWN",
     "new_provider_requests": 0,
     "new_scanner_dispatches": 0
+  },
+  "main_sha_observed": "3643ce7a25e512e573f7ae036990145f6f737204",
+  "health_status_only_20261102_continuation": {
+    "after_run": 41399115085,
+    "first_run": 41400149530,
+    "last_run": 41438505079,
+    "completed_successful_runs": 32,
+    "created_at_gap_seconds_min": 598,
+    "created_at_gap_seconds_max": 626,
+    "full_diagnostics": "NOT_AUDITED",
+    "last_sample_log": {
+      "run_id": 41438505079,
+      "shadow": true,
+      "btc_reason": "regime_bearish",
+      "candles_complete": 35,
+      "synthetic": 0,
+      "errors": 0,
+      "confirmed": 0,
+      "near_ready": 0,
+      "early_alerts": 0,
+      "state_saved": "OK"
+    }
+  },
+  "new_case_evidence_20261102": "monitoring/research/hot-ogn-risk-review-20261102.md",
+  "native_capture_verified_20261102": {
+    "runs": [
+      41427845578,
+      41429178927,
+      41430527755,
+      41435872834,
+      41438505079
+    ],
+    "all_record_hashes_and_closed_native_verified": true,
+    "integrity_errors": 0,
+    "scope": "selected as-of capture only; no full universe candles",
+    "artifact_expiry": "2026-11-09",
+    "full_strategy_recovery": "UNKNOWN"
   }
 }
