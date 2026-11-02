@@ -8,7 +8,7 @@ paper-tracked in shadow mode.
 """
 
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from statistics import median
 from typing import Any, Optional
 
@@ -200,6 +200,16 @@ def build_risk_plan_result(
         adjusted = True
 
     rr = (tp1 - entry) / risk
+    if rr < min_rr and not adjusted:
+        # The unadjusted target was constructed to meet min_rr. Decimal's
+        # default 28-digit context can round entry + risk * min_rr downward
+        # by one ulp, making the subsequent division falsely fail the gate.
+        # Reconstruct that same floor precisely; never relax min_rr or rescue
+        # a sell-wall-adjusted target with genuinely insufficient reward.
+        with localcontext() as ctx:
+            ctx.prec = max(ctx.prec, 50)
+            tp1 = max(tp1, entry + risk * min_rr)
+            rr = (tp1 - entry) / risk
     if rr < min_rr:
         return RiskPlanResult(None, "rr_below_min", {
             "entry": str(entry), "stop": str(stop), "risk_pct": str(risk_pct),
