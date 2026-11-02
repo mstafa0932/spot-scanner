@@ -8,7 +8,7 @@ paper-tracked in shadow mode.
 """
 
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation, localcontext
+from decimal import Decimal, InvalidOperation, ROUND_CEILING, localcontext
 from statistics import median
 from typing import Any, Optional
 
@@ -175,15 +175,23 @@ def build_risk_plan_result(
         entry * (D("1") + tp2_pct / D("100")),
         entry + risk * D("2.00"),
     )
-    # Compute the true minimum target before looking for sell walls: a
-    # 28-digit rounded target can exclude a wall at its own price, even
-    # though that wall lies below the mathematically required RR floor.
+    # Preserve the original wall window: extending it to the first valid
+    # price step can change the median and hide an earlier credible wall.
+    original_tp1 = raw_tp1
     with localcontext() as ctx:
         ctx.prec = max(ctx.prec, 50)
+        # Decimal(28) may round the true minimum RR floor down by one ulp.
         raw_tp1 = max(raw_tp1, entry + risk * min_rr)
+        # The displayed and shadow-tracked TP1 must be the same executable
+        # price step, not an unrepresentable 50-digit target.
+        raw_tp1 = raw_tp1.quantize(price_step(raw_tp1), rounding=ROUND_CEILING)
     tp1 = raw_tp1
     adjusted = False
     wall_price, wall_share = _sell_wall_before_target(book, entry, raw_tp1)
+    if original_tp1 < raw_tp1:
+        prior_wall, prior_share = _sell_wall_before_target(book, entry, original_tp1)
+        if prior_wall is not None and (wall_price is None or prior_wall < wall_price):
+            wall_price, wall_share = prior_wall, prior_share
 
     if wall_price is not None:
         step = price_step(wall_price)
