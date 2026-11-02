@@ -1,0 +1,110 @@
+{
+  "schema": "nov5_pr66_exact_head_merge_acceptance_v1",
+  "recorded_at_utc": "2026-11-02T17:07:03.006Z",
+  "repository": "mstafa0932/spot-scanner",
+  "monitor_parent_sha": "f8a28fb5d549363924f1b205f4d693f0a3bf2949",
+  "prior_main_sha": "a2f4c5961d027c6b8866aefc65af2dccf8d5d57a",
+  "pr": 66,
+  "reviewed_head": "eebce51d0601f8bd6e5fb4cb98adb32524f90623",
+  "merged_main_code_sha": "b5fcf12e9aef066bf89f568f0f4075a388ae78b5",
+  "merged_at_utc": "2026-11-02T17:04:27Z",
+  "merge_parents": [
+    "a2f4c5961d027c6b8866aefc65af2dccf8d5d57a",
+    "eebce51d0601f8bd6e5fb4cb98adb32524f90623"
+  ],
+  "merged_changed_files": [
+    "risk_engine.py",
+    "tests/test_risk_rejection_arithmetic_20261023.py"
+  ],
+  "risk_engine_blob_sha": "a2c4661501a11fbf22be1303fd9aef85a6c8ddd8",
+  "proven_defect": {
+    "run_id": 41363082203,
+    "symbol": "STX_TL",
+    "score": 83,
+    "original_rr": "1.499999999999999999999999989",
+    "required_rr": "1.50",
+    "source": "monitoring/research/nov5-health-risk-increment-20261102.json",
+    "scope": "Decimal rounding falsely rejected unadjusted minimum-RR target; not a proven missed profitable trade"
+  },
+  "review": {
+    "provider": "CodeRabbit",
+    "check_id": 125256726647,
+    "head_sha": "eebce51d0601f8bd6e5fb4cb98adb32524f90623",
+    "conclusion": "success",
+    "completed_at_utc": "2026-11-02T11:50:47Z",
+    "annotations_count": 0,
+    "prior_actionable_comments_addressed": true,
+    "review_url": "https://github.com/mstafa0932/spot-scanner/pull/66"
+  },
+  "pr_ci": {
+    "run_id": 41438979692,
+    "python_3_10": "success_405_tests",
+    "python_3_12": "success_405_tests"
+  },
+  "organic_push": {
+    "run_id": 41487614539,
+    "job_id": 125421963420,
+    "trigger": "merge_push",
+    "head_sha": "b5fcf12e9aef066bf89f568f0f4075a388ae78b5",
+    "status": "completed",
+    "conclusion": "success",
+    "all_steps_success": true,
+    "pytest_passed": 405,
+    "scan": {
+      "markets": 235,
+      "btc_ok": true,
+      "btc_reason": "regime_neutral",
+      "candles_complete": 38,
+      "synthetic": 0,
+      "candle_errors": 0,
+      "shadow": true,
+      "candidates": 0,
+      "confirmed": 0,
+      "near_ready_alerts": 0,
+      "early_watch_alerts": 0,
+      "signals": false,
+      "scan_state_saved": "OK"
+    },
+    "capture": {
+      "compressed_bytes": 461905,
+      "kind_counts": {
+        "captured:book": 80,
+        "captured:candles": 72,
+        "captured:tickers": 1,
+        "omitted_budget:candles": 42
+      },
+      "manifest_status": "partial",
+      "data_sha256": "322a9c2b38d1aa5c1e69ece143e084f3eff792932395b90e60b5c4969fea92bb",
+      "artifact_id": 13161184980,
+      "artifact_expires_at_utc": "2026-11-09T17:06:03Z",
+      "zip_record_hashes_independently_verified": false
+    },
+    "state_commit": "8802519f10645cd66cd8de48ac94815c46cface3"
+  },
+  "workflow_status_increment": {
+    "after_run": 41438505079,
+    "first_run": 41439783422,
+    "last_run": 41486797708,
+    "completed_successful_scanner_runs": 32,
+    "full_saved_diagnostics": "NOT_AUDITED",
+    "separate_push_run": 41487614539
+  },
+  "research": {
+    "frozen_v1_seed": "monitoring/research/early-surge-continuation-20261101-deadline.json.gz",
+    "last_frozen_v1_quote_trt": "2026-11-01T13:38:36+03:00",
+    "recovery_protocol_sha256": "6c99f4c9daf4a131faebfc7bd0234fe179f10f83d2e4fe642d97d81c73d8333d",
+    "four_necessary_structure_positive": "0/123 selected market-runs from earlier verified captures",
+    "full_recovery_strategy": "UNKNOWN_NOT_TESTED",
+    "paper_fills": "UNKNOWN",
+    "strategy_improvement_proven": false
+  },
+  "constraints": {
+    "shadow_mode_true": true,
+    "live_orders": false,
+    "telegram_test": false,
+    "extra_provider_calls": false,
+    "scanner_or_controller_created": false,
+    "core_filters_unchanged": true
+  },
+  "next": "Audit saved diagnostics after 41374370816 without overlapping prior batches; preserve and verify selected native archives before expiry; perform frozen full as-of RECOVERY comparison with unchanged gates, negative controls and unknown risk/fill/outcome explicitly retained; do not count 32 workflow successes as trades."
+}
