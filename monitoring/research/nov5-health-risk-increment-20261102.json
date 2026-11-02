@@ -1,0 +1,189 @@
+{
+  "schema": "nov5_health_risk_increment_v1",
+  "recorded_at_utc": "2026-11-02T01:58:09.468Z",
+  "scope": "new scans after independently audited run 41346141922, no overlap with earlier 46-run batch or organic 41324270688",
+  "workflow": {
+    "first_run_id": 41346992881,
+    "last_run_id": 41374370816,
+    "run_count": 33,
+    "all_success": true,
+    "first_created_at_utc": "2026-11-01T20:28:07Z",
+    "last_created_at_utc": "2026-11-02T01:48:20Z",
+    "run_ids": [
+      41346992881,
+      41347865778,
+      41348708982,
+      41349530624,
+      41350413963,
+      41351300369,
+      41352154045,
+      41353021190,
+      41353859449,
+      41354697217,
+      41355577133,
+      41356455974,
+      41357296172,
+      41358138157,
+      41358961734,
+      41359758501,
+      41360603001,
+      41361450137,
+      41362259839,
+      41363082203,
+      41363881883,
+      41364671430,
+      41365520905,
+      41366425050,
+      41367321626,
+      41368221608,
+      41369116005,
+      41369983270,
+      41370859812,
+      41371788427,
+      41372655439,
+      41373522975,
+      41374370816
+    ],
+    "cadence_created_seconds": {
+      "min": 599,
+      "max": 613,
+      "median": 600
+    }
+  },
+  "state_sources": {
+    "refs": [
+      "main",
+      "4ed4aec7a6a2e366ebef64309002c5734af1a00a",
+      "9973a984a3d5b0a4d2dfaada15c24d7c82c9d1a1"
+    ],
+    "head_main_verified": "c223f541b16ddbef290dc48c40e40f546d1f8e8d",
+    "source_code_base": "ce289ed0b19855316d840129b6c461c985625f6e",
+    "state_sha_last": "538863d8978a1d43be717e1d4a4f8933667a84cf"
+  },
+  "diagnostics": {
+    "found": 33,
+    "all_completed": true,
+    "shadow_true": 33,
+    "btc_accepted": 31,
+    "btc_rejected": [
+      {
+        "run_id": 41346992881,
+        "reason": "BTC confirmed weakness RSI=35.4 | 3C=-0.07%"
+      },
+      {
+        "run_id": 41358138157,
+        "reason": "BTC confirmed weakness RSI=34.9 | 3C=-0.36%"
+      }
+    ],
+    "native_discovery_authentic_only": 1196,
+    "unknown_discovery_authenticity": 0,
+    "technical_data_valid": 1229,
+    "orderbooks_attempted": 2640,
+    "capacity_deferred_market_runs": 1268,
+    "candle_error_stage_rows": 0,
+    "synthetic_reason_rows": 0,
+    "confirmed_before_risk": 3,
+    "recorded_signals": 0,
+    "alerts_sent": 0,
+    "near_ready_alerts": 0,
+    "early_watch_alerts": 0,
+    "research_capture_enabled": 33,
+    "risk_rejections": [
+      {
+        "run_id": 41363082203,
+        "symbol": "STX_TL",
+        "reason": "rr_below_min",
+        "score": 83,
+        "risk_audit": {
+          "entry": "16.3700",
+          "stop": "15.90615455100794135613927917",
+          "risk_pct": "2.833509156945990493956755223",
+          "tp1": "17.06576817348808796579108124",
+          "actual_rr": "1.499999999999999999999999989",
+          "min_rr": "1.50"
+        }
+      },
+      {
+        "run_id": 41370859812,
+        "symbol": "TRUMP_TL",
+        "reason": "risk_out_of_range",
+        "score": 89,
+        "risk_audit": {
+          "entry": "87.8800",
+          "stop": "83.356560",
+          "risk_pct": "5.147291761492944924897587619",
+          "max_risk_pct": "4.00",
+          "atr14": "0.9592771734545569",
+          "swing_low": "83.44"
+        }
+      },
+      {
+        "run_id": 41374370816,
+        "symbol": "FLOKI_TL",
+        "reason": "rr_below_min",
+        "score": 82,
+        "risk_audit": {
+          "entry": "0.00115971",
+          "stop": "0.001133793268360193496650024575",
+          "risk_pct": "2.234759693354933849839651723",
+          "sell_wall_price": "0.00116383",
+          "sell_wall_share": "0.1132613657526938017032903688",
+          "adjusted_tp1": "0.00116382",
+          "actual_rr": "0.1585848114307474316138973053",
+          "min_rr": "1.50"
+        }
+      }
+    ]
+  },
+  "limits": [
+    "Workflow statuses verified for 33; detailed stage counts derived from three historical scanner_state snapshots, not 33 downloaded workflow logs.",
+    "Data_valid and authentic_only are scanner diagnostics, not independently re-downloaded candles for every market.",
+    "Archived artifacts for these new runs have not been ZIP-hash verified in this audit.",
+    "No ask/bid fill chronology or confirmed execution; no paper PnL or strategy-improvement claim."
+  ],
+  "proven_defect": {
+    "run_id": 41363082203,
+    "symbol": "STX_TL",
+    "reason": "rr_below_min",
+    "score": 83,
+    "risk_pct": "2.833509156945990493956755223",
+    "min_rr": "1.50",
+    "computed_rr": "1.499999999999999999999999989",
+    "raw_tp1": "17.06576817348808796579108124",
+    "mathematical_floor": "17.0657681734880879657910812450",
+    "decimal_shortfall": "5E-27 TL",
+    "cause": "Decimal 28-digit rounding of unadjusted entry + risk * min_rr, not a market rejection or a Telegram failure",
+    "verified_isolated_reproduction": true,
+    "not_a_proven_trade_or_profit": true
+  },
+  "fix": {
+    "pr": 66,
+    "head": "73723a52cf94502783cb5f40f31901b78875a5a0",
+    "files": [
+      "risk_engine.py",
+      "tests/test_risk_rejection_arithmetic_20261023.py"
+    ],
+    "status": "PR_OPEN_NOT_MERGED",
+    "checks": [
+      {
+        "name": "CodeRabbit",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "tests (3.10)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "tests (3.12)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "strategy_thresholds_unchanged": true,
+    "requires_independent_review": true,
+    "requires_post_merge_organic_scan_verification": true
+  },
+  "next": "Await exact-head CodeRabbit result; merge only if both Python checks and independent review pass, then verify organic push. Resume full frozen RECOVERY comparison on authentic as-of input and negative outcomes; no production strategy change."
+}
