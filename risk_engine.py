@@ -175,6 +175,12 @@ def build_risk_plan_result(
         entry * (D("1") + tp2_pct / D("100")),
         entry + risk * D("2.00"),
     )
+    # Compute the true minimum target before looking for sell walls: a
+    # 28-digit rounded target can exclude a wall at its own price, even
+    # though that wall lies below the mathematically required RR floor.
+    with localcontext() as ctx:
+        ctx.prec = max(ctx.prec, 50)
+        raw_tp1 = max(raw_tp1, entry + risk * min_rr)
     tp1 = raw_tp1
     adjusted = False
     wall_price, wall_share = _sell_wall_before_target(book, entry, raw_tp1)
