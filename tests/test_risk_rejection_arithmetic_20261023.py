@@ -1,7 +1,7 @@
 from decimal import Decimal as D, localcontext
 from types import SimpleNamespace
 
-from risk_engine import build_risk_plan_result
+from risk_engine import build_risk_plan_result, price_step
 
 
 def _book(asks=()):
@@ -80,6 +80,9 @@ def test_unadjusted_rr_floor_survives_decimal_rounding_without_loosening():
         minimum_profit = (result.plan.entry - result.plan.stop) * D("1.50")
         assert result.plan.tp1 - result.plan.entry >= minimum_profit
         assert result.plan.reward_risk_tp1 >= D("1.50")
+        # A displayed 4-decimal TP1 must be exactly the stored/tracked target.
+        assert result.plan.tp1 == result.plan.tp1.quantize(price_step(result.plan.tp1))
+        assert D(format(result.plan.tp1, ".4f")) == result.plan.tp1
 
 
 
@@ -108,4 +111,29 @@ def test_precise_rr_floor_checks_wall_at_original_rounded_target():
     assert result.plan is None
     assert result.rejection_reason == "rr_below_min"
     assert result.evidence["sell_wall_price"] == str(rounded_tp1)
+    assert D(result.evidence["actual_rr"]) < D(result.evidence["min_rr"])
+
+
+def test_quantized_rr_target_keeps_earlier_credible_wall():
+    """Extending the scan to a valid price step must not erase an earlier wall."""
+    book = SimpleNamespace(
+        best_bid=D("16.37"),
+        best_ask=D("16.40"),
+        spread_percent=D("0.1832620647525962125839951067"),
+        asks=(
+            (D("16.41"), D("1")),
+            (D("16.42"), D("20")),
+            (D("17.0001"), D("24")),
+        ),
+    )
+    tech = SimpleNamespace(
+        ema9=D("16.37"),
+        mean_touch=True,
+        atr14=D("0.2400380952380952380952380971"),
+        swing_low=None,
+    )
+    result = build_risk_plan_result(book=book, tech=tech, setup="PULLBACK")
+    assert result.plan is None
+    assert result.rejection_reason == "rr_below_min"
+    assert result.evidence["sell_wall_price"] == "16.42"
     assert D(result.evidence["actual_rr"]) < D(result.evidence["min_rr"])
