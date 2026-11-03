@@ -170,6 +170,7 @@ class Candidate:
     setup: str
     reasons: list[str]
     candle_at: int = 0
+    candle_validity: Optional[tuple[int, int]] = None
 
 
 @dataclass(frozen=True)
@@ -1669,6 +1670,16 @@ def build_opportunity(
         reasons=reasons,
     )
 
+def _candidate_candles_fresh(candidate: Candidate, now: int) -> bool:
+    """Preserve the fetched frames' closed/publication-delay time window."""
+    lower = candidate.candle_at + 900
+    upper = lower + 960
+    if candidate.candle_validity is not None:
+        lower = max(lower, candidate.candle_validity[0])
+        upper = min(upper, candidate.candle_validity[1])
+    return lower <= now <= upper
+
+
 def _send_near_ready(
     state: dict[str, Any], candidate: Candidate, item: dict[str, Any],
     btc_ok: bool, btc_reason: str, now: int,
@@ -1690,7 +1701,7 @@ def _send_near_ready(
     if (not _global_alert_allowed(state.copy(), now, True)
             or not _symbol_alert_allowed(state, candidate.symbol, now, True)):
         return False
-    if not 0 <= now - (candidate.candle_at + 900) <= 960:
+    if not _candidate_candles_fresh(candidate, now):
         return False
     try:
         fresh_book = get_order_book(candidate.symbol)
@@ -1700,7 +1711,7 @@ def _send_near_ready(
     except ParibuDataError:
         return False
     checked_at = int(time.time())
-    if not 0 <= checked_at - (candidate.candle_at + 900) <= 960:
+    if not _candidate_candles_fresh(candidate, checked_at):
         return False
     ready, reason, avg_imbalance, confirmations = trigger_check(
         candidate, item, btc_ok, btc_reason, checked_at
@@ -2176,6 +2187,12 @@ def run_scanner() -> None:
             setup=setup,
             reasons=reasons + [f"discovery: {discovery_reason}"],
             candle_at=int(df_15["timestamp"].iloc[-1]),
+            candle_validity=(
+                max(int(candle_frames[tf]["timestamp"].iloc[-1]) + seconds
+                    for tf, seconds in (("15m", 900), ("1h", 3600), ("4h", 14400))),
+                min(int(candle_frames[tf]["timestamp"].iloc[-1]) + 2 * seconds + 60
+                    for tf, seconds in (("15m", 900), ("1h", 3600), ("4h", 14400))),
+            ),
         )
 
         discovered.append(candidate)
@@ -2292,9 +2309,18 @@ def run_scanner() -> None:
             )
             note(candidate.symbol, "execution", "fresh_book_unavailable")
             continue
-        ready, trigger_reason, avg_imbalance, confirmations = trigger_check(
-            candidate, item, btc_ok, btc_reason, int(time.time())
-        )
+        checked_at = int(time.time())
+        # Refreshing the book does not refresh the candle-derived indicators.
+        # Preserve validate_candles' existing per-frame interval + 60s window
+        # when a slow scan or refresh crosses it; require a fresh next scan.
+        if not _candidate_candles_fresh(candidate, checked_at):
+            ready, trigger_reason, avg_imbalance, confirmations = (
+                False, "candle data not fresh", Decimal("0"), 0,
+            )
+        else:
+            ready, trigger_reason, avg_imbalance, confirmations = trigger_check(
+                candidate, item, btc_ok, btc_reason, checked_at
+            )
         if not ready:
             _record_execution_followup(
                 state, symbol=candidate.symbol, now=int(time.time()),
